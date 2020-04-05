@@ -1,0 +1,29 @@
+<ng-template #fenetre>
+    <div #dialogueBarreDeTitre id="dialogue-barre-de-titre">
+        <span #dialogueFermer (click)="clic($event)" class="bouton ferme">&times;</span>
+        <span #dialogueTitre id="dialogue-titre">titre</span>
+    </div>
+    <form>
+        <app-kf-composant *ngFor="let composant of composants" [composant]="composant"></app-kf-composant>
+        <menu>
+            <span #dialogueOk (click)="clic($event)" class="bouton ok" [attr.inactif]="okInactif">texteOk</span>
+            <span #dialogueAnnuler (click)="clic($event)" class="bouton annuler">texteAnnuler</span>
+        </menu>
+    </form>
+</ng-template>
+
+<ng-template #avecDialog>
+    <dialog #dialogElement id="dialogue">
+        <ng-container *ngTemplateOutlet="fenetre"></ng-container>
+    </dialog>
+</ng-template>
+
+<ng-template #avecDiv>
+    <div #dialogElement id="dialogue">
+        <div id="dialogue-fenetre">
+            <ng-container *ngTemplateOutlet="fenetre"></ng-container>
+        </div>
+    </div>
+</ng-template>
+
+<ng-container *ngIf="dansDialogElement; then avecDialog; else avecDiv"></ng-container>

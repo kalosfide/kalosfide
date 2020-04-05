@@ -1,0 +1,424 @@
+.texte-sous-icone {
+    width: 90px;
+    height: 40px;
+}
+a.texte-sous-icone {
+    padding-top: 2px;
+    padding-bottom: 0;
+}
+button.texte-sous-icone {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+button.texte-sous-icone.dropdown-toggle::after {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    margin-left: .255em;
+    vertical-align: super; // .255em;
+    content: "";
+    border-top: .3em solid;
+    border-right: .3em solid transparent;
+    border-bottom: 0;
+    border-left: .3em solid transparent;
+}
+.fond-texte-dans-icone {
+    display: inline-block;
+    text-align: center;
+}
+.texte-dans-icone {
+    display: block;
+    font-size: 0.66rem;
+    position: relative;
+    top: -0.25rem;
+}
+i.kf-vue-table-tri {
+    padding-left: .33rem;
+    color: lightslategray;
+}
+i.kf-vue-table-tri-dernier {
+    padding-left: .33rem;
+    color: black;
+}
+i.kf-vue-table-tri-asc {
+    vertical-align: baseline;
+}
+i.kf-vue-table-tri-desc {
+    vertical-align: super;
+}
+i.kf-popover-icone {
+    vertical-align: text-top;
+    padding-left: .2rem;
+}
+.plein-ecran {
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+    display: flex;              /* establish flex container */
+    flex-direction: column;     /* stack flex items vertically */
+    justify-content: center;    /* center items vertically, in this case */
+    align-items: center;        /* center items horizontally, in this case */
+}
+.survol-centre {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    text-align: center;
+    vertical-align: middle;
+}
+.avec-survol {
+    position: relative;
+}
+
+.retour-en-haut {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+    opacity: 0;
+    transition: all .2s ease-in-out;
+}
+.retour-en-haut-montre {
+    opacity: 1;
+    transition: all .2s ease-in-out;
+}
+
+tr.kf-vue-table-choisi {
+    color: crimson;
+}
+.titre-page {
+    .form-group,
+    .h1, .h2, .h3, .h4, .h5, .h6 {
+        margin-bottom: 0;
+    }
+}
+.sous-page .container-fluid {
+    padding-left: inherit;
+    padding-right: inherit;
+}
+
+table .nombre {
+    width: 120px;
+}
+
+table .prix {
+    width: 150px;
+}
+
+table .unite {
+    width: 120px;
+}
+
+.btn-group .texte-sous-icone {
+    padding-left: 0;
+    padding-right: 0;
+}
+.colonne-btn-group-2 {
+    width: 158px; // 2 * 60 + 2 * 8 + 30
+    padding-right: 30px;;
+}
+.colonne-btn-group-3 {
+    width: 218px; // 3 * 60 + 2 * 8 + 30
+    padding-right: 30px;;
+}
+.colonne-btn-group-2,.colonne-btn-group-3 .texte-sous-icone {
+    width: 60px;
+}
+
+.modal-confirme .modal-content {
+    background-color: lightgray;
+}
+
+.breadcrumb {
+    background: none;
+    font-size: 0.8em;
+    margin: 0;
+    a,
+    span {
+      color: darkgrey;
+    }
+    a:hover,
+    span:hover {
+      color: dimgrey;
+      text-decoration: none;
+    }
+    li {
+      list-style: none;
+      float: left;
+      margin: 5px;
+    }
+    li:last-child {
+      margin-right: 20px;
+    }
+    li::after {
+      content: "->";
+      color: darkgrey;
+    }
+    li:last-child::after {
+      content: "";
+    }
+  }
+  
+// surcharge de bootstrap pour qu'un clic force le collapse
+.navbar .collapse {
+    visibility: hidden;
+    display: block;
+}
+
+.navbar .collapse.show {
+    visibility: visible;
+}
+
+@media (max-width: 767px) {
+    .navbar-nav .nav-link.active {
+        visibility: visible;
+    }
+    
+    .collapsing {
+        transition: all 0.35s ease;
+        height: 40px !important;
+    }
+    
+    .collapse:not(.show) .navbar-nav .nav-item:not(.active) {
+        display: none;
+    }
+}
+
+@media (min-width: 768px) {
+    .navbar .collapse .navbar-nav .nav-item {
+        visibility: visible;
+    }
+}
+// fin surcharge de bootstrap pour qu'un clic force le collapse
+
+// surcharge de bootstrap
+.popover-header {
+    font-size: 14px;
+}
+
+.couleur-antiquewhite {
+    color: antiquewhite;
+}
+.couleur-blanchedalmond {
+    color: blanchedalmond;
+}
+.couleur-beige {
+    color: beige;
+}
+.couleur-whitesmoke {
+    color: whitesmoke;
+}
+
+.couleur-blue {
+    color: blue;
+}
+
+.couleur-indigo {
+    color: #6610f2;
+}
+
+.couleur-purple {
+    color: #6f42c1;
+}
+
+.couleur-pink {
+    color: #e83e8c;
+}
+
+.couleur-red {
+    color: #dc3545;
+}
+
+.couleur-orange {
+    color: #fd7e14;
+}
+
+.couleur-yellow {
+    color: #ffc107;
+}
+
+.couleur-green {
+    color: #28a745;
+}
+
+.couleur-teal {
+    color: #20c997;
+}
+
+.couleur-cyan {
+    color: #17a2b8;
+}
+
+.couleur-white {
+    color: #fff;
+}
+
+.couleur-gray {
+    color: #6c757d;
+}
+
+.couleur-gray_dark {
+    color: #343a40;
+}
+
+.couleur-primary {
+    color: #007bff;
+}
+
+.couleur-secondary {
+    color: #6c757d;
+}
+
+.couleur-success {
+    color: #28a745;
+}
+
+.couleur-info {
+    color: #17a2b8;
+}
+
+.couleur-warning {
+    color: #ffc107;
+}
+
+.couleur-danger {
+    color: #dc3545;
+}
+
+.couleur-light {
+    color: #f8f9fa;
+}
+
+.couleur-dark {
+    color: #343a40;
+}
+
+.couleur-fond-antiquewhite {
+    background-color: antiquewhite;
+}
+
+.couleur-fond-blanchedalmond {
+    background-color: blanchedalmond;
+}
+
+.couleur-fond-beige {
+    background-color: beige;
+}
+
+.couleur-fond-whitesmoke {
+    background-color: whitesmoke;
+}
+
+.couleur-fond-blue {
+    background-color: #007bff;
+}
+
+.couleur-fond-indigo {
+    background-color: #6610f2;
+}
+
+.couleur-fond-purple {
+    background-color: #6f42c1;
+}
+
+.couleur-fond-pink {
+    background-color: #e83e8c;
+}
+
+.couleur-fond-red {
+    background-color: #dc3545;
+}
+
+.couleur-fond-orange {
+    background-color: #fd7e14;
+}
+
+.couleur-fond-yellow {
+    background-color: #ffc107;
+}
+
+.couleur-fond-green {
+    background-color: #28a745;
+}
+
+.couleur-fond-teal {
+    background-color: #20c997;
+}
+
+.couleur-fond-cyan {
+    background-color: #17a2b8;
+}
+
+.couleur-fond-white {
+    background-color: #fff;
+}
+
+.couleur-fond-gray {
+    background-color: #6c757d;
+}
+
+.couleur-fond-gray_dark {
+    background-color: #343a40;
+}
+
+.couleur-fond-primary {
+    background-color: #007bff;
+}
+
+.couleur-fond-secondary {
+    background-color: #6c757d;
+}
+
+.couleur-fond-success {
+    background-color: #28a745;
+}
+
+.couleur-fond-info {
+    background-color: #17a2b8;
+}
+
+.couleur-fond-warning {
+    background-color: #ffc107;
+}
+
+.couleur-fond-danger {
+    background-color: #dc3545;
+}
+
+.couleur-fond-light {
+    background-color: #f8f9fa;
+}
+
+.couleur-fond-dark {
+    background-color: #343a40;
+}
+
+
+button:disabled {
+    .couleur-blue,
+    .couleur-indigo,
+    .couleur-purple,
+    .couleur-pink,
+    .couleur-red,
+    .couleur-orange,
+    .couleur-yellow,
+    .couleur-green,
+    .couleur-teal,
+    .couleur-cyan,
+    .couleur-white,
+    .couleur-gray,
+    .couleur-gray_dark,
+    .couleur-primary,
+    .couleur-secondary,
+    .couleur-success,
+    .couleur-info,
+    .couleur-warning,
+    .couleur-danger,
+    .couleur-light,
+    .couleur-dark {
+        color: inherit;
+    }
+}

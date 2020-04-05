@@ -1,0 +1,60 @@
+<ng-template #labelTemplate>
+    <label #labelElement [attr.for]="radios.nom" [ngClass]="radios.classeLabel">
+        <app-kf-contenu-phrase [contenuPhrase]="radios.contenuPhrase"></app-kf-contenu-phrase>
+    </label>
+</ng-template>
+
+<ng-template #infoTemplate>
+    <app-kf-etiquette *ngIf="radios.texteAide" [composant]="radios.texteAide"></app-kf-etiquette>
+    <div *ngIf="radios.avecInvalidFeedback" class="invalid-feedback">
+        <p *ngFor="let erreur of radios.erreurs">{{erreur}}</p>
+    </div>
+</ng-template>
+
+<ng-container *ngIf="radios.classeDiv; then avecDivTemplate; else sansDivTemplate"></ng-container>
+<ng-template #avecDivTemplate>
+    <div [ngClass]="radios.classeDiv">
+        <ng-container *ngTemplateOutlet="sansDivTemplate"></ng-container>
+    </div>
+</ng-template>
+<ng-template #sansDivTemplate>
+    <ng-container *ngIf="radios.avecLabel">
+        <ng-container *ngTemplateOutlet="labelTemplate"></ng-container>
+    </ng-container>
+    <ng-container *ngIf="radios.classeEntree; then entreeAvecDivTemplate; else entreeTemplate"></ng-container>
+    <ng-template #entreeAvecDivTemplate>
+        <div [ngClass]="radios.classeEntree">
+            <ng-container *ngTemplateOutlet="entreeTemplate"></ng-container>
+        </div>
+    </ng-template>
+    <ng-container *ngTemplateOutlet="infoTemplate"></ng-container>
+</ng-template>
+
+<ng-template #entreeTemplate>
+    <ng-container *ngIf="radios.avecNgBootstrap; then ngBootstrapTemplate; else classicTemplate"></ng-container>
+</ng-template>
+
+<ng-template #ngBootstrapTemplate>
+    <div #divElement [ngClass]="radios.classe" [ngStyle]="radios.style">
+        <div class="btn-group btn-group-toggle" ngbRadioGroup [formControl]="radios.formControl">
+            <ng-container *ngFor="let radio of radios.contenus">
+                <label ngbButtonLabel [ngClass]="radio.classe">
+                    <input ngbButton type="radio" [value]="radio.valeur">
+                    <app-kf-contenu-phrase [contenuPhrase]="radio.contenuPhrase"></app-kf-contenu-phrase>
+                </label>
+            </ng-container>
+        </div>
+        <ng-container *ngTemplateOutlet="infoTemplate"></ng-container>
+    </div>
+</ng-template>
+
+<ng-template #classicTemplate>
+
+    <div #divElement [ngClass]="radios.classe" [ngStyle]="radios.style">
+        <ng-container *ngFor="let radio of radios.contenus">
+            <app-kf-composant [composant]="radio" (output)="transmet($event)"></app-kf-composant>
+        </ng-container>
+        <ng-container *ngTemplateOutlet="infoTemplate"></ng-container>
+    </div>
+
+</ng-template>

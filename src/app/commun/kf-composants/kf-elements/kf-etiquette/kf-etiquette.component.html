@@ -1,0 +1,17 @@
+<ng-container *ngIf="balise; then thenTemplate; else autreTemplate"></ng-container>
+
+<ng-template #thenTemplate>
+    <app-kf-balise [balise]="balise"></app-kf-balise>
+</ng-template>
+
+<ng-template #autreTemplate>
+    <ng-container *ngIf="suiviDeSaut; then suiviDeSautTemplate; else normalTemplate"></ng-container>
+
+    <ng-template #suiviDeSautTemplate>
+        <app-kf-contenu-phrase [contenuPhrase]="contenuPhrase"></app-kf-contenu-phrase><br>
+    </ng-template>
+
+    <ng-template #normalTemplate>
+        <app-kf-contenu-phrase [contenuPhrase]="contenuPhrase"></app-kf-contenu-phrase>
+    </ng-template>
+</ng-template>

@@ -1,0 +1,86 @@
+
+.kf-input-efface-bouton {
+    z-index: 999;
+    background-color: transparent;
+    border: none;
+    position: absolute;
+    right: .1rem;
+    vertical-align: middle;
+}
+.kf-input-vide .kf-input-efface-bouton {
+    display: none;
+}
+
+.kf-invisible {
+    display: none;
+}
+
+.kf-texte-dans-icone-fond {
+    display: inline-block;
+    text-align: center;
+}
+
+.kf-texte-dans-icone {
+    display: block;
+    font-size: 0.66em;
+    position: relative;
+    top: -0.25em;
+}
+
+.kf-legende {
+    width: auto;
+    font-size: 1em;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+}
+
+.kf-largeur0 {
+    width: 0;
+    color: #a94442;
+};
+
+.kf-enligne {
+    display: inline;
+}
+
+.kf-bouton {
+    cursor: pointer;
+    cursor: hand;
+}
+.kf-bouton:disabled {
+    cursor: pointer;
+}
+
+.kf-bouton.kf-choisi  {
+    color: blue;
+}
+div.kf-choisi {
+    border: 1px solid blue;
+}
+
+.kf-menu-vertical .kf-ferme .kf-sous-menu {
+    display: none;
+}
+
+div.kf-sous-menu.kf-menu-horizontal {
+    display: inline;
+}
+.kf-table {
+	display: table;
+	padding: 6px;
+}
+.kf-table .kf-thead {
+	display: table-header-group;
+	padding: 6px;
+}
+.kf-table .kf-row {
+	display: table-row;
+}
+.kf-table .kf-cell {
+	margin: 6px;
+	display: table-cell;
+}
+
+.kf-vue-table-tri {
+    cursor: pointer;
+}

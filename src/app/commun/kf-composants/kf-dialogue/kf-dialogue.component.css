@@ -1,0 +1,73 @@
+div#dialogue:not([ouvert]) {
+    display: none;
+}
+div#dialogue {
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+    background: rgba(0, 0, 0, 0.1);
+}
+div#dialogue-fenetre {
+    display: block;
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    top: 10%;
+    width: -webkit-fit-content;
+    height: -webkit-fit-content;
+    color: black;
+    margin: auto;
+    border-width: initial;
+    border-style: solid;
+    border-color: initial;
+    border-image: initial;
+    background: white;
+}
+div#dialogue-fenetre form {
+    padding: 1em;
+}
+div#dialogue-barre-de-titre {
+    background-color: blue;
+    width: 100%;
+    padding: 2px;
+    color: white;
+}
+#dialogue-fenetre .bouton {
+    cursor: pointer;
+    cursor: hand;
+}
+#dialogue-fenetre .bouton.ferme {
+    float: right;
+    text-align: center;
+    padding: 2px;
+}
+#dialogue-fenetre .bouton.ferme:hover {
+    background-color: red;
+}
+#dialogue-fenetre .bouton.ok, #dialogue-fenetre .bouton.annuler {
+    font-family: Arial;
+    background-color: #eee;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #888;
+    align-items: flex-start;
+    text-align: center;
+    cursor: default;
+    box-sizing: border-box;
+    text-rendering: auto;
+    letter-spacing: normal;
+    word-spacing: normal;
+    text-transform: none;
+    text-indent: 0px;
+    text-shadow: none;
+    display: inline-block;
+    margin: 0em;
+    font: 400 13.3333px Arial;
+}
+#dialogue-fenetre .bouton.ok:hover, #dialogue-fenetre .bouton.annuler:hover {
+    background-color: #cfd8dc;
+}

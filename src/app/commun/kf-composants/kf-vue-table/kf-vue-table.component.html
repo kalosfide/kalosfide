@@ -1,0 +1,84 @@
+<ng-container *ngIf="avecOutils">
+    <ng-container *ngIf="vueTable.outils.classe; else outilsTemplate">
+        <div [ngClass]="vueTable.outils.classe" [ngStyle]="vueTable.outils.style">
+            <ng-container *ngTemplateOutlet="outilsTemplate"></ng-container>
+        </div>
+    </ng-container>
+    <ng-template #outilsTemplate>
+        <app-kf-b-btn-toolbar [composant]="vueTable.outils.btnToolbar"></app-kf-b-btn-toolbar>
+    </ng-template>
+
+</ng-container>
+<!-- outils
+-->
+
+<table #tableElement [ngClass]="vueTable.classe" [ngStyle]="vueTable.style">
+
+    <!-- en-têtes -->
+    <thead *ngIf="vueTable.lignesEnTete" [ngClass]="vueTable.classeEnTete">
+        <tr *ngFor="let ligneEnTete of vueTable.lignesEnTete">
+            <ng-container *ngTemplateOutlet="ligneTemplate; context: { ligne1: ligneEnTete }">
+            </ng-container>
+        </tr>
+    </thead>
+    <!-- corps -->
+    <tbody [ngClass]="vueTable.classeCorps">
+        <!-- remplace les lignes quand les filtres ne laissent rien passer -->
+        <tr *ngIf="vueTable.rienPasseFiltres">
+            <td class="text-center" [attr.colspan]="vueTable.nbColonnesVisibles">{{ vueTable.texteRienPasseFiltres }}
+            </td>
+        </tr>
+
+        <ng-container *ngIf="!vueTable.avecValeur; else avecValeurTemplate">
+            <ng-container *ngIf="vueTable.avecClic; then avecClicTemplate; else autreTemplate"></ng-container>
+        </ng-container>
+
+    </tbody>
+    <tfoot *ngIf="vueTable.lignesBilan" [ngClass]="vueTable.classeBilan">
+        <tr *ngFor="let ligneBilan of vueTable.lignesBilan">
+            <ng-container *ngTemplateOutlet="ligneTemplate; context: { ligne1: ligneBilan }">
+            </ng-container>
+        </tr>
+    </tfoot>
+</table>
+
+<ng-template #avecValeurTemplate>
+    <ng-container *ngFor="let ligne of vueTable.lignesVisibles">
+        <tr [attr.id]="ligne.id" [ngClass]="ligne.classe" [ngStyle]="ligne.style" [formGroup]="ligne.formGroup">
+            <ng-container *ngTemplateOutlet="ligneTemplate; context: { ligne1: ligne }"></ng-container>
+        </tr>
+    </ng-container>
+</ng-template>
+
+<ng-template #avecClicTemplate>
+    <ng-container *ngFor="let ligne of vueTable.lignesVisibles">
+        <tr [attr.id]="ligne.id" [ngClass]="ligne.classe" [ngStyle]="ligne.style" (click)="vueTable.quandClic(ligne)">
+            <ng-container *ngTemplateOutlet="ligneTemplate; context: { ligne1: ligne }"></ng-container>
+        </tr>
+    </ng-container>
+</ng-template>
+
+<ng-template #autreTemplate>
+    <ng-container *ngFor="let ligne of vueTable.lignesVisibles">
+        <tr [attr.id]="ligne.id" [ngClass]="ligne.classe" [ngStyle]="ligne.style">
+            <ng-container *ngTemplateOutlet="ligneTemplate; context: { ligne1: ligne }"></ng-container>
+        </tr>
+    </ng-container>
+</ng-template>
+
+<!-- ligne -->
+<ng-template #ligneTemplate let-ligne="ligne1">
+    <ng-container *ngFor="let cellule of ligne.cellules">
+        <ng-container *ngIf="cellule.thScope; else tdTemplate">
+            <th [attr.scope]="cellule.thScope" [ngClass]="cellule.classe" [colSpan]="cellule.colSpan"
+                [attr.rowspan]="cellule.rowSpan">
+                <app-kf-composant [composant]="cellule.composant" (output)="transmet($event)"></app-kf-composant>
+            </th>
+        </ng-container>
+        <ng-template #tdTemplate>
+            <td [ngClass]="cellule.classe" [colSpan]="cellule.colSpan">
+                <app-kf-composant [composant]="cellule.composant" (output)="transmet($event)"></app-kf-composant>
+            </td>
+        </ng-template>
+    </ng-container>
+</ng-template>

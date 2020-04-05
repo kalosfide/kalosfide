@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
-  "version": 1, 
+  "version": 1,
   "newProjectRoot": "projects",
   "projects": {
     "kalosfide": {
@@ -123,6 +123,10 @@
           }
         }
       }
-    }},
-  "defaultProject": "kalosfide"
+    }
+  },
+  "defaultProject": "kalosfide",
+  "cli": {
+    "analytics": "c1b0fb70-02fb-4795-b5db-a62997c06e4e"
+  }
 }

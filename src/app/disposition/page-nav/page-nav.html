@@ -1,0 +1,12 @@
+<div *ngIf="navDefs.navDefs">
+    <ul class="nav nav-tab">
+        <li *ngFor="let navDef of navDefs.navDefs" class="nav-item">
+            <a class="nav-link" [attr.active]="navDef.active" [routerLink]="navDef.route">
+                <app-kf-composant [composant]="navDef.titre"></app-kf-composant>
+            </a>
+        </li>
+    </ul>
+</div>
+<div>
+    <router-outlet></router-outlet>
+</div>

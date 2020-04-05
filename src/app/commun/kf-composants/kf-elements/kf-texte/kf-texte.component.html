@@ -1,0 +1,8 @@
+<ng-container *ngIf="balise; then baliseTemplate; else autreTemplate"></ng-container>
+<ng-template #baliseTemplate>
+    <app-kf-balise [balise]="balise"></app-kf-balise>
+</ng-template>
+<ng-template #autreTemplate>
+    {{ texte.texte }}
+</ng-template>
+<ng-container *ngIf="suiviDeSaut"><br></ng-container>

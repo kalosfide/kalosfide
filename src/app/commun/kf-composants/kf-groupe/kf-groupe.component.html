@@ -1,0 +1,123 @@
+<ng-container *ngIf="groupe.legende; then avecLegendeTemplate; else sansLegendeTemplate;"></ng-container>
+
+<ng-template #avecLegendeTemplate>
+    <fieldset #htmlElement [ngClass]="groupe.classe" [ngStyle]="groupe.style">
+        <legend [ngClass]="groupe.legende.classe">
+            <app-kf-contenu-phrase [contenuPhrase]="groupe.legende.contenuPhrase"></app-kf-contenu-phrase>
+        </legend>
+        <ng-container *ngTemplateOutlet="contenus"></ng-container>
+    </fieldset>
+</ng-template>
+
+<ng-template #sansLegendeTemplate>
+    <ng-container *ngIf="groupe.estDansListe || !groupe.estFormulaire; then pasFormulaire; else formulaire">
+    </ng-container>
+
+    <ng-template #pasFormulaire>
+        <ng-container *ngIf="groupe.typeDeValeur===typeDeValeur.avecGroupe; then avecFormGroup; else sansFormGroup">
+        </ng-container>
+
+        <ng-template #avecFormGroup>
+            <div #htmlElement [formGroup]="groupe.formGroup" [ngClass]="groupe.classe" [ngStyle]="groupe.style">
+                <ng-container *ngTemplateOutlet="sousDiv"></ng-container>
+            </div>
+            <div *ngIf="groupe.avecInvalidFeedback" class="invalid-feedback">
+                <p *ngFor="let erreur of groupe.erreurs">{{erreur}}</p>
+            </div>
+        </ng-template>
+
+        <ng-template #sansFormGroup>
+            <div #htmlElement [ngClass]="groupe.classe" [ngStyle]="groupe.style">
+                <ng-container *ngTemplateOutlet="sousDiv"></ng-container>
+            </div>
+        </ng-template>
+    </ng-template>
+
+    <ng-template #formulaire>
+        <!--" -->
+        <form #htmlElement [attr.id]="groupe.nom" [formGroup]="formGroup" novalidate [ngClass]="groupe.classe" [ngStyle]="groupe.style">
+            <ng-container *ngTemplateOutlet="sousDiv"></ng-container>
+        </form>
+    </ng-template>
+
+</ng-template>
+
+<ng-template #sousDiv>
+    <ng-container *ngIf="groupe.classeSousDiv; else contenus">
+        <div [ngClass]="groupe.classeSousDiv">
+            <ng-container *ngTemplateOutlet="contenus"></ng-container>
+        </div>
+    </ng-container>
+
+</ng-template>
+
+<ng-template #contenus>
+    <ng-container *ngIf="!groupe.divTable; else divTable">
+        <ng-container *ngIf="!groupe.divLigne; else divLigne">
+            <ng-container *ngFor="let contenu of groupe.contenus">
+                <ng-container *ngIf="contenu.div; else divTemplate">
+                    <app-kf-div *ngIf="!contenu.nePasAfficher" [div]="contenu.div"></app-kf-div>
+                </ng-container>
+                <ng-template #divTemplate>
+                    <app-kf-composant [attr.nom]="contenu.nom" [composant]="contenu" (output)="transmet($event)">
+                    </app-kf-composant>
+                </ng-template>
+
+            </ng-container>
+        </ng-container>
+    </ng-container>
+</ng-template>
+
+<ng-template #divTable>
+    <div [ngClass]="groupe.divTable.classe" [ngStyle]="groupe.divTable.style">
+        <ng-container *ngFor="let ligne of groupe.divTable.lignes">
+            <div [ngClass]="ligne.classe" [ngStyle]="ligne.style">
+                <ng-container *ngFor="let colonne of ligne.colonnes">
+                    <div [ngClass]="colonne.classe" [ngStyle]="colonne.style">
+                        <ng-container *ngIf="colonne.texte; else composantTemplate">
+                            {{ colonne.texte }}
+                        </ng-container>
+                        <ng-template #composantTemplate>
+                            <app-kf-composant [attr.nom]="colonne.composant.nom" [composant]="colonne.composant"
+                                (output)="transmet($event)">
+                            </app-kf-composant>
+
+                        </ng-template>
+                    </div>
+                </ng-container>
+            </div>
+        </ng-container>
+    </div>
+</ng-template>
+
+<ng-template #divLigne>
+    <div [ngClass]="groupe.divLigne.classe" [ngStyle]="groupe.divLigne.style">
+        <ng-container *ngFor="let colonne of groupe.divLigne.colonnes">
+            <div [ngClass]="colonne.classe" [ngStyle]="colonne.style">
+                <ng-container *ngIf="colonne.texte; else composantTemplate">
+                    {{ colonne.texte }}
+                </ng-container>
+                <ng-template #composantTemplate>
+                    <app-kf-composant [attr.nom]="colonne.composant.nom" [composant]="colonne.composant"
+                        (output)="transmet($event)">
+                    </app-kf-composant>
+
+                </ng-template>
+            </div>
+        </ng-container>
+    </div>
+</ng-template>
+
+
+<!--
+ 
+<ng-template #contenus>
+    <ng-container *ngFor="let contenu of groupe.contenus; index as i">
+        <app-kf-composant [attr.nom]="contenu.nom" [composant]="contenu" (output)="transmet($event)">
+        </app-kf-composant>
+    </ng-container>
+    <ng-container *ngTemplateOutlet="enveloppesTemplate; context: { divs: groupe.divs, composant: contenu, index: 0 }"></ng-container>
+    
+</ng-template>
+   
+-->

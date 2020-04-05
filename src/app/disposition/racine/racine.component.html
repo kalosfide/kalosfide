@@ -1,0 +1,9 @@
+<div class="container body-content">
+    <app-navbar [navBar]="menu"></app-navbar>
+    <app-alerte></app-alerte>
+    <app-kf-groupe [composant]="breadcrumb"></app-kf-groupe>
+    <app-retour-en-haut></app-retour-en-haut>
+    <router-outlet></router-outlet>
+    <app-pied></app-pied>
+    <app-kf-groupe [composant]="animeAttente"></app-kf-groupe>
+</div>

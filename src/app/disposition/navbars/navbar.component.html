@@ -1,0 +1,42 @@
+<div class="row">
+    <div class="col">
+        <nav class="navbar navbar-expand-md navbar-light bg-light">
+
+            <ng-container *ngFor="let item of navBar.enTetes">
+                <app-kf-composant [composant]="item.composant"></app-kf-composant>
+            </ng-container>
+
+            <button [id]="navBar.idBascule" class="navbar-toggler" type="button" data-toggle="collapse"
+                [attr.data-target]="'#' + navBar.idContenu" [attr.aria-controls]="navBar.nom" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" [id]="navBar.idContenu">
+
+                <ng-container *ngFor="let contenu of navBar.contenus">
+                    <ng-container *ngIf="contenu.formulaire; else itemsTemplate">
+                        <app-kf-composant [composant]="contenu.formulaire"></app-kf-composant>
+                    </ng-container>
+                    <ng-template #itemsTemplate>
+                        <ul class="navbar-nav" [ngClass]="contenu.classe" [ngStyle]="contenu.style">
+                            <li *ngFor="let item of contenu.items" [ngClass]="{'nav-item': true, 'dropdown': item.sousMenu}">
+                                <app-kf-composant [composant]="item.composant"></app-kf-composant>
+                            </li>
+                        </ul>
+                    </ng-template>
+                    <ng-template #itemsTemplate1>
+                        <div class="navbar-nav" [ngClass]="contenu.classe" [ngStyle]="contenu.style">
+                            <div *ngFor="let item of contenu.items" [ngClass]="{'nav-item': true}">
+                                <app-kf-composant [composant]="item.composant"></app-kf-composant>
+                            </div>
+                        </div>
+                    </ng-template>
+
+                </ng-container>
+
+            </div>
+
+        </nav>
+    </div>
+</div>

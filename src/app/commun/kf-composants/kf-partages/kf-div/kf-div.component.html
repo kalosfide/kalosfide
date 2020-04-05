@@ -1,0 +1,9 @@
+<div [ngClass]="div.classe" [ngStyle]="div.style">
+    <ng-container *ngIf="div.div; else composantTemplate">
+        <app-kf-div [div]="div.div"></app-kf-div>
+    </ng-container>
+    <ng-template #composantTemplate>
+        <app-kf-composant [attr.nom]="div.composant.nom" [composant]="div.composant"
+            (output)="transmet($event)"></app-kf-composant>
+    </ng-template>
+</div>

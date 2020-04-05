@@ -1,0 +1,133 @@
+<!--
+<P *ngIf="composant.abstractControl">liste value: {{ composant.abstractControl.value | json }}</P>
+<P *ngIf="composant.abstractControl">liste valeur: {{ composant.valeurs | json }}</P>
+        <span *ngIf="composant.avecNumero" class="badge">{{ i }}</span>
+-->
+<ng-template #avecUL_>
+    <ul>
+        <li *ngFor="let item of liste.items">
+            <app-kf-composant [composant]="selecteurs.selecteur(item)" (output)="transmet($event)"></app-kf-composant>
+        </li>
+    </ul>
+</ng-template>
+
+<ng-template #sansUL_>
+    <div *ngFor="let item of liste.items">
+        <app-kf-composant [composant]="selecteurs.selecteur(item)" (output)="transmet($event)"></app-kf-composant>
+    </div>
+</ng-template>
+
+<ng-template #avecNav_>
+    <nav>
+        <ng-container *ngTemplateOutlet="sansUL_"></ng-container>
+    </nav>
+</ng-template>
+
+<ng-template #sansNav_>
+    <ng-container *ngIf="selecteurs.avecUL; then avecUL_; else sansUL_"></ng-container>
+</ng-template>
+
+<ng-template #edition_ let-item="item__">
+    <app-kf-composant *ngIf="editions.titreAvantEnTete" [composant]="editions.etiquetteTitre(item)"></app-kf-composant>
+    <app-kf-composant *ngIf="editions.enTete" [composant]="editions.enTete" (output)="editions.quandEvenementEnTete(item, $event)"></app-kf-composant>
+    <app-kf-composant *ngIf="editions.titreApresEnTete" [composant]="editions.etiquetteTitre(item)"></app-kf-composant>
+    <app-kf-composant [composant]="editions.edition(item)" (output)="transmet($event)"></app-kf-composant>
+</ng-template>
+
+<ng-template #avecSelecteurs_>
+    <div *ngIf="editions.rienAEditer">
+        <app-kf-composant [composant]="editions.etiquetteRienAEditer"></app-kf-composant>
+    </div>
+    <div *ngIf="liste.itemChoisi">
+        <ng-container *ngTemplateOutlet="edition_; context: { item__: liste.itemChoisi }"></ng-container>
+    </div>
+    <div *ngIf="editions.itemNouveau">
+        <ng-container *ngTemplateOutlet="edition_; context: { item__: editions.itemNouveau }"></ng-container>
+        <app-kf-composant [composant]="editions.boutonOk"></app-kf-composant>
+        <app-kf-composant [composant]="editions.boutonAnnuler"></app-kf-composant>
+    </div>
+</ng-template>
+
+<ng-template #sansSelecteurs_>
+    <div *ngIf="editions.listeVide">
+        <app-kf-composant [composant]="editions.etiquetteListeVide"></app-kf-composant>
+    </div>
+    <div *ngFor="let item of liste.items">
+        <ng-container *ngTemplateOutlet="edition_; context: { item__: item }"></ng-container>
+    </div>
+</ng-template>
+
+<ng-template #editions_>
+    <ng-container *ngIf="selecteurs; then avecSelecteurs_; else sansSelecteurs_"></ng-container>
+</ng-template>
+
+<ng-template #commandes_>
+    <ng-container *ngFor="let commande of commandes.boutons">
+        <app-kf-composant [composant]="commande" (output)="traiteCommande($event)"></app-kf-composant><br>
+    </ng-container>
+</ng-template>
+
+<ng-template #avecCommandes_>
+    <div class="kf-table">
+        <div class="kf-row">
+            <div *ngIf="liste.positionCommandes===0" class="kf-cell kf-liste-commandes">
+                <ng-container *ngTemplateOutlet="commandes_"></ng-container>
+            </div>
+            <div *ngIf="selecteurs" class="kf-cell kf-liste-selecteurs">
+                <app-kf-composant *ngIf="editions.etiquetteTitreListe" [composant]="editions.etiquetteTitreListe"></app-kf-composant>
+                <div *ngIf="editions.listeVide && editions.etiquetteListeVide">
+                    <app-kf-composant [composant]="editions.etiquetteListeVide"></app-kf-composant>
+                </div>
+                <ng-container *ngIf="selecteurs.avecNav; then avecNav_; else sansNav_"></ng-container>
+            </div>
+            <div *ngIf="liste.positionCommandes===1" class="kf-cell kf-liste-commandes">
+                <ng-container *ngTemplateOutlet="commandes_"></ng-container>
+            </div>
+            <div *ngIf="!editions.editeur" class="kf-cell kf-liste-edition">
+                <ng-container *ngTemplateOutlet="editions_"></ng-container>
+            </div>
+            <div *ngIf="liste.positionCommandes===2" class="kf-cell kf-liste-commandes">
+                <ng-container *ngTemplateOutlet="commandes_"></ng-container>
+            </div>
+
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #sansCommandes>
+    <ng-container *ngIf="!editions.editeur" >
+        <ng-container *ngTemplateOutlet="editions_"></ng-container>
+    </ng-container>
+</ng-template>
+
+<ng-template #dansTable>
+    <div class="kf-table">
+        <div class="kf-row">
+            <div *ngIf="liste.positionCommandes===0" class="kf-cell kf-liste-commandes">
+                <ng-container *ngTemplateOutlet="commandes_"></ng-container>
+            </div>
+            <div class="kf-cell">
+                <app-kf-composant *ngIf="editions.etiquetteTitreListe" [composant]="editions.etiquetteTitreListe"></app-kf-composant>
+                <div class="kf-table">
+                    <div *ngIf="editions.dansTable.enTetesDesColonnes" class="kf-thead">
+                        <app-kf-composant *ngIf="editions.dansTable.enTetesDesColonnes" [composant]="editions.dansTable.enTetesDesColonnes"></app-kf-composant>
+                    </div>
+                    <ng-container *ngFor="let item of liste.items">
+                        <app-kf-composant> [composant]="editions.edition(item)" (output)="transmet($event)"></app-kf-composant>
+                    </ng-container>
+                </div>
+            </div>
+            <div *ngIf="liste.positionCommandes!==0" class="kf-cell kf-liste-commandes">
+                <ng-container *ngTemplateOutlet="commandes_"></ng-container>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #sansTable>
+    <ng-container *ngIf="selecteurs || commandes; then avecCommandes_; else editions_"></ng-container>
+</ng-template>  
+
+<div #htmlElement [ngClass]="liste.classe">
+    <ng-container *ngIf="editions.dansTable; then dansTable; else sansTable"></ng-container>
+</div>

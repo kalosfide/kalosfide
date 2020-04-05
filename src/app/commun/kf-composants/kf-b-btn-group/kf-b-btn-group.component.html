@@ -1,0 +1,52 @@
+<div #htmlElement role="group" [attr.aria-label]="ariaLabel" [class]="bbtnGroup.groupeClasse"
+    [ngClass]="bbtnGroup.classe" [ngStyle]="bbtnGroup.style">
+    <ng-container *ngFor="let bouton of bbtnGroup.contenus">
+        <ng-container *ngIf="!bouton.nePasAfficher">
+            <!-- test bouton -->
+            <ng-container *ngIf="bbtnGroup.estBouton(bouton); else pasBoutonTemplate">
+                <!-- bouton test popover -->
+                <ng-container *ngIf="bouton.ngbPopover; else buttonTemplate">
+                    <!-- bouton popover -->
+                    <app-kf-bouton [composant]="bouton"></app-kf-bouton>
+                </ng-container>
+                <ng-template #buttonTemplate>
+                    <!-- bouton simple -->
+                    <button type="button" [name]="bouton.nom" [disabled]="bouton.inactif"
+                        [ngClass]="bouton.classe" [ngStyle]="bouton.style" (click)="bbtnGroup.quandClic(bouton)">
+                        <app-kf-contenu-phrase [contenuPhrase]="bouton.contenuPhrase">
+                        </app-kf-contenu-phrase>
+                    </button>
+                </ng-template>
+            </ng-container>
+            <!-- pas bouton -->
+            <ng-template #pasBoutonTemplate>
+                <!-- test lien -->
+                <ng-container *ngIf="bbtnGroup.estLien(bouton); else pasLienTemplate">
+                    <!-- lien -->
+                    <ng-container *ngTemplateOutlet="lienTemplate; context: { bouton1: bouton }"></ng-container>
+                </ng-container>
+                <!-- pas lien -->
+                <ng-template #pasLienTemplate>
+                    <!-- test etiquette -->
+                    <ng-container *ngIf="bbtnGroup.estEtiquette; else pasEtiquetteTemplate">
+                        <span [ngClass]="bouton.classe" [ngStyle]="bouton.style">
+                            <app-kf-contenu-phrase [contenuPhrase]="bouton.contenuPhrase"> </app-kf-contenu-phrase>
+                        </span>
+                    </ng-container>
+                    <ng-template #pasEtiquetteTemplate>
+
+                    </ng-template>
+
+                </ng-template>
+
+                <ng-template #lienTemplate let-lien="bouton1">
+                    <a [routerLink]="lien.route" routerLinkActive="active" [queryParams]="lien.queryParams"
+                        [fragment]="lien.fragment" [ngClass]="lien.classe" [ngStyle]="lien.style">
+                        <app-kf-contenu-phrase [contenuPhrase]="lien.contenuPhrase"></app-kf-contenu-phrase>
+                    </a>
+                </ng-template>
+            </ng-template>
+
+        </ng-container>
+    </ng-container>
+</div>

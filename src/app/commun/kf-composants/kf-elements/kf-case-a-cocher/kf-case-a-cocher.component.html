@@ -1,0 +1,47 @@
+<ng-template #labelTemplate>
+    <label #labelElement [attr.for]="case.nom" [ngClass]="case.classeLabel">
+        <app-kf-contenu-phrase [contenuPhrase]="case.contenuPhrase"></app-kf-contenu-phrase>
+    </label>
+</ng-template>
+
+<ng-template #infoTemplate>
+    <app-kf-etiquette *ngIf="case.texteAide" [composant]="case.texteAide"></app-kf-etiquette>
+    <div *ngIf="case.avecInvalidFeedback" class="invalid-feedback">
+        <p *ngFor="let erreur of case.erreurs">{{erreur}}</p>
+    </div>
+</ng-template>
+
+<ng-container *ngIf="case.classeDiv; else sansDivTemplate">
+    <div [ngClass]="case.classeDiv">
+        <ng-container *ngTemplateOutlet="sansDivTemplate"></ng-container>
+    </div>
+</ng-container>
+
+<ng-template #sansDivTemplate>
+    <div *ngIf="case.classeDivVide" [ngClass]="case.classeDivVide"></div>
+    <ng-container *ngIf="case.classeEntree; else entreeTemplate">
+        <div [ngClass]="case.classeEntree">
+            <ng-container *ngTemplateOutlet="entreeTemplate"></ng-container>
+        </div>
+    </ng-container>
+</ng-template>
+
+<ng-template #entreeTemplate>
+    <ng-container *ngIf="case.avecLabelAvant">
+        <ng-container *ngTemplateOutlet="labelTemplate"></ng-container>
+    </ng-container>
+
+    <ng-container *ngIf="case.aspect; else normalTemplate">
+        <input type='checkbox' #inputElement [name]="case.nom" [formControl]="case.formControl" class="kf-invisible"
+            [attr.disabled]="case.inactif" />
+        <app-kf-composant [composant]="case.aspect.composant"></app-kf-composant>
+    </ng-container>
+    <ng-template #normalTemplate>
+        <input type='checkbox' #inputElement [name]="case.nom" [formControl]="case.formControl" [ngClass]="case.classe"
+            [attr.disabled]="case.inactif" />
+    </ng-template>
+    <ng-container *ngIf="case.avecLabelApres">
+        <ng-container *ngTemplateOutlet="labelTemplate"></ng-container>
+    </ng-container>
+    <ng-container *ngTemplateOutlet="infoTemplate"></ng-container>
+</ng-template>

@@ -1,0 +1,64 @@
+<ng-container [ngSwitch]="icone.positionTexte">
+    <ng-container *ngSwitchCase="'droite'">
+        <ng-container *ngTemplateOutlet="iconeTemplate"></ng-container>&nbsp;<ng-container
+            *ngTemplateOutlet="texteTemplate"></ng-container>
+    </ng-container>
+    <ng-container *ngSwitchCase="'haut'">
+        <span [ngClass]="icone.classeFond" [ngStyle]="icone.styleFond">
+            <ng-container *ngTemplateOutlet="texteAvecCss"></ng-container>
+            <ng-container *ngTemplateOutlet="iconeTemplate"></ng-container>
+        </span>
+    </ng-container>
+    <ng-container *ngSwitchCase="'gauche'">
+        <ng-container *ngTemplateOutlet="texteTemplate"></ng-container>&nbsp;<ng-container
+            *ngTemplateOutlet="iconeTemplate"></ng-container>
+    </ng-container>
+    <ng-container *ngSwitchCase="'bas'">
+        <span [ngClass]="icone.classeFond" [ngStyle]="icone.styleFond">
+            <ng-container *ngTemplateOutlet="iconeTemplate"></ng-container>
+            <ng-container *ngTemplateOutlet="texteAvecCss"></ng-container>
+        </span>
+    </ng-container>
+    <ng-container *ngSwitchDefault>
+        <ng-container *ngIf="icone.classeFond; else sansFondTemplate">
+            <span [ngClass]="icone.classeFond" [ngStyle]="icone.styleFond">
+                <ng-container *ngTemplateOutlet="iconeTemplate"></ng-container>
+            </span>
+        </ng-container>
+        <ng-template #sansFondTemplate>
+            <ng-container *ngTemplateOutlet="iconeTemplate"></ng-container>
+        </ng-template>
+    </ng-container>
+</ng-container>
+
+<ng-template #texteTemplate>
+    <ng-container *ngIf="!icone.texteAvecCss; else texteAvecCss">
+        {{ icone.texte }}
+    </ng-container>
+</ng-template>
+
+<ng-template #texteAvecCss>
+    <span [ngClass]="icone.classeTexte" [ngStyle]="icone.styleTexte">{{ icone.texte }}</span>
+</ng-template>
+
+<ng-template #iconeTemplate>
+    <span>
+        <ng-container *ngIf="!icone.couches; else couchesTemplate">
+            <i #htmlElement [class]="icone.faClasse" [ngClass]="icone.classe" [ngStyle]="icone.style"></i>
+        </ng-container>
+        <ng-template #couchesTemplate>
+            <span #htmlElement [class]="icone.faClassePile" [ngClass]="icone.classeFond" [ngStyle]="icone.styleFond">
+                <ng-container *ngFor="let icone of icone.couches">
+                    <ng-container *ngIf="icone.nomIcone; else texteTemplate">
+                        <i [class]="icone.faClasse" [ngClass]="icone.classe" [ngStyle]="icone.style"></i>
+                    </ng-container>
+                    <ng-template #texteTemplate>
+                        <span [class]="icone.faClasse" [ngClass]="icone.classe" [ngStyle]="icone.style">{{ icone.texteCouche }}</span>
+                    </ng-template>
+                </ng-container>
+                
+            </span>
+        </ng-template>
+
+    </span>
+</ng-template>

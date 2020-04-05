@@ -1,0 +1,9 @@
+<div class="alertes-div">
+    <ng-container *ngFor="let alerte of alertes">
+        <P *ngIf="!alerte.invisible" class="alertes-p">
+            <ngb-alert [dismissible]="alerte.fermable" [type]="alerte.type" (close)="ferme(alerte)">
+                <app-kf-etiquette [composant]="alerte.contenu"></app-kf-etiquette>
+            </ngb-alert>
+        </P>
+    </ng-container>
+</div>

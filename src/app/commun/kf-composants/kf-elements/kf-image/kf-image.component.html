@@ -1,0 +1,21 @@
+<ng-template #sansDimensions_>
+    <img #imgElement [src]="image.url" [attr.width]="image.largeur"  [ngClass]="image.classe" [ngStyle]="image.style"/>
+</ng-template>
+<ng-template #avecLargeurSeule_>
+    <img #imgElement [src]="image.url" [attr.width]="image.largeur" [ngClass]="image.classe" [ngStyle]="image.style" />
+</ng-template>
+<ng-template #avecHauteurSeule_>
+    <img #imgElement [src]="image.url" [attr.height]="image.hauteur" [ngClass]="image.classe" [ngStyle]="image.style" />
+</ng-template>
+<ng-template #avecLargeurEtHauteur_>
+    <img #imgElement [src]="image.url" [attr.width]="image.largeur" [attr.height]="image.hauteur" [ngClass]="image.classe" [ngStyle]="image.style" />
+</ng-template>
+
+<ng-template #avecLargeur_>
+    <ng-container *ngIf="image.avecHauteur; then avecLargeurEtHauteur_; else avecHauteurSeule_"></ng-container>
+</ng-template>
+<ng-template #sansLargeur_>
+    <ng-container *ngIf="image.avecHauteur; then avecHauteurSeule_; else sansDimensions_"></ng-container>
+</ng-template>
+
+<ng-container *ngIf="image.avecLargeur; then avecLargeur_; else sansLargeur_"></ng-container>

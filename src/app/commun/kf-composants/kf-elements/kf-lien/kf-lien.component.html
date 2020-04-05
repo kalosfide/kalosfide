@@ -1,0 +1,12 @@
+<ng-container *ngIf="lien.routerLinkActive; else elseTemplate">
+    <a #baliseElement [routerLink]="lien.route" routerLinkActive="active" [queryParams]="lien.queryParams"
+        [fragment]="lien.fragment" [ngClass]="lien.classe" [ngStyle]="lien.style">
+        <app-kf-contenu-phrase [contenuPhrase]="lien.contenuPhrase"></app-kf-contenu-phrase>
+    </a>
+</ng-container>
+<ng-template #elseTemplate>
+    <a #baliseElement [routerLink]="lien.route" [queryParams]="lien.queryParams"
+        [fragment]="lien.fragment" [ngClass]="lien.classe" [ngStyle]="lien.style">
+        <app-kf-contenu-phrase [contenuPhrase]="lien.contenuPhrase"></app-kf-contenu-phrase>
+    </a>
+</ng-template>

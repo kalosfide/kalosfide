@@ -1,0 +1,8 @@
+<div class="form-group form-check">
+    <input #inputElement type='radio' [name]="radio.radios.nom" [formControl]="radio.radios.formControl"
+        [value]="radio.valeur" [class]="classe"  /><!--[appInactif]="radio.inactif" -->
+    <label *ngIf="radio.contenuPhrase" #labelElement [attr.for]="radio.nom" class="form-check-label text-dark">
+        <app-kf-contenu-phrase [contenuPhrase]="radio.contenuPhrase"></app-kf-contenu-phrase>
+    </label>
+</div>
+<app-kf-etiquette *ngIf="radio.texteAide" [composant]="radio.texteAide"></app-kf-etiquette>

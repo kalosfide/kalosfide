@@ -1,0 +1,76 @@
+<ng-template #labelTemplate>
+    <label #labelElement *ngIf="input.classeLabel" [attr.for]="input.nom" [ngClass]="input.classeLabel">
+        <app-kf-contenu-phrase [contenuPhrase]="input.contenuPhrase"></app-kf-contenu-phrase>
+    </label>
+</ng-template>
+
+<ng-template #infoTemplate>
+    <app-kf-etiquette *ngIf="input.texteAide" [composant]="input.texteAide"></app-kf-etiquette>
+    <div *ngIf="input.avecInvalidFeedback" class="invalid-feedback">
+        <p *ngFor="let erreur of input.erreurs">{{erreur}}</p>
+    </div>
+</ng-template>
+
+<ng-container *ngIf="input.classeDiv; then avecDivTemplate; else sansDivTemplate"></ng-container>
+
+<ng-template #avecDivTemplate>
+    <div nom="classeDiv" [ngClass]="input.classeDiv">
+        <ng-container *ngTemplateOutlet="sansDivTemplate"></ng-container>
+    </div>
+</ng-template>
+
+<ng-template #sansDivTemplate>
+    <ng-container *ngIf="input.avecLabel">
+        <ng-container *ngTemplateOutlet="labelTemplate"></ng-container>
+    </ng-container>
+    <ng-container *ngIf="input.classeEntree; then entreeAvecDivTemplate; else entreeTemplate"></ng-container>
+
+    <ng-template #entreeAvecDivTemplate>
+        <div nom="classeEntree" [ngClass]="input.classeEntree">
+            <ng-container *ngTemplateOutlet="entreeTemplate"></ng-container>
+            <ng-container *ngIf="input.boutonEfface">
+                <button type="button" role="efface" [ngClass]="input.boutonEfface.classe" (click)="input.efface()">x</button>
+            </ng-container>
+            <ng-container *ngIf="input.iconeSurvol">
+                <app-kf-icone [composant]="input.iconeSurvol"></app-kf-icone>
+            </ng-container>
+        </div>
+    </ng-template>
+</ng-template>
+
+<ng-template #entreeTemplate>
+    <div *ngIf="input.composantAvant" class="input-group-prepend">
+        <app-kf-composant [composant]="input.composantAvant"></app-kf-composant>
+    </div>
+    <ng-container *ngIf="nombre; then nombre_; else pasNombre_"></ng-container>
+    <ng-container *ngTemplateOutlet="infoTemplate"></ng-container>
+</ng-template>
+
+
+<ng-template #nombre_>
+    <input #inputElement [name]="input.nom" [type]="input.typeDInput" [formControl]="input.formControl"
+        [ngClass]="input.classe" [readonly]="input.lectureSeule" [attr.disabled]="input.inactif"
+        [attr.placeholder]="input.placeholder" [min]="nombre.min" [max]="nombre.max" [step]="nombre.pas" />
+</ng-template>
+
+<ng-template #pasNombre_>
+    <ng-container *ngIf="dateTemps; then dateTempsTemplate; else normalTemplate"></ng-container>
+    <ng-template #dateTempsTemplate>
+        <div class="input-group form-inline">
+            <input #inputElement [name]="input.nom" [type]="dateTemps.inputDate.typeDInput"
+                [formControl]="dateTemps.inputDate.formControl" [ngClass]="input.classe"
+                [readonly]="input.lectureSeule" [attr.disabled]="input.inactif"
+                [attr.placeholder]="dateTemps.inputDate.placeholder" (change)="dateTemps.quandValeurChange()" />
+            <input [name]="dateTemps.inputTemps.nom" [type]="dateTemps.inputTemps.typeDInput"
+                [formControl]="dateTemps.inputTemps.formControl" [ngClass]="input.classe"
+                [readonly]="input.lectureSeule" [attr.disabled]="input.inactif"
+                [attr.placeholder]="dateTemps.inputTemps.placeholder" (change)="dateTemps.quandValeurChange()" />
+        </div>
+    </ng-template>
+    <ng-template #normalTemplate>
+        <input #inputElement [name]="input.nom" [type]="input.typeDInput" [formControl]="input.formControl"
+            [ngClass]="input.classe" [readonly]="input.lectureSeule" [attr.disabled]="input.inactif"
+            [attr.placeholder]="input.placeholder" />
+    </ng-template>
+
+</ng-template>

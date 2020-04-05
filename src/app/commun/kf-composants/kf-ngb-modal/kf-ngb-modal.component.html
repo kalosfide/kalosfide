@@ -1,0 +1,14 @@
+<div class="modal-header" [ngClass]="modal.classeEnTete" *ngIf="modal.titre">
+    <h6 class="modal-title" id="modal-title">{{ modal.titre }}</h6>
+    <button type="button" class="close" [ngClass]="modal.classeCroix" aria-describedby="modal-title" (click)="activeModal.dismiss('ngbModalCroix')">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body" [ngClass]="modal.classeCorps" *ngIf="modal.corps">
+    <app-kf-groupe [composant]="modal.corps"></app-kf-groupe>
+</div>
+<div class="modal-footer" [ngClass]="modal.classePied" *ngIf="modal.boutons">
+    <ng-container *ngFor="let bouton of modal.boutons">
+        <app-kf-bouton [composant]="bouton" (output)="traiteClic($event)"></app-kf-bouton>
+    </ng-container>
+</div>

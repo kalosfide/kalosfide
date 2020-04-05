@@ -1,0 +1,15 @@
+<div class="container-fluid">
+    <ng-container *ngIf="titrePage">
+        <app-kf-groupe [composant]="titrePage"></app-kf-groupe>
+    </ng-container>
+    <ng-container *ngIf="superGroupe">
+        <div class="row">
+            <div class="col">
+                <app-kf-groupe [composant]="superGroupe" (output)="traite($event)"></app-kf-groupe>
+            </div>
+        </div>
+    </ng-container>
+</div>
+<ng-container *ngIf="!superGroupe">
+    <router-outlet></router-outlet>
+</ng-container>
