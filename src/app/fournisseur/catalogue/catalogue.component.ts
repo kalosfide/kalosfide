@@ -213,7 +213,8 @@ export class CatalogueComponent extends PageBaseComponent implements OnInit, OnD
             () => {
                 this.site = this.service.navigation.litSiteEnCours();
                 this.rafraichit();
-            }));
+            })
+        );
     }
 
 }

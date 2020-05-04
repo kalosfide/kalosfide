@@ -31,7 +31,7 @@ export class CommandeAccueilComponent extends CLFTitreComponent implements OnIni
 
         etiquette = Fabrique.ajouteEtiquetteP(infos);
         Fabrique.ajouteTexte(etiquette,
-            `Ceci est `,
+            `Ceci est encore `,
             { texte: 'à faire', balise: KfTypeDeBaliseHTML.b },
             '.'
         );

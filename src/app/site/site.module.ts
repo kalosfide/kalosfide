@@ -10,6 +10,8 @@ import { MessagesModule } from '../messages/messages.module';
 import { VisiteurRacineComponent } from './visiteur-racine-component';
 import { FournisseurRacineComponent } from './fournisseur-racine.component';
 import { ClientRacineComponent } from './client-racine.component';
+import { FournisseurGarde } from './fournisseur-garde';
+import { ClientGarde } from './client-garde';
 
 @NgModule({
     imports: [
@@ -27,6 +29,8 @@ import { ClientRacineComponent } from './client-racine.component';
     ],
     providers: [
         SiteResolverService,
+        FournisseurGarde,
+        ClientGarde
     ],
 })
 export class SiteModule { }

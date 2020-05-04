@@ -4,7 +4,7 @@ import { Observable, of } from 'rxjs';
 import { ApiResult } from '../../commun/api-results/api-result';
 import { ApiAction, ApiController } from '../../commun/api-route';
 import { KeyUidRnoService } from '../../commun/data-par-key/key-uid-rno/key-uid-rno.service';
-import { map } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 import { ApiResult200Ok } from '../../commun/api-results/api-result-200-ok';
 import { ApiRequêteService } from '../../services/api-requete.service';
 import { IdEtatSite } from '../etat-site';
@@ -83,5 +83,20 @@ export class SiteService extends KeyUidRnoService<Site> {
         site.etat = état;
         this.navigation.fixeSiteEnCours(site);
         this.identification.fixeSiteIdentifiant(site);
+    }
+
+    public vérifieEtat(): Observable<IdEtatSite> {
+        const site = this.navigation.litSiteEnCours();
+        return this.litEtat(site).pipe(
+            take(1),
+            map(etat => {
+                if (site.etat !== etat) {
+                    site.etat = etat;
+                    this.navigation.fixeSiteEnCours(site);
+                    this.identification.fixeSiteIdentifiant(site);
+                }
+                return etat;
+            })
+        );
     }
 }

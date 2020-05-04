@@ -143,16 +143,18 @@ export const ApiAction = {
     commande: {
 
         /**
-         * Le CLFDocs lu dans l'Api contient la dernière commande d'un client avec ses lignes.
+         *  Si le site est d'état Catalogue, retourne un contexte Catalogue: état site = Catalogue, date catalogue = DateNulle.
+         *  Si le site est ouvert et si l'utilisateur a passé la date de son catalogue
+         *  et si la date du catalogue utilisateur est postérieure à celle du catalogue de la bdd, les données utilisateur sont à jour,
+         *  retourne un contexte Ok: état site = ouvert, date catalogue = DataNulle.
+         *  Si le site est ouvert et si l'utilisateur a passé la date de son catalogue
+         *  et si la date du catalogue utilisateur est antérieure à celle du catalogue de la bdd
+         *  retourne un contexte Périmé: état site = ouvert, date catalogue = DataNulle.
+         *  Si le site est ouvert et si l'utilisateur n'a pas passé la date de son catalogue, il n'y pas de données utilisateur,
+         *  retourne un CLFDocs dont le champ Documents contient les données pour client de la dernière commande du client
          * Param: key du Client.
          */
         encours: 'enCours',
-
-        /**
-         * Le CLFDocs lu dans l'Api contient uniquement un site avec son état et un catalogue avec sa date.
-         * Param: key du site.
-         */
-        contexte: 'contexte',
 
         /**
          * Crée une nouvelle commande d'un client sans détails.

@@ -7,16 +7,13 @@ import { EtapeDeFormulaireComponent } from '../disposition/formulaire/etape-de-f
 import { DevenirClientComponent } from './devenir-client/devenir-client.component';
 import { DevenirClientPages } from './devenir-client/devenir-client-pages';
 import { MotDePasseResolverService } from '../securite/mot-de-passe/mot-de-passe-resolver.service';
-import { VProduitsComponent } from './v-produits.component';
 import { AppPages } from '../app-pages';
 import { SiteOuvertGarde } from '../securite/site-ouvert-garde';
 import { PageInterditeComponent } from '../messages/page-interdite.component';
 import { PageConflitComponent } from '../messages/page-conflit.component';
 import { PageErreurComponent } from '../messages/page-erreur.component';
-import { SitePasOuvertComponent } from '../messages/site-pas-ouvert.component';
 import { VisiteurPages } from './visiteur-pages';
 import { PageIntrouvableComponent } from '../messages/page-introuvable.component';
-import { CatalogueResolverService } from 'src/app/modeles/catalogue/catalogue-resolver.service';
 
 const routes: Routes = [
     {
@@ -31,11 +28,7 @@ const routes: Routes = [
     {
         path: VisiteurPages.produits.urlSegment,
         data: { pageDef: VisiteurPages.produits },
-        component: VProduitsComponent,
-        resolve: {
-            catalogue: CatalogueResolverService,
-        },
-        canActivate: [SiteOuvertGarde]
+        loadChildren: () => import('src/app/modeles/catalogue/vccatalogue.module').then(mod => mod.VCCatalogueModule),
     },
     {
         path: VisiteurPages.contact.urlSegment,
@@ -98,10 +91,6 @@ const routes: Routes = [
     {
         path: AppPages.apiErreur.urlSegment,
         component: PageErreurComponent,
-    },
-    {
-        path: AppPages.pasOuvert.urlSegment,
-        component: SitePasOuvertComponent,
     },
     {
         path: AppPages.introuvable.urlSegment,

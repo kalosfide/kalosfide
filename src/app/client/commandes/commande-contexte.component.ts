@@ -53,10 +53,6 @@ export class CommandeContexteComponent extends PageBaseComponent implements OnIn
         let etiquette: KfEtiquette;
         groupe.ajouteClasseDef('alert alert-warning');
 
-        etiquette = new KfEtiquette(''
-        );
-        etiquette.baliseHtml = KfTypeDeBaliseHTML.p;
-
         etiquette = new KfEtiquette('état');
         etiquette.baliseHtml = KfTypeDeBaliseHTML.p;
         groupe.ajoute(etiquette);

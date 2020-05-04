@@ -30,7 +30,7 @@ const routes: Routes = [
                 },
                 component: CDocumentDocumentsComponent,
                 resolve: {
-                    liste: CDocumentDocumentsResolverService,
+                    clfDocs: CDocumentDocumentsResolverService,
                 },
             },
             {

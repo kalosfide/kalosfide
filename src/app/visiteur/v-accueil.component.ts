@@ -12,8 +12,6 @@ import { KfTypeDeBaliseHTML } from '../commun/kf-composants/kf-composants-types'
     templateUrl: '../disposition/page-base/page-base.html', styleUrls: ['../commun/commun.scss']
 })
 export class VAccueilComponent extends PageBaseComponent implements OnInit {
-
-    static sPageDef: PageDef = VisiteurPages.accueil;
     pageDef: PageDef = VisiteurPages.accueil;
 
     site: Site;

@@ -7,14 +7,11 @@ import { IKfVueTableDef } from 'src/app/commun/kf-composants/kf-vue-table/i-kf-v
 import { ActivatedRoute, Data } from '@angular/router';
 import { CLFService } from './c-l-f.service';
 import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
-import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 import { KfSuperGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-super-groupe';
 import { RouteurService } from 'src/app/services/routeur.service';
 import { PageTableComponent } from 'src/app/disposition/page-table/page-table.component';
 import { IGroupeTableDef, GroupeTable } from 'src/app/disposition/page-table/groupe-table';
 import { BarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
-import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
-import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
 import { CLFDoc } from './c-l-f-doc';
 import { CLFUtile } from './c-l-f-utile';
 import { CLFDocs } from './c-l-f-docs';
@@ -82,8 +79,7 @@ export abstract class CLFDocsComponent extends PageTableComponent<CLFDoc> implem
             nbMessages: 1,
             avecSolution: true,
             charge: ((etat: EtatTable) => {
-                etat.grBtnsMsgs.messages[0].fixeTexte(`Il n\'a pas de ${this.texteUtile.def.bon} envoyé par ${this.clfDocs.client.nom}.`);
-                Fabrique.lien.fixeDef(etat.grBtnsMsgs.boutons[0] as KfLien, this.utile.lien.bonVirtuelDef(this.clfDocs));
+                etat.grBtnsMsgs.messages[0].fixeTexte(`Il n\'a pas de documents enregistrés.`);
                 etat.grBtnsMsgs.alerte('info');
             }).bind(this)
         });
@@ -108,6 +104,11 @@ export abstract class CLFDocsComponent extends PageTableComponent<CLFDoc> implem
     avantChargeData() {
         this.site = this.service.navigation.litSiteEnCours();
         this.identifiant = this.service.identification.litIdentifiant();
+    }
+
+    chargeData(data: Data) {
+        this.clfDocs = data.clfDocs;
+        this.liste = this.clfDocs.créeVues();
     }
 
     initialiseUtile() {

@@ -98,7 +98,7 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
                 this.service.siCréeCopieOk(créé);
                 this.service.routeur.navigueUrlDef(this.utile.url.bon());
             },
-            traiteErreur: (this.service.traiteErreur).bind(this.service)
+            traiteErreur: this.service.traiteErreur
         };
         return apiRequêteAction;
     }
@@ -117,7 +117,7 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
                 this.service.routeur.navigueUrlDef(url);
 
             },
-            traiteErreur: (this.service.traiteErreur).bind(this.service)
+            traiteErreur: this.service.traiteErreur
         };
         return apiRequêteAction;
     }
@@ -225,7 +225,7 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
                             formulaire: this.superGroupe,
                             demandeApi,
                             actionSiOk,
-                            traiteErreur: (this.service.traiteErreur).bind(this.service)
+                            traiteErreur: this.service.traiteErreur
                         };
                         return apiRequêteAction;
                     };

@@ -8,7 +8,6 @@ import { AppSiteSitesComponent } from './app-site-sites.component';
 import { AppSiteContactComponent } from './app-site-contact.component';
 import { AppSiteAProposComponent } from './app-site-a-propos.component';
 import { SitesResolverService } from './app-site-sites-resolver.service';
-import { ModelesModule } from '../modeles/modeles.module';
 import { AppSiteRoutingModule } from './app-site.routing.module';
 import { MessagesModule } from '../messages/messages.module';
 import { DevenirFournisseurComponent } from './devenir-fournisseur/devenir-fournisseur.component';
@@ -21,7 +20,6 @@ import { PeupleResolverService } from './peuple-resolver.service';
         CommonModule,
         NgbModule,
         CommunModule,
-        ModelesModule,
         DispositionModule,
         MessagesModule,
         AppSiteRoutingModule,

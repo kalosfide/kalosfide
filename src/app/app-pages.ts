@@ -35,12 +35,6 @@ export class AppPages {
         title: 'Erreur',
         titre: 'Erreur du serveur'
     };
-    static pasOuvert: PageDef = {
-        urlSegment: 'pasOuvert',
-        lien: '',
-        title: 'Fermé',
-        titre: 'Site fermé'
-    };
     static administrateur: PageDef = {
         urlSegment: 'administrateur',
     };
@@ -52,7 +46,6 @@ export class AppPages {
         AppPages.interdit,
         AppPages.conflit,
         AppPages.apiErreur,
-        AppPages.pasOuvert,
         AppPages.administrateur,
     ];
 }

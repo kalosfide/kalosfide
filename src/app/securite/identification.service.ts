@@ -11,16 +11,16 @@ import { StockageService } from '../services/stockage/stockage.service';
 })
 export class IdentificationService {
 
-    private _stockageJwtIdentifiant: Stockage<JwtIdentifiant>;
-    private _stockageIdentifiant: Stockage<Identifiant>;
+    private stockageJwtIdentifiant: Stockage<JwtIdentifiant>;
+    private stockageIdentifiant: Stockage<Identifiant>;
 
     private utilisateurAChangé = new Subject<boolean>();
 
     constructor(
         stockageService: StockageService
     ) {
-        this._stockageJwtIdentifiant = stockageService.nouveau('JwtIdentifiant', { rafraichit: 'aucun'});
-        this._stockageIdentifiant = stockageService.nouveau('Identifiant', {
+        this.stockageJwtIdentifiant = stockageService.nouveau('JwtIdentifiant', { rafraichit: 'aucun'});
+        this.stockageIdentifiant = stockageService.nouveau('Identifiant', {
             quandStockChange : (ancien: Identifiant, nouveau: Identifiant) => {
                 if (!nouveau || !ancien || ancien.userId !== nouveau.userId) {
                     this.utilisateurAChangé.next(true);
@@ -32,7 +32,7 @@ export class IdentificationService {
     }
 
     public get estIdentifié(): boolean {
-        return !this._stockageIdentifiant.estNull();
+        return !this.stockageIdentifiant.estNull();
     }
 
     /**
@@ -48,30 +48,30 @@ export class IdentificationService {
     }
 
     private litJwtIdentifiant(): JwtIdentifiant {
-        return this._stockageJwtIdentifiant.litStock();
+        return this.stockageJwtIdentifiant.litStock();
     }
 
     public litIdentifiant(): Identifiant {
-        const stock = this._stockageIdentifiant.litStock();
+        const stock = this.stockageIdentifiant.litStock();
         return stock ? new Identifiant(stock) : null;
     }
 
     public fixeIdentifiants(jwtIdentifiantSérialisé: string, identifiant: Identifiant): void {
-        this._stockageJwtIdentifiant.fixeStock(JSON.parse(jwtIdentifiantSérialisé) as JwtIdentifiant);
-        this._stockageIdentifiant.fixeStock(identifiant);
+        this.stockageJwtIdentifiant.fixeStock(JSON.parse(jwtIdentifiantSérialisé) as JwtIdentifiant);
+        this.stockageIdentifiant.fixeStock(identifiant);
     }
 
     public fixeSiteIdentifiant(site: Site) {
-        const identifiant = this._stockageIdentifiant.litStock();
+        const identifiant = this.stockageIdentifiant.litStock();
         if (identifiant) {
             const index = identifiant.sites.findIndex((s: Site) => site.uid === s.uid && site.rno === s.rno);
             identifiant.sites[index] = site;
-            this._stockageIdentifiant.fixeStock(identifiant);
+            this.stockageIdentifiant.fixeStock(identifiant);
         }
     }
 
     public déconnecte(): void {
-        this._stockageJwtIdentifiant.fixeStock(undefined);
-        this._stockageIdentifiant.fixeStock(undefined);
+        this.stockageJwtIdentifiant.fixeStock(undefined);
+        this.stockageIdentifiant.fixeStock(undefined);
     }
 }

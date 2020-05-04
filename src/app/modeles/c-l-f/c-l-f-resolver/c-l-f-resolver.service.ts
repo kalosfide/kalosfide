@@ -10,6 +10,7 @@ import { KeyUidRnoNo } from 'src/app/commun/data-par-key/key-uid-rno-no/key-uid-
 import { map,  switchMap } from 'rxjs/operators';
 import { IKeyUidRnoNo } from 'src/app/commun/data-par-key/key-uid-rno-no/i-key-uid-rno-no';
 import { CLFService } from '../c-l-f.service';
+import { CLFDocs } from '../c-l-f-docs';
 
 export class CLFResolverService extends DataResolverService {
 
@@ -51,8 +52,8 @@ export class CLFResolverService extends DataResolverService {
      * Le CLFDocs retourné contient le Client du client.
      * Pas stocké.
      */
-    documentsDuClient(): Observable<CLFDoc[]> {
-        return this.service.documentsDuClient().pipe(map(clfDocs => clfDocs.créeVues()));
+    documentsDuClient(): Observable<CLFDocs> {
+        return this.service.documentsDuClient();
     }
 
     /**
@@ -61,8 +62,8 @@ export class CLFResolverService extends DataResolverService {
      * Le CLFDocs retourné contient les Client de tous les clients.
      * Pas stocké.
      */
-    documentsDuSite(): Observable<CLFDoc[]> {
-        return this.service.documentsDuSite().pipe(map(clfDocs => clfDocs.créeVues()));
+    documentsDuSite(): Observable<CLFDocs> {
+        return this.service.documentsDuSite();
     }
 
     /**

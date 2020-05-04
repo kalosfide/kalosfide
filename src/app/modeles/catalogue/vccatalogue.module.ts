@@ -9,23 +9,28 @@ import { CatalogueService } from './catalogue.service';
 import { CategoriesResolverService } from './categories-resolver.service';
 import { ProduitResolverService } from './produit-resolver.service';
 import { CategorieResolverService } from './categorie-resolver.service';
+import { ModelesModule } from '../modeles.module';
+import { VCCatalogueRoutingModule } from './v-c-catalogue-routing.module';
+import { VCModifEnCoursComponent } from './v-c-modif-en-cours.component';
+import { VCProduitsComponent } from './v-c-produits.component';
+import { VCEtatCatalogueGardeService } from './v-c-etat-catalogue-garde.service';
+import { VCEtatOuvertGardeService } from './v-c-etat-ouvert-garde.service';
 
 @NgModule({
     imports: [
         CommonModule,
         CommunModule,
         DispositionModule,
+        ModelesModule,
+        VCCatalogueRoutingModule
     ],
     declarations: [
+        VCModifEnCoursComponent,
+        VCProduitsComponent,
     ],
     providers: [
-//        CatalogueService,
-        CategorieService,
-        ProduitService,
-        CatalogueResolverService,
-        CategorieResolverService,
-        CategoriesResolverService,
-        ProduitResolverService,
+        VCEtatCatalogueGardeService,
+        VCEtatOuvertGardeService,
     ],
 })
-export class CatalogueModule { }
+export class VCCatalogueModule { }

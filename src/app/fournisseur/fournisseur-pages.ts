@@ -4,7 +4,7 @@ import { PageDef, BaseRoutes } from '../commun/page-def';
 export class FournisseurPages {
     static accueil: PageDef = SitePages.accueil;
     static catalogue: PageDef = SitePages.catalogue;
-    static commandes: PageDef = SitePages.commandes;
+
     static livraison: PageDef = {
         urlSegment: 'livraison',
         lien: 'Livraison',
@@ -35,18 +35,6 @@ export class FournisseurPages {
         title: 'Site',
         titre: 'Site',
     };
-
-
-    static pageDefs: PageDef[] = [
-        FournisseurPages.accueil,
-        FournisseurPages.catalogue,
-        FournisseurPages.commandes,
-        FournisseurPages.livraison,
-        FournisseurPages.facture,
-        FournisseurPages.documents,
-        FournisseurPages.clients,
-        FournisseurPages.site,
-    ];
 }
 
 class CFournisseurRoutes extends BaseRoutes implements ISiteRoutes {
@@ -55,12 +43,6 @@ class CFournisseurRoutes extends BaseRoutes implements ISiteRoutes {
     }
     get urlBase(): string {
         return SiteRoutes.urlRole(SiteRoutes.urlBase, SitePages.fournisseur.urlSegment);
-    }
-    page(url: string): PageDef {
-        const analyse = SiteRoutes.nomSite_typeRole_page(url);
-        if (analyse.page) {
-            return FournisseurPages.pageDefs.find(p => p.urlSegment === analyse.page);
-        }
     }
 }
 export const FournisseurRoutes = new CFournisseurRoutes();

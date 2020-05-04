@@ -24,8 +24,6 @@ import { CompteService } from 'src/app/compte/compte.service';
     styleUrls: ['../../commun/commun.scss']
 })
 export class DevenirClientComponent extends FormulaireAEtapesComponent implements OnInit {
-
-    static sPageDef: PageDef = VisiteurPages.devenirClient;
     pageDef: PageDef = VisiteurPages.devenirClient;
 
     get titre(): string {

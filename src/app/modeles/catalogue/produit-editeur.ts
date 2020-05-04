@@ -176,11 +176,6 @@ export class ProduitEditeur extends KeyUidRnoNoEditeur<Produit> {
                 this.créeNom(this.validateursNomEdite());
                 this.créeTypesMesureEtCommande();
                 break;
-            case ProduitPages.supprime:
-                this.créeCategorie(lectureSeule);
-                this.créeNom();
-                this.créeTypesMesureEtCommande(lectureSeule);
-                break;
             case ProduitPages.index:
                 this.créeCategorie(lectureSeule);
                 this.créeNom();

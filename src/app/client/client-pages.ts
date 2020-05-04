@@ -4,7 +4,12 @@ import { PageDef, BaseRoutes } from '../commun/page-def';
 export class ClientPages  {
     static accueil: PageDef = SitePages.accueil;
     static produits: PageDef = SitePages.catalogue;
-    static commandes: PageDef = SitePages.commandes;
+    static commandes: PageDef = {
+        urlSegment: 'commandes',
+        lien: 'Commandes',
+        title: 'Commande',
+        titre: 'Commande',
+    };
     static documents: PageDef = {
         urlSegment: 'documents',
         lien: 'Documents',
@@ -16,14 +21,6 @@ export class ClientPages  {
         lien: 'Contact',
         title: 'Contact',
     };
-
-    static pageDefs: PageDef[] = [
-        ClientPages.accueil,
-        ClientPages.produits,
-        ClientPages.commandes,
-        ClientPages.documents,
-        ClientPages.contact,
-    ];
 }
 
 class CClientRoutes extends BaseRoutes implements ISiteRoutes {

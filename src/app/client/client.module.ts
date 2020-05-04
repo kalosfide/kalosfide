@@ -7,7 +7,6 @@ import { DispositionModule } from '../disposition/disposition.module';
 import { ClientRoutingModule } from './client-routing.module';
 import { CAccueilComponent } from './c-accueil.component';
 import { MessagesModule } from '../messages/messages.module';
-import { ModelesModule } from '../modeles/modeles.module';
 import { CProduitsComponent } from './c-produits.component';
 import { ClientCLFService } from './client-c-l-f.service';
 
@@ -15,7 +14,6 @@ import { ClientCLFService } from './client-c-l-f.service';
     imports: [
         CommonModule,
         CommunModule,
-        ModelesModule,
         DispositionModule,
         MessagesModule,
         ClientRoutingModule,

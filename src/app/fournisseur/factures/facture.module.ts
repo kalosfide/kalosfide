@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CommunModule } from 'src/app/commun/commun.module';
-import { ModelesModule } from 'src/app/modeles/modeles.module';
 import { DispositionModule } from 'src/app/disposition/disposition.module';
 import { MessagesModule } from 'src/app/messages/messages.module';
 import { FactureRoutingModule } from './facture-routing.module';
@@ -32,7 +31,6 @@ import { FactureTitreComponent } from './facture-titre.component';
     imports: [
         CommonModule,
         CommunModule,
-        ModelesModule,
         DispositionModule,
         MessagesModule,
         FactureRoutingModule

@@ -8,6 +8,8 @@ import { IdEtatSite } from '../modeles/etat-site';
 import { SiteService } from '../modeles/site/site.service';
 import { Site } from '../modeles/site/site';
 import { take, map } from 'rxjs/operators';
+import { SiteRoutes, SitePages } from '../site/site-pages';
+import { ClientRoutes } from '../client/client-pages';
 
 class EtatSiteChange {
 
@@ -34,6 +36,9 @@ class EtatSiteChange {
 @Injectable({
     providedIn: 'root',
 })
+/**
+ * Lit dans l'Api l'état du site, fixe l'état des stockages du site et laisse passer
+ */
 export class EtatSiteChangeGarde extends EtatSiteChange implements CanActivate, CanActivateChild {
 
     constructor(
@@ -42,7 +47,7 @@ export class EtatSiteChangeGarde extends EtatSiteChange implements CanActivate, 
         super(siteService);
     }
 
-    canActivate(_route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): Observable<boolean> | boolean {
+    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | boolean {
         const site = this.siteService.navigation.litSiteEnCours();
         if (site) {
             return this.etatSiteChange(site).pipe(
@@ -68,13 +73,13 @@ export class SiteOuvertGarde extends EtatSiteChange implements CanActivate, CanA
         super(siteService);
     }
 
-    canActivate(_route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): Observable<boolean> | boolean {
+    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | boolean {
         const site = this.siteService.navigation.litSiteEnCours();
         if (site) {
             return this.etatSiteChange(site).pipe(
                 map(état => {
                     if (état !== IdEtatSite.ouvert) {
-                        this.routeur.navigue([AppPages.pasOuvert.urlSegment]);
+                        this.routeur.naviguePageDef(SitePages.pasOuvert, ClientRoutes, site.nomSite);
                         return false;
                     }
                     return true;

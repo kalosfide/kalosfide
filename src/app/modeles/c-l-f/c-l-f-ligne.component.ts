@@ -129,7 +129,7 @@ export abstract class CLFLigneComponent extends PageBaseComponent implements OnI
                 this.routeur.navigueUrlDef(this.utile.lien.url.bon());
             },
             afficheResultat,
-            traiteErreur: (this.service.traiteErreur).bind(this.service)
+            traiteErreur: this.service.traiteErreur
         };
         return apiRequêteAction;
     }
@@ -190,7 +190,7 @@ export abstract class CLFLigneComponent extends PageBaseComponent implements OnI
                 this.routeur.navigueUrlDef(this.utile.lien.url.bon());
             },
             afficheResultat,
-            traiteErreur: (this.service.traiteErreur).bind(this.service)
+            traiteErreur: this.service.traiteErreur
         };
         const boutonAnnuler = Fabrique.lien.boutonAnnuler(this.utile.url.retourLigne(this.pLigne));
         const btSupprime = Fabrique.bouton.boutonAction('supprime', 'Supprimer', apiRequêteAction, this.service);

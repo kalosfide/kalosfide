@@ -9,7 +9,6 @@ import { PageErreurComponent } from './page-erreur.component';
 import { PageInterditeComponent } from './page-interdite.component';
 import { PageIntrouvableComponent } from './page-introuvable.component';
 import { DispositionModule } from '../disposition/disposition.module';
-import { SitePasOuvertComponent } from './site-pas-ouvert.component';
 
 @NgModule({
     imports: [
@@ -23,7 +22,6 @@ import { SitePasOuvertComponent } from './site-pas-ouvert.component';
         PageIntrouvableComponent,
         PageConflitComponent,
         PageErreurComponent,
-        SitePasOuvertComponent,
     ],
     providers: [
     ],

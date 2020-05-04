@@ -5,7 +5,6 @@ import { PageDef } from 'src/app/commun/page-def';
 import { Site } from 'src/app/modeles/site/site';
 import { SiteService } from 'src/app/modeles/site/site.service';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
-import { ProduitService } from 'src/app/modeles/catalogue/produit.service';
 import { FournisseurPages } from '../fournisseur-pages';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
@@ -13,6 +12,7 @@ import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-compos
 import { PageBaseComponent } from 'src/app/disposition/page-base/page-base.component';
 import { BarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { ModeTable } from 'src/app/commun/data-par-key/condition-table';
+import { ClientService } from 'src/app/modeles/client/client.service';
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
@@ -27,7 +27,7 @@ export class ClientComponent extends PageBaseComponent implements OnInit, OnDest
 
     constructor(
         protected route: ActivatedRoute,
-        protected service: ProduitService,
+        protected service: ClientService,
         protected siteService: SiteService,
     ) {
         super();

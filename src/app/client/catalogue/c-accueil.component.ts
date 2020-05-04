@@ -1,16 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-import { NavigationService } from '../services/navigation.service';
-import { PageDef } from '../commun/page-def';
-import { ClientPages } from './client-pages';
-import { BarreTitre } from '../disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
-import { Fabrique } from '../disposition/fabrique/fabrique';
-import { KfComposant } from '../commun/kf-composants/kf-composant/kf-composant';
-import { KfEtiquette } from '../commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
-import { KfTypeDeBaliseHTML } from '../commun/kf-composants/kf-composants-types';
-import { PageBaseComponent } from '../disposition/page-base/page-base.component';
-import { Site } from '../modeles/site/site';
-import { KfSuperGroupe } from '../commun/kf-composants/kf-groupe/kf-super-groupe';
-import { ActivatedRoute } from '@angular/router';
+import { NavigationService } from '../../services/navigation.service';
+import { PageDef } from '../../commun/page-def';
+import { ClientPages } from '../client-pages';
+import { BarreTitre } from '../../disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
+import { Fabrique } from '../../disposition/fabrique/fabrique';
+import { KfComposant } from '../../commun/kf-composants/kf-composant/kf-composant';
+import { KfEtiquette } from '../../commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
+import { KfTypeDeBaliseHTML } from '../../commun/kf-composants/kf-composants-types';
+import { PageBaseComponent } from '../../disposition/page-base/page-base.component';
+import { Site } from '../../modeles/site/site';
+import { KfSuperGroupe } from '../../commun/kf-composants/kf-groupe/kf-super-groupe';
 
 @Component({
     templateUrl: '../disposition/page-base/page-base.html',
@@ -28,7 +27,6 @@ export class CAccueilComponent extends PageBaseComponent implements OnInit {
     }
 
     constructor(
-        protected route: ActivatedRoute,
         protected service: NavigationService,
     ) {
         super();
@@ -54,7 +52,7 @@ export class CAccueilComponent extends PageBaseComponent implements OnInit {
         etiquette = Fabrique.ajouteEtiquetteP(infos);
         Fabrique.ajouteTexte(etiquette,
             `Ceci est `,
-            { texte: 'à faire', balise: KfTypeDeBaliseHTML.b },
+            { texte: 'à faire', balise: KfTypeDeBaliseHTML.b},
             '.'
         );
 
@@ -74,15 +72,11 @@ export class CAccueilComponent extends PageBaseComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.subscriptions.push(this.route.data.subscribe(
-            () => {
-                this.site = this.service.litSiteEnCours();
-                this.niveauTitre = 0;
-                this.créeTitrePage();
-                this.créeContenus();
-                this.rafraichit();
-            })
-        );
+        this.site = this.service.litSiteEnCours();
+        this.niveauTitre = 0;
+        this.créeTitrePage();
+        this.créeContenus();
+        this.rafraichit();
     }
 
 }

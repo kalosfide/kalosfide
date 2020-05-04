@@ -24,18 +24,12 @@ const routes: Routes = [
         component: CAccueilComponent,
         canActivate: [
             EtatSiteChangeGarde,
-        ],
+        ]
     },
     {
         path: ClientPages.produits.urlSegment,
         data: { pageDef: ClientPages.produits },
-        component: CProduitsComponent,
-        canActivate: [
-            SiteOuvertGarde,
-        ],
-        resolve: {
-            catalogue: CatalogueResolverService,
-        },
+        loadChildren: () => import('src/app/modeles/catalogue/vccatalogue.module').then(mod => mod.VCCatalogueModule),
     },
     {
         path: ClientPages.commandes.urlSegment,

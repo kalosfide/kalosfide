@@ -29,12 +29,3 @@ export class ProduitResolverService extends DataKeyResolverService<Produit> impl
     }
 
 }
-
-@Injectable()
-export class ProduitRésoluResolverService extends DataResolverService implements Resolve<Produit> {
-
-    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<never> | Observable<Produit> {
-        return this.résolu(route, 'produit');
-    }
-
-}

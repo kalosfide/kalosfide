@@ -12,6 +12,7 @@ import { KfLienComponent } from './kf-composants/kf-elements/kf-lien/kf-lien.com
 import { KfGroupeComponent } from './kf-composants/kf-groupe/kf-groupe.component';
 import { KfBoutonComponent } from './kf-composants/kf-elements/kf-bouton/kf-bouton.component';
 import { KfEtiquetteComponent } from './kf-composants/kf-elements/kf-etiquette/kf-etiquette.component';
+import { QuicklinkModule } from 'ngx-quicklink';
 
 @NgModule({
     imports: [
@@ -19,6 +20,7 @@ import { KfEtiquetteComponent } from './kf-composants/kf-elements/kf-etiquette/k
         RouterModule,
         NgbModule,
         KfComposantsModule,
+        QuicklinkModule,
     ],
     declarations: [
         PeutQuitterComponent,
@@ -37,6 +39,7 @@ import { KfEtiquetteComponent } from './kf-composants/kf-elements/kf-etiquette/k
         KfBoutonComponent,
         KfEtiquetteComponent,
         KfLienComponent,
+        QuicklinkModule
     ]
 })
 export class CommunModule { }

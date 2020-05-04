@@ -3,7 +3,7 @@ import { AttenteService } from './attente.service';
 import { RouteurService } from './routeur.service';
 import { Observable, of } from 'rxjs';
 import { ApiResult } from '../commun/api-results/api-result';
-import { ResultatAction, IResultatAffichable } from '../disposition/affiche-resultat/resultat-affichable';
+import { ResultatAction } from '../disposition/affiche-resultat/resultat-affichable';
 import { ApiResult400BadRequest } from '../commun/api-results/api-result-400-bad-request';
 import { ApiResultErreur } from '../commun/api-results/api-result-erreur';
 import { map, delay, tap, catchError } from 'rxjs/operators';
@@ -21,7 +21,6 @@ import { ApiRequêteAction } from './api-requete-action';
 import { NavigationService } from './navigation.service';
 import { ApiErreur400 } from '../commun/api-results/api-erreur-400';
 import { KfNgbModalService } from '../commun/kf-composants/kf-ngb-modal/kf-ngb-modal.service';
-import { ApiResult423Locked } from '../commun/api-results/api-result-423-locked-content';
 
 @Injectable()
 export class ApiRequêteService {
@@ -56,7 +55,7 @@ export class ApiRequêteService {
                 break;
             case 401:
                 apiResult = new ApiResult401Unauthorized();
-                /// IMPORTANT
+                /// IMPORTANT efface les stocks d'identification
                 this.pIdentification.déconnecte();
                 break;
             case 403:

@@ -10,8 +10,6 @@ import { AppPages } from 'src/app/app-pages';
     styleUrls: ['../commun/commun.scss']
 })
 export class PageErreurComponent extends PageMessageComponent implements OnInit, OnDestroy {
-
-    static sPageDef: PageDef = AppPages.apiErreur;
     pageDef: PageDef = AppPages.apiErreur;
 
     messages: string[];
@@ -23,6 +21,7 @@ export class PageErreurComponent extends PageMessageComponent implements OnInit,
     }
 
     ngOnInit() {
+        this.créeTitrePage();
         this.subscriptions.push(this.route.paramMap.subscribe((paramMap: ParamMap) => {
             this.messages = [
                 'Erreur ' + paramMap.get('statusCode'),

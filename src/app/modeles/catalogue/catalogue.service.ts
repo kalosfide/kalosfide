@@ -46,9 +46,6 @@ export class CatalogueService extends DataService {
         return stock;
     }
 
-    /**
-     * dans actuel
-     */
     litStock(): Catalogue {
         const stock = this.stockage.litStock();
         if (!stock) {
@@ -56,9 +53,7 @@ export class CatalogueService extends DataService {
         }
         return Catalogue.nouveau(stock);
     }
-    /**
-     * dans actuel
-     */
+
     fixeStock(stock: Catalogue) {
         this.stockage.fixeStock(stock);
     }

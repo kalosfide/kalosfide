@@ -46,6 +46,6 @@ export abstract class CommandeComponent extends CLFDocComponent implements OnIni
     }
 
     protected créeColonneDefs(): IKfVueTableColonneDef<CLFLigne>[] {
-        return this.utile.colonne.ligne.defsClient(this.quandLigneSupprimée.bind(this), (this.service.traiteErreur).bind(this.service));
+        return this.utile.colonne.ligne.defsClient(this.quandLigneSupprimée.bind(this), this.service.traiteErreur);
     }
 }

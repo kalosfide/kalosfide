@@ -20,16 +20,3 @@ export class CatalogueResolverService implements Resolve<Catalogue> {
     }
 
 }
-
-@Injectable()
-export class CatalogueRésoluResolverService extends DataResolverService implements Resolve<Catalogue> {
-
-    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Catalogue | Observable<Catalogue> {
-        const résolu: Catalogue = this.résolu(route, 'catalogue');
-        if (résolu) {
-            return résolu;
-        } else {
-            throw new Error('CatalogueRésoluResolverService: CatalogueResolverService doit avoir déjà résolu le catalogue');
-        }
-    }
-}

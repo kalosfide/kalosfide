@@ -8,8 +8,6 @@ import { SiteContactComponent } from '../site/site-contact.component';
     templateUrl: '../disposition/page-base/page-base.html', styleUrls: ['../commun/commun.scss']
 })
 export class VContactComponent extends SiteContactComponent implements OnInit {
-
-    static sPageDef: PageDef = VisiteurPages.contact;
     pageDef: PageDef = VisiteurPages.contact;
 
     constructor(

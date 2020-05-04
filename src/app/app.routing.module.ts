@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes, PreloadAllModules } from '@angular/router';
-
+import { QuicklinkModule, QuicklinkStrategy } from 'ngx-quicklink';
 import { AppPages, AppRoutes } from './app-pages';
 import { IdentifiantResolverService } from './securite/identifiant-resolver.service';
 
@@ -36,10 +36,11 @@ const routes: Routes = [
 @NgModule({
 
     imports: [
+        QuicklinkModule,
         RouterModule.forRoot(
             routes,
             {
-                preloadingStrategy: PreloadAllModules,
+                preloadingStrategy: QuicklinkStrategy,
 //                enableTracing: true // <-- debugging purposes only
             }
         )

@@ -9,9 +9,6 @@ import { CategoriesResolverService } from 'src/app/modeles/catalogue/categories-
 import { ProduitPages } from './produit-pages';
 import { CatalogueResolverService } from 'src/app/modeles/catalogue/catalogue-resolver.service';
 import { ProduitSitePasCatalogueGarde } from './produit-site-pas-catalogue-garde';
-import { CatalogueComponent } from '../catalogue.component';
-import { ProduitSupprimeComponent } from './produit-supprime.component';
-import { FournisseurPages } from '../../fournisseur-pages';
 
 const routes: Routes = [
     {
@@ -53,18 +50,6 @@ const routes: Routes = [
                     estEnfantPathVide: undefined
                 },
                 component: ProduitEditeComponent,
-                canActivate: [
-                    ProduitSitePasCatalogueGarde,
-                ],
-                resolve: {
-                    valeur: ProduitResolverService,
-                    categories: CategoriesResolverService,
-                }
-            },
-            {
-                path: ProduitPages.supprime.urlSegment + '/:no',
-                data: { pageDef: ProduitPages.supprime },
-                component: ProduitSupprimeComponent,
                 canActivate: [
                     ProduitSitePasCatalogueGarde,
                 ],

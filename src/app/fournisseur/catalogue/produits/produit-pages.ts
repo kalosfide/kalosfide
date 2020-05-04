@@ -21,12 +21,6 @@ export class ProduitPages {
         title: 'Modifier',
         titre: 'Modifier un produit',
     };
-    static supprime: PageDef = {
-        urlSegment: 'supprime',
-        lien: 'Supprimer',
-        title: 'Produits - Supprimer',
-        titre: 'Supprimer un produit',
-    };
 }
 
 export const ProduitRoutes = iSiteRoutePlusSegments(CatalogueRoutes, [CataloguePages.produits.urlSegment]);

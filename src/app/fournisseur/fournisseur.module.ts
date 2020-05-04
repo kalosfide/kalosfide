@@ -8,7 +8,6 @@ import { FournisseurRoutingModule } from './fournisseur-routing.module';
 import { FournisseurService } from './fournisseur.service';
 import { FAccueilComponent } from './f-accueil.component';
 import { MessagesModule } from '../messages/messages.module';
-import { ModelesModule } from '../modeles/modeles.module';
 import { FSiteModule } from './f-site/f-site.module';
 import { FournisseurCLFService } from './fournisseur-c-l-f-.service';
 
@@ -16,7 +15,6 @@ import { FournisseurCLFService } from './fournisseur-c-l-f-.service';
     imports: [
         CommonModule,
         CommunModule,
-        ModelesModule,
         DispositionModule,
         MessagesModule,
         FSiteModule,

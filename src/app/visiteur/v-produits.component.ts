@@ -9,16 +9,11 @@ import { VisiteurPages } from './visiteur-pages';
     templateUrl: '../disposition/page-base/page-base.html', styleUrls: ['../commun/commun.scss']
 })
 export class VProduitsComponent extends ProduitIndexBaseComponent implements OnInit, OnDestroy {
-
-    static sPageDef: PageDef = VisiteurPages.produits;
     pageDef: PageDef = VisiteurPages.produits;
 
     get titre(): string {
         return this.pageDef.title;
     }
-
-    dataPages = null;
-    dataRoutes = null;
 
     constructor(
         protected route: ActivatedRoute,

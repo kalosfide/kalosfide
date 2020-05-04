@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute, RouterStateSnapshot } from '@angular/router';
 import { IdentificationService } from '../securite/identification.service';
 import { NavigationService } from './navigation.service';
 import { Site } from '../modeles/site/site';
@@ -90,6 +90,33 @@ export class RouteurService {
             nomSite,
         };
         this.router.navigate([this.urlDeDef(urlDef)]);
+    }
+
+    navigueRelatif(state: RouterStateSnapshot, vers: string) {
+        const segments = state.url.split('/');
+        const cibles = vers.split('/');
+        let cible = cibles.shift();
+        if (cible === '.') {
+            cible = cibles.shift();
+        } else {
+            if (cible === '..') {
+                while (cible === '..') {
+                    segments.pop();
+                    cible = cibles.shift();
+                }
+            } else {
+                throw new Error(`Un chemin relatif doit commencer par un './' ou un ou plusieurs '../'`);
+            }
+        }
+        while (cible) {
+            if (cible === '.' || cible === '..') {
+                    throw new Error(`'./' et '../' ne peuvent figurer qu'au début d'un chemin relatif`);
+            }
+            segments.push(cible);
+            cible = cibles.shift();
+        }
+        const url = segments.join('/');
+        this.router.navigateByUrl(url);
     }
 
     navigueUrlDef(urlDef: IUrlDef) {

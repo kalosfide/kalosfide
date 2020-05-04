@@ -35,7 +35,7 @@ export class NavigationService implements OnDestroy {
 
     constructor(
         private router: Router,
-        private activatedRoute: ActivatedRoute,
+        public activatedRoute: ActivatedRoute,
         stockageService: StockageService,
         private pAttenteService: AttenteService,
     ) {

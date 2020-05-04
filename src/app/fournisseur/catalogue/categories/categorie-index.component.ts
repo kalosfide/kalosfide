@@ -27,8 +27,6 @@ import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien
     styleUrls: ['../../../commun/commun.scss']
 })
 export class CategorieIndexComponent extends KeyUidRnoNoIndexComponent<Categorie> implements OnInit {
-
-    static sPageDef: PageDef = CategoriePages.index;
     pageDef: PageDef = CategoriePages.index;
 
     get titre(): string {

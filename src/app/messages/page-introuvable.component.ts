@@ -8,8 +8,6 @@ import { AppPages } from 'src/app/app-pages';
     styleUrls: ['../commun/commun.scss']
 })
 export class PageIntrouvableComponent extends PageMessageComponent {
-
-    static sPageDef: PageDef = AppPages.introuvable;
     pageDef: PageDef = AppPages.introuvable;
 
     messages = ['Les ressource demandées sont introuvables.'];

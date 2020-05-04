@@ -8,8 +8,6 @@ import { AppPages } from 'src/app/app-pages';
     styleUrls: ['../commun/commun.scss']
 })
 export class PageInterditeComponent extends PageMessageComponent {
-
-    static sPageDef: PageDef = AppPages.interdit;
     pageDef: PageDef = AppPages.interdit;
 
     messages: ['L\'accès à ces ressources est réservé.'];

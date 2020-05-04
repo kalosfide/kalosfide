@@ -5,8 +5,8 @@ import { SiteResolverService } from './site-resolver.service';
 import { VisiteurRacineComponent } from './visiteur-racine-component';
 import { FournisseurRacineComponent } from './fournisseur-racine.component';
 import { ClientRacineComponent } from './client-racine.component';
-import { FournisseurGarde } from '../securite/fournisseur-garde';
-import { ClientGarde } from '../securite/client-garde';
+import { FournisseurGarde } from './fournisseur-garde';
+import { ClientGarde } from './client-garde';
 
 const routes: Routes = [
     {

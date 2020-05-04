@@ -8,7 +8,6 @@ import { DispositionModule } from '../disposition/disposition.module';
 import { VisiteurRoutingModule } from './visiteur-routing.module';
 import { VAProposComponent } from './v-apropos.component';
 import { DevenirClientComponent } from './devenir-client/devenir-client.component';
-import { VProduitsComponent } from './v-produits.component';
 import { CompteModule } from '../compte/compte.module';
 import { MessagesModule } from '../messages/messages.module';
 
@@ -23,7 +22,6 @@ import { MessagesModule } from '../messages/messages.module';
     ],
     declarations: [
         VAccueilComponent,
-        VProduitsComponent,
         VContactComponent,
         VAProposComponent,
         DevenirClientComponent,

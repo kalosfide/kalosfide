@@ -8,8 +8,6 @@ import { AppPages } from 'src/app/app-pages';
     styleUrls: ['../commun/commun.scss']
 })
 export class PageConflitComponent extends PageMessageComponent {
-
-    static sPageDef: PageDef = AppPages.conflit;
     pageDef: PageDef = AppPages.conflit;
 
     messages = ['Les ressource demandées sont verrouillées car en cours d\'utilisation.'];

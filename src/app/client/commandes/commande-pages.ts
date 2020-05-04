@@ -1,5 +1,5 @@
 import { SitePages, iSiteRoutePlusSegments } from 'src/app/site/site-pages';
-import { ClientRoutes } from 'src/app/client/client-pages';
+import { ClientRoutes, ClientPages } from 'src/app/client/client-pages';
 import { PageDef } from 'src/app/commun/page-def';
 import { CLFPages } from 'src/app/modeles/c-l-f/c-l-f-pages';
 
@@ -104,4 +104,4 @@ export class CommandePages {
     };
 }
 
-export const CommandeRoutes = iSiteRoutePlusSegments(ClientRoutes, [SitePages.commandes.urlSegment]);
+export const CommandeRoutes = iSiteRoutePlusSegments(ClientRoutes, [ClientPages.commandes.urlSegment]);

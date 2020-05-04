@@ -2,7 +2,6 @@ import { ProduitUtile } from './produit-utile';
 import { DataUtileLien } from 'src/app/commun/data-par-key/data-utile-lien';
 import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
 import { Produit } from './produit';
-import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 
 export class ProduitUtileLien extends DataUtileLien {
     constructor(utile: ProduitUtile) {
@@ -24,9 +23,6 @@ export class ProduitUtileLien extends DataUtileLien {
     }
     edite(t: Produit): KfLien {
         return this.utile.lienKey.edite(t);
-    }
-    supprime(t: Produit): KfLien {
-        return this.utile.lienKey.supprime(t);
     }
 
 }

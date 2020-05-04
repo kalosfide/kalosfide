@@ -18,6 +18,7 @@ import { ClientService } from 'src/app/modeles/client/client.service';
 import { ApiErreur400Traite } from 'src/app/commun/api-results/api-erreur-400';
 import { CLFDoc } from '../modeles/c-l-f/c-l-f-doc';
 import { IdEtatSite } from '../modeles/etat-site';
+import { DATE_EST_NULLE } from '../modeles/date-nulle';
 
 @Injectable({
     providedIn: 'root'
@@ -90,72 +91,6 @@ export class ClientCLFService extends CLFService {
         return this.pStockChargéSubject.asObservable();
     }
 
-    private _litContexte$(keyClient: KeyUidRno): Observable<CLFDocs> {
-        return this.litClfDocs(ApiController.commande, ApiAction.commande.contexte, KeyUidRno.créeParams(keyClient));
-    }
-
-    private _litDocuments$(site: Site, keyClient: IKeyUidRno): Observable<CLFDocs> {
-        let clfDocs$ = this.litClfDocs(ApiController.commande, ApiAction.commande.encours, KeyUidRno.créeParams(keyClient)).pipe(
-            tap(clfDocs => {
-                clfDocs.type = 'commande';
-                this.fixeSiteEtIdentifiant(clfDocs, site, keyClient);
-            }));
-        clfDocs$ = this._fixeClient$(clfDocs$, keyClient, true);
-        return this._fixeCatalogue$(clfDocs$);
-    }
-
-    /**
-     * Vérifie l'état du site et la date du catalogue
-     * @param mêmeSiPasChangé si présent, le stock est rechargé même s'il semble à jour
-     */
-    chargeEtVérifie(mêmeSiPasChangé?: 'mêmeSiPasChangé'): Observable<{
-        stock: CLFDocs,
-        changé: boolean,
-        siteChangé?: Site
-    }> {
-        const site = this.navigation.litSiteEnCours();
-        const identifiant = this.identification.litIdentifiant();
-        const keyIdentifiant = {
-            uid: identifiant.uid,
-            rno: identifiant.roleNo(site)
-        };
-
-        return this._litContexte$(keyIdentifiant).pipe(
-            concatMap((contexte: CLFDocs) => {
-                const stock = this.litStock();
-                let changé: boolean;
-                let siteChangé: Site;
-                if (site.etat !== contexte.site.etat) {
-                    site.etat = contexte.site.etat;
-                    changé = true;
-                    siteChangé = site;
-                } else {
-                    changé = mêmeSiPasChangé !== undefined
-                        || !stock
-                        || stock.type !== 'commande'
-                        || !stock.catalogue
-                        || stock.catalogue.date !== contexte.catalogue.date; // date du catalogue changé
-                }
-
-                if (changé) {
-                    return this._litDocuments$(site, keyIdentifiant).pipe(
-                        mergeMap(documents => {
-                            return of({ stock: documents, changé: true, siteChangé });
-                        })
-
-                    );
-                }
-                return of({ stock, changé: false, siteChangé });
-            }));
-    }
-
-    metAJourSitesStockés(site: Site) {
-        if (site) {
-            this.navigation.fixeSiteEnCours(site);
-            this.identification.fixeSiteIdentifiant(site);
-        }
-    }
-
     /**
      * Charge le contexte.
      * Si site pas ouvert ou catalogue périmé, stocke le contexte et redirige vers ./contexte.
@@ -168,30 +103,49 @@ export class ClientCLFService extends CLFService {
             uid: identifiant.uid,
             rno: identifiant.roleNo(site)
         };
-
-        return this._litContexte$(keyIdentifiant).pipe(
-            concatMap((contexte: CLFDocs) => {
-                if (site.etat !== contexte.site.etat) {
-                    site.etat = contexte.site.etat;
-                    this.navigation.fixeSiteEnCours(site);
-                    this.identification.fixeSiteIdentifiant(site);
+        const stock = this.litStock();
+        const params = KeyUidRno.créeParams(keyIdentifiant);
+        if (stock && !stock.estContexte) {
+            params.dateCatalogue = '' + stock.catalogue.date;
+        }
+        // si le stock existe avec un catalogue à jour et si le site est toujours ouvert, retourne un contexte ayant une date nulle
+        return this.litClfDocs(ApiController.commande, ApiAction.commande.encours, params).pipe(
+            map(lu => {
+                const cflDocs = new CLFDocs();
+                cflDocs.copie(lu);
+                if (cflDocs.estContexte) {
+                    if (site.etat !== cflDocs.site.etat) {
+                        site.etat = cflDocs.site.etat;
+                        this.navigation.fixeSiteEnCours(site);
+                        this.identification.fixeSiteIdentifiant(site);
+                    }
+                    if (cflDocs.site.etat !== IdEtatSite.ouvert || !DATE_EST_NULLE(cflDocs.catalogue.date)) {
+                        this.fixeStock(cflDocs);
+                        return { contexte: cflDocs, clfDocs: undefined };
+                    } else {
+                        // le stock est toujours à jour
+                        return { contexte: undefined, clfDocs: cflDocs };
+                    }
+                } else {
+                    // le stock n'existait pas ou était un contexte ou avait un catalogue devenu obsolete
+                    return { contexte: cflDocs, clfDocs: cflDocs };
                 }
-                if (contexte.site.etat !== IdEtatSite.ouvert) {
-                    this.fixeStock(contexte);
-                    return of(false);
-                }
-                const stock = this.litStock();
-                if (stock && !stock.estContexte && stock.catalogue.date !== contexte.catalogue.date) {
-                    this.fixeStock(contexte);
-                    return of(false);
-                }
-                if (stock && !stock.estContexte) {
+            }),
+            mergeMap(result => {
+                if (!result.contexte) {
                     return of(true);
                 }
-                return this._litDocuments$(site, keyIdentifiant).pipe(
-                    map((clfDocs: CLFDocs) => {
-                        this.fixeStock(clfDocs);
-                        return !clfDocs.estContexte;
+                if (!result.clfDocs) {
+                    this.fixeStock(result.contexte);
+                    this.routeur.navigueUrlDef(this.utile.url.contexte());
+                    return of(false);
+                }
+                result.clfDocs.type = 'commande';
+                this.fixeSiteEtIdentifiant(result.clfDocs, site, keyIdentifiant);
+                return this._fixeCatalogue$(this._fixeClient$(of(result.clfDocs), keyIdentifiant, true)).pipe(
+                    map(cLFDocs => {
+                        this.fixeStock(cLFDocs);
+                        return true;
                     })
                 );
             })
@@ -210,10 +164,17 @@ export class ClientCLFService extends CLFService {
      * Le stock existe car gardePageBon garde aussi envoi
      * retourne vrai si le document est prêt à l'envoi
      */
-    gardeEnvoi(): boolean {
-        const stock = this.litStock();
-        const apiDoc = stock.documents[0];
-        return !apiDoc.date && apiDoc.lignes.length > 0;
+    gardeEnvoi(): Observable<boolean> {
+        return this.gardePageBon().pipe(
+            map(gardé => {
+                if (gardé) {
+                    const stock = this.litStock();
+                    const apiDoc = stock.documents[0];
+                    gardé = !apiDoc.date && apiDoc.lignes.length > 0;
+                }
+                return gardé;
+            })
+        );
     }
 
     /**
@@ -260,63 +221,6 @@ export class ClientCLFService extends CLFService {
         const urlDef = this.utile.url.contexte();
         urlDef.params = [{ nom: 'err', valeur: '409' }];
         this.routeur.navigueUrlDef(urlDef);
-    }
-
-    private _vérifieStock$(contexte: CLFDocs, site: Site, keyIdentifiant: IKeyUidRno): Observable<{
-        stock: CLFDocs,
-        changé: boolean
-    }> {
-        const stock = this.litStock();
-        let changé: boolean;
-        if (site.etat !== contexte.site.etat) {
-            site.etat = contexte.site.etat;
-            this.navigation.fixeSiteEnCours(site);
-            this.identification.fixeSiteIdentifiant(site);
-            changé = true;
-        } else {
-            changé = !stock
-                || !KeyUidRno.compareKey(stock.site, site) // site changé
-                || !KeyUidRno.compareKey(stock.keyIdentifiant, keyIdentifiant) // identifiant changé
-                || stock.catalogue.date !== contexte.catalogue.date; // date du catalogue changé
-        }
-
-        if (changé) {
-            return this._litDocuments$(site, keyIdentifiant).pipe(
-                mergeMap(documents => {
-                    return of({ stock: documents, changé: true });
-                })
-
-            );
-        }
-        return of({ stock, changé: false });
-    }
-
-    /**
-     * appelé par les resolvers de accueil et bon
-     */
-    stock$(): Observable<CLFDocs> {
-        const site = this.navigation.litSiteEnCours();
-        const identifiant = this.identification.litIdentifiant();
-        const keyIdentifiant = {
-            uid: identifiant.uid,
-            rno: identifiant.roleNo(site)
-        };
-
-        const contexte$ = this._litContexte$(keyIdentifiant);
-        const stockChangé$ = contexte$.pipe(
-            concatMap((contexte: CLFDocs) => this._vérifieStock$(contexte, site, keyIdentifiant))
-        );
-        const stock$ = stockChangé$.pipe(
-            switchMap(stockChangé => {
-                const stock = stockChangé.stock;
-                if (stockChangé.changé) {
-                    this.pStockage.fixeStock(stock);
-                }
-                return of(stock);
-            })
-        );
-
-        return stock$;
     }
 
     /// FIN SECTION Observables du stock

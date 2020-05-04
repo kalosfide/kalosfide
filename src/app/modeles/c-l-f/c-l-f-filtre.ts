@@ -43,7 +43,9 @@ export class CLFFiltre extends KeyUidRno {
         const params: { [key: string]: string } = {};
         params.uid = this.uid;
         params.rno = '' + this.rno;
-        params.type = apiType(this.type);
+        if (this.type) {
+            params.type = apiType(this.type);
+        }
         if (this.dateMin) {
             params.dateMin = this.dateMin.toJSON();
         }

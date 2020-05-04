@@ -2,6 +2,7 @@ import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angul
 import { Injectable } from '@angular/core';
 import { ClientCLFService } from '../client-c-l-f.service';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Injectable()
 /**
@@ -15,11 +16,14 @@ export class CommandeEnvoiGardeService implements CanActivate {
     }
 
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | boolean {
-        const gardé = this.service.gardeEnvoi();
-        if (!gardé) {
-            this.service.utile.url.fixeRouteCommande();
-            this.service.routeur.navigueUrlDef(this.service.utile.url.lignes());
-        }
-        return gardé;
+        return this.service.gardeEnvoi().pipe(
+            map(gardé => {
+                if (!gardé) {
+                    this.service.utile.url.fixeRouteCommande();
+                    this.service.routeur.navigueUrlDef(this.service.utile.url.lignes());
+                }
+                return gardé;
+            })
+        );
     }
 }

@@ -14,12 +14,10 @@ import { DispositionModule } from './disposition/disposition.module';
 import { MotDePasseService } from './securite/mot-de-passe/mot-de-passe.service';
 import { httpInterceptorProviders } from './services/http-interceptor-provider';
 import { NavigationService } from './services/navigation.service';
-import { FournisseurGarde } from './securite/fournisseur-garde';
 import { MotDePasseResolverService } from './securite/mot-de-passe/mot-de-passe-resolver.service';
-import { ModelesModule } from './modeles/modeles.module';
 import { MessagesModule } from './messages/messages.module';
 import { AlerteService } from './disposition/alerte/alerte-service';
-import { ClientGarde } from './securite/client-garde';
+import { ClientGarde } from './site/client-garde';
 import { IdentifiantResolverService } from './securite/identifiant-resolver.service';
 import { CatalogueService } from './modeles/catalogue/catalogue.service';
 import { ApiRequêteService } from './services/api-requete.service';
@@ -38,7 +36,6 @@ import { StockageService } from './services/stockage/stockage.service';
         CommunModule,
         DispositionModule,
         MessagesModule,
-        ModelesModule,
         AppRoutingModule,
     ],
     declarations: [
@@ -60,8 +57,6 @@ import { StockageService } from './services/stockage/stockage.service';
         MotDePasseResolverService,
         IdentifiantResolverService,
 
-        FournisseurGarde,
-        ClientGarde,
         EtatSiteChangeGarde,
         SiteOuvertGarde,
 
