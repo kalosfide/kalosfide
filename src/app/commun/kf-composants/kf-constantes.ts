@@ -52,4 +52,4 @@ class KfComposantDocumentContexte {
 
 
 }
-export const KfDocumentContexte = new KfComposantDocumentContexte;
+export const KfDocumentContexte = new KfComposantDocumentContexte();

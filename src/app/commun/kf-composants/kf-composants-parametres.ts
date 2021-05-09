@@ -83,7 +83,7 @@ export class KfFichierParDefaut {
     nom = 'fichier';
     extension = 'kf';
     texteVide = 'Choisissez un fichier...';
-    texteIncorrect = 'Le fichier n\'est pas valide';
+    texteIncorrect = `Le fichier n'est pas valide`;
     texteVérification = 'Vérification en cours';
     texteValide = 'valide';
 }

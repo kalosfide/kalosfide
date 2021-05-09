@@ -63,16 +63,19 @@ export class FabriqueEtatSite extends FabriqueMembre {
     intro = `Le site a trois états qui définissent les actions possibles du fournisseur et des clients qui ont un compte de connexion.`;
 
     get vueTableDef(): IKfVueTableDef<EtatSite> {
+        const crée = (état: EtatSite) => {
+                        const groupe = new KfGroupe('');
+                        état.description().forEach(d => groupe.ajoute(d));
+                        return groupe;
+                    };
         const vueTableDef: IKfVueTableDef<EtatSite> = {
             colonnesDef: [
                 { nom: 'nom', enTeteDef: { titreDef: 'Etat' }, créeContenu: (état: EtatSite) => état.nom, },
                 { nom: 'titre', enTeteDef: { titreDef: 'Description' }, créeContenu: (état: EtatSite) => état.titre },
                 {
-                    nom: 'action', enTeteDef: { titreDef: 'Remarques' }, créeContenu: (état: EtatSite) => {
-                        const groupe = new KfGroupe('');
-                        état.description().forEach(d => groupe.ajoute(d));
-                        return groupe;
-                    }
+                    nom: 'action',
+                    enTeteDef: { titreDef: 'Remarques' },
+                    créeContenu: crée
                 }
             ]
         };

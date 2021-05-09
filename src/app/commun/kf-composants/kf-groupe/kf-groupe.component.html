@@ -35,7 +35,8 @@
 
     <ng-template #formulaire>
         <!--" -->
-        <form #htmlElement [attr.id]="groupe.nom" [formGroup]="formGroup" novalidate [ngClass]="groupe.classe" [ngStyle]="groupe.style">
+        <form #htmlElement [attr.id]="groupe.nom" [formGroup]="formGroup" novalidate [ngClass]="groupe.classe"
+            [ngStyle]="groupe.style">
             <ng-container *ngTemplateOutlet="sousDiv"></ng-container>
         </form>
     </ng-template>
@@ -59,7 +60,7 @@
                     <app-kf-div *ngIf="!contenu.nePasAfficher" [div]="contenu.div"></app-kf-div>
                 </ng-container>
                 <ng-template #divTemplate>
-                    <app-kf-composant [attr.nom]="contenu.nom" [composant]="contenu" (output)="transmet($event)">
+                    <app-kf-composant [attr.nom]="contenu.nom" [composant]="contenu">
                     </app-kf-composant>
                 </ng-template>
 
@@ -73,17 +74,7 @@
         <ng-container *ngFor="let ligne of groupe.divTable.lignes">
             <div [ngClass]="ligne.classe" [ngStyle]="ligne.style">
                 <ng-container *ngFor="let colonne of ligne.colonnes">
-                    <div [ngClass]="colonne.classe" [ngStyle]="colonne.style">
-                        <ng-container *ngIf="colonne.texte; else composantTemplate">
-                            {{ colonne.texte }}
-                        </ng-container>
-                        <ng-template #composantTemplate>
-                            <app-kf-composant [attr.nom]="colonne.composant.nom" [composant]="colonne.composant"
-                                (output)="transmet($event)">
-                            </app-kf-composant>
-
-                        </ng-template>
-                    </div>
+                    <ng-container *ngTemplateOutlet="divColonne; context: { colonne1: colonne }"></ng-container>
                 </ng-container>
             </div>
         </ng-container>
@@ -93,31 +84,21 @@
 <ng-template #divLigne>
     <div [ngClass]="groupe.divLigne.classe" [ngStyle]="groupe.divLigne.style">
         <ng-container *ngFor="let colonne of groupe.divLigne.colonnes">
-            <div [ngClass]="colonne.classe" [ngStyle]="colonne.style">
-                <ng-container *ngIf="colonne.texte; else composantTemplate">
-                    {{ colonne.texte }}
-                </ng-container>
-                <ng-template #composantTemplate>
-                    <app-kf-composant [attr.nom]="colonne.composant.nom" [composant]="colonne.composant"
-                        (output)="transmet($event)">
-                    </app-kf-composant>
-
-                </ng-template>
-            </div>
+            <ng-container *ngTemplateOutlet="divColonne; context: { colonne1: colonne }"></ng-container>
         </ng-container>
     </div>
 </ng-template>
 
-
-<!--
- 
-<ng-template #contenus>
-    <ng-container *ngFor="let contenu of groupe.contenus; index as i">
-        <app-kf-composant [attr.nom]="contenu.nom" [composant]="contenu" (output)="transmet($event)">
-        </app-kf-composant>
-    </ng-container>
-    <ng-container *ngTemplateOutlet="enveloppesTemplate; context: { divs: groupe.divs, composant: contenu, index: 0 }"></ng-container>
-    
+<ng-template #divColonne let-colonne="colonne1">
+    <div [ngClass]="colonne.classe" [ngStyle]="colonne.style">
+        <ng-container *ngIf="colonne.texte; else composantsTemplate">
+            {{ colonne.texte }}
+        </ng-container>
+        <ng-template #composantsTemplate>
+            <ng-container *ngFor="let composant of colonne.composants">
+                <app-kf-composant [attr.nom]="composant.nom" [composant]="composant">
+                </app-kf-composant>
+            </ng-container>
+        </ng-template>
+    </div>
 </ng-template>
-   
--->

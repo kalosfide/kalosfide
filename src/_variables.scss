@@ -1,3 +1,7 @@
+/* div qui recouvre toute la fenêtre */
+$cache-tout-opacity: 0.33;
+$cache-tout-background-color: antiquewhite;
+
 .texte-sous-icone {
     width: 90px;
     height: 40px;
@@ -5,6 +9,9 @@
 a.texte-sous-icone {
     padding-top: 2px;
     padding-bottom: 0;
+}
+a:focus {
+    outline: 1px;
 }
 button.texte-sous-icone {
     padding-top: 0;
@@ -32,46 +39,19 @@ button.texte-sous-icone.dropdown-toggle::after {
     position: relative;
     top: -0.25rem;
 }
-i.kf-vue-table-tri {
-    padding-left: .33rem;
-    color: lightslategray;
+i.form-check-input {
+    cursor: pointer;
 }
-i.kf-vue-table-tri-dernier {
-    padding-left: .33rem;
-    color: black;
+i.form-check-input.disabled {
+    cursor: default;
+    color: lightgray;
 }
-i.kf-vue-table-tri-asc {
-    vertical-align: baseline;
-}
-i.kf-vue-table-tri-desc {
-    vertical-align: super;
+i.form-check-input.undefined {
+    background-color: lightgray;
 }
 i.kf-popover-icone {
     vertical-align: text-top;
     padding-left: .2rem;
-}
-.plein-ecran {
-    position: fixed;
-    top: 0px;
-    right: 0px;
-    bottom: 0px;
-    left: 0px;
-    display: flex;              /* establish flex container */
-    flex-direction: column;     /* stack flex items vertically */
-    justify-content: center;    /* center items vertically, in this case */
-    align-items: center;        /* center items horizontally, in this case */
-}
-.survol-centre {
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    text-align: center;
-    vertical-align: middle;
-}
-.avec-survol {
-    position: relative;
 }
 
 .retour-en-haut {
@@ -100,17 +80,15 @@ tr.kf-vue-table-choisi {
     padding-right: inherit;
 }
 
-table .nombre {
-    width: 120px;
-}
-
-table .prix {
-    width: 150px;
-}
-
-table .unite {
-    width: 120px;
-}
+/* Colonnes des tables */
+$table-no-ligne: 60px;
+$table-date: 120px;
+$table-client-compte: 130px;
+$table-nombre: 120px;
+$table-prix: 150px;
+$table-unite: 120px;
+$table-action: 88px;
+$table-action-texte-sous-icone: 68px;
 
 .btn-group .texte-sous-icone {
     padding-left: 0;
@@ -124,7 +102,7 @@ table .unite {
     width: 218px; // 3 * 60 + 2 * 8 + 30
     padding-right: 30px;;
 }
-.colonne-btn-group-2,.colonne-btn-group-3 .texte-sous-icone {
+.colonne-btn-group-2 .texte-sous-icone, .colonne-btn-group-3 .texte-sous-icone {
     width: 60px;
 }
 
@@ -199,6 +177,7 @@ table .unite {
     font-size: 14px;
 }
 
+// couleurs
 .couleur-antiquewhite {
     color: antiquewhite;
 }
@@ -210,6 +189,10 @@ table .unite {
 }
 .couleur-whitesmoke {
     color: whitesmoke;
+}
+
+.couleur-black {
+    color: black;
 }
 
 .couleur-blue {
@@ -310,6 +293,10 @@ table .unite {
 
 .couleur-fond-whitesmoke {
     background-color: whitesmoke;
+}
+
+.couleur-fond-black {
+    background-color: black;
 }
 
 .couleur-fond-blue {

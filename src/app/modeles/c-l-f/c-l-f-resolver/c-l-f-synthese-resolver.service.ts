@@ -2,7 +2,6 @@ import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/r
 import { Observable, of } from 'rxjs';
 import { CLFDoc } from 'src/app/modeles/c-l-f/c-l-f-doc';
 import { CLFResolverService } from 'src/app/modeles/c-l-f/c-l-f-resolver/c-l-f-resolver.service';
-import { switchMap } from 'rxjs/operators';
 import { CLFService } from '../c-l-f.service';
 
 export class CLFSynthèseResolverService extends CLFResolverService implements Resolve<CLFDoc> {
@@ -14,11 +13,6 @@ export class CLFSynthèseResolverService extends CLFResolverService implements R
     }
 
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): CLFDoc | Observable<CLFDoc> {
-        return this.service.bons().pipe(
-            switchMap(clfDocs => {
-                const clfDoc = clfDocs.créeDocumentAEnvoyer();
-                return of(clfDoc);
-            })
-        );
+        return this.service.litStock().créeDocumentAEnvoyer();
     }
 }

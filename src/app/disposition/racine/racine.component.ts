@@ -14,6 +14,10 @@ import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 import { Fabrique } from '../fabrique/fabrique';
 import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
 import { KfUlComposant } from 'src/app/commun/kf-composants/kf-ul/kf-ul-composant';
+import { NavigationSegment } from 'src/app/services/navigation-segment';
+import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
+import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
+import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
 
 export abstract class RacineComponent implements OnDestroy {
 
@@ -33,7 +37,7 @@ export abstract class RacineComponent implements OnDestroy {
         protected alerteService: AlerteService,
     ) {
         this.breadcrumb = new KfGroupe('breadcrumb');
-        this.breadcrumb.ajouteClasseDef('breadcrumb');
+        this.breadcrumb.ajouteClasse('breadcrumb');
         this.breadcrumbUl = new KfUlComposant('');
         this.breadcrumb.ajoute(this.breadcrumbUl);
     }
@@ -57,26 +61,38 @@ export abstract class RacineComponent implements OnDestroy {
         this.menu.identifiant = this.identification.litIdentifiant();
     }
 
-    protected utilisateurChange() {
-        const identifiant: Identifiant = this.identification.litIdentifiant();
+    /**
+     * Met à jour le menu et affiche une alerte lors de la connection et de la déconnection
+     * @param identifiant identifiant de l'utilisateur à la connection, null à la déconnection
+     */
+    protected utilisateurChange(identifiant: Identifiant) {
         this.menu.identifiant = identifiant;
         this.menu.rafraichit();
         this.alerteService.alertes = [AlerteConnection(identifiant)];
     }
 
+    /**
+     * Fixe le title de l'onglet du navigateur et le breadcrumb.
+     */
     private pageDefChange() {
         const titles: string[] = [];
-        const liens: KfLien[] = [];
+        const breadcrumbs: KfComposant[] = [];
         let url = '';
-        this.navigation.navigation.forEach(n => {
-            titles.push(n.title);
-            url = `${url}/${n.path}`;
-            const lien = new KfLien('', url, n.title);
-            liens.push(lien);
+        this.navigation.navigation.forEach((segment: NavigationSegment) => {
+            titles.push(segment.title);
+            if (segment.path === '') {
+                const étiquette = new KfEtiquette('', segment.titre);
+                étiquette.baliseHtml = KfTypeDeBaliseHTML.span;
+                breadcrumbs.push(étiquette);
+            } else {
+                url = `${url}/${segment.path}`;
+                const lien = new KfLien('', url, segment.titre);
+                breadcrumbs.push(lien);
+            }
         });
         const title = titles.join(' - ');
         this.titleService.setTitle(title);
-        this.breadcrumbUl.contenus = liens;
+        this.breadcrumbUl.contenus = breadcrumbs;
     }
 
     ngOnDestroy() {

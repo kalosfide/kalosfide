@@ -13,6 +13,6 @@ export class CLFBonsResolverService extends CLFResolverService implements Resolv
     }
 
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<never> | CLFDocs | Observable<CLFDocs> {
-        return this.service.bons();
+        return this.service.litStock();
     }
 }

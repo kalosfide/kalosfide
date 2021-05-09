@@ -24,7 +24,7 @@ export class ProduitSitePasCatalogueGarde implements CanActivate, CanActivateChi
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | boolean {
         const site = this.navigation.litSiteEnCours();
         if (site.etat !== IdEtatSite.catalogue) {
-            this.routeur.naviguePageDef(ProduitPages.index, ProduitRoutes, site.nomSite);
+            this.routeur.naviguePageDef(ProduitPages.index, ProduitRoutes, site.url);
             return false;
         }
         return true;

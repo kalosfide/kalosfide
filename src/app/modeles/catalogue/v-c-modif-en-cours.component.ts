@@ -13,14 +13,12 @@ import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
-    styleUrls: ['../../commun/commun.scss']
 })
 export class VCModifEnCoursComponent extends PageBaseComponent implements OnInit {
 
     pageDef: PageDef = SitePages.pasOuvert;
 
     site: Site;
-    barre: BarreTitre;
 
     get titre(): string {
         return this.site.titre;
@@ -32,15 +30,6 @@ export class VCModifEnCoursComponent extends PageBaseComponent implements OnInit
         super();
     }
 
-    créeBarreTitre = (): BarreTitre => {
-        const barre = Fabrique.titrePage.barreTitre({
-            pageDef: this.pageDef,
-        });
-
-        this.barre = barre;
-        return barre;
-    }
-
     private rafraichit() {
         this.barre.site = this.service.litSiteEnCours();
         this.barre.rafraichit();
@@ -50,7 +39,7 @@ export class VCModifEnCoursComponent extends PageBaseComponent implements OnInit
         this.superGroupe = new KfSuperGroupe(this.nom);
         const groupe = new KfGroupe('actionImpossible');
         let etiquette: KfEtiquette;
-        groupe.ajouteClasseDef('alert alert-warning');
+        groupe.ajouteClasse('alert alert-warning');
 
         etiquette = new KfEtiquette(''
         );

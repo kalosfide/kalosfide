@@ -4,7 +4,7 @@ import {
 import { KfComposantComponent } from '../../kf-composant/kf-composant.component';
 import { KfComposant } from '../../kf-composant/kf-composant';
 import { KfTypeDeComposant } from '../../kf-composants-types';
-import { KFComposantService } from '../../kf-composant.service';
+import { TraiteKeydownService } from '../../../traite-keydown/traite-keydown.service';
 import { KfNgbDropdown } from './kf-ngb-dropdown';
 
 @Component({
@@ -15,7 +15,7 @@ import { KfNgbDropdown } from './kf-ngb-dropdown';
 export class KfNgbDropdownComponent extends KfComposantComponent implements OnInit, AfterViewInit {
     @ViewChild('htmlElement', {static: false}) htmlElementRef: ElementRef;
 
-    constructor(protected service: KFComposantService) {
+    constructor(protected service: TraiteKeydownService) {
         super(service);
     }
 
@@ -27,8 +27,7 @@ export class KfNgbDropdownComponent extends KfComposantComponent implements OnIn
     }
 
     ngAfterViewInit() {
-        this.composant.gereHtml.htmlElement = this.htmlElementRef.nativeElement;
-        this.composant.gereHtml.initialiseHtml(this.output);
+        this.composant.initialiseHtml(this.htmlElementRef.nativeElement, this.output);
     }
 
     estGroupe(composant: KfComposant): boolean {

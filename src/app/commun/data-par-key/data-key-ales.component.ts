@@ -4,11 +4,11 @@ import { Observable } from 'rxjs';
 
 import { FormulaireComponent } from '../../disposition/formulaire/formulaire.component';
 import { DataKeyService } from './data-key.service';
-import { ApiResult } from '../api-results/api-result';
+import { ApiResult } from 'src/app/api/api-results/api-result';
 import { DataTexteSoumettre } from './data-pages';
 import { KfGroupe } from '../kf-composants/kf-groupe/kf-groupe';
 import { IDataKey } from './data-key';
-import { ApiAction } from '../api-route';
+import { ApiAction } from '../../api/api-route';
 import { Site } from 'src/app/modeles/site/site';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { KfTexteDef } from '../kf-composants/kf-partages/kf-texte-def';
@@ -19,7 +19,7 @@ import { KfBouton } from '../kf-composants/kf-elements/kf-bouton/kf-bouton';
 import { BarreTitre, IBarreDef } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { KfComposant } from '../kf-composants/kf-composant/kf-composant';
 import { DataKeyEditeur } from './data-key editeur';
-import { IDataKeyComponent } from './i-data-key-component';
+import { IDataComponent } from './i-data-component';
 
 export class ActionAles {
     nom: string;
@@ -28,11 +28,11 @@ export class ActionAles {
     actionSiOk?: () => void;
 }
 
-export abstract class DataKeyALESComponent<T extends IDataKey> extends FormulaireComponent implements OnInit, IDataKeyComponent {
+export abstract class DataKeyALESComponent<T extends IDataKey> extends FormulaireComponent implements OnInit, IDataComponent {
 
     abstract site: Site;
-    get nomSiteDef(): KfTexteDef {
-        return () => this.site.nomSite;
+    get urlSiteDef(): KfTexteDef {
+        return () => this.site.url;
     }
 
     action: ActionAles;
@@ -59,8 +59,10 @@ export abstract class DataKeyALESComponent<T extends IDataKey> extends Formulair
     créeBarreTitre = (): BarreTitre => {
         const def: IBarreDef = {
             pageDef: this.pageDef,
-            boutonsPourBtnGroup: [[this.lienIndex]]
         };
+        if (this.lienIndex) {
+            def.boutonsPourBtnGroup = [[this.lienIndex]];
+        }
         if (this.contenuAidePage) {
             def.contenuAidePage = this.contenuAidePage();
         }
@@ -97,40 +99,51 @@ export abstract class DataKeyALESComponent<T extends IDataKey> extends Formulair
 
     créeEdition = (): KfGroupe => {
         this.créeDataEditeur();
-        this.dataEditeur.créeEdition(this.pageDef);
+        this.dataEditeur.créeFormulaire();
         return this.dataEditeur.edition;
-    }
-
-    private prépareKeyAjout() {
-        const key = this.service.keyDeAjoute;
-        this.dataEditeur.fixeKfKey(key);
     }
 
     ngOnInit() {
         this.site = this.service.navigation.litSiteEnCours();
         this.subscriptions.push(this.route.data.subscribe(
             (data: Data) => {
-                if (this.action.nom === ApiAction.data.ajoute) {
-                    this.lienIndex = this.service.utile.lienKey.index();
-                    this.créeBoutonsDeFormulaire = (formulaire: KfSuperGroupe) => [
-                        Fabrique.bouton.boutonSoumettre(formulaire, this.action.texteSoumettre),
-                        Fabrique.lien.boutonAnnuler(this.service.utile.urlKey.index()),
-                    ];
+                if (this.service.utile.lienKey) {
+                    if (this.action.nom === ApiAction.data.ajoute) {
+                        this.lienIndex = this.service.utile.lienKey.index();
+                        this.créeBoutonsDeFormulaire = (formulaire: KfGroupe) => {
+                            this.boutonSoumettre = Fabrique.bouton.soumettre(formulaire, this.action.texteSoumettre);
+                            return [
+                                Fabrique.lien.boutonAnnuler(this.service.utile.urlKey.index()),
+                                this.boutonSoumettre
+                            ];
+                        };
+                    } else {
+                        this.lienIndex = this.service.utile.lienKey.retourIndex(data.valeur);
+                        this.créeBoutonsDeFormulaire = (formulaire: KfGroupe) => {
+                            this.boutonSoumettre = Fabrique.bouton.soumettre(formulaire, this.action.texteSoumettre);
+                            return [
+                                Fabrique.lien.boutonAnnuler(this.service.utile.urlKey.retourIndex(data.valeur)),
+                                this.boutonSoumettre
+                            ];
+                        };
+                    }
                 } else {
-                    this.lienIndex = this.service.utile.lienKey.retourIndex(data.valeur);
-                    this.créeBoutonsDeFormulaire = (formulaire: KfSuperGroupe) => [
-                        Fabrique.bouton.boutonSoumettre(formulaire, this.action.texteSoumettre),
-                        Fabrique.lien.boutonAnnuler(this.service.utile.urlKey.retourIndex(data.valeur)),
-                    ];
+                        this.créeBoutonsDeFormulaire = (formulaire: KfGroupe) => {
+                            this.boutonSoumettre = Fabrique.bouton.soumettre(formulaire, this.action.texteSoumettre);
+                            return [
+                                this.boutonSoumettre
+                            ];
+                        };
                 }
-                this.formulaire = Fabrique.formulaire.formulaire(this);
+                this.superGroupe = Fabrique.formulaire.superGroupe(this);
                 if (this.chargeData) {
                     this.chargeData(data);
                 }
                 this.créeTitrePage();
                 if (this.action.nom === ApiAction.data.ajoute) {
-                    this.prépareKeyAjout();
+                    this.dataEditeur.fixeKfKey(this.service.keyDeAjoute);
                 } else {
+                    this.dataEditeur.fixeKfKey(data.valeur);
                     this.fixeValeur(data.valeur);
                 }
                 if (this.fixeGroupeBoutonsMessages) {
@@ -151,13 +164,13 @@ export abstract class DataKeyALESComponent<T extends IDataKey> extends Formulair
         this.routeur.navigueUrlDef(this.service.utile.urlKey.index());
     }
 
-    get valeur(): any {
+    get valeur(): T {
         if (this.dataEditeur && this.dataEditeur.valeur) {
             return this.dataEditeur.valeur;
         }
     }
 
-    fixeValeur(valeur: any) {
+    fixeValeur(valeur: T) {
         this.dataEditeur.fixeValeur(valeur);
     }
 }

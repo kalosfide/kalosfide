@@ -4,7 +4,7 @@ import { CLFDoc } from 'src/app/modeles/c-l-f/c-l-f-doc';
 import { CLFResolverService } from 'src/app/modeles/c-l-f/c-l-f-resolver/c-l-f-resolver.service';
 import { CLFPages } from '../c-l-f-pages';
 import { switchMap } from 'rxjs/operators';
-import { ApiResult404NotFound } from 'src/app/commun/api-results/api-result-404-not-found';
+import { ApiResult404NotFound } from 'src/app/api/api-results/api-result-404-not-found';
 import { CLFService } from '../c-l-f.service';
 
 export class CLFBonResolverService extends CLFResolverService implements Resolve<CLFDoc> {
@@ -17,15 +17,11 @@ export class CLFBonResolverService extends CLFResolverService implements Resolve
 
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<never> | CLFDoc | Observable<CLFDoc> {
         const no = +route.paramMap.get(CLFPages.nomParamNoDoc);
-        return this.service.bons().pipe(
-            switchMap(clfDocs => {
-                const clfDoc = clfDocs.créeBon(no);
-                if (!clfDoc) {
-                    this.service.routeur.navigueVersErreur(new ApiResult404NotFound());
-                    return EMPTY;
-                }
-                return of(clfDoc);
-            })
-        );
+        const clfDoc = this.service.litStock().créeBon(no);
+        if (!clfDoc) {
+            this.service.routeur.navigueVersPageErreur(new ApiResult404NotFound());
+            return EMPTY;
+        }
+        return of(clfDoc);
     }
 }

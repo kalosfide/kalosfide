@@ -50,23 +50,23 @@ export class KfListeCommandes {
      * permet de munir la liste de déclencheurs pour des actions (ajouter, supprimer, monter, descendre, ...)
      *
      * @param liste parent du gestionnaire
-     * @param commandesInterface {
-     *  @param types array des types des boutons devant être présents dans l'ordre
-     *      valeur par défaut: LISTE_TYPES_D_ACTIONS_PAR_DEFAUT
-     *  @param creeDeclencheur retourne le déclencheur de l'action du type passé en paramètre
-     *      valeur par défaut: créée à partir de texte, des images et du type
-     *  @param texte retourne le texte du déclencheur de l'action du type passé en paramètre
+     * @param commandesInterface
+     *   types: array des types des boutons devant être présents dans l'ordre
+     *      valeur par défaut: LISTE_TYPES_D_ACTIONS_PAR_DEFAUT,
+     *  creeDeclencheur: retourne le déclencheur de l'action du type passé en paramètre
+     *      valeur par défaut: créée à partir de texte, des images et du type,
+     *  texte retourne le texte du déclencheur de l'action du type passé en paramètre
      *      valeur par défaut si imageAvant et imageApres ne sont pas définies: créée à partir de baseDesTextes
-     *  @param imageAvant retourne l'imageAvant du déclencheur de l'action du type passé en paramètre
-     *  @param imageApres retourne l'imageApres du déclencheur de l'action du type passé en paramètre
-     *  @param type type des déclencheurs, doit être constructible par texte et images et emettre des clics
+     *   imageAvant retourne l'imageAvant du déclencheur de l'action du type passé en paramètre
+     *   imageApres retourne l'imageApres du déclencheur de l'action du type passé en paramètre
+     *   type type des déclencheurs, doit être constructible par texte et images et emettre des clics
      *      valeur par défaut: LISTE_TYPE_DECLENCHEUR_PAR_DEFAUT
      * }
      */
     constructor(liste: KfListe, commandesInterface: KfCommandesDeListeInterface) {
         this.liste = liste;
         // traite les clics à la place de la liste
-        this.liste.gereHtml.ajouteTraiteur(KfTypeDEvenement.clic,
+        this.liste.gereHtml.ajouteTraiteur(KfTypeDEvenement.click,
             (evenement: KfEvenement) => {
                 console.log(evenement);
                 if (this.traiteClic(evenement.emetteur)) {
@@ -100,7 +100,7 @@ export class KfListeCommandes {
                 }
                 c.declencheur.inactivitéFnc = this.inactivitéFnc(c.type);
                 c.declencheur.listeParent = this.liste;
-                c.declencheur.ajouteClasseDef('kf-liste-' + 'kf-' + KfParametres.listeParDefaut.nomBouton(c.type));
+                c.declencheur.ajouteClasse('kf-liste-' + 'kf-' + KfParametres.listeParDefaut.nomBouton(c.type));
             }
         );
         this.position = commandesInterface.position ? commandesInterface.position : 1;

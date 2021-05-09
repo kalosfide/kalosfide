@@ -10,7 +10,6 @@ export abstract class CLFTitreComponent extends PageBaseComponent implements OnI
     estClient: 'client';
 
     niveauTitre = 0;
-    barre: BarreTitre;
 
     protected contenuAidePage: () => KfComposant[];
 

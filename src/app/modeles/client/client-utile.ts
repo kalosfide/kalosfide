@@ -2,7 +2,7 @@ import { ClientService } from './client.service';
 import { Client } from './client';
 import { DataKeyUtileUrl } from 'src/app/commun/data-par-key/data-key-utile-url';
 import { DataKeyUtileLien } from 'src/app/commun/data-par-key/data-key-utile-lien';
-import { ClientRoutes, ClientPages } from 'src/app/fournisseur/clients/client-pages';
+import { FournisseurClientRoutes, FournisseurClientPages } from 'src/app/fournisseur/clients/client-pages';
 import { ClientUtileUrl } from './client-utile-url';
 import { DataKeyUtileColonne } from 'src/app/commun/data-par-key/data-key-utile-colonne';
 import { ClientUtileLien } from './client-utile-lien';
@@ -11,12 +11,13 @@ import { ClientUtileOutils } from './client-utile-outils';
 import { ClientUtileBouton } from './client-utile-bouton';
 import { DataKeyUtileOutils } from 'src/app/commun/data-par-key/data-key-utile-outils';
 import { KeyUidRnoUtile } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno-utile';
+import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
 
 export class ClientUtile extends KeyUidRnoUtile<Client> {
     constructor(service: ClientService) {
         super(service);
-        this.dataRoutes = ClientRoutes;
-        this.dataPages = ClientPages;
+        this.dataRoutes = FournisseurClientRoutes;
+        this.dataPages = FournisseurClientPages;
         this.pUrl = new ClientUtileUrl(this);
         this.pLien = new ClientUtileLien(this);
         this.pBouton = new ClientUtileBouton(this);
@@ -26,6 +27,10 @@ export class ClientUtile extends KeyUidRnoUtile<Client> {
         this.pLienKey = new DataKeyUtileLien(this);
         this.pColonneKey = new DataKeyUtileColonne(this);
         this.pOutilsKey = new DataKeyUtileOutils(this);
+    }
+
+    fragment(client: Client): string {
+        return 'kfvt' + KeyUidRno.texteDeKey(client);
     }
 
     get url(): ClientUtileUrl {

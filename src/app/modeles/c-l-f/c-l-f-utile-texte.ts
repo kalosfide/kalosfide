@@ -32,7 +32,7 @@ class Defs {
     dernier: string;
     action: string;
     faire?: string;
-    faites?: string;
+    faite?: string;
 }
 
 class Bouton {
@@ -79,13 +79,20 @@ export class Textes {
         + ` et n'apparaitra pas parmi les documents.`;
     }
 
+    get copierBon(): string {
+        return `Copier la quantité ${this.def.faite} de chaque produit dans la quantité à ${this.def.faire} `;
+    }
+
+    get copierBons(): string {
+        return `Copier les quantités ${this.def.faite}s de chaque ${this.def.bon} dans les quantités à ${this.def.faire} `;
+    }
+
     bilanRienAVérifier: (bilan: CLFBilan) => string;
     bilanNbAVérifier: (bilan: CLFBilan) => string;
 
     vérificationPossible = () => `La vérification puis l'enregistrement ${this.du_doc} peuvent commencer.`;
     vérificationImpossible =  () => `Pour pouvoir vérifier puis enregistrer ${this.le_doc}, au moins un ${this.def.bon} doit `
         + `être préparé puis sélectionné.`
-
 
     bilanNbAVérifierC(bilan: CLFBilan): string {
         let nbDocs: string;
@@ -205,7 +212,7 @@ export class CLFUtileTexte {
             dernier: 'dernier',
             action: 'livraison',
             faire: 'livrer',
-            faites: 'commandées'
+            faite: 'commandée',
         };
         textes.synthèse = this.facture;
         textes.bilanRienAVérifier = textes.bilanRienAVérifierLF;
@@ -239,7 +246,7 @@ export class CLFUtileTexte {
             dernier: 'dernière',
             action: 'facture',
             faire: 'facturer',
-            faites: 'livrées'
+            faite: 'livrées',
         };
         textes.bilanRienAVérifier = textes.bilanRienAVérifierLF;
         textes.bilanNbAVérifier = textes.bilanNbAVérifierLF;

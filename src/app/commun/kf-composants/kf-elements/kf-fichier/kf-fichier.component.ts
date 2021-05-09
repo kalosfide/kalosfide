@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angula
 import { KfFichier } from './kf-fichier';
 import { KfComposantComponent } from '../../kf-composant/kf-composant.component';
 import { KfTypeDEvenement, KfStatutDEvenement, KfEvenement } from '../../kf-partages/kf-evenements';
-import { KFComposantService } from '../../kf-composant.service';
+import { TraiteKeydownService } from '../../../traite-keydown/traite-keydown.service';
 
 @Component({
     selector: 'app-kf-fichier',
@@ -32,25 +32,19 @@ export class KfFichierComponent extends KfComposantComponent implements OnInit, 
 
     file: File;
 
-    constructor(protected service: KFComposantService) {
+    constructor(protected service: TraiteKeydownService) {
         super(service);
     }
+
+    get fichier(): KfFichier { return this.composant as KfFichier; }
 
     ngOnInit() {
         this.test = this.fichier.formControl === undefined;
     }
 
     ngAfterViewInit() {
-        this.composant.gereHtml.htmlElement = this.labelElement.nativeElement;
-        this.composant.gereHtml.enfantsDeVue = {
-            inputElement: this.inputElement.nativeElement,
-            labelElement: this.labelElement.nativeElement,
-        };
-        this.composant.gereHtml.initialiseHtml(this.output);
-        const inputElement = this.inputElement.nativeElement as HTMLInputElement;
+        this.composant.initialiseHtml(this.inputElement.nativeElement, this.output);
     }
-
-    get fichier(): KfFichier { return this.composant as KfFichier; }
 
     quandChange() {
         const files: FileList = (this.inputElement.nativeElement as HTMLInputElement).files;

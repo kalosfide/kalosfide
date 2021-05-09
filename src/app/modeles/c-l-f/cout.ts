@@ -22,7 +22,7 @@ export class CoûtDef<T> {
      * @param t objet ayant un coût
      */
     texte(t: T): string {
-        return !this.valide || this.valide(t) ? Fabrique.texte.prix(this.iCoût(t)) : '';
+        return !this.valide || this.valide(t) ? Fabrique.texte.euros(this.iCoût(t)) : '';
     }
 
     /**
@@ -54,12 +54,12 @@ export class CoûtDef<T> {
      * @param items objets ayant un coût
      */
     texteAgrégé(items: T[]): string {
-        return Fabrique.texte.prix(this.agrége(items));
+        return Fabrique.texte.euros(this.agrége(items));
     }
 }
 
 export class LigneDocumentCoût {
-    private static _coûtDef(date: Date,
+    private static _coûtDef(
                             àAgréger: (ligne: CLFLigne) => number,
                             agrégable?: (ligne: CLFLigne) => boolean
         ): CoûtDef<CLFLigne> {
@@ -77,15 +77,15 @@ export class LigneDocumentCoût {
         );
     }
 
-    static quantité(date?: Date): CoûtDef<CLFLigne> {
-        return LigneDocumentCoût._coûtDef(date,
+    static quantité(): CoûtDef<CLFLigne> {
+        return LigneDocumentCoût._coûtDef(
             (ligne: CLFLigne) => ligne.quantité,
             (ligne: CLFLigne) => ligne.typeCommande === TypeMesure.typeCommandeParDéfaut(ligne.produit.typeMesure)
         );
     }
 
-    static aFixer(date?: Date): CoûtDef<CLFLigne> {
-        return LigneDocumentCoût._coûtDef(date,
+    static aFixer(): CoûtDef<CLFLigne> {
+        return LigneDocumentCoût._coûtDef(
             (ligne: CLFLigne) => ligne.aFixer,
             (ligne: CLFLigne) => ligne.AFixerEstFixé,
         );

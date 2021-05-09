@@ -1,6 +1,6 @@
-<ng-template #labelTemplate>
-    <label #labelElement [attr.for]="case.nom" [ngClass]="case.classeLabel">
-        <app-kf-contenu-phrase [contenuPhrase]="case.contenuPhrase"></app-kf-contenu-phrase>
+<ng-template #labelTemplate let-avecLabel>
+    <label #labelElement [attr.for]="avecLabel.nom" [ngClass]="avecLabel.label.classe">
+        <app-kf-contenu-phrase [contenuPhrase]="avecLabel.label.contenuPhrase"></app-kf-contenu-phrase>
     </label>
 </ng-template>
 
@@ -12,15 +12,15 @@
 </ng-template>
 
 <ng-container *ngIf="case.classeDiv; else sansDivTemplate">
-    <div [ngClass]="case.classeDiv">
+    <div [ngClass]="case.classeDiv" [id]="case.nom + '_Div'">
         <ng-container *ngTemplateOutlet="sansDivTemplate"></ng-container>
     </div>
 </ng-container>
 
 <ng-template #sansDivTemplate>
-    <div *ngIf="case.classeDivVide" [ngClass]="case.classeDivVide"></div>
+    <div *ngIf="case.classeDivVide" [ngClass]="case.classeDivVide" [id]="case.nom + '_DivVide'"></div>
     <ng-container *ngIf="case.classeEntree; else entreeTemplate">
-        <div [ngClass]="case.classeEntree">
+        <div [ngClass]="case.classeEntree" [id]="case.nom + '_Entrée'">
             <ng-container *ngTemplateOutlet="entreeTemplate"></ng-container>
         </div>
     </ng-container>
@@ -28,20 +28,20 @@
 
 <ng-template #entreeTemplate>
     <ng-container *ngIf="case.avecLabelAvant">
-        <ng-container *ngTemplateOutlet="labelTemplate"></ng-container>
+        <ng-container *ngTemplateOutlet="labelTemplate; context: { $implicit: case }"></ng-container>
     </ng-container>
 
     <ng-container *ngIf="case.aspect; else normalTemplate">
         <input type='checkbox' #inputElement [name]="case.nom" [formControl]="case.formControl" class="kf-invisible"
             [attr.disabled]="case.inactif" />
-        <app-kf-composant [composant]="case.aspect.composant"></app-kf-composant>
+        <app-kf-composant [composant]="case.aspect"></app-kf-composant>
     </ng-container>
     <ng-template #normalTemplate>
         <input type='checkbox' #inputElement [name]="case.nom" [formControl]="case.formControl" [ngClass]="case.classe"
             [attr.disabled]="case.inactif" />
     </ng-template>
     <ng-container *ngIf="case.avecLabelApres">
-        <ng-container *ngTemplateOutlet="labelTemplate"></ng-container>
+        <ng-container *ngTemplateOutlet="labelTemplate; context: { $implicit: case }"></ng-container>
     </ng-container>
     <ng-container *ngTemplateOutlet="infoTemplate"></ng-container>
 </ng-template>

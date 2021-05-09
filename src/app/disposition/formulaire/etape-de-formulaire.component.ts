@@ -7,7 +7,6 @@ import { EtapeDeFormulaire } from './etape-de-formulaire';
 
 @Component({
     templateUrl: './etape-de-formulaire.component.html',
-    styleUrls: ['../../commun/commun.scss']
 })
 export class EtapeDeFormulaireComponent implements OnInit, OnDestroy {
     etape: EtapeDeFormulaire;
@@ -20,7 +19,7 @@ export class EtapeDeFormulaireComponent implements OnInit, OnDestroy {
     ) {}
 
     get formulaire(): KfSuperGroupe {
-        return this.etape.parent.formulaire;
+        return this.etape.parent.superGroupe;
     }
 
     ngOnInit() {

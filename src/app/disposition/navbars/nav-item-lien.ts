@@ -11,14 +11,14 @@ export class NavItemLien extends NavItemContenu {
     constructor(nom: string, parent: NavBar | NavItemDropdown | NavItemDropDownGroup | NavItemUlLi) {
         super(nom, parent, new KfLien(nom));
         this.lien.routerLinkActive = true;
-        this.lien.ajouteClasseDef(
+        this.lien.ajouteClasse(
             'nav-link',
             { nom: 'disabled', active: () => this.inactif },
         );
     }
 
     get lien(): KfLien {
-        return this._composant as KfLien;
+        return this.pComposant as KfLien;
     }
 
     set url(url: KfTexteDef) {

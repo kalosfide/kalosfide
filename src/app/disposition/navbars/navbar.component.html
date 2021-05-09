@@ -25,13 +25,6 @@
                             </li>
                         </ul>
                     </ng-template>
-                    <ng-template #itemsTemplate1>
-                        <div class="navbar-nav" [ngClass]="contenu.classe" [ngStyle]="contenu.style">
-                            <div *ngFor="let item of contenu.items" [ngClass]="{'nav-item': true}">
-                                <app-kf-composant [composant]="item.composant"></app-kf-composant>
-                            </div>
-                        </div>
-                    </ng-template>
 
                 </ng-container>
 

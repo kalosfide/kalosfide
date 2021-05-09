@@ -42,7 +42,7 @@ export class KfNgbModal {
         if (!this.pGéreCssEnTête) {
             this.pGéreCssEnTête = new KfGéreCss();
         }
-        this.pGéreCssEnTête.ajouteClasseDefArray(classeDefs);
+        this.pGéreCssEnTête.ajouteClasse(...classeDefs);
     }
 
     get classeEnTete(): KfNgClasse {
@@ -55,7 +55,7 @@ export class KfNgbModal {
         if (!this.pGéreCssCroix) {
             this.pGéreCssCroix = new KfGéreCss();
         }
-        this.pGéreCssCroix.ajouteClasseDefArray(classeDefs);
+        this.pGéreCssCroix.ajouteClasse(...classeDefs);
     }
 
     get classeCroix(): KfNgClasse {
@@ -68,7 +68,7 @@ export class KfNgbModal {
         if (!this.pGéreCssCorps) {
             this.pGéreCssCorps = new KfGéreCss();
         }
-        this.pGéreCssCorps.ajouteClasseDefArray(classeDefs);
+        this.pGéreCssCorps.ajouteClasse(...classeDefs);
     }
 
     get classeCorps(): KfNgClasse {
@@ -81,7 +81,7 @@ export class KfNgbModal {
         if (!this.pGéreCssPied) {
             this.pGéreCssPied = new KfGéreCss();
         }
-        this.pGéreCssPied.ajouteClasseDefArray(classeDefs);
+        this.pGéreCssPied.ajouteClasse(...classeDefs);
     }
 
     get classePied(): KfNgClasse {

@@ -6,15 +6,15 @@
         <ng-container *ngFor="let contenu of ngbDropdown.contenus">
             <ng-container *ngIf="estGroupe(contenu); then groupeTemplate; else itemTemplate"></ng-container>
             <ng-template #groupeTemplate>
-                <ng-container *ngIf="contenu.contenus.length > 0">
+                <ng-container *ngIf="contenu.contenuPhrase.contenus.length > 0">
                     <div class="dropdown-divider"></div>
-                    <ng-container *ngFor="let contenu1 of contenu.contenus" role="menuitem">
-                        <app-kf-composant [composant]="contenu1" (output)="transmet($event)"></app-kf-composant>
+                    <ng-container *ngFor="let contenu1 of contenu.contenuPhrase.contenus" role="menuitem">
+                        <app-kf-composant [composant]="contenu1"></app-kf-composant>
                     </ng-container>
                 </ng-container>
             </ng-template>
             <ng-template #itemTemplate>
-                <app-kf-composant [composant]="contenu" (output)="transmet($event)"></app-kf-composant>
+                <app-kf-composant [composant]="contenu"></app-kf-composant>
             </ng-template>
         </ng-container>
     </div>

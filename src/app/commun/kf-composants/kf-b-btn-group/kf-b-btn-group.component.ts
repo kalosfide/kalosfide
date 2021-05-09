@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
 import { KfComposantComponent } from '../kf-composant/kf-composant.component';
-import { KFComposantService } from '../kf-composant.service';
+import { TraiteKeydownService } from '../../traite-keydown/traite-keydown.service';
 import { KfBBtnGroup } from './kf-b-btn-group';
 
 @Component({
@@ -11,7 +11,7 @@ import { KfBBtnGroup } from './kf-b-btn-group';
 export class KfBBtnGroupComponent extends KfComposantComponent implements OnInit, AfterViewInit {
     @ViewChild('htmlElement', {static: false}) domElementRef: ElementRef;
 
-    constructor(protected service: KFComposantService) {
+    constructor(protected service: TraiteKeydownService) {
         super(service);
     }
 
@@ -27,8 +27,13 @@ export class KfBBtnGroupComponent extends KfComposantComponent implements OnInit
     }
 
     ngAfterViewInit() {
-        this.composant.gereHtml.htmlElement = this.domElementRef.nativeElement;
-        this.composant.gereHtml.initialiseHtml(this.output);
+        const divElement = this.domElementRef.nativeElement as HTMLDivElement;
+        this.composant.initialiseHtml(divElement, this.output);
+        for (let index = 0; index < this.bbtnGroup.contenus.length; index++) {
+            const composant = this.bbtnGroup.contenus[index];
+            const htmlElement = divElement.children[index] as HTMLElement;
+            composant.initialiseHtml(htmlElement, null);
+        }
     }
 
 }

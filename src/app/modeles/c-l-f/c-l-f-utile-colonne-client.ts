@@ -1,10 +1,9 @@
 import { IKfVueTableColonneDef } from 'src/app/commun/kf-composants/kf-vue-table/i-kf-vue-table-colonne-def';
-import { Tri } from 'src/app/commun/outils/tri';
 import { CLFUtileUrl } from './c-l-f-utile-url';
 import { CLFUtileLien } from './c-l-f-utile-lien';
 import { CLFUtile } from './c-l-f-utile';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
-import { Compare } from '../compare';
+import { Compare } from '../../commun/outils/tri';
 import { CLFDocs } from './c-l-f-docs';
 import { CLFDoc } from './c-l-f-doc';
 import { ApiDocument } from './api-document';
@@ -25,12 +24,12 @@ export class CLFUtileColonneClient {
     }
 
     client(): IKfVueTableColonneDef<CLFDocs> {
+        const créeContenu = (clfDocs: CLFDocs) => clfDocs.client.nom;
         return {
             nom: 'client',
-            créeContenu: (clfDocs: CLFDocs) => clfDocs.client.nom,
+            créeContenu,
             enTeteDef: { titreDef: 'Client' },
-            tri: new Tri<CLFDocs>('client',
-                (docs1: CLFDocs, docs2: CLFDocs): number => Compare.AvecClient_nomClient(docs1, docs2)),
+            compare: Compare.texte(créeContenu),
         };
     }
 
@@ -39,7 +38,7 @@ export class CLFUtileColonneClient {
             nom: 'nbDocuments',
             créeContenu: (clfDocs: CLFDocs) => '' + clfDocs.documents.length,
             enTeteDef: { titreDef: titre },
-            tri: new Tri<CLFDocs>('nbDocuments', CLFDocs.compareNbDocuments),
+            compare: Compare.nombre((clfDocs: CLFDocs) => clfDocs.documents.length),
         };
     }
 
@@ -48,14 +47,17 @@ export class CLFUtileColonneClient {
             nom: 'nbPrêts',
             créeContenu: (clfDocs: CLFDocs) => '' + clfDocs.documents.filter(d => ApiDocument.prêt(d)).length,
             enTeteDef: { titreDef: 'Prêts' },
-            tri: new Tri<CLFDocs>('nbPrêts', CLFDocs.compareNbPrêts)
+            compare: Compare.enchaine(
+                Compare.nombre((clfDocs: CLFDocs) => clfDocs.documents.length),
+                Compare.nombre((clfDocs: CLFDocs) => clfDocs.documents.filter(d => ApiDocument.prêt(d)).length),
+            ),
         };
     }
 
     choixClient(): IKfVueTableColonneDef<CLFDocs> {
         return {
-            nom: 'choixClient',
-            créeContenu: (clfDocs: CLFDocs) => ({ composant: this.lien.client(clfDocs) }),
+            nom: this.utile.nom.choisit,
+            créeContenu: (clfDocs: CLFDocs) => this.lien.client(clfDocs),
         };
     }
 
@@ -73,6 +75,7 @@ export class CLFUtileColonneClient {
         return {
             nom: 'àPréparer',
             créeContenu: (doc: CLFDoc) => '' + doc.nbAPréparer,
+            compare: Compare.nombre((doc: CLFDoc) => doc.nbAPréparer),
             enTeteDef: { titreDef: 'à préparer', chapeauDef: 'Nombre de lignes', longueurChapeau: 3 },
         };
     }
@@ -81,6 +84,7 @@ export class CLFUtileColonneClient {
         return {
             nom: 'préparés',
             créeContenu: (doc: CLFDoc) => '' + doc.nbPréparés,
+            compare: Compare.nombre((doc: CLFDoc) => doc.nbPréparés),
             enTeteDef: { titreDef: 'préparées' },
         };
     }
@@ -89,6 +93,7 @@ export class CLFUtileColonneClient {
         return {
             nom: 'annulés',
             créeContenu: (doc: CLFDoc) => '' + doc.nbAnnulés,
+            compare: Compare.nombre((doc: CLFDoc) => doc.nbAnnulés),
             enTeteDef: { titreDef: 'dont annulées' },
         };
     }
@@ -96,7 +101,8 @@ export class CLFUtileColonneClient {
     montant(): IKfVueTableColonneDef<CLFDoc> {
         return {
             nom: 'montant',
-            créeContenu: (document: CLFDoc) => Fabrique.texte.prix(document.apiDoc.total),
+            créeContenu: (document: CLFDoc) => Fabrique.texte.euros(document.apiDoc.total),
+            compare: Compare.nombre((doc: CLFDoc) => doc.apiDoc.total),
             enTeteDef: { titreDef: 'Montant' },
         };
     }

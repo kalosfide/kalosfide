@@ -32,9 +32,17 @@ export abstract class PageBaseComponent implements OnDestroy {
     }
 
     titrePage: KfGroupe;
+    barre: BarreTitre;
 
     niveauTitre: number;
-    protected créeBarreTitre: () => BarreTitre;
+    protected créeBarreTitre = (): BarreTitre => {
+        const barre = Fabrique.titrePage.barreTitre({
+            pageDef: this.pageDef,
+        });
+
+        this.barre = barre;
+        return barre;
+    }
 
     get avecValeur(): boolean {
         return !!this.superGroupe.gereValeur;

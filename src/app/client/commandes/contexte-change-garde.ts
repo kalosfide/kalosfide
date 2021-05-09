@@ -17,15 +17,10 @@ export class RedirigeSiContexteChangé implements CanActivate, CanActivateChild 
     }
 
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | boolean {
-        return this.service.gardePageBon().pipe(
-            tap(gardé => {
-                if (!gardé) {
-                    this.service.routeur.navigueUrlDef(this.service.utile.url.contexte());
-                }
-            })
-        );
+        return this.service.gardePageBon();
     }
     canActivateChild(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | Observable<boolean> | Promise<boolean> {
+        console.log(state.url);
         return this.canActivate(route, state);
     }
 }

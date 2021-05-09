@@ -3,7 +3,6 @@ import { Routes, RouterModule } from '@angular/router';
 import { CommandeAccueilComponent } from './commande-accueil.component';
 import { CommandeChoixProduitComponent } from './commande-choix-produit.component';
 import { CommandeLigneAjouteComponent } from './commande-ligne-ajoute.component';
-import { CommandeLigneSupprimeComponent } from './commande-ligne-supprime.component';
 import { CommandeBonResolverService } from './commande-bon-resolver.service';
 import { RedirigeSiContexteChangé, RedirigeSiPasContexte } from './contexte-change-garde';
 import { CommandePages } from './commande-pages';
@@ -23,6 +22,7 @@ import { CommandeContexteResolverService } from './commande-contexte-resolver.se
 const routes: Routes = [
     {
         path: '',
+        // Page titre de la section commande
         component: CommandeAccueilComponent,
         children: [
             {
@@ -31,25 +31,18 @@ const routes: Routes = [
                 pathMatch: 'full',
             },
             {
+                // path sans page
                 path: CommandePages.bon.urlSegment,
                 data: {
                     pageDef: CommandePages.bon,
                     estEnfantPathVide: true
                 },
-                canActivate: [
+                canActivateChild: [
                     // Charge le contexte.
                     // Si site pas ouvert ou catalogue périmé, stocke le contexte et redirige vers .contexte
                     // Sinon, si le stock n'existe pas, charge et stocke le cflDocs
                     RedirigeSiContexteChangé,
                 ],
-                canActivateChild: [
-                    RedirigeSiContexteChangé,
-                ],
-                resolve: {
-                    // pour que les gardes des enfants aient accès au résolu de la route
-                    // Lit le stock. Crée le cflDoc.
-                    clfDoc: CommandeBonResolverService,
-                },
                 children: [
                     {
                         path: '',
@@ -114,20 +107,9 @@ const routes: Routes = [
                             // Lit le stock.
                             // Redirige vers ./nouveau si le document n'existe pas ou est fermé
                             CommandeBonExisteGardeService,
-                            CommandeProduitPasDansBonGardeService,
-                        ],
-                        resolve: {
-                            clfLigne: CommandeLigneResolverService,
-                        },
-                    },
-                    {
-                        path: CommandePages.supprime.urlSegment + '/:' + CLFPages.nomParamNoLigne,
-                        data: { pageDef: CommandePages.supprime },
-                        component: CommandeLigneSupprimeComponent,
-                        canActivate: [
                             // Lit le stock.
-                            // Redirige vers ./nouveau si le document n'existe pas ou est fermé
-                            CommandeBonExisteGardeService,
+                            // Redirige vers ./bon si le produit est déjà dans les lignes
+                            CommandeProduitPasDansBonGardeService,
                         ],
                         resolve: {
                             clfLigne: CommandeLigneResolverService,
@@ -154,11 +136,10 @@ const routes: Routes = [
                 data: { pageDef: CommandePages.envoi },
                 component: CommandeEnvoiComponent,
                 canActivate: [
-                    RedirigeSiContexteChangé,
+                    CommandeEnvoiGardeService,
                     // Lit le stock.
                     // Redirige vers ./nouveau si le document n'existe pas ou est fermé
                     CommandeBonExisteGardeService,
-                    CommandeEnvoiGardeService,
                 ],
                 resolve: {
                     // Lit le stock. Crée le cflDoc.

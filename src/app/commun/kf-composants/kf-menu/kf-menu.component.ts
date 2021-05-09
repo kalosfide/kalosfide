@@ -2,7 +2,7 @@ import {
     Component, OnInit, ViewChild, AfterViewInit, ElementRef
 } from '@angular/core';
 import { KfComposantComponent } from '../kf-composant/kf-composant.component';
-import { KFComposantService } from '../kf-composant.service';
+import { TraiteKeydownService } from '../../traite-keydown/traite-keydown.service';
 import { KfMenu } from './kf-menu';
 
 @Component({
@@ -10,7 +10,7 @@ import { KfMenu } from './kf-menu';
     template: `
     <div #divElement [ngClass]="menu.classe" [ngStyle]="menu.style">
         <app-kf-sous-menu *ngFor="let sousMenu of menu.sousMenus"
-            [composant]="sousMenu" (output)="traiteOuTransmet($event)"></app-kf-sous-menu>
+            [composant]="sousMenu"></app-kf-sous-menu>
     </div>
 `,
     styleUrls: ['../kf-composants.scss']
@@ -18,7 +18,7 @@ import { KfMenu } from './kf-menu';
 export class KfMenuComponent extends KfComposantComponent implements OnInit, AfterViewInit {
     @ViewChild('divElement', {static: false}) divElementRef: ElementRef;
 
-    constructor(protected service: KFComposantService) {
+    constructor(protected service: TraiteKeydownService) {
         super(service);
     }
 
@@ -30,8 +30,7 @@ export class KfMenuComponent extends KfComposantComponent implements OnInit, Aft
     }
 
     ngAfterViewInit() {
-        this.composant.gereHtml.htmlElement = this.divElementRef.nativeElement;
-        this.composant.gereHtml.initialiseHtml(this.output);
+        this.composant.initialiseHtml(this.divElementRef.nativeElement, this.output);
     }
 
 }

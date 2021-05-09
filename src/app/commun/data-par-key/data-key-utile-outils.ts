@@ -4,13 +4,13 @@ import { KfVueTableOutilBtnGroupe } from 'src/app/commun/kf-composants/kf-vue-ta
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 
 export class DataKeyUtileOutils<T extends IDataKey> {
-    protected _utile: DataKeyUtile<T>;
+    protected utile: DataKeyUtile<T>;
 
     constructor(utile: DataKeyUtile<T>) {
-        this._utile = utile;
+        this.utile = utile;
     }
 
     outilAjoute(): KfVueTableOutilBtnGroupe<T> {
-        return Fabrique.vueTable.outilAjoute(this._utile.lienKey.ajoute());
+        return Fabrique.vueTable.outilAjoute(this.utile.lienKey.ajoute());
     }
 }

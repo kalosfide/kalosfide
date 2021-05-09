@@ -1,3 +1,4 @@
+import { KfGéreCss } from './kf-gere-css';
 import { KfNgClasse, KfNgClasseDefDe } from './kf-gere-css-classe';
 
 export class KfGéreCssDe<T> {
@@ -28,11 +29,8 @@ export class KfGéreCssDe<T> {
         }
     }
 
-    ajouteClasseDefArray(classeDefs: (string | ((t: T) => string) | KfNgClasseDefDe<T>)[]): void {
-        classeDefs.forEach(classeDef => this._ajouteClasseDef(classeDef));
-    }
     ajouteClasseDef(...classeDefs: (string | ((t: T) => string) | KfNgClasseDefDe<T>)[]): void {
-        this.ajouteClasseDefArray(classeDefs);
+        classeDefs.forEach(classeDef => this._ajouteClasseDef(classeDef));
     }
 
     classe(t: T): KfNgClasse {
@@ -59,5 +57,27 @@ export class KfGéreCssDe<T> {
             );
         }
         return ngClasse;
+    }
+
+    ajouteAgéreCss(t: T, géreCss: KfGéreCss) {
+        if (this.pClasseDefs && this.pClasseDefs.length > 0) {
+            this.pClasseDefs.forEach(
+                classeDef => {
+                    géreCss.ajouteClasse(typeof (classeDef) === 'string' ? classeDef : classeDef(t));
+                });
+        }
+        if (this.pNgClasseDefs && this.pNgClasseDefs.length > 0) {
+            this.pNgClasseDefs.forEach(
+                ngClasseDef => {
+                    géreCss.ajouteClasse({ nom: ngClasseDef.nom, active: ngClasseDef.active ? () => ngClasseDef.active(t) : undefined });
+                });
+        }
+        return géreCss;
+    }
+
+    créeGéreCss(t: T): KfGéreCss {
+        const géreCss = new KfGéreCss();
+        this.ajouteAgéreCss(t, géreCss);
+        return géreCss;
     }
 }

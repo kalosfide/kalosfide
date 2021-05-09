@@ -1,13 +1,18 @@
 import { KeyUidRno } from '../../commun/data-par-key/key-uid-rno/key-uid-rno';
 import { IdEtatSite } from '../etat-site';
+import { IRoleData } from '../role/role';
 
-export class Site extends KeyUidRno {
-    nomSite: string;
+export interface ISiteData {
+    url: string;
     titre: string;
+}
+
+export class Site extends KeyUidRno implements ISiteData, IRoleData {
+    url: string;
+    titre: string;
+    nom: string;
+    adresse: string;
     ville: string;
-    formatNomFichierCommande: string;
-    formatNomFichierLivraison: string;
-    formatNomFichierFacture: string;
     nbProduits?: number;
     nbClients?: number;
     etat: IdEtatSite;
@@ -19,6 +24,11 @@ export class Site extends KeyUidRno {
         }
     }
 
+    static copieData(de: ISiteData, vers: ISiteData) {
+        vers.url = de.url;
+        vers.titre = de.titre;
+    }
+
     static compare(site1: Site, site2: Site): boolean {
         if (!site1) {
             return !site2;
@@ -28,8 +38,9 @@ export class Site extends KeyUidRno {
         }
         return site1.uid === site2.uid
             && site1.rno === site2.rno
-            && site1.nomSite === site2.nomSite
+            && site1.url === site2.url
             && site1.titre === site2.titre
+            && site1.nom === site2.nom
             && site1.nbProduits === site2.nbProduits
             && site1.nbClients === site2.nbClients
             && site1.etat === site2.etat;
@@ -42,12 +53,11 @@ export class Site extends KeyUidRno {
     copie(site: Site) {
         this.uid = site.uid;
         this.rno = site.rno;
-        this.nomSite = site.nomSite;
+        this.url = site.url;
         this.titre = site.titre;
+        this.nom = site.nom;
+        this.adresse = site.adresse;
         this.ville = site.ville;
-        this.formatNomFichierCommande = site.formatNomFichierCommande;
-        this.formatNomFichierLivraison = site.formatNomFichierLivraison;
-        this.formatNomFichierFacture = site.formatNomFichierFacture;
         this.nbProduits = site.nbProduits;
         this.nbClients = site.nbClients;
         this.etat = site.etat;

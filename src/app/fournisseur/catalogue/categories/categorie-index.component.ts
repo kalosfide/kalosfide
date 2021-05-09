@@ -21,10 +21,10 @@ import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-compos
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
 import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
+import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
 
 @Component({
     templateUrl: '../../../disposition/page-base/page-base.html',
-    styleUrls: ['../../../commun/commun.scss']
 })
 export class CategorieIndexComponent extends KeyUidRnoNoIndexComponent<Categorie> implements OnInit {
     pageDef: PageDef = CategoriePages.index;
@@ -52,7 +52,7 @@ export class CategorieIndexComponent extends KeyUidRnoNoIndexComponent<Categorie
         const urlDef: IUrlDef = {
             pageDef: ProduitPages.index,
             routes: ProduitRoutes,
-            nomSite: this.site.nomSite
+            urlSite: this.site.url
         };
         const lien = Fabrique.lien.retour(urlDef);
         const def = this._barreTitreDef;
@@ -76,7 +76,7 @@ export class CategorieIndexComponent extends KeyUidRnoNoIndexComponent<Categorie
     }
 
     créeGroupeTableDef(): IGroupeTableDef<Categorie> {
-        const outils = Fabrique.vueTable.outils<Categorie>(this.nom);
+        const outils = Fabrique.vueTable.outils<Categorie>();
         outils.ajoute(this.service.utile.outils.catégorie());
         const outilAjoute = this.service.utile.outils.ajoute();
         outilAjoute.bbtnGroup.afficherSi(this.service.utile.conditionTable.edition);
@@ -85,14 +85,16 @@ export class CategorieIndexComponent extends KeyUidRnoNoIndexComponent<Categorie
         const vueTableDef: IKfVueTableDef<Categorie> = {
             outils,
             colonnesDef: this.service.utile.colonne.colonnes((this.quandLigneSupprimée).bind(this)),
-            id: (catégorie: Categorie) => '' + catégorie.no,
-        };
+            id: (catégorie: Categorie) =>  {
+                return this.service.fragment(catégorie);
+            },
+    };
         const etatTable = Fabrique.vueTable.etatTable({
             nePasAfficherSiPasVide: true,
             nbMessages: 1,
             avecSolution: true,
             charge: ((etat: EtatTable) => {
-                etat.grBtnsMsgs.messages[0].fixeTexte('Il n\'a pas de categories de produits.');
+                etat.grBtnsMsgs.messages[0].fixeTexte(`Il n'y a pas de categories de produits.`);
                 Fabrique.lien.fixeDef(etat.grBtnsMsgs.boutons[0] as KfLien, this.lienDefAjoute());
                 etat.grBtnsMsgs.alerte('danger');
             }).bind(this)
@@ -107,13 +109,14 @@ export class CategorieIndexComponent extends KeyUidRnoNoIndexComponent<Categorie
         return this.site.etat === IdEtatSite.catalogue ? ModeTable.edite : ModeTable.aperçu;
     }
 
-    rafraichit() {
+    rafraichit(site: Site) {
+        this.site = site;
         this.service.changeModeTable(this.calculeModeTable());
     }
 
     aprèsChargeData() {
         this.subscriptions.push(
-            this.service.navigation.siteObs().subscribe(() => this.rafraichit())
+            this.service.navigation.siteObs().subscribe((site: Site) => this.rafraichit(site))
         );
     }
 
@@ -142,12 +145,14 @@ export class CategorieIndexComponent extends KeyUidRnoNoIndexComponent<Categorie
         this.chargeGroupe();
     }
 
-    créePageTableDef() {
-        this.pageTableDef = this.créePageTableDefBase();
-        this.pageTableDef.avantChargeData = () => this.avantChargeData();
-        this.pageTableDef.initialiseUtile = () => this.service.initialiseModeTable(this.calculeModeTable());
-        this.pageTableDef.chargeGroupe = () => this.chargeGroupe();
-        this.pageTableDef.aprèsChargeData = () => this.aprèsChargeData();
+    créePageTableDef(): IPageTableDef {
+        return {
+            avantChargeData: () => this.avantChargeData(),
+            chargeData: (data: Data) => this.chargeData(data),
+            créeSuperGroupe: () => this.créeGroupe('super'),
+            initialiseUtile: () => this.service.initialiseModeTable(this.calculeModeTable()),
+            chargeGroupe: () => this.chargeGroupe(),
+            aprèsChargeData: () => this.aprèsChargeData(),
+        };
     }
-
 }

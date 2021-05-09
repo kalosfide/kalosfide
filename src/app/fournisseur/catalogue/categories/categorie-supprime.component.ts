@@ -7,7 +7,6 @@ import { CategorieService } from 'src/app/modeles/catalogue/categorie.service';
 
 @Component({
     templateUrl: '../../../disposition/page-base/page-base.html',
-    styleUrls: ['../../../commun/commun.scss']
 })
 export class CategorieSupprimeComponent extends CategorieALESComponent implements OnInit {
 

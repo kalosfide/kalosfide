@@ -13,7 +13,6 @@ import { CLFClientComponent } from 'src/app/modeles/c-l-f/c-l-f-client.component
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
-    styleUrls: ['../../commun/commun.scss']
 })
 /** page titre */
 export class LivraisonClientComponent extends CLFClientComponent implements OnInit, OnDestroy {

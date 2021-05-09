@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { PageDef } from 'src/app/commun/page-def';
-import { ClientPages, ClientRoutes } from './client-pages';
+import { FournisseurClientPages, FournisseurClientRoutes } from './client-pages';
 import { Site } from 'src/app/modeles/site/site';
 import { Identifiant } from 'src/app/securite/identifiant';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Data } from '@angular/router';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { Client } from 'src/app/modeles/client/client';
 import { KeyUidRnoIndexComponent } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno-index.component';
@@ -13,21 +13,24 @@ import { ModeTable } from 'src/app/commun/data-par-key/condition-table';
 import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
 import { EtatTable } from 'src/app/disposition/fabrique/etat-table';
 import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
+import { KfGéreCss } from 'src/app/commun/kf-composants/kf-partages/kf-gere-css';
+import { KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
+import { EtatClient } from 'src/app/modeles/client/etat-client';
+import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
-    styleUrls: ['../../commun/commun.scss']
 })
 export class ClientIndexComponent extends KeyUidRnoIndexComponent<Client> implements OnInit {
 
-    pageDef: PageDef = ClientPages.index;
+    pageDef: PageDef = FournisseurClientPages.index;
 
     get titre(): string {
         return this.pageDef.titre;
     }
 
-    dataPages = ClientPages;
-    dataRoutes = ClientRoutes;
+    dataPages = FournisseurClientPages;
+    dataRoutes = FournisseurClientRoutes;
 
     site: Site;
     identifiant: Identifiant;
@@ -41,16 +44,16 @@ export class ClientIndexComponent extends KeyUidRnoIndexComponent<Client> implem
     }
 
     créeGroupeTableDef(): IGroupeTableDef<Client> {
-        const outils = Fabrique.vueTable.outils<Client>(this.nom);
+        const outils = Fabrique.vueTable.outils<Client>();
         outils.ajoute(this.service.utile.outils.client());
-        outils.texteRienPasseFiltres = `Il n\'a pas de client correspondant aux critères de recherche.`;
+        outils.texteRienPasseFiltres = `Il n'y a pas de client correspondant aux critères de recherche.`;
         outils.ajoute(this.service.utile.outils.ajoute());
         const etatTable = Fabrique.vueTable.etatTable({
             nePasAfficherSiPasVide: true,
             nbMessages: 1,
             avecSolution: true,
             charge: ((etat: EtatTable) => {
-                etat.grBtnsMsgs.messages[0].fixeTexte('Il n\'a pas de clients.');
+                etat.grBtnsMsgs.messages[0].fixeTexte(`Il n'y a pas de clients enregistrés.`);
                 Fabrique.lien.fixeDef(etat.grBtnsMsgs.boutons[0] as KfLien, this.lienDefAjoute());
                 etat.grBtnsMsgs.alerte('warning');
             }).bind(this)
@@ -60,10 +63,19 @@ export class ClientIndexComponent extends KeyUidRnoIndexComponent<Client> implem
             vueTableDef: {
                 colonnesDef: this.service.utile.colonne.colonnes(),
                 outils,
-                id: (t: Client) => {
-                    return this.service.utile.url.id(KeyUidRno.texteDeKey(t));
+                id: (client: Client) => {
+                    return this.service.fragment(client);
                 },
-                optionsDeTrieur: Fabrique.vueTable.optionsDeTrieur()
+                triInitial: { colonne: 'nom', direction: 'asc' },
+                gereCssLigne: (t: Client) => {
+                    const gereCss = new KfGéreCss();
+                    gereCss.ajouteClasse({
+                        nom: KfBootstrap.classe('text', 'danger'),
+                        active: () => t.etat === EtatClient.nouveau
+                    });
+                    return gereCss;
+                },
+                pagination: Fabrique.vueTable.pagination<Client>()
             },
             etatTable
         };
@@ -83,11 +95,14 @@ export class ClientIndexComponent extends KeyUidRnoIndexComponent<Client> implem
         this.identifiant = this.service.identification.litIdentifiant();
     }
 
-    créePageTableDef() {
-        this.pageTableDef = this.créePageTableDefBase();
-        this.pageTableDef.avantChargeData = () => this.avantChargeData();
-        this.pageTableDef.chargeGroupe = () => this.chargeGroupe();
-        this.pageTableDef.initialiseUtile = () => this.service.initialiseModeTable(this.calculeModeTable());
+    créePageTableDef(): IPageTableDef {
+        return {
+            avantChargeData: () => this.avantChargeData(),
+            chargeData: (data: Data) => this.chargeData(data),
+            créeSuperGroupe: () => this.créeGroupe('super'),
+            initialiseUtile: () => this.service.initialiseModeTable(this.calculeModeTable()),
+            chargeGroupe: () => this.chargeGroupe(),
+        };
     }
 
 }

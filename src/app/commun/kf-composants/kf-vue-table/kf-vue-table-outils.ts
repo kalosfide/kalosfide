@@ -6,6 +6,7 @@ import { KfGéreCss } from '../kf-partages/kf-gere-css';
 import { IKfVueTableOutilVue, IKfVueTableOutil } from './kf-vue-table-outil';
 import { KfBBtnToolbar } from '../kf-b-btn-toolbar/kf-b-btn-toolbar';
 import { KfNgStyle } from '../kf-partages/kf-gere-css-style';
+import { KfTypeDEvenement } from '../kf-partages/kf-evenements';
 
 export interface IKfVueTableOutils {
     nePasAfficher: boolean;
@@ -16,11 +17,16 @@ export interface IKfVueTableOutils {
 }
 
 export class KfVueTableOutils<T> extends KfGéreCss implements IKfVueTableOutils {
-    private vueTable: KfVueTable<T>;
+    private pVueTable: KfVueTable<T>;
     private pOutils: IKfVueTableOutil<T>[];
     /** remplace les lignes quand les filtres ne laissent rien passer */
     texteRienPasseFiltres: string;
+    /**
+     * Groupe KfBBtnToolbar d'affichage des outils
+     */
     private pBtnToolbar: KfBBtnToolbar;
+
+    private pFiltreChercheALeFocus: boolean;
 
     constructor() {
         super();
@@ -30,13 +36,19 @@ export class KfVueTableOutils<T> extends KfGéreCss implements IKfVueTableOutils
         this.texteRienPasseFiltres = `Il n'y aucune ligne correspondant aux critères de filtrage.`;
     }
 
+    get vueTable(): KfVueTable<T> {
+        return this.pVueTable;
+    }
 
     initialise(vueTable: KfVueTable<T>) {
-        this.vueTable = vueTable;
+        this.pVueTable = vueTable;
         this.suitLaVisiblité(vueTable);
         this.pBtnToolbar.créeGereValeur();
         this.pBtnToolbar.estRacineV = true;
-        this.pBtnToolbar.sauveQuandChange = true;
+        this.pBtnToolbar.gereHtml.ajouteTraiteur(KfTypeDEvenement.valeurChange,
+            () => {
+                vueTable.appliqueFiltres();
+            });
         this.pOutils.forEach(outil => {
             this.pBtnToolbar.ajoute(outil.composant);
             if (outil.initialise) {
@@ -45,26 +57,56 @@ export class KfVueTableOutils<T> extends KfGéreCss implements IKfVueTableOutils
         });
     }
 
-    get filtreActif(): boolean {
-        let actif = false;
-        this.pOutils.forEach(o => actif = actif || o.filtreActif);
-        return actif;
+    /**
+     * Retourne true si l'un des outils est un filtre des lignes
+     */
+    get avecFiltre(): boolean {
+        for (const outil of this.pOutils) {
+            if (outil.valide) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
-     * définit des classes css à appliquer suivant l'état des filtres
+     * Retourne True si l'un des outils filtre les lignes
+     */
+    get filtreActif(): boolean {
+        for (const outil of this.pOutils) {
+            if (outil.filtreActif) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    get filtreChercheALeFocus(): boolean {
+        return this.pFiltreChercheALeFocus;
+    }
+    quandFiltreCherchePrendLeFocus() {
+        this.pFiltreChercheALeFocus = true;
+        console.log('FiltreCherchePrendLeFocus');
+    }
+    quandFiltreCherchePerdLeFocus() {
+        this.pFiltreChercheALeFocus = true;
+        console.log('FiltreCherchePerdLeFocus');
+    }
+
+    /**
+     * Définit des classes css à appliquer suivant l'état des filtres.
      * @param siFiltreActif classe css du groupe des outils quand un filtre est actif
      * @param siFiltreInactif classe css du groupe des outils quand aucun filtre n'est actif
      */
     fixeClassesFiltre(siFiltreActif?: string, siFiltreInactif?: string) {
         if (siFiltreActif) {
-            this.ajouteClasseDef({
+            this.ajouteClasse({
                 nom: siFiltreActif,
                 active: () => this.filtreActif
             });
         }
         if (siFiltreInactif) {
-            this.ajouteClasseDef({
+            this.ajouteClasse({
                 nom: siFiltreInactif,
                 active: () => !this.filtreActif
             });
@@ -84,23 +126,18 @@ export class KfVueTableOutils<T> extends KfGéreCss implements IKfVueTableOutils
         return outil;
     }
 
-    appliqueFiltres() {
-        const valides: ((t: T) => boolean)[] = this.pOutils
-            .filter(outil => outil.valide !== undefined)
-            .map(filtre => filtre.valide);
-        const lignes: KfVueTableLigne<T>[] = this.vueTable.lignes;
-        lignes.forEach(l => {
-            let passeFiltre = true;
-            for (let index = 0; index < valides.length && passeFiltre; index++) {
-                const valide = valides[index];
-                passeFiltre = valide(l.item);
-            }
-            l.passeFiltres = passeFiltre;
-        });
-    }
-
-    supprimeFiltres() {
-        this.vueTable.lignes.forEach(l => l.passeFiltres = true);
+    get valideLigne(): (ligne: KfVueTableLigne<T>) => boolean {
+        const outilsValidants = this.pOutils.filter(outil => outil.valide !== undefined);
+        if (outilsValidants.length > 0) {
+            return (ligne: KfVueTableLigne<T>) => {
+                for (const outil of outilsValidants) {
+                    if (!outil.valide(ligne)) {
+                        return false;
+                    }
+                }
+                return true;
+            };
+        }
     }
 
     get outils(): IKfVueTableOutil<T>[] {

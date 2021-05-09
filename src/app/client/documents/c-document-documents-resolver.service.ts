@@ -18,7 +18,7 @@ export class CDocumentDocumentsResolverService extends CLFResolverService implem
     }
 
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<CLFDocs> {
-        return this.documentsDuClient();
+        return this.service.documents();
     }
 
 }

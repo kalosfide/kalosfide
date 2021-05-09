@@ -6,7 +6,7 @@ import { CLFLigne } from './c-l-f-ligne';
 import { ApiLigneData } from './api-ligne';
 import { DATE_EST_NULLE } from '../date-nulle';
 import { CLFDocEditeur } from './c-l-f-doc-editeur';
-import { IDataKeyComponent } from 'src/app/commun/data-par-key/i-data-key-component';
+import { IDataComponent } from 'src/app/commun/data-par-key/i-data-component';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { KeyUidRnoNo } from 'src/app/commun/data-par-key/key-uid-rno-no/key-uid-rno-no';
 import { Couleur } from 'src/app/disposition/fabrique/fabrique-couleurs';
@@ -14,6 +14,10 @@ import { TexteOutils } from 'src/app/commun/outils/texte-outils';
 import { ApiDocumentsSynthèse } from './api-documents-client-data';
 import { KfCaseACocher } from 'src/app/commun/kf-composants/kf-elements/kf-case-a-cocher/kf-case-a-cocher';
 import { TypeCLF } from './c-l-f-type';
+import { CLFService } from './c-l-f.service';
+import { IKfVueTableLigne } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-ligne-base';
+import { CoûtDef, ICoût, LigneDocumentCoût } from './cout';
+import { KfVueTableLigne } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-ligne';
 
 export class CLFDoc {
 
@@ -24,12 +28,17 @@ export class CLFDoc {
     àSynthétiser: CLFDoc[];
     client: Client;
 
+    /** */
+    vueTableLigne: KfVueTableLigne<CLFDoc>;
+
     private pEditeur: CLFDocEditeur;
     private pCaseToutSélectionner: KfCaseACocher;
 
     private pChargeLigne: (ligne: CLFLigne, data: ApiLigneData) => void;
 
     protected pLignes: CLFLigne[];
+
+    private pCoûtAgrégé: ICoût;
 
     constructor(clfDocs: CLFDocs, type: TypeCLF) {
         this.clfDocs = clfDocs;
@@ -58,7 +67,7 @@ export class CLFDoc {
         return this.type === 'commande' && this.date !== undefined && !DATE_EST_NULLE(this.date);
     }
 
-    créeEditeur(component: IDataKeyComponent) {
+    créeEditeur(component: IDataComponent) {
         this.pEditeur = new CLFDocEditeur(this, component);
     }
     get éditeur(): CLFDocEditeur { return this.pEditeur; }
@@ -67,21 +76,28 @@ export class CLFDoc {
     }
     get caseToutSélectionner(): KfCaseACocher { return this.pCaseToutSélectionner; }
 
-    créeCaseACocherTout() {
-        const caseTout = Fabrique.caseACocher('choisi', undefined,
-            () => {
-                this.àSynthétiser.forEach(bon => bon.éditeur.kfChoisi.valeur = caseTout.valeur);
-            }
+    créeCaseACocherTout(service: CLFService) {
+        const caseTout = Fabrique.caseACocher('choisi_tout', undefined,
+            (() => {
+                service.changeChoisis(this, caseTout.valeur);
+            }).bind(this)
         );
-        const bonsPréparés = this.àSynthétiser.filter(bon => bon.préparé);
-        const nb = bonsPréparés.length;
-        const nbChoisis = bonsPréparés.filter(bon => bon.apiDoc.choisi === true).length;
-        const nbExclus = bonsPréparés.filter(bon => bon.apiDoc.choisi === false).length;
-        caseTout.valeur = nb === nbChoisis ? true : nb === nbExclus ? false : undefined;
-        caseTout.inactivité = nb > 0;
+        Fabrique.caseACocherAspect(caseTout, true);
         caseTout.estRacineV = true;
+        caseTout.géreClasseEntree.ajouteClasse('text-center');
         this.pCaseToutSélectionner = caseTout;
         return caseTout;
+    }
+
+    rafraichitCaseToutSélectionner() {
+        const bonsPréparés = this.àSynthétiser.filter(bon => bon.préparé);
+        const nb = bonsPréparés.length;
+        const nbChoisis = bonsPréparés.filter(bon => bon.choisi === true).length;
+        const nbExclus = bonsPréparés.filter(bon => bon.choisi === false).length;
+        this.pCaseToutSélectionner.gereHtml.actionSansSuiviValeur(() => {
+            this.pCaseToutSélectionner.valeur = nb === nbChoisis ? true : nb === nbExclus ? false : undefined;
+            this.pCaseToutSélectionner.inactivité = nb === 0;
+        })();
     }
 
    private  get chargeLigne(): (ligne: CLFLigne, data: ApiLigneData) => void {
@@ -334,6 +350,10 @@ export class CLFDoc {
         };
     }
 
+    /**
+     * Retourne un ApiDocumentsSynthèse contenant la key du client et la liste des no des bons à synthétiser
+     * @param filtre retourne true si le bon doit faire partie de la synthèse
+     */
     apiSynthèseAEnvoyer(filtre: (clfDoc: CLFDoc) => boolean): ApiDocumentsSynthèse {
         const apiDocs = new ApiDocumentsSynthèse();
         apiDocs.keyClient = { uid: this.uid, rno: this.rno };
@@ -341,6 +361,14 @@ export class CLFDoc {
             .filter(d => filtre(d))
             .map(d => d.no);
         return apiDocs;
+    }
+
+    get coûtAgrégé(): ICoût {
+        if (!this.pCoûtAgrégé) {
+            const coûtDef: CoûtDef<CLFLigne> = LigneDocumentCoût.aFixer();
+            this.pCoûtAgrégé = coûtDef.agrége(this.pLignes);
+        }
+        return this.pCoûtAgrégé;
     }
 
 }

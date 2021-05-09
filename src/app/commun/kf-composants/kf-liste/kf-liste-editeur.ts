@@ -36,7 +36,7 @@ export class KfListeEditeur extends KfSuperGroupe {
      */
     get boutonAnnuler(): KfBouton { return this.editions.boutonAnnuler; }
 
-    _editionEnCours: boolean;
+    pEditionEnCours: boolean;
 
     constructor(editions: KfListeEditions) {
         super(editions.liste.nom);
@@ -80,7 +80,7 @@ export class KfListeEditeur extends KfSuperGroupe {
     }
 
     désactiveEdition() {
-        this._editionEnCours = false;
+        this.pEditionEnCours = false;
         if (this.editions.enTete) {
             this.editions.enTete.désactive();
         }
@@ -93,7 +93,7 @@ export class KfListeEditeur extends KfSuperGroupe {
 
     activeEdition() {
         console.log('activeEdition', this);
-        this._editionEnCours = true;
+        this.pEditionEnCours = true;
         if (this.editions.itemNouveau) {
             this.composant.gereValeur.rétablit(this.liste.creeItems.valeur(this.editions.itemNouveau));
         }
@@ -105,7 +105,7 @@ export class KfListeEditeur extends KfSuperGroupe {
     }
 
     get editionEnCours(): boolean {
-        return this._editionEnCours;
+        return this.pEditionEnCours;
     }
 
     quandEvenementEnTete(evenement: KfEvenement) {

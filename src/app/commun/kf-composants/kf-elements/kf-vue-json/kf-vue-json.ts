@@ -1,12 +1,11 @@
+import { KfTypeDeComposant } from '../../kf-composants-types';
 import { KfComposant } from '../../kf-composant/kf-composant';
-import { KfTypeDeComposant, KfTypeDeValeur } from '../../kf-composants-types';
-import { KfElement } from '../../kf-composant/kf-element';
 
 export function KfNomVueJson(nom: string): string {
     return nom + '_json';
 }
 
-export class KfVueJson extends KfElement {
+export class KfVueJson extends KfComposant {
 
     objet: () => any;
 

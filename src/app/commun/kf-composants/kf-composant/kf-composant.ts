@@ -19,7 +19,6 @@ import { KfListe } from '../kf-liste/kf-liste';
 import { KfSuperGroupe } from '../kf-groupe/kf-super-groupe';
 import { KfGroupe } from '../kf-groupe/kf-groupe';
 import { KfComposantGereHtml } from './kf-composant-gere-html';
-import { KfComposantGereVisible } from './kf-composant-gere-visible';
 import { KfGereTabIndex } from './kf-composant-gere-tabindex';
 import { KfContenuPhrase } from '../kf-partages/kf-contenu-phrase/kf-contenu-phrase';
 import { KfComposantGereValeur } from './kf-composant-gere-valeur';
@@ -32,9 +31,16 @@ import { KfGéreCss } from '../kf-partages/kf-gere-css';
 import { Subscription, Observable } from 'rxjs';
 import { KfInitialObservable } from '../kf-partages/kf-initial-observable';
 import { KfDiv } from '../kf-partages/kf-div/kf-div';
+import { KfNgClasse } from '../kf-partages/kf-gere-css-classe';
+import { KfNgStyle } from '../kf-partages/kf-gere-css-style';
+import { EventEmitter } from '@angular/core';
+import { KfEvenement } from '../kf-partages/kf-evenements';
+import { TraiteKeydownService } from '../../traite-keydown/traite-keydown.service';
 
 export interface IKfComposant {
     composant: KfComposant;
+    classe: KfNgClasse;
+    style: KfNgStyle;
 }
 export abstract class KfComposant extends KfGéreCss implements IKfComposant {
     // GENERAL
@@ -82,17 +88,6 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
      *
      */
     gereValeur: KfComposantGereValeur;
-    /**
-     * estRacineV: si vrai, à fixer avant quandTousAjoutés
-     */
-    get estRacineV(): boolean {
-        return this.gereValeur && this.gereValeur.estRacineV;
-    }
-    set estRacineV(valeur: boolean) {
-        if (this.gereValeur) {
-            this.gereValeur.estRacineV = valeur;
-        }
-    }
 
     // HTML
 
@@ -117,44 +112,37 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
     /**
      * contenu phrasé de l'element ou de son label
      */
-    private _contenuPhrase?: KfContenuPhrase;
+    private pContenuPhrase?: KfContenuPhrase;
     // pour debug
     get contenuPhrase(): KfContenuPhrase {
-        return this._contenuPhrase;
+        return this.pContenuPhrase;
     }
     set contenuPhrase(contenuPhrase: KfContenuPhrase) {
-        this._contenuPhrase = contenuPhrase;
+        this.pContenuPhrase = contenuPhrase;
     }
 
     /**
      * pour entourer le template du composant dans un ou des éléments div
      */
-    private _div: KfDiv;
+    private pDiv: KfDiv;
     get div(): KfDiv {
-        return this._div;
+        return this.pDiv;
     }
 
     /**
      * pour désigner le composant dans les messages
      */
-    private _nomPourErreur: string;
-
-    /**
-     * title de l'element
-     */
-    private _titleHtml: string;
-
-    /**
-     * voir visible
-     */
-    gereVisible: KfComposantGereVisible;
+    private pNomPourErreur: string;
 
     /**
      * voir inactif
      */
-    private _inactivité: boolean;
-    private _inactivitéFnc: () => boolean;
-    private _subscriptionInactif: Subscription;
+    private pInactivité: boolean;
+    private pInactivitéFnc: () => boolean;
+    private pSubscriptionInactif: Subscription;
+
+
+    traiteKeydownService: TraiteKeydownService;
 
     constructor(nom: string, type: KfTypeDeComposant) {
         super();
@@ -162,7 +150,6 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
         this.type = type;
         this.noeud = new Noeud();
         this.noeud.objet = this;
-        this.gereVisible = new KfComposantGereVisible(this);
         this.gereHtml = new KfComposantGereHtml(this);
     }
 
@@ -220,23 +207,15 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
         return null;
     }
 
-    /* A N'UTILISER QU'APRES QUE LA RACINE DU COMPOSANT A APPELE créeValeur */
-    get groupeParent(): KfGroupe {
+    get formulaireParent(): KfGroupe {
         let c = this.parent;
         while (c) {
-            if (c.typeDeValeur === KfTypeDeValeur.avecGroupe) {
+            if (c.typeDeValeur === KfTypeDeValeur.avecGroupe && c.estRacineV) {
                 break;
             }
             c = c.parent;
         }
         return c as KfGroupe;
-    }
-
-    get formulaireParent(): KfSuperGroupe {
-        const gp = this.groupeParent;
-        if (gp) {
-            return gp.noeud.racine.objet as KfSuperGroupe;
-        }
     }
 
     /**
@@ -246,6 +225,9 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
     ajoute(composant: KfComposant) {
         if (composant.noeud.parent) {
             throw new Error(`Le composant ${composant.nom} a déjà un parent.`);
+        }
+        if (composant.type === KfTypeDeComposant.radio && this.type !== KfTypeDeComposant.radios) {
+            throw new Error(`Un composant de type ${KfTypeDeComposant.radio} ne peut être ajouté à ${this.nom} qui n'est pas de type ${KfTypeDeComposant.radios}.`);
         }
         this.noeud.Ajoute(composant.noeud);
     }
@@ -284,13 +266,31 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
     }
 
     // INFO
+    /**
+     * Est vrai si le composant est le superGroupe racine de l'arbre de disposition.
+     */
     get estRacine(): boolean {
         return !(this.noeud.parent);
     }
-    get estFormulaire(): boolean {
-        return this.estRacineV && this.estGroupePourLaValeur && !!this.gereValeur;
+    /**
+     * Est vrai si le composant est la racine d'un arbre de valeur.
+     * A fixer avant d'appeler quandTousAjoutés du superGroupe racine de l'arbre de disposition.
+     */
+     get estRacineV(): boolean {
+        return this.gereValeur && this.gereValeur.estRacineV;
     }
-    get estGroupePourLaValeur(): boolean {
+    set estRacineV(valeur: boolean) {
+        if (this.gereValeur) {
+            this.gereValeur.estRacineV = valeur;
+        }
+    }
+    /**
+     * Est vrai si le composant est un groupe qui est la racine d'un arbre de valeur.
+     */
+    get estFormulaire(): boolean {
+        return this.estRacineV && this.type === KfTypeDeComposant.groupe && !!this.gereValeur;
+    }
+    get estGroupe(): boolean {
         return this.type === KfTypeDeComposant.groupe || this.type === KfTypeDeComposant.b_btn_toolbar;
     }
     get estListe(): boolean {
@@ -300,7 +300,7 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
         return this.type === KfTypeDeComposant.vuetable;
     }
     get estElement(): boolean {
-        return !this.estGroupePourLaValeur && !this.estListe && !this.estVueTable;
+        return !this.estGroupe && !this.estListe && !this.estVueTable;
     }
     get estEntree(): boolean {
         return this.estElement && this.typeDeValeur !== KfTypeDeValeur.aucun;
@@ -308,30 +308,11 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
 
     // VALEUR
 
-    /* A N'UTILISER QU'APRES QUE LA RACINE DU COMPOSANT A APPELE créeValeur */
-    get valeurDansParent(): any {
-        if (this.groupeParent) {
-            const v = this.groupeParent.valeurDansParent;
-            if (v) {
-                return v[this.nom];
-            }
-        }
-    }
-    /* A N'UTILISER QU'APRES QUE LA RACINE DU COMPOSANT A APPELE créeValeur */
-    set valeurDansParent(valeur: any) {
-        if (this.groupeParent) {
-            const v = this.groupeParent.valeurDansParent;
-            if (v) {
-                v[this.nom] = valeur;
-            }
-        }
-    }
-
     /* VALIDATION */
 
-    ajouteValidateur(validateur: KfValidateur) {
+    ajouteValidateur(...validateurs: KfValidateur[]) {
         if (this.gereValeur) {
-            this.gereValeur.AjouteValidateur(validateur);
+            this.gereValeur.ajouteValidateur(...validateurs);
         }
     }
 
@@ -346,8 +327,8 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
     }
 
     get nomPourErreur(): string {
-        if (this._nomPourErreur) {
-            return this._nomPourErreur;
+        if (this.pNomPourErreur) {
+            return this.pNomPourErreur;
         }
         const t = this.texte;
         if (t) {
@@ -356,11 +337,11 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
         return this.nom;
     }
     set nomPourErreur(nom: string) {
-        this._nomPourErreur = nom;
+        this.pNomPourErreur = nom;
     }
 
     get avecInvalidFeedback(): boolean {
-        if (this.parent) {
+        if (this.parent && !this.estDansVueTable) {
             return this.parent.avecInvalidFeedback;
         }
     }
@@ -374,12 +355,12 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
     }
 
     private _active(inactivité: boolean) {
-        this._inactivité = inactivité;
+        this.pInactivité = inactivité;
         if (this.abstractControl) {
             if (inactivité) {
-                this.abstractControl.enable();
-            } else {
                 this.abstractControl.disable();
+            } else {
+                this.abstractControl.enable();
             }
         }
     }
@@ -394,18 +375,18 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
      *  méthodes pour fixer la façon de déterminer l'activité
      */
     set inactivité(inactivité: boolean) {
-        this._inactivité = inactivité;
+        this.pInactivité = inactivité;
         this._active(inactivité);
     }
     set inactivitéFnc(inactivitéFnc: () => boolean) {
-        this._inactivitéFnc = inactivitéFnc;
+        this.pInactivitéFnc = inactivitéFnc;
         this._active(inactivitéFnc());
     }
     set inactivitéObs(inactivitéObs: Observable<boolean>) {
-        if (this._subscriptionInactif) {
-            this._subscriptionInactif.unsubscribe();
+        if (this.pSubscriptionInactif) {
+            this.pSubscriptionInactif.unsubscribe();
         }
-        this._subscriptionInactif = inactivitéObs.subscribe(inactif => {
+        this.pSubscriptionInactif = inactivitéObs.subscribe(inactif => {
             this._active(inactif);
         });
     }
@@ -418,9 +399,9 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
      * permet d'affecter l'attribut disabled au DOM element
      */
     get inactif(): boolean {
-        let inactif = (this._inactivitéFnc)
-            ? this._inactivitéFnc()
-            : this._inactivité; // si l'inactivité dépend d'un observable elle a été fixée
+        let inactif = (this.pInactivitéFnc)
+            ? this.pInactivitéFnc()
+            : this.pInactivité; // si l'inactivité dépend d'un observable elle a été fixée
         inactif = (this.abstractControl && this.abstractControl.disabled)
             || (this.parent && this.parent.inactif)
             || (this.listeParent && this.listeParent.composant.inactif)
@@ -430,13 +411,9 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
 
     // HTML
 
-    enveloppeDiv(): KfDiv {
-        if (!this._div) {
-            this._div = KfDiv.enveloppe(this);
-            return this._div;
-        } else {
-            return KfDiv.ajouteA(this._div);
-        }
+    initialiseHtml(htmlElement: HTMLElement, output: EventEmitter<KfEvenement>) {
+        this.gereHtml.htmlElement = htmlElement;
+        this.composant.gereHtml.initialiseHtml(output);
     }
 
     get tabIndex(): number {
@@ -446,25 +423,23 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
         this.gereHtml.tabIndex = tabIndex;
     }
 
-    get parentPourTabIndex(): KfComposant {
-        let parent = this.listeParent ? this.listeParent.composant : this.parent;
-        if (parent) {
-            if (!parent.composant.gereTabIndex) {
-                parent = parent.composant.parentPourTabIndex;
-            }
-        }
-        return parent;
-    }
     get gereTabIndexParent(): KfGereTabIndex {
-        const parent = this.parentPourTabIndex;
-        if (parent && parent.gereTabIndex.contenus.find(c => c === this)) {
-            return parent.gereTabIndex;
+        const ascendantAvecGereTabIndex: (composant: KfComposant) => KfComposant =
+            (composant: KfComposant) => {
+                const parent = composant.listeParent ? composant.listeParent.composant : composant.parent;
+                if (parent) {
+                    if (parent.gereTabIndex) {
+                        return parent;
+                    } else {
+                        return ascendantAvecGereTabIndex(parent);
+                    }
+                }
+            };
+        const ascendant = ascendantAvecGereTabIndex(this);
+        if (ascendant && ascendant.gereTabIndex.contenus.find(c => c === this)) {
+            return ascendant.gereTabIndex;
         }
     }
-
-    /**
-     * balises Html à ajouter dans le template autour de la partie rendant le composant
-     */
 
     prendLeFocus(): boolean {
         if (this.gereHtml.prendLeFocus()) {
@@ -524,7 +499,7 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
         }
     }
     /**
-     * fixe le icone de l'element ou de son label
+     * fixe l'icone de l'element ou de son label
      */
     fixeIcone(icone: FANomIcone) {
         if (!this.contenuPhrase) {
@@ -534,18 +509,14 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
         }
     }
 
-
     /**
      * title de l'element
      */
     get titleHtml(): string {
-        return this._titleHtml;
+        return this.gereHtml.titleHtml;
     }
     set titleHtml(titleHtml: string) {
-        this._titleHtml = titleHtml;
-        if (this.gereHtml.htmlElement) {
-            this.gereHtml.htmlElement.title = titleHtml;
-        }
+        this.gereHtml.titleHtml = titleHtml;
     }
 
     // avec disposition

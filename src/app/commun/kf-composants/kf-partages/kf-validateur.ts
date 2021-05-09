@@ -1,8 +1,7 @@
 import { ValidatorFn, AsyncValidatorFn, ValidationErrors, AbstractControl, Validators } from '@angular/forms';
 import { KfComposant } from '../kf-composant/kf-composant';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
-import { KfGroupe } from '../kf-groupe/kf-groupe';
 import { KfInputNombre } from '../kf-elements/kf-input/kf-input-nombre';
 
 export class KfValidateur {
@@ -11,31 +10,96 @@ export class KfValidateur {
     asyncValidatorFn: AsyncValidatorFn;
     message: string;
 
+    /**
+     * Si présent, le validateur est un validateur à marque qui stocke la valeur du controle
+     * quand une soumission retourne une erreur pour le controle et invalide le controle quand il contient une valeur stockée
+     */
     marqueErreur: (a: AbstractControl) => void;
 }
 
-class KfValidateurDoublon extends KfValidateur {
-    doublon: any;
+/**
+ * Valide avant la première soumission.
+ * Si une soumission retourne une erreur pour le controle, stocke la valeur du controle.
+ * La fonction de validation retourne une erreur si le controle contient une valeur stockée
+ */
+class KfValidateurAMarque extends KfValidateur {
+    valeurErronée: any[];
 
     constructor(nom: string, message: string) {
         super();
         this.nom = nom;
+        this.valeurErronée = [];
         this.validatorFn = (a: AbstractControl): ValidationErrors => this._validatorFn(a);
-        this.marqueErreur = (a: AbstractControl) => {
-            this.doublon = a.value;
-        };
+        this.marqueErreur = ((a: AbstractControl) => {
+            this.valeurErronée.push(a.value);
+            a.updateValueAndValidity();
+        }).bind(this);
         this.message = message;
     }
 
     private _validatorFn(a: AbstractControl): ValidationErrors {
         const errors: ValidationErrors = {};
-        if (a.value === this.doublon) {
+        if (this.valeurErronée.find(v => v === a.value)) {
             errors[this.nom] = {
                 value: a.value
             };
             return errors;
         }
         return null;
+    }
+}
+
+/**
+ * Valide avant la première soumission.
+ * Si une soumission retourne une erreur pour le formulaire, stocke la valeur du formulaire.
+ * La fonction de validation retourne une erreur si le formulaire contient une valeur stockée
+ */
+class KfValidateurAMarqueDeFormulaire extends KfValidateur {
+    valeurErronée: any[];
+
+    constructor(sontEgaux: (a1: any, a2: any) => boolean) {
+        super();
+        this.nom = 'AMarque';
+        this.valeurErronée = [];
+        this.validatorFn = (a: AbstractControl): ValidationErrors => {
+            const errors: ValidationErrors = {};
+            if (this.valeurErronée.find(v => sontEgaux(v, a.value))) {
+                errors[this.nom] = a.value;
+                return errors;
+            }
+            return null;
+        };
+        this.marqueErreur = ((a: AbstractControl) => {
+            this.valeurErronée.push(a.value);
+            a.updateValueAndValidity();
+        }).bind(this);
+    }
+}
+
+/**
+ * Valide avant la première soumission.
+ * Si une soumission retourne une erreur pour le formulaire, souscrit à valueChanges du formulaire.
+ * Si la valeur du formulaire change, efface la souscription
+ * La fonction de validation retourne une erreur si la souscription existe
+ */
+class KfValidateurAUnCoup extends KfValidateur {
+    invalide: boolean;
+
+    constructor(nom: string, message: string) {
+        super();
+        this.nom = nom;
+        this.validatorFn = (a: AbstractControl): ValidationErrors => {
+            if (this.invalide) {
+                this.invalide = false;
+                return { invalid: true };
+            }
+            return null;
+        };
+        this.marqueErreur = ((a: AbstractControl) => {
+            this.invalide = true;
+            a.updateValueAndValidity();
+        }).bind(this);
+        this.message = message;
     }
 }
 
@@ -66,6 +130,11 @@ export class KfValidateurs {
         return false;
     }
 
+    /**
+     * Validateur qui ajoute une erreur pour une fonction d'invalidation personnalisée
+     * @param invalideFn retourne true si la valeur est invalide
+     * @param message texte ou fonction retournant le texte la valeur de l'erreur
+     */
     static validateurDeFn(nom: string, invalideFn: (value: any) => boolean, message: string | (() => string)): KfValidateur {
         const validateur = new KfValidateur();
         validateur.nom = nom;
@@ -79,7 +148,7 @@ export class KfValidateurs {
             }
             return null;
         };
-        if (typeof(message) === 'string') {
+        if (typeof (message) === 'string') {
             validateur.message = message;
         } else {
             validateur.message = message();
@@ -87,8 +156,21 @@ export class KfValidateurs {
         return validateur;
     }
 
-    static validateurDoublon(nom: string, message: string): KfValidateur {
-        return new KfValidateurDoublon(nom, message);
+    /**
+     * Validateur qui permet de stocker la valeur du controle lorsqu'une requête Api retourne une erreur.
+     * Le controle reste invalide tant qu'il contient la valeur erronée
+     */
+    static validateurAMarque(nom: string, message: string): KfValidateurAMarque {
+        return new KfValidateurAMarque(nom, message);
+    }
+
+    /**
+     * Validateur qui permet de stocker la valeur du formGroup lorsqu'une requête Api retourne une erreur.
+     * Le formGroup reste invalide tant qu'il contient une valeur égale à la valeur erronée
+     * @param sontEgaux fonction de comparaison des valeurs
+     */
+    static validateurAMarqueDeFormulaire(sontEgaux: (a1: any, a2: any) => boolean): KfValidateurAMarqueDeFormulaire {
+        return new KfValidateurAMarqueDeFormulaire(sontEgaux);
     }
 
     static validateur(nom: string, validatorFn: ValidatorFn, message: string): KfValidateur {
@@ -163,6 +245,14 @@ export class KfValidateurs {
         return KfValidateurs.validateur('email', Validators.email, `L'adresse mail est invalide.`);
     }
 
+    static autorise(autorisés: string): KfValidateur {
+        return KfValidateurs.validateurDeFn(
+            'autorise',
+            (texte: string) => KfValidateurs.contientUnHorsDe(texte, autorisés),
+            `Les caractères autorisés sont ` + autorisés
+        );
+    }
+
     static get noSpaces(): KfValidateur {
         return KfValidateurs.validateurDeFn(
             'NoSpaces',
@@ -170,6 +260,18 @@ export class KfValidateurs {
                 return !!texte && texte.includes(' ');
             },
             `Il ne doit pas y avoir d'espaces`);
+    }
+
+    /**
+     * Interdit les espaces au début et à la fin d'un texte
+     */
+    static get trim(): KfValidateur {
+        return KfValidateurs.validateurDeFn(
+            'Trim',
+            (texte: string) => {
+                return !!texte && (texte.startsWith(' ') || texte.endsWith(' '));
+            },
+            `Il ne doit pas y avoir d'espace au début ni à la fin`);
     }
 
     static requiredLength(valeur: number): KfValidateur {
@@ -313,35 +415,63 @@ export class KfValidateurs {
     static nombreVirgule(
         nbChiffresAvantFnc: number | (() => number), nbChiffresAprèsFnc: number | (() => number),
         avecSigne?: '<' | '<=' | '>' | '>='): KfValidateur {
+        let nbChiffresAvant: number;
+        if (typeof (nbChiffresAvantFnc) === 'number') {
+            nbChiffresAvant = nbChiffresAvantFnc;
+        } else {
+            nbChiffresAvant = nbChiffresAvantFnc();
+        }
+        let nbChiffresAprès: number;
+        if (typeof (nbChiffresAprèsFnc) === 'number') {
+            nbChiffresAprès = nbChiffresAprèsFnc;
+        } else {
+            nbChiffresAprès = nbChiffresAprèsFnc();
+        }
         const invalideFn = (valeur: any): boolean => {
-            let nbChiffresAvant: number;
-            if (typeof(nbChiffresAvantFnc) === 'number') {
-                nbChiffresAvant = nbChiffresAvantFnc;
-            } else {
-                nbChiffresAvant = nbChiffresAvantFnc();
+            if (valeur === undefined || valeur === null) {
+                return valeur;
             }
-            let nbChiffresAprès: number;
-            if (typeof(nbChiffresAprèsFnc) === 'number') {
-                nbChiffresAprèsFnc = nbChiffresAprèsFnc;
-            } else {
-                nbChiffresAprès = nbChiffresAprèsFnc();
+            const nombre = parseFloat(valeur);
+            if (Number.isNaN(nombre)) {
+                return true;
             }
-            const nombre = KfValidateurs.vérifieEtFormateNombre(valeur, nbChiffresAvant, nbChiffresAprès, avecSigne);
-            return Number.isNaN(nombre);
+            if (nombre === 0) {
+                return avecSigne === '<' || avecSigne === '>';
+            }
+            let texte1 = nombre.toString();
+            let négatif: boolean;
+            if (texte1.charAt(0) === '-') {
+                négatif = true;
+                texte1 = texte1.slice(1);
+            }
+            const textes = texte1.split('.');
+            if (négatif) {
+                if (avecSigne === '>' || avecSigne === '>=') {
+                    return true;
+                }
+            } else {
+                if (avecSigne === '<' || avecSigne === '<=') {
+                    return true;
+                }
+            }
+            const entière = textes[0].length;
+            if (entière > nbChiffresAvant) {
+                return true;
+            }
+            if (textes.length === 1) {
+                return false;
+            }
+            // il n'y a pas de chiffres après
+            if (nbChiffresAprès === 0) {
+                return false;
+            }
+            if (textes[1].length > nbChiffresAprès) {
+            // il y a trop de chiffres après
+                return true;
+            }
+            return false;
         };
         const messageFn = (): string => {
-            let nbChiffresAvant: number;
-            if (typeof(nbChiffresAvantFnc) === 'number') {
-                nbChiffresAvant = nbChiffresAvantFnc;
-            } else {
-                nbChiffresAvant = nbChiffresAvantFnc();
-            }
-            let nbChiffresAprès: number;
-            if (typeof(nbChiffresAprèsFnc) === 'number') {
-                nbChiffresAprèsFnc = nbChiffresAprèsFnc;
-            } else {
-                nbChiffresAprès = nbChiffresAprèsFnc();
-            }
             let message = 'Le nombre ';
             if (avecSigne) {
                 message = message + `doit être ${avecSigne === '<'

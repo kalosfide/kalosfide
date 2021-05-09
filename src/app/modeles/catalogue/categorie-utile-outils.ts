@@ -24,17 +24,9 @@ export class CategorieUtileOutils extends DataUtileOutils {
         return this.utile.lien;
     }
 
-    get nomOutil(): {
-        catégorie: string,
-    } {
-        return {
-            catégorie: 'catégorie',
-        };
-    }
-
     catégorie(): KfVueTableFiltreCherche<Categorie> {
-        return Fabrique.vueTable.cherche<Categorie>(this.nomOutil.catégorie, 'Nom',
-            (categorie: Categorie) => categorie.nom, 'Rechercher une catégorie');
+        return Fabrique.vueTable.cherche<Categorie>(this.utile.nom.catégorie, 'Nom',
+            this.utile.nom.catégorie, 'Rechercher une catégorie');
     }
 
     ajoute(): KfVueTableOutilBtnGroupe<Categorie> {

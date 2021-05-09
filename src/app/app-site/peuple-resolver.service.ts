@@ -16,9 +16,8 @@ export class PeupleResolverService extends DataResolverService implements Resolv
     }
 
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<never> | Observable<boolean> {
-        return this.service.avecAttente(
-            () => this.service.estPeuplé()
-        )(route, state);
+        const demandeApi = () => this.service.estPeuplé();
+        return this.service.lectureObs<boolean>({ demandeApi });
     }
 
 }

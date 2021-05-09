@@ -1,11 +1,11 @@
 import { ValeurTexteDef } from '../../kf-partages/kf-texte-def';
 import { ValeurNombreDef } from '../../kf-partages/kf-nombre-def';
-import { KfElement } from '../../kf-composant/kf-element';
+import { KfComposant } from '../../kf-composant/kf-composant';
 import { KfTypeDeComposant } from '../../kf-composants-types';
 import { KfTypeDHTMLEvents } from '../../kf-partages/kf-evenements';
 import { KfImageDef } from '../../kf-partages/kf-image-def';
 
-export class KfImage extends KfElement {
+export class KfImage extends KfComposant {
     imageDef: KfImageDef;
 
     constructor(nom: string, imageDef: KfImageDef, avecClic?: boolean) {

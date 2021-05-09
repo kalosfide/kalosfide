@@ -25,44 +25,28 @@ export class CLFUtileOutils extends DataUtileOutils {
         return this._dataUtile as CLFUtile;
     }
 
-    get nomOutil(): {
-        client: string,
-        catégorie: string,
-        produit: string,
-        préparation: string,
-        type: string,
-    } {
-        return {
-            client: 'client',
-            produit: 'produit',
-            catégorie: 'catégorie',
-            préparation: 'préparation',
-            type: 'type',
-        };
-    }
-
     clientDeDocsClient(): KfVueTableFiltreCherche<CLFDocs> {
-        return Fabrique.vueTable.cherche<CLFDocs>(this.nomOutil.client, 'Client',
-            (docsClient: CLFDocs) => docsClient.client.nom, 'Rechercher un client');
+        return Fabrique.vueTable.cherche<CLFDocs>(this.utile.nom.client, 'Client',
+            this.utile.nom.client, 'Rechercher un client');
     }
 
     produit(): KfVueTableFiltreCherche<CLFLigne> {
-        return Fabrique.vueTable.cherche<CLFLigne>(this.nomOutil.produit, 'Produit',
-            (ligne: CLFLigne) => ligne.produit.nom, 'Rechercher un produit');
+        return Fabrique.vueTable.cherche<CLFLigne>(this.utile.nom.produit, 'Produit',
+            this.utile.nom.produit, 'Rechercher un produit');
     }
 
     catégorie(): KfVueTableFiltreNombre<CLFLigne> {
-        return Fabrique.vueTable.filtreNombre<CLFLigne>(this.nomOutil.catégorie, 'Catégorie',
+        return Fabrique.vueTable.filtreNombre<CLFLigne>(this.utile.nom.catégorie, 'Catégorie',
             (ligne: CLFLigne, noCategorie: number) => ligne.produit.categorieNo === noCategorie, 'Filtrer par catégorie');
     }
     chargeCatégories(vueTable: KfVueTable<CLFLigne>, catégories: Categorie[]) {
-        const outil = vueTable.outils.outil(this.nomOutil.catégorie);
+        const outil = vueTable.outils.outil(this.utile.nom.catégorie);
         const liste: KfListeDeroulanteNombre = outil.composant as KfListeDeroulanteNombre;
         catégories.forEach((c: Categorie) => liste.créeEtAjouteOption(c.nom, c.no));
     }
 
     préparation(): KfVueTableFiltreTexte<CLFLigne> {
-        const filtre = Fabrique.vueTable.filtreTexte<CLFLigne>(this.nomOutil.préparation,
+        const filtre = Fabrique.vueTable.filtreTexte<CLFLigne>(this.utile.nom.préparation,
             'Etat',
             (détail: CLFLigne, idEtat: IdEtatCLFLigne) => {
                 return EtatCLFLigne.étatDeId(idEtat).vérifie(détail);
@@ -74,12 +58,12 @@ export class CLFUtileOutils extends DataUtileOutils {
     }
 
     clientDeDoc(): KfVueTableFiltreCherche<CLFDoc> {
-        return Fabrique.vueTable.cherche<CLFDoc>(this.nomOutil.client, 'Client',
-            (clfDoc: CLFDoc) => clfDoc.client.nom, 'Rechercher un client');
+        return Fabrique.vueTable.cherche<CLFDoc>(this.utile.nom.client, 'Client',
+            this.utile.nom.client, 'Rechercher un client');
     }
 
     type(): KfVueTableFiltreTexte<CLFDoc> {
-        const outil = Fabrique.vueTable.filtreTexte<CLFDoc>(this.nomOutil.type, 'Type',
+        const outil = Fabrique.vueTable.filtreTexte<CLFDoc>(this.utile.nom.type, 'Type',
             (clfDoc: CLFDoc, type: string) => {
                 return clfDoc.type === type;
             }, 'Filtrer par type');

@@ -7,7 +7,7 @@ import { KfEvenement, KfTypeDEvenement } from '../../commun/kf-composants/kf-par
 import { KfBouton } from '../../commun/kf-composants/kf-elements/kf-bouton/kf-bouton';
 import { KfGroupe } from '../../commun/kf-composants/kf-groupe/kf-groupe';
 
-import { ApiResult } from '../../commun/api-results/api-result';
+import { ApiResult } from '../../api/api-results/api-result';
 
 import { DataService } from '../../services/data.service';
 
@@ -15,9 +15,10 @@ import { FormulaireBaseComponent } from './formulaire-base.component';
 import { Fabrique } from '../fabrique/fabrique';
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
 import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
-import { IFormulaireDef } from '../fabrique/fabrique-formulaire';
+import { GroupeBoutonsMessages, IFormulaireComponent } from '../fabrique/fabrique-formulaire';
+import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 
-export abstract class FormulaireComponent extends FormulaireBaseComponent implements IFormulaireDef, OnInit, OnDestroy {
+export abstract class FormulaireComponent extends FormulaireBaseComponent implements IFormulaireComponent, OnInit, OnDestroy {
 
     abstract créeEdition: () => KfGroupe;
     abstract créeBoutonsDeFormulaire: (formulaire: KfSuperGroupe) => (KfBouton | KfLien)[];
@@ -25,10 +26,10 @@ export abstract class FormulaireComponent extends FormulaireBaseComponent implem
     abstract actionSiOk: (créé?: any) => void;
     abstract apiDemande: () => Observable<ApiResult>;
 
+    groupeBoutonsMessages: GroupeBoutonsMessages;
+
     // membres communs
-    formulaire: KfSuperGroupe;
-    avantEdition: () => KfComposant[];
-    edition: KfGroupe;
+    créeAvantFormulaire: () => KfComposant[];
     aprèsBoutons: () => KfComposant[];
 
     constructor(
@@ -38,15 +39,19 @@ export abstract class FormulaireComponent extends FormulaireBaseComponent implem
     }
 
     ngOnInit() {
-        this.formulaire = Fabrique.formulaire.formulaire(this);
+        this.superGroupe = Fabrique.formulaire.superGroupe(this);
     }
 
     ngOnDestroy() {
         this.ngOnDestroy_Subscriptions();
     }
 
+    protected _message(i: number): KfEtiquette {
+        return (this.groupeBoutonsMessages.messages[i]) as KfEtiquette;
+    }
+
     traite(evenement: KfEvenement) {
-        if (evenement.type === KfTypeDEvenement.soumet) {
+        if (evenement.type === KfTypeDEvenement.submit) {
             this.soumet();
         }
     }

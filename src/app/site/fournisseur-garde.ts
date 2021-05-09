@@ -2,12 +2,10 @@ import { Injectable } from '@angular/core';
 import { CanActivate, CanActivateChild } from '@angular/router';
 import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
-import { AppPages } from '../app-pages';
+import { ApiResult403Forbidden } from '../api/api-results/api-result-403-forbidden';
 import { IdentificationService } from '../securite/identification.service';
-import { NavigationService } from '../services/navigation.service';
 import { RouteurService } from '../services/routeur.service';
 import { SiteRoutes } from './site-pages';
-import { TypesRoles } from '../securite/type-role';
 
 @Injectable({
     providedIn: 'root',
@@ -23,12 +21,12 @@ export class FournisseurGarde implements CanActivate, CanActivateChild {
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | boolean {
         if (this.identification.estIdentifié) {
             const identifiant = this.identification.litIdentifiant();
-            const nomSite = SiteRoutes.nomSite(state.url);
-            if (identifiant.estFournisseurDeNomSite(nomSite)) {
+            const urlSite = SiteRoutes.urlSite(state.url);
+            if (identifiant.estFournisseurDeSiteParUrl(urlSite)) {
                 return true;
             }
         }
-        this.routeur.navigue([AppPages.interdit.urlSegment]);
+        this.routeur.navigueVersPageErreur(new ApiResult403Forbidden());
         return false;
     }
     canActivateChild(childRoute: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | Observable<boolean> | Promise<boolean> {

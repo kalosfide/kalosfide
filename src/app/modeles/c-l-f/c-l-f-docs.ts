@@ -69,22 +69,12 @@ export class CLFDocs {
      */
     private pClfBilan: CLFBilan;
 
-    static compareNbDocuments(clfDocs1: CLFDocs, clfDocs2: CLFDocs): number {
-        const n1 = clfDocs1.documents.length;
-        const n2 = clfDocs2.documents.length;
-        return n1 < n2 ? -1 : n1 === n2 ? 0 : 1;
-    }
+    constructor() {}
 
-    static compareNbPrêts(clfDocs1: CLFDocs, clfDocs2: CLFDocs): number {
-        let résultat = CLFDocs.compareNbDocuments(clfDocs1, clfDocs2);
-        if (résultat === 0) {
-            const n1 = clfDocs1.documents.filter(d => ApiDocument.prêt(d)).length;
-            const n2 = clfDocs2.documents.filter(d => ApiDocument.prêt(d)).length;
-            résultat = n1 < n2 ? -1 : n1 === n2 ? 0 : 1;
-        }
-        return résultat;
-    }
-
+    /**
+     * Copie tous les champs du ClfDocs stocké par le service
+     * @param stocké ClfDocs stocké par le service
+     */
     copie(stocké: CLFDocs) {
         this.type = stocké.type;
         this.keyIdentifiant = stocké.keyIdentifiant;
@@ -133,6 +123,11 @@ export class CLFDocs {
         return this.catalogue && !this.catalogue.produits;
     }
 
+    /**
+     * Fixe la valeur de la propriété qui indique si le document fera partie de la synthèse
+     * @param noDoc no du document
+     * @param choisi true ou false
+     */
     changeChoisi(noDoc: number, choisi: boolean) {
         const apiDoc = this.documents.find(d => d.no === noDoc);
         apiDoc.choisi = choisi;
@@ -173,7 +168,7 @@ export class CLFDocs {
         return bilan;
     }
 
-    créeBilan() {
+    créeBilan(): CLFBilan {
         this.pClfBilan = this.type === 'commande'
             ? this.créeBilanBon(this.documents[0])
             : this.créeBilanASynthétiser();
@@ -208,10 +203,14 @@ export class CLFDocs {
                     bon.créeLignes();
                     return bon;
                 });
-            return clfDoc;
         }
+        return clfDoc;
     }
 
+    /**
+     * Crée un CLFDoc bon correspondant à l'ApiDocument stocké.
+     * @param no no du document, requis si le type n'est pas 'commande'
+     */
     créeBon(no?: number): CLFDoc {
         let clfDoc: CLFDoc;
         let apiDoc: ApiDocument;
@@ -374,6 +373,10 @@ export class CLFDocs {
         }
     }
 
+    quandAnnuleDocs(synthèse: CLFDoc) {
+        synthèse.àSynthétiser.forEach(doc => this.quandAnnuleDoc(doc));
+    }
+
     quandSourceCopiéeDansAFixerSynthèse(synthèse: CLFDoc) {
         synthèse.àSynthétiser.forEach(doc => this.quandSourceCopiéeDansAFixerDoc(doc));
     }
@@ -396,12 +399,12 @@ export class CLFDocs {
                 // àCopier.date est la date de  la dernière livraison
                 // Pour en faire un bon de commande virtuel actif, il suffit d'annuler sa date
                 apiDoc.date = DATE_NULLE;
+                apiDoc.lignes = apiDoc.lignes
+                    .filter(l => {
+                        const produit = this.produit(l.no);
+                        return produit && produit.etat === IdEtatProduit.disponible;
+                    });
             }
-            apiDoc.lignes = apiDoc.lignes
-                .filter(l => {
-                    const produit = this.produit(l.no);
-                    return produit && produit.etat === IdEtatProduit.disponible;
-                });
         } else {
             apiDoc = new ApiDocument();
             apiDoc.no = créé.no;

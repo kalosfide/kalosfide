@@ -26,7 +26,6 @@ import { KfDialogueService } from './kf-dialogue/kf-dialogue.service';
 import { KfVueTableComponent } from './kf-vue-table/kf-vue-table.component';
 import { KfContenuPhraseComponent } from './kf-partages/kf-contenu-phrase/kf-contenu-phrase.component';
 import { KfInputComponent } from './kf-elements/kf-input/kf-input.component';
-import { KfInactifDirective } from './kf-partages/kf-inactif.directive';
 import { KfIconeComponent } from './kf-elements/kf-icone/kf-icone.component';
 import { KfImageComponent } from './kf-elements/kf-image/kf-image.component';
 import { KfTexteComponent } from './kf-elements/kf-texte/kf-texte.component';
@@ -35,13 +34,12 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { KfBaliseComponent } from './kf-partages/kf-balise/kf-balise.component';
 import { KfNavbarComponent } from './kf-navbar/kf-navbar.component';
 import { KfUlComponent } from './kf-ul/kf-ul.component';
-import { KfDivComponent } from './kf-partages/kf-div/kf-div.component';
 import { KfBBtnGroupComponent } from './kf-b-btn-group/kf-b-btn-group.component';
 import { KfBBtnToolbarComponent } from './kf-b-btn-toolbar/kf-b-btn-toolbar.component';
 import { KfTableComponent } from './kf-table/kf-table.component';
-import { KFComposantService } from './kf-composant.service';
 import { KfNgbModalComponent } from './kf-ngb-modal/kf-ngb-modal.component';
 import { KfNgbModalService } from './kf-ngb-modal/kf-ngb-modal.service';
+import { KfDivComponent } from './kf-partages/kf-div/kf-div.component';
 
 @NgModule({
   imports: [
@@ -81,22 +79,20 @@ import { KfNgbModalService } from './kf-ngb-modal/kf-ngb-modal.service';
       KfVueTableComponent,
       KfNgbDropdownComponent,
       KfNavbarComponent,
-      KfDivComponent,
       KfBBtnGroupComponent,
       KfBBtnToolbarComponent,
       KfTableComponent,
+      KfDivComponent,
 
       KfNgbModalComponent,
 
       KfUlComponent,
-      KfInactifDirective,
   ],
   entryComponents: [
       KfNgbModalComponent,
   ],
   providers: [
       KfDialogueService,
-      KFComposantService,
       KfNgbModalService,
   ],
   exports: [
@@ -105,7 +101,7 @@ import { KfNgbModalService } from './kf-ngb-modal/kf-ngb-modal.service';
       KfBoutonComponent,
       KfEtiquetteComponent,
       KfLienComponent,
-      KfInactifDirective,
   ]
 })
-export class KfComposantsModule { }
+export class KfComposantsModule {
+}

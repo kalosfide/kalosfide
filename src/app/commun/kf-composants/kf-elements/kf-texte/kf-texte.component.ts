@@ -18,9 +18,7 @@ export class KfTexteComponent extends KfComposantComponent implements OnInit {
             b.baliseHTML = this.texte.balisesAAjouter[0];
             b.contenuTexte = this.texte.texte;
             b.suitLaVisiblité(this.texte);
-            if (this.texte.avecClassesOuStyle) {
-                b.copieClassesEtStyle(this.texte);
-            }
+            b.suitClassesEtStyle(this.texte);
             b.afterViewInit = (htmlElement: HTMLElement) => {
                 if (htmlElement) {
                     this.composant.gereHtml.htmlElement = htmlElement;

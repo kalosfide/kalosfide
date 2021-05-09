@@ -1,6 +1,3 @@
-import { KfComposant } from '../kf-composant/kf-composant';
-import { KfTypeDeComposant } from '../kf-composants-types';
-import { KfElement } from '../kf-composant/kf-element';
 
 export class KfDialogueDef {
     /** si défini, une barre de titre affiche ce texte */

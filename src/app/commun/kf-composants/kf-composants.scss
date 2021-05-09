@@ -1,18 +1,29 @@
 
-.kf-input-efface-bouton {
+.kf-input-bouton-flottant {
     z-index: 999;
     background-color: transparent;
     border: none;
     position: absolute;
     right: .1rem;
-    vertical-align: middle;
 }
-.kf-input-vide .kf-input-efface-bouton {
+.kf-input-vide .kf-input-cache-si-vide {
+    display: none;
+}
+.kf-input-pas-vide .kf-input-cache-si-pas-vide {
     display: none;
 }
 
 .kf-invisible {
-    display: none;
+    display: none !important;
+}
+
+.kf-input-icone {
+    float: right;
+    margin-right: 5px;
+    margin-top: -25px;
+    position: relative;
+    z-index: 2;
+    cursor: pointer;
 }
 
 .kf-texte-dans-icone-fond {
@@ -81,6 +92,68 @@ div.kf-sous-menu.kf-menu-horizontal {
 	display: table-cell;
 }
 
+.kf-éclairé {
+    background-color: darkgoldenrod;
+}
+
+$icon-sort: "\f0dc";
+$icon-sort-up: "\f0de";
+$icon-sort-down: "\f0dd";
 .kf-vue-table-tri {
-    cursor: pointer;
+    cursor: pointer;  
+}
+.kf-vue-table-tri-::after {
+    font-family: "Font Awesome 5 Free"; 
+    font-weight: 900; 
+    content: $icon-sort;  
+}
+.kf-vue-table-tri-asc::after {
+    font-family: "Font Awesome 5 Free"; 
+    font-weight: 900; 
+    content: $icon-sort-up;  
+}
+.kf-vue-table-tri-desc::after {
+    font-family: "Font Awesome 5 Free"; 
+    font-weight: 900; 
+    content: $icon-sort-down;  
+}
+
+.kf-ligne-invalide .invalid-feedback {
+    display: block;
+}
+
+$icon-dernier: "\f101";
+.page-link.page-link-dernier::before {
+    font-family: "Font Awesome 5 Free"; 
+    font-weight: 900; 
+    content: $icon-dernier;
+}
+
+
+/* à appliquer au fond d'une icone pour qu'elle soit centrée au dessus de son conteneur de classe .avec-survol */
+$survol-font-size: 1.25em;
+/* à appliquer au conteneur pendant le survol */
+$survol-opacity: 0.33;
+/* à appliquer au fond d'une icone pour qu'elle soit centrée au dessus de son conteneur de classe .avec-survol */
+.survol-centre {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    text-align: center;
+    vertical-align: middle;
+    font-size: $survol-font-size;
+}
+/* à appliquer à un conteneur qui contient une icone pour qu'elle soit centrée au dessus de ce conteneur si le fond de l'icone est de classe survol-centre */
+.avec-survol {
+    position: relative;
+}
+/* à appliquer aux autres contenus du conteneur pendant le survol */
+.avec-survol-actif, .avec-survol-actif * {
+    opacity: $survol-opacity;
+}
+
+tr.active {
+    background-color: #949292;
 }

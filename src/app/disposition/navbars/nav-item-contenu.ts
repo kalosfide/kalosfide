@@ -12,52 +12,52 @@ import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien
 import { KfTypeDeComposant } from 'src/app/commun/kf-composants/kf-composants-types';
 
 export class NavItemContenu extends NavItem {
-    protected _composant: KfComposant;
+    protected pComposant: KfComposant;
 
     constructor(nom: string,
-        parent: NavBar | NavItemDropdown | NavItemDropDownGroup | NavItemUlLi,
-        composant: KfComposant
+                parent: NavBar | NavItemDropdown | NavItemDropDownGroup | NavItemUlLi,
+                composant: KfComposant
     ) {
         super(nom, parent);
-        this._composant = composant;
+        this.pComposant = composant;
     }
 
     fermeQuandClick() {
-        this._composant.gereHtml.fixeAttribut('data-toggle', 'collapse');
-        this._composant.gereHtml.fixeAttribut('data-target', '#' + this.navBar.idContenu);
+        this.pComposant.gereHtml.fixeAttribut('data-toggle', 'collapse');
+        this.pComposant.gereHtml.fixeAttribut('data-target', '#' + this.navBar.idContenu);
     }
 
     get composant(): KfComposant {
-        return this._composant;
+        return this.pComposant;
     }
 
     set texte(texte: KfTexteDef) {
-        this._composant.fixeTexte(texte);
+        this.pComposant.fixeTexte(texte);
     }
 
     set image(image: KfImageDef) {
-        this._composant.fixeImage(image);
+        this.pComposant.fixeImage(image);
     }
 
     set icone(icone: FANomIcone) {
-        this._composant.fixeIcone(icone);
+        this.pComposant.fixeIcone(icone);
     }
 
     get contenuPhrase(): KfContenuPhrase {
-        return this._composant.contenuPhrase;
+        return this.pComposant.contenuPhrase;
     }
 
     /** */
 
     get lien(): KfLien {
-        if (this._composant.type === KfTypeDeComposant.lien) {
-            return this._composant as KfLien;
+        if (this.pComposant.type === KfTypeDeComposant.lien) {
+            return this.pComposant as KfLien;
         }
     }
 
     set url(url: KfTexteDef) {
-        if (this._composant.type === KfTypeDeComposant.lien) {
-            (this._composant as KfLien).fixeRoute(url);
+        if (this.pComposant.type === KfTypeDeComposant.lien) {
+            (this.pComposant as KfLien).fixeRoute(url);
         }
     }
 }

@@ -12,7 +12,7 @@ export class ItemConnection extends NavItemLien {
             const pageDef: PageDef = this.identifiant ? ComptePages.deconnection : ComptePages.connection;
             this.texte = pageDef.lien;
             this.url = this.site
-                ? SiteRoutes.urlSite(this.site.nomSite, this.identifiant, CompteRoutes.route([pageDef.urlSegment]))
+                ? SiteRoutes.urlDIdentifiant(this.site.url, this.identifiant, CompteRoutes.route([pageDef.urlSegment]))
                 : AppSiteRoutes.url(CompteRoutes.route([pageDef.urlSegment]));
         };
     }

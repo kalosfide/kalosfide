@@ -51,33 +51,25 @@ export class KfListe extends KfComposant {
 
     // CONSTRUCTEUR
     /**
-    * @param nom identifiant unique dans le groupe ou la liste parent
-    * @param creeItemsInterface la liste a une valeur si défini;
-    */
+     * @param nom identifiant unique dans le groupe ou la liste parent
+     * @param creeItemsInterface la liste a une valeur si défini;
+     */
     constructor(nom: string,
-        creeItemsInterface: KfListeCreeItemsInterface,
-        editionsInterface: KfListeEditionsInterface,
-        commandesInterface?: KfCommandesDeListeInterface,
-        selecteursInterface?: KfListeSelecteursInterface
+                creeItemsInterface: KfListeCreeItemsInterface,
+                editionsInterface: KfListeEditionsInterface,
+                commandesInterface?: KfCommandesDeListeInterface,
+                selecteursInterface?: KfListeSelecteursInterface
     ) {
         super(nom, KfTypeDeComposant.liste);
-        this.liste = new Liste;
+        this.liste = new Liste();
 
         this.creeItems = new KfListeCreeItems(this, creeItemsInterface);
         this.editions = new KfListeEditions(this, editionsInterface);
         this.commandes = new KfListeCommandes(this, commandesInterface);
         if (selecteursInterface) {
             this.selecteurs = new KfListeSelecteurs(this, selecteursInterface);
-            this.gereVisible.avecUnSeulContenuVisible(
-                // contenus
-                () => this.contenus,
-                // index du seul visible
-                () => this.liste.index,
-                // aucun contenu visible
-                () => this.liste.index === -1
-            );
         }
-        this.ajouteClasseDef('kf-liste');
+        this.ajouteClasse('kf-liste');
     }
 
     créeGereValeur() {

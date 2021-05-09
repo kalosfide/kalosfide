@@ -39,7 +39,7 @@ export class TypeMesure {
     static texte_au(id: string): string {
         switch (id) {
             case TypeMesure.id.ALaPièce:
-                return 'à l\'unité';
+                return `à l'unité`;
             case TypeMesure.id.AuKilo:
                 return 'au poids';
             case TypeMesure.id.AuLitre:

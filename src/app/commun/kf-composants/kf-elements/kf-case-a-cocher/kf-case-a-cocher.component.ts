@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
 import { KfComposantComponent } from '../../kf-composant/kf-composant.component';
 import { KfCaseACocher } from './kf-case-a-cocher';
-import { KFComposantService } from '../../kf-composant.service';
+import { TraiteKeydownService } from '../../../traite-keydown/traite-keydown.service';
 
 @Component({
     selector: 'app-kf-caseacocher',
@@ -12,9 +12,10 @@ export class KfCaseACocherComponent extends KfComposantComponent implements OnIn
     @ViewChild('inputElement', {static: false}) inputElement: ElementRef;
     @ViewChild('labelElement', {static: false}) labelElement: ElementRef;
 
-    constructor(protected service: KFComposantService) {
+    constructor(protected service: TraiteKeydownService) {
         super(service);
     }
+
     ngOnInit() {
     }
 
@@ -23,14 +24,7 @@ export class KfCaseACocherComponent extends KfComposantComponent implements OnIn
     }
 
     ngAfterViewInit() {
-        this.composant.gereHtml.htmlElement = this.inputElement.nativeElement,
-        this.composant.gereHtml.enfantsDeVue = {
-            inputElement: this.inputElement.nativeElement,
-        };
-        if (this.case.avecLabelAvant || this.case.avecLabelApres) {
-            this.composant.gereHtml.enfantsDeVue.labelElement = this.labelElement.nativeElement;
-        }
-        this.composant.gereHtml.initialiseHtml(this.output);
+        this.composant.initialiseHtml(this.inputElement.nativeElement, this.output);
     }
 
 }

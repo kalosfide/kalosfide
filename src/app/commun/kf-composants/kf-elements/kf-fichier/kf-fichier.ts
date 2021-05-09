@@ -1,10 +1,10 @@
 import 'rxjs/add/observable/of';
 import { KfTypeDeComposant } from '../../kf-composants-types';
-import { KfElement } from '../../kf-composant/kf-element';
+import { KfComposant } from '../../kf-composant/kf-composant';
 import { FormControl } from '@angular/forms';
-import { KfParametres } from '../../kf-composants-parametres';
 import { KfTexteDef } from '../../kf-partages/kf-texte-def';
 import { KfContenuPhrase } from '../../kf-partages/kf-contenu-phrase/kf-contenu-phrase';
+import { KfEvenement, KfTypeDEvenement } from '../../kf-partages/kf-evenements';
 
 
 export function KfNomFichier(nom: string): string {
@@ -16,7 +16,7 @@ export const TypeDeFichier = {
     objet: 'objet',
 };
 
-export class KfFichier extends KfElement {
+export class KfFichier extends KfComposant {
 
     typeDeFichier: string;
 
@@ -35,7 +35,8 @@ export class KfFichier extends KfElement {
         this.contenuPhrase = new KfContenuPhrase(this, texte);
         this.typesMime = [];
         this.typesExtension = [];
-        this.ajouteClasseDef('kf-fichier', 'kf-bouton');
+        this.ajouteClasse('kf-fichier', 'kf-bouton');
+        this.gereHtml.ajouteTraiteur(KfTypeDEvenement.change, (évènement: KfEvenement) => this.quandChange(évènement))
     }
 
     get idBouton(): string {
@@ -61,4 +62,15 @@ export class KfFichier extends KfElement {
         return this.files ? this.files.map(f => f.name).join(', ') : 'aucun';
     }
 
+    protected _quandChange() {
+        const files: FileList = (this.gereHtml.htmlElement as HTMLInputElement).files;
+        this.files = [];
+        for (let i = 0; i < files.length; i++) {
+            this.files.push(files[i]);
+        }
+    }
+
+    quandChange(évènement: KfEvenement) {
+        this._quandChange();
+    }
 }

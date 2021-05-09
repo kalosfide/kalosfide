@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CommunModule } from 'src/app/commun/commun.module';
 import { DispositionModule } from 'src/app/disposition/disposition.module';
-import { MessagesModule } from 'src/app/messages/messages.module';
+import { ErreursModule } from 'src/app/erreurs/erreurs.module';
 import { LivraisonRoutingModule } from './livraison-routing.module';
 
 import { LivraisonBonsComponent } from './livraison-bons.component';
@@ -15,7 +15,6 @@ import { LivraisonClientsResolverService } from './livraison-clients-resolver.se
 import { LivraisonChoixProduitComponent } from './livraison-choix-produit.component';
 import { LivraisonClientsComponent } from './livraison-clients.component';
 import { LivraisonLigneAjouteComponent } from './livraison-ligne-ajoute.component';
-import { LivraisonLigneSupprimeComponent } from './livraison-ligne-supprime.component';
 import { LivraisonBonSupprimeComponent } from './livraison-bon-supprime.component';
 import { LivraisonBonsResolverService } from './livraison-bons-resolver.service';
 import { LivraisonBonResolverService } from './livraison-bon-resolver.service';
@@ -36,7 +35,7 @@ import { LivraisonTitreComponent } from './livraison-titre.component';
         CommonModule,
         CommunModule,
         DispositionModule,
-        MessagesModule,
+        ErreursModule,
         LivraisonRoutingModule
     ],
     declarations: [
@@ -51,7 +50,6 @@ import { LivraisonTitreComponent } from './livraison-titre.component';
         LivraisonTitreComponent,
         LivraisonClientsComponent,
         LivraisonLigneAjouteComponent,
-        LivraisonLigneSupprimeComponent,
         LivraisonEnvoiComponent,
     ],
     providers: [

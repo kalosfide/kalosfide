@@ -11,7 +11,6 @@ import { AlerteService } from '../disposition/alerte/alerte-service';
 
 @Component({
     templateUrl: '../disposition/racine/racine.component.html',
-    styleUrls: ['../commun/commun.scss']
 })
 export class ClientRacineComponent extends SiteRacineComponent implements OnInit, OnDestroy {
 

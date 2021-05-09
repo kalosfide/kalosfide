@@ -3,7 +3,7 @@ import { KfEtiquette } from './kf-etiquette';
 import { KfComposantComponent } from '../../kf-composant/kf-composant.component';
 import { KfContenuPhrase } from '../../kf-partages/kf-contenu-phrase/kf-contenu-phrase';
 import { KfBalise } from '../../kf-partages/kf-balise/kf-balise';
-import { KFComposantService } from '../../kf-composant.service';
+import { TraiteKeydownService } from '../../../traite-keydown/traite-keydown.service';
 
 @Component({
     selector: 'app-kf-etiquette',
@@ -12,9 +12,9 @@ import { KFComposantService } from '../../kf-composant.service';
 })
 export class KfEtiquetteComponent extends KfComposantComponent implements OnInit {
 
-    private _balise: KfBalise;
+    private pBalise: KfBalise;
 
-    constructor(protected service: KFComposantService) {
+    constructor(protected service: TraiteKeydownService) {
         super(service);
     }
 
@@ -23,7 +23,7 @@ export class KfEtiquetteComponent extends KfComposantComponent implements OnInit
     }
 
     get balise(): KfBalise {
-        return this._balise;
+        return this.pBalise;
     }
 
     get contenuPhrase(): KfContenuPhrase {
@@ -34,14 +34,18 @@ export class KfEtiquetteComponent extends KfComposantComponent implements OnInit
         return this.etiquette.suiviDeSaut;
     }
 
+    get labelFor(): string {
+        return this.etiquette.labelFor;
+    }
+
     ngOnInit() {
         if (this.etiquette.baliseHtml) {
-            this._balise = new KfBalise();
-            this._balise.baliseHTML = this.etiquette.baliseHtml;
-            this._balise.contenuPhrase = this.etiquette.contenuPhrase;
-            this._balise.suitLaVisiblité(this.etiquette);
-            this._balise.suitClassesEtStyle(this.etiquette);
-            this._balise.afterViewInit = (htmlElement: HTMLElement) => {
+            this.pBalise = new KfBalise();
+            this.pBalise.baliseHTML = this.etiquette.baliseHtml;
+            this.pBalise.contenuPhrase = this.etiquette.contenuPhrase;
+            this.pBalise.suitLaVisiblité(this.etiquette);
+            this.pBalise.suitClassesEtStyle(this.etiquette);
+            this.pBalise.afterViewInit = (htmlElement: HTMLElement) => {
                 if (htmlElement) {
                     this.composant.gereHtml.htmlElement = htmlElement;
                 }

@@ -7,7 +7,6 @@ import { CommandeAccueilComponent } from './commande-accueil.component';
 import { CommandeChoixProduitComponent } from './commande-choix-produit.component';
 import { CommandeProduitResolverService } from './commande-produit-resolver.service';
 import { CommandeLigneAjouteComponent } from './commande-ligne-ajoute.component';
-import { CommandeLigneSupprimeComponent } from './commande-ligne-supprime.component';
 import { RedirigeSiContexteChangé, RedirigeSiPasContexte } from './contexte-change-garde';
 import { CommandeBonResolverService } from './commande-bon-resolver.service';
 import { CommandeBonComponent } from './commande-bon.component';
@@ -38,7 +37,6 @@ import { CommandeContexteResolverService } from './commande-contexte-resolver.se
         CommandeEnvoiComponent,
         CommandeChoixProduitComponent,
         CommandeLigneAjouteComponent,
-        CommandeLigneSupprimeComponent,
     ],
     providers: [
         RedirigeSiContexteChangé,

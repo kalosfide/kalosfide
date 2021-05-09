@@ -13,22 +13,22 @@ export interface IKfOption {
 }
 
 export abstract class KfOptionBase extends KfGéreCss implements IKfOption {
-    private _contenuPhrase: KfContenuPhrase;
+    private pContenuPhrase: KfContenuPhrase;
     inactif?: boolean;
 
     constructor() {
         super();
-        this._contenuPhrase = new KfContenuPhrase();
+        this.pContenuPhrase = new KfContenuPhrase();
     }
 
-    public get contenuPhrase(): KfContenuPhrase { return this._contenuPhrase; }
+    public get contenuPhrase(): KfContenuPhrase { return this.pContenuPhrase; }
 
     ajoute(contenu: KfTypeContenuPhrasé) {
-        this._contenuPhrase.ajoute(contenu);
+        this.pContenuPhrase.ajoute(contenu);
     }
 
     fixeTexte(texteDef: KfTexteDef) {
-        this._contenuPhrase.fixeTexte(texteDef);
+        this.pContenuPhrase.fixeTexte(texteDef);
     }
 
     abstract get valeur(): any;

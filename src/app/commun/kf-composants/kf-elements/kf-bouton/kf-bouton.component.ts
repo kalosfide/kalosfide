@@ -3,10 +3,9 @@ import {
 } from '@angular/core';
 import { KfBouton } from './kf-bouton';
 import { KfComposantComponent } from '../../kf-composant/kf-composant.component';
-import { FormGroup } from '@angular/forms';
 import { KfContenuPhrase } from '../../kf-partages/kf-contenu-phrase/kf-contenu-phrase';
 import { KfTypeDeBouton } from '../../kf-composants-types';
-import { KFComposantService } from '../../kf-composant.service';
+import { TraiteKeydownService } from '../../../traite-keydown/traite-keydown.service';
 
 @Component({
     selector: 'app-kf-bouton',
@@ -16,15 +15,14 @@ import { KFComposantService } from '../../kf-composant.service';
 export class KfBoutonComponent extends KfComposantComponent implements OnInit, AfterViewInit {
     @ViewChild('htmlElement', {static: false}) htmlElementRef: ElementRef;
 
-    constructor(protected service: KFComposantService) {
+    constructor(protected service: TraiteKeydownService) {
         super(service);
     }
     ngOnInit() {
     }
 
     ngAfterViewInit() {
-        this.composant.gereHtml.htmlElement = this.htmlElementRef.nativeElement;
-        this.composant.gereHtml.initialiseHtml(this.output);
+        this.composant.initialiseHtml(this.htmlElementRef.nativeElement, this.output);
     }
 
     get button(): HTMLButtonElement {
@@ -35,21 +33,14 @@ export class KfBoutonComponent extends KfComposantComponent implements OnInit, A
         return this.composant as KfBouton;
     }
 
-    get buttonType(): string {
-        return 'button';
-    }
-
     get inactif(): boolean {
-        const form = this.composant.formulaireParent;
         switch (this.bouton.typeDeBouton) {
-            case KfTypeDeBouton.bouton:
+            case 'button':
                 return this.bouton.inactif;
-            case KfTypeDeBouton.annuler:
-                return false;
-            case KfTypeDeBouton.retablir:
-                return form ? form.formGroup.pristine : false;
-            case KfTypeDeBouton.soumettre:
-                return !form || !form.peutSoumettre();
+            case 'reset':
+                return this.bouton.formulaire ? this.bouton.formulaire.formGroup.pristine : false;
+            case 'submit':
+                return !this.bouton.formulaire.peutSoumettre;
             default:
                 break;
         }

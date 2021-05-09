@@ -15,8 +15,7 @@ export class KfIconeComponent extends KfComposantComponent implements OnInit, Af
 
     ngAfterViewInit() {
         if (this.htmlElement) {
-            this.composant.gereHtml.htmlElement = this.htmlElement.nativeElement;
-            this.composant.gereHtml.initialiseHtml(this.output);
+            this.composant.initialiseHtml(this.htmlElement.nativeElement, this.output);
         }
     }
     clic() {

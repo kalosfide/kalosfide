@@ -3,17 +3,17 @@ import { DataUtileUrl } from './data-utile-url';
 import { DataUtileLien } from './data-utile-lien';
 
 export class DataUtileBouton {
-    protected _dataUtile: DataUtile;
+    protected dataUtile: DataUtile;
 
     constructor(dataUtile: DataUtile) {
-        this._dataUtile = dataUtile;
+        this.dataUtile = dataUtile;
     }
 
     get url(): DataUtileUrl {
-        return this._dataUtile.url;
+        return this.dataUtile.url;
     }
 
     get lien(): DataUtileLien {
-        return this._dataUtile.lien;
+        return this.dataUtile.lien;
     }
 }

@@ -9,7 +9,6 @@ import { LivraisonClientsResolverService } from './livraison-clients-resolver.se
 import { LivraisonClientComponent } from './livraison-client.component';
 import { LivraisonChoixProduitComponent } from './livraison-choix-produit.component';
 import { LivraisonLigneAjouteComponent } from './livraison-ligne-ajoute.component';
-import { LivraisonLigneSupprimeComponent } from './livraison-ligne-supprime.component';
 import { LivraisonBonSupprimeComponent } from './livraison-bon-supprime.component';
 import { LivraisonBonsComponent } from './livraison-bons.component';
 import { LivraisonBonsResolverService } from './livraison-bons-resolver.service';
@@ -70,7 +69,7 @@ const routes: Routes = [
                 data: {
                     pageDef: LivraisonPages.client,
                     cheminDeTitre: ['clfDocs', 'client', 'nom'],
-                    pageDefEnfantPathVide: LivraisonPages.bons,
+                    pageDefDescendantParDéfaut: LivraisonPages.bons,
                 },
                 component: LivraisonClientComponent,
                 canActivate: [
@@ -123,7 +122,7 @@ const routes: Routes = [
                         path: LivraisonPages.bon.urlSegment + '/:' + CLFPages.nomParamNoDoc,
                         data: {
                             pageDef: LivraisonPages.bon,
-//                            pageDefEnfantPathVide: LivraisonPages.lignes
+                            pageDefDescendantParDéfaut: LivraisonPages.lignes
                         },
                         canActivateChild: [
                             // Si le stock n'existe pas ou si keyClient ou no a changé, charge et stocke le cflDocs
@@ -207,17 +206,6 @@ const routes: Routes = [
                                 canActivate: [
                                     LivraisonBonVirtuelGardeService,
                                     LivraisonProduitPasDansBonGardeService,
-                                ],
-                                resolve: {
-                                    clfLigne: LivraisonLigneResolverService,
-                                },
-                            },
-                            {
-                                path: LivraisonPages.supprime.urlSegment + '/:' + CLFPages.nomParamNoLigne,
-                                data: { pageDef: LivraisonPages.supprime },
-                                component: LivraisonLigneSupprimeComponent,
-                                canActivate: [
-                                    LivraisonBonVirtuelGardeService
                                 ],
                                 resolve: {
                                     clfLigne: LivraisonLigneResolverService,

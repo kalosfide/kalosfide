@@ -2,7 +2,7 @@
     <app-kf-composant *ngIf="editions.titreAvantEnTete" [composant]="editeur.etiquetteTitre"></app-kf-composant>
     <app-kf-composant *ngIf="editions.enTete" [composant]="editions.enTete" (output)="editeur.quandEvenementEnTete($event)"></app-kf-composant>
     <app-kf-composant *ngIf="editions.titreApresEnTete" [composant]="editeur.etiquetteTitre"></app-kf-composant>
-    <app-kf-composant [composant]="editeur.composant" (output)="transmet($event)"></app-kf-composant>
+    <app-kf-composant [composant]="editeur.composant"></app-kf-composant>
     <app-kf-composant [composant]="editeur.boutonOk" [ngClass]="{'kf-invisible': !editeur.boutonOk.visible}" (output)="traiteOkAnnuler($event)"></app-kf-composant>
     <app-kf-composant [composant]="editeur.boutonAnnuler" [ngClass]="{'kf-invisible': !editeur.boutonAnnuler.visible}" (output)="traiteOkAnnuler($event)"></app-kf-composant>
 

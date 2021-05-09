@@ -7,14 +7,14 @@ import { CLFDoc } from './c-l-f-doc';
 import { CLFService } from './c-l-f.service';
 import { IContenuPhraseDef } from 'src/app/disposition/fabrique/fabrique-contenu-phrase';
 import { Observable } from 'rxjs';
-import { ApiResult } from 'src/app/commun/api-results/api-result';
+import { ApiResult } from 'src/app/api/api-results/api-result';
 import { KfBouton } from 'src/app/commun/kf-composants/kf-elements/kf-bouton/kf-bouton';
-import { ApiRequêteAction } from 'src/app/services/api-requete-action';
+import { ApiRequêteAction } from 'src/app/api/api-requete-action';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { KfSuperGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-super-groupe';
 import { ModeAction } from './condition-action';
 import { IBoutonDef } from 'src/app/disposition/fabrique/fabrique-bouton';
-import { BootstrapNom } from 'src/app/disposition/fabrique/fabrique-bootstrap';
+import { BootstrapNom } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
 import { Couleur } from 'src/app/disposition/fabrique/fabrique-couleurs';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
@@ -22,7 +22,7 @@ import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-t
 import { IBtnGroupeDef, BarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { ApiDocument } from './api-document';
 import { AfficheResultat } from 'src/app/disposition/affiche-resultat/affiche-resultat';
-import { KfNgbModal } from 'src/app/commun/kf-composants/kf-ngb-modal/kf-ngb-modal';
+import { CLFDocs } from './c-l-f-docs';
 
 export class CLFUtileBouton extends DataUtileBouton {
     constructor(utile: CLFUtile) {
@@ -30,7 +30,7 @@ export class CLFUtileBouton extends DataUtileBouton {
     }
 
     get utile(): CLFUtile {
-        return this._dataUtile as CLFUtile;
+        return this.dataUtile as CLFUtile;
     }
 
     get service(): CLFService {
@@ -46,21 +46,12 @@ export class CLFUtileBouton extends DataUtileBouton {
     }
 
     copieLigne(ligne: CLFLigne): KfBouton {
-        const apiRequêteAction: ApiRequêteAction = {
-            formulaire: null,
-            demandeApi: () => {
-                return this.service.copieSourceDansAFixer1(ligne);
-            },
-            actionSiOk: () => {
-                this.service.siCopieSourceDansAFixer1Ok(ligne);
-            }
-        };
-        const bouton = Fabrique.bouton.boutonAttenteDeColonne('copie1_' + ligne.no2,
-            Fabrique.contenu.copier, apiRequêteAction, this.service);
+        const bouton = Fabrique.bouton.attenteDeColonne('copie1_' + ligne.no2,
+            Fabrique.contenu.copier, this.service.apiRequêteCopieSourceDansAFixer1(ligne), this.service);
         return bouton;
     }
 
-    supprime(ligne: CLFLigne, rafraichitTable: (ligne: CLFLigne) => void, traiteErreur?: (apiResult: ApiResult) => boolean): KfBouton {
+    supprime(ligne: CLFLigne, quandLigneSupprimée: (ligne: CLFLigne) => ((stock: CLFDocs) => void)): KfBouton {
         const texteUtile = this.utile.texte.textes(ligne.parent.type);
         const titre = `Suppression d'une ligne`;
         const description = new KfEtiquette('');
@@ -81,23 +72,15 @@ export class CLFUtileBouton extends DataUtileBouton {
             },
             ' au prix de ',
             {
-                texte: Fabrique.texte.prixAvecUnité(ligne.produit.typeMesure, ligne.prix),
+                texte: Fabrique.texte.eurosAvecTypeMesure(ligne.produit.typeMesure, ligne.prix),
                 balise: KfTypeDeBaliseHTML.b
             },
             ' va être supprimée.'
         );
-        const apiRequêteAction: ApiRequêteAction = {
-            formulaire: null,
-            demandeApi: () => this.service.supprimeLigne(ligne),
-            actionSiOk: () => {
-                this.service.siSupprimeLigneOk(ligne);
-                rafraichitTable(ligne);
-            },
-            traiteErreur
-        };
-        const bouton = Fabrique.bouton.boutonAttenteDeColonne('supprime' + ligne.no2,
+        const apiRequêteAction: ApiRequêteAction = this.service.apiRequêteSupprimeLigne(ligne, quandLigneSupprimée(ligne));
+        const bouton = Fabrique.bouton.attenteDeColonne('supprime' + ligne.no2,
             Fabrique.contenu.supprime, apiRequêteAction, this.service,
-            Fabrique.confirme(titre, [description])
+            Fabrique.confirmeModal(titre, [description])
         );
         return bouton;
     }
@@ -105,44 +88,30 @@ export class CLFUtileBouton extends DataUtileBouton {
     copieDoc(doc: CLFDoc): KfBouton {
         const texteUtile = this.utile.texte.textes(doc.synthèse.type);
         const titre = `Remplissage automatique`;
-        const description = `${texteUtile.Le_doc} sera préparé en copiant les quantités du ${texteUtile.def.bon}`;
-        const apiRequêteAction: ApiRequêteAction = {
-            formulaire: null,
-            demandeApi: () => this.service.copieSourceDansAFixerDoc(doc),
-            actionSiOk: () => {
-                this.service.siCopieSourceDansAFixerDocOk(doc);
-            },
-        };
-        const bouton = Fabrique.bouton.boutonAttenteDeColonne('copie_D', Fabrique.contenu.copier,
-            apiRequêteAction, this.service, Fabrique.confirme(titre, description));
+        const description = texteUtile.copierBon;
+        const apiRequêteAction: ApiRequêteAction = this.service.apiRequêteCopieSourceDansAFixerDoc(doc,
+            () => doc.vueTableLigne.quandItemModifié());
+        const bouton = Fabrique.bouton.attenteDeColonne('copie_D', Fabrique.contenu.copier,
+            apiRequêteAction, this.service, Fabrique.confirmeModal(titre, description));
+        bouton.titleHtml = description;
         return bouton;
     }
 
     copieDocs(doc: CLFDoc): KfBouton {
         const texteUtile = this.utile.texte.textes(doc.type);
         const titre = `Remplissage automatique`;
-        const description = `${texteUtile.Le_doc} sera préparé en copiant les quantités de tous les ${texteUtile.def.bons}`;
-        const apiRequêteAction: ApiRequêteAction = {
-            formulaire: null,
-            demandeApi: () => this.service.copieSourceDansAFixerDocs(doc),
-            actionSiOk: () => {
-                this.service.siCopieSourceDansAFixerDocsOk(doc);
-            },
-        };
-        const bouton = Fabrique.bouton.boutonAttenteDeColonne('copie_T', Fabrique.contenu.copier,
-            apiRequêteAction, this.service, Fabrique.confirme(titre, description));
+        const description = texteUtile.copierBons;
+        const apiRequêteAction: ApiRequêteAction = this.service.apiRequêteCopieSourceDansAFixerDocs(doc,
+                () => doc.àSynthétiser.forEach(bon => bon.vueTableLigne.quandItemModifié()));
+        const bouton = Fabrique.bouton.attenteDeColonne('copie_T', Fabrique.contenu.copier,
+            apiRequêteAction, this.service, Fabrique.confirmeModal(titre, description));
+        bouton.titleHtml = description;
         return bouton;
     }
 
     annuleLigne(ligne: CLFLigne): KfBouton {
-        const apiRequêteAction: ApiRequêteAction = {
-            formulaire: null,
-            demandeApi: () => this.service.annuleLigne(ligne),
-            actionSiOk: () => {
-                this.service.siAnnuleLigneOk(ligne);
-            },
-        };
-        const bouton = Fabrique.bouton.boutonAttenteDeColonne('annule1',
+        const apiRequêteAction: ApiRequêteAction = this.service.apiRequêteAnnuleLigne(ligne);
+        const bouton = Fabrique.bouton.attenteDeColonne('annule1',
             Fabrique.contenu.annule, apiRequêteAction, this.service);
         return bouton;
     }
@@ -151,16 +120,10 @@ export class CLFUtileBouton extends DataUtileBouton {
         const texteUtile = this.utile.texte.textes(doc.synthèse.type);
         const titre = `Remplissage automatique`;
         const description = `${texteUtile.Le_doc} sera préparé en annulant les quantités du ${texteUtile.def.bon}`;
-        const apiRequêteAction: ApiRequêteAction = {
-            formulaire: null,
-            demandeApi: () => this.service.annuleDoc(doc),
-            actionSiOk: () => {
-                this.service.siAnnuleDocOk(doc);
-            },
-        };
-        const bouton = Fabrique.bouton.boutonAttenteDeColonne('annuleD',
+        const apiRequêteAction: ApiRequêteAction = this.service.apiRequêteAnnuleDoc(doc, () => doc.vueTableLigne.quandItemModifié());
+        const bouton = Fabrique.bouton.attenteDeColonne('annuleD',
             Fabrique.contenu.annule, apiRequêteAction, this.service,
-            Fabrique.confirme(titre, description)
+            Fabrique.confirmeModal(titre, description)
         );
         return bouton;
     }
@@ -169,32 +132,28 @@ export class CLFUtileBouton extends DataUtileBouton {
         const texteUtile = this.utile.texte.textes(doc.type);
         const titre = `Remplissage automatique`;
         const description = `${texteUtile.Le_doc} sera préparé en annulant les quantités du ${texteUtile.def.bon}`;
-        const apiRequêteAction: ApiRequêteAction = {
-            formulaire: null,
-            demandeApi: () => this.service.annuleDocs(doc),
-            actionSiOk: () => {
-                this.service.siAnnuleDocsOk(doc);
-            },
-        };
-        const bouton = Fabrique.bouton.boutonAttenteDeColonne('annuleT',
+        const apiRequêteAction: ApiRequêteAction = this.service.apiRequêteAnnuleDocs(doc,
+            () => doc.àSynthétiser.forEach(bon => bon.vueTableLigne.quandItemModifié())
+        );
+        const bouton = Fabrique.bouton.attenteDeColonne('annuleT',
             Fabrique.contenu.annule, apiRequêteAction, this.service,
-            Fabrique.confirme(titre, description)
+            Fabrique.confirmeModal(titre, description)
         );
         return bouton;
     }
 
-    envoieBon(clfDoc: CLFDoc, superGroupe: KfSuperGroupe, afficheResultat: AfficheResultat): KfBouton {
+    envoi(clfDoc: CLFDoc, superGroupe: KfSuperGroupe, afficheResultat: AfficheResultat): KfBouton {
         const apiRequêteAction: ApiRequêteAction = {
             formulaire: superGroupe,
             demandeApi: (): Observable<ApiResult> => {
-                return this.service.envoieBon(clfDoc);
+                return this.service.envoi(clfDoc);
             },
             actionSiOk: (créé: ApiDocument): void => {
                 clfDoc.apiDoc.date = créé.date;
                 if (clfDoc.type !== 'commande') {
                     clfDoc.apiDoc.no = créé.no;
                 }
-                this.service.quandEnvoyé();
+                this.service.videStock();
                 this.service.changeMode(ModeAction.envoyé);
             },
             afficheResultat,
@@ -238,14 +197,14 @@ export class CLFUtileBouton extends DataUtileBouton {
                 Fabrique.ajouteTexte(etiquette, texteUtile.bilanNbAVérifier(clfDocs.clfBilan));
                 etiquette = Fabrique.ajouteEtiquetteP(infos);
                 Fabrique.ajouteTexte(etiquette, texteUtile.vérificationPossible());
-                etiquette.ajouteClasseDef('alert-success');
+                etiquette.ajouteClasse('alert-success');
                 couleur = Couleur.green;
             } else {
                 etiquette = Fabrique.ajouteEtiquetteP(infos);
                 Fabrique.ajouteTexte(etiquette, texteUtile.bilanRienAVérifier(clfDocs.clfBilan));
                 etiquette = Fabrique.ajouteEtiquetteP(infos);
                 Fabrique.ajouteTexte(etiquette, texteUtile.vérificationImpossible());
-                etiquette.ajouteClasseDef('alert-warning');
+                etiquette.ajouteClasse('alert-warning');
                 couleur = Couleur.warning;
             }
             Fabrique.bouton.fixeDef(vérifier, {

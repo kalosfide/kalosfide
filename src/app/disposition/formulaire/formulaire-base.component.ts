@@ -6,13 +6,13 @@ import { KfBouton } from '../../commun/kf-composants/kf-elements/kf-bouton/kf-bo
 import { AfficheResultat } from '../affiche-resultat/affiche-resultat';
 import { KfGroupe } from '../../commun/kf-composants/kf-groupe/kf-groupe';
 
-import { ApiResult } from '../../commun/api-results/api-result';
+import { ApiResult } from '../../api/api-results/api-result';
 
 import { DataService } from '../../services/data.service';
 
 import { PageBaseComponent } from '../page-base/page-base.component';
 import { ResultatAction } from 'src/app/disposition/affiche-resultat/resultat-affichable';
-import { ApiRequêteAction } from 'src/app/services/api-requete-action';
+import { ApiRequêteAction } from 'src/app/api/api-requete-action';
 import { RouteurService } from 'src/app/services/routeur.service';
 import { IdentificationService } from 'src/app/securite/identification.service';
 import { NavigationService } from 'src/app/services/navigation.service';
@@ -27,8 +27,7 @@ export abstract class FormulaireBaseComponent extends PageBaseComponent {
     abstract apiDemande: () => Observable<ApiResult>;
 
     // membres communs
-    formulaire: KfSuperGroupe;
-    edition: KfGroupe;
+    formulaire: KfGroupe;
 
     subscriptions: Subscription[] = [];
 
@@ -49,28 +48,26 @@ export abstract class FormulaireBaseComponent extends PageBaseComponent {
     get routeur(): RouteurService { return this.service.routeur; }
     get navigation(): NavigationService { return this.service.navigation; }
 
-    get superGroupe(): KfSuperGroupe {
-        return this.formulaire;
-    }
-
     get valeur(): any {
-        return this.edition.formGroup.value;
+        return this.formulaire.formGroup.value;
     }
     set valeur(valeur: any) {
-        this.edition.formGroup.setValue(valeur);
+        this.formulaire.formGroup.setValue(valeur);
     }
 
-    soumet() {
-        const apiRequêteAction: ApiRequêteAction = {
-            demandeApi: this.apiDemande,
-            actionSiOk: this.actionSiOk,
-            formulaire: this.formulaire,
-            afficheResultat: this.afficheResultat,
-            titreErreur: this.titreRésultatErreur,
-            titreSucces: this.titreRésultatSucces
-        };
-        const subscription = this.service.actionOkObs(apiRequêteAction).subscribe(() => {
-            subscription.unsubscribe();
-        });
+    get soumet(): (() => void) {
+        return () => {
+            const apiRequêteAction: ApiRequêteAction = {
+                demandeApi: this.apiDemande,
+                actionSiOk: this.actionSiOk,
+                formulaire: this.superGroupe,
+                afficheResultat: this.afficheResultat,
+                titreErreur: this.titreRésultatErreur,
+                titreSucces: this.titreRésultatSucces
+            };
+            const subscription = this.service.actionObs(apiRequêteAction).subscribe(() => {
+                subscription.unsubscribe();
+            });
+        }
     }
 }

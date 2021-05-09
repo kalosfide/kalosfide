@@ -7,7 +7,7 @@ export class CategorieUtileUrl extends DataUtileUrl {
     }
 
     get utile(): CategorieUtile {
-        return this._parent as CategorieUtile;
+        return this.parent as CategorieUtile;
     }
 
 }

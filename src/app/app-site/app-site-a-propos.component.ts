@@ -7,7 +7,7 @@ import { AppSitePages } from './app-site-pages';
 import { AppSite } from './app-site';
 
 @Component({
-    templateUrl: '../disposition/page-base/page-base.html', styleUrls: ['../commun/commun.scss']
+    templateUrl: '../disposition/page-base/page-base.html',
 })
 export class AppSiteAProposComponent extends PageBaseComponent {
 

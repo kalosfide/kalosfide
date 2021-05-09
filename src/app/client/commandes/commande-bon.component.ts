@@ -11,7 +11,6 @@ import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
-    styleUrls: ['../../commun/commun.scss']
 })
 export class CommandeBonComponent extends CommandeComponent implements OnInit, OnDestroy {
 

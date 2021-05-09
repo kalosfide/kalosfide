@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CommunModule } from 'src/app/commun/commun.module';
 import { DispositionModule } from 'src/app/disposition/disposition.module';
-import { MessagesModule } from 'src/app/messages/messages.module';
+import { ErreursModule } from 'src/app/erreurs/erreurs.module';
 import { CDocumentRoutingModule } from './c-document-routing.module';
 import { CDocumentLivraisonResolverService } from './c-document-livraison-resolver.service';
 import { CDocumentCommandeResolverService } from './c-document-commande-resolver.service';
@@ -19,7 +19,7 @@ import { CDocumentTitreComponent } from './c-document-titre.component';
         CommonModule,
         CommunModule,
         DispositionModule,
-        MessagesModule,
+        ErreursModule,
         CDocumentRoutingModule,
     ],
     declarations: [

@@ -1,10 +1,9 @@
-import { KfInput } from 'src/app/commun/kf-composants/kf-elements/kf-input/kf-input';
-import { ApiRequêteAction } from 'src/app/services/api-requete-action';
+import { KfTypeDInput } from 'src/app/commun/kf-composants/kf-elements/kf-input/kf-type-d-input';
+import { ApiRequêteAction } from 'src/app/api/api-requete-action';
 import { DataService } from 'src/app/services/data.service';
 import { FabriqueMembre } from './fabrique-membre';
 import { FabriqueClasse } from './fabrique';
-import { ResultatAction } from '../affiche-resultat/resultat-affichable';
-import { KfEntrée } from 'src/app/commun/kf-composants/kf-composant/kf-entree';
+import { KfEntrée } from 'src/app/commun/kf-composants/kf-elements/kf-entree/kf-entree';
 import { KfTexteDef } from 'src/app/commun/kf-composants/kf-partages/kf-texte-def';
 import { KfInputTexte } from 'src/app/commun/kf-composants/kf-elements/kf-input/kf-input-texte';
 import { KfInputNombre } from 'src/app/commun/kf-composants/kf-elements/kf-input/kf-input-nombre';
@@ -14,26 +13,34 @@ import {
 import { KfListeDeroulanteObjet } from 'src/app/commun/kf-composants/kf-elements/kf-liste-deroulante/kf-liste-deroulante-objet';
 import { KfValidateurs } from 'src/app/commun/kf-composants/kf-partages/kf-validateur';
 import { TypeCommande } from 'src/app/modeles/type-commande';
+import { ReglesDeMotDePasse } from 'src/app/securite/mot-de-passe';
+import { IKfEntreeFocusClavier } from 'src/app/commun/kf-composants/kf-elements/kf-entree/i-kf-entree-focus-clavier';
+import { KfRadios } from 'src/app/commun/kf-composants/kf-elements/kf-radios/kf-radios';
+import { IKfBootstrapOptions, KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
+import { KfRadio } from 'src/app/commun/kf-composants/kf-elements/kf-radios/kf-radio';
 
 class FabriqueEntrée extends FabriqueMembre {
     constructor(fabrique: FabriqueClasse) {
         super(fabrique);
     }
-    protected prépareInput(input: KfEntrée) {
-        input.géreClasseDiv.ajouteClasseDef('form-group row');
-        input.géreClasseLabel.ajouteClasseDef('col-sm-2 col-form-label');
-        input.géreClasseEntree.ajouteClasseDef({ nom: 'col-sm-10', active: () => !input.estDansVueTable });
-        input.ajouteClasseDef('form-control',
-            { nom: '.form-control-plaintext', active: () => input.lectureSeule }
-        );
-    }
 
-    prépareSuitValeurEtFocus(input: KfEntrée, apiAction: ApiRequêteAction, service: DataService) {
-        const icone = this.fabrique.icone.préparePourAttente(input.géreClasseEntree, apiAction);
-        input.ajouteIconeSurvol(icone);
-        input.gereHtml.suitValeurEtFocus(() => {
-            return service.actionOkObs(apiAction);
-        });
+    prépareSuitValeurEtFocus(entrée: KfEntrée, apiAction: ApiRequêteAction, service: DataService) {
+        const icone = this.fabrique.icone.iconeAttente();
+        icone.survole(entrée);
+        apiAction.attente = icone.attenteSurvol;
+
+        const def: IKfEntreeFocusClavier = {
+            /*
+            lectureSeuleSiPasFocus: true,
+            sauveQuandPerdFocus: true,
+            toucheRétablit: 'Escape',
+            */
+            toucheDébutEdition: 'F2',
+            toucheRétablit: 'Escape',
+            toucheSauvegarde: 'Enter',
+            sauvegarde: () => service.actionObs(apiAction)
+        };
+        entrée.prépareFocusClavier(def);
     }
 }
 
@@ -45,7 +52,6 @@ export class FabriqueInput extends FabriqueEntrée {
     texte(nom: string, texte?: KfTexteDef, placeholder?: string): KfInputTexte {
         const input = new KfInputTexte(nom, texte);
         input.placeholder = placeholder;
-        this.prépareInput(input);
         return input;
     }
     texteLectureSeule(nom: string, texte?: KfTexteDef, valeur?: string): KfInputTexte {
@@ -61,10 +67,42 @@ export class FabriqueInput extends FabriqueEntrée {
         input.visible = false;
         return input;
     }
+    email(nom?: string, texte?: KfTexteDef): KfInputTexte {
+        const input = this.texte(!nom ? 'email' : nom, !texte ? 'Adresse email' : texte, 'nom@kalosfide.fr');
+        input.typeDInput = KfTypeDInput.email;
+        input.ajouteValidateur(KfValidateurs.required, KfValidateurs.email);
+        return input;
+    }
+    motDePasse(règlesDeMotDePasse: ReglesDeMotDePasse, nom?: string, texte?: KfTexteDef): KfInputTexte {
+        const input = this.texte(!nom ? 'password' : nom, !texte ? 'Mot de passe' : texte, 'Mot de passe');
+        input.typeDInput = KfTypeDInput.password;
+        input.ajouteValidateur(KfValidateurs.required);
+        if (règlesDeMotDePasse) {
+            if (règlesDeMotDePasse.noSpaces) {
+                input.ajouteValidateur(KfValidateurs.noSpaces);
+            }
+            if (règlesDeMotDePasse.requiredLength) {
+                input.ajouteValidateur(KfValidateurs.requiredLength(règlesDeMotDePasse.requiredLength));
+            }
+            if (règlesDeMotDePasse.requireDigit) {
+                input.ajouteValidateur(KfValidateurs.requireDigit);
+            }
+            if (règlesDeMotDePasse.requireLowercase) {
+                input.ajouteValidateur(KfValidateurs.requireLowercase);
+            }
+            if (règlesDeMotDePasse.requireUppercase) {
+                input.ajouteValidateur(KfValidateurs.requireUppercase);
+            }
+            if (règlesDeMotDePasse.requireNonAlphanumeric) {
+                input.ajouteValidateur(KfValidateurs.requireNonAlphanumeric);
+            }
+        }
+        input.ajouteMontreMotDePasse('eye', 'eye-slash');
+        return input;
+    }
     nombre(nom: string, texte?: KfTexteDef, placeholder?: string): KfInputNombre {
         const input = new KfInputNombre(nom, texte);
         input.placeholder = placeholder;
-        this.prépareInput(input);
         return input;
     }
     nombreInvisible(nom: string, valeur?: number): KfInputNombre {
@@ -103,18 +141,30 @@ export class FabriqueListeDéroulante extends FabriqueEntrée {
     // liste déroulante
     texte(nom: string, texte?: KfTexteDef): KfListeDeroulanteTexte {
         const liste = new KfListeDeroulanteTexte(nom, texte);
-        this.prépareInput(liste);
         return liste;
     }
     nombre(nom: string, texte?: KfTexteDef): KfListeDeroulanteNombre {
         const liste = new KfListeDeroulanteNombre(nom, texte);
-        this.prépareInput(liste);
         return liste;
     }
     objet<T>(nom: string, texte?: KfTexteDef): KfListeDeroulanteObjet<T> {
         const liste = new KfListeDeroulanteObjet<T>(nom, texte);
-        this.prépareInput(liste);
         return liste;
     }
 }
 
+export class FabriqueRadios extends FabriqueEntrée {
+    constructor(fabrique: FabriqueClasse) {
+        super(fabrique);
+    }
+
+    // liste déroulante
+    groupe(nom: string, texte?: KfTexteDef): KfRadios {
+        const radios = new KfRadios(nom, texte);
+        return radios;
+    }
+    radio(nom: string, valeur: string, texte?: KfTexteDef): KfRadio {
+        const radio = new KfRadio(nom, valeur, texte);
+        return radio;
+    }
+}

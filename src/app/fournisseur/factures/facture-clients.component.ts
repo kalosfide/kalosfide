@@ -9,7 +9,6 @@ import { FournisseurCLFService } from '../fournisseur-c-l-f-.service';
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
-    styleUrls: ['../../commun/commun.scss']
 })
 export class FactureClientsComponent extends CLFClientsComponent implements OnInit, OnDestroy {
 
@@ -18,8 +17,7 @@ export class FactureClientsComponent extends CLFClientsComponent implements OnIn
     constructor(
         protected route: ActivatedRoute,
         protected service: FournisseurCLFService,
-        protected siteService: SiteService,
     ) {
-        super(route, service, siteService);
+        super(route, service);
     }
 }

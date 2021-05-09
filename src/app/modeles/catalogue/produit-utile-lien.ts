@@ -9,7 +9,7 @@ export class ProduitUtileLien extends DataUtileLien {
     }
 
     get utile(): ProduitUtile {
-        return this._parent as ProduitUtile;
+        return this.parent as ProduitUtile;
     }
 
     index(): KfLien {

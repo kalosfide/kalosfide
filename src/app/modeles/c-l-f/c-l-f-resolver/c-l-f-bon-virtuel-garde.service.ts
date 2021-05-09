@@ -5,7 +5,8 @@ import { CLFService } from '../c-l-f.service';
 
 @Injectable()
 /**
- * Redirige vers la page du bon virtuel si le document n'est pas le bon virtuel.
+ * Redirige vers la page des lignes si le document n'est pas le bon virtuel.
+ * Redirige vers la page de création si le document n'est pas le bon virtuel ouvert.
  * Garde les pages d'édition autres que lignes.
  */
 export class CLFBonVirtuelGardeService extends CLFGardeService implements CanActivate {

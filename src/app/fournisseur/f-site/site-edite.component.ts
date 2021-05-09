@@ -7,7 +7,6 @@ import { FSitePages } from './f-site-pages';
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
-    styleUrls: ['../../commun/commun.scss']
 })
 export class SiteEditeComponent extends SiteALESComponent {
 

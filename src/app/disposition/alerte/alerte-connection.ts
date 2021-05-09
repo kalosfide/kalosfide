@@ -1,4 +1,4 @@
-import { Alerte, TypeAlerte} from './alerte';
+import { Alerte, TypeAlerte } from './alerte';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 import { Identifiant } from 'src/app/securite/identifiant';
 
@@ -11,5 +11,5 @@ export function AlerteConnection(identifiant: Identifiant): Alerte {
     alerte.nbNavigationAvantFermeture = 2;
     alerte.fermable = true;
     alerte.fermetureAuto = 5000;
-return alerte;
+    return alerte;
 }

@@ -15,7 +15,8 @@ import {
 } from 'src/app/commun/kf-composants/kf-elements/kf-liste-deroulante/kf-liste-deroulante-texte';
 import { KeyUidRnoNoEditeur } from 'src/app/commun/data-par-key/key-uid-rno-no/key-uid-rno-no-editeur';
 import { ProduitService } from './produit.service';
-import { IDataKeyComponent } from 'src/app/commun/data-par-key/i-data-key-component';
+import { IDataComponent } from 'src/app/commun/data-par-key/i-data-component';
+import { KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
 
 export class ProduitEditeur extends KeyUidRnoNoEditeur<Produit> {
     categories: Categorie[];
@@ -31,7 +32,7 @@ export class ProduitEditeur extends KeyUidRnoNoEditeur<Produit> {
     kfEtatLS: KfInputTexte;
     kfPrix: KfInputNombre;
 
-    constructor(component: IDataKeyComponent) {
+    constructor(component: IDataComponent) {
         super(component);
         this.keyAuto = true;
     }
@@ -49,18 +50,20 @@ export class ProduitEditeur extends KeyUidRnoNoEditeur<Produit> {
         return [
             KfValidateurs.required,
             KfValidateurs.longueurMax(200),
+            KfValidateurs.trim,
             validateur
         ];
     }
     private validateursNomEdite(): KfValidateur[] {
         const validateur = KfValidateurs.validateurDeFn('nomPris',
             (value: any) => {
-                return this.service.nomPrisParAutre(this._kfNo.valeur, value);
+                return this.service.nomPrisParAutre(this.pKfNo.valeur, value);
             },
             'Ce nom est déjà pris');
         return [
             KfValidateurs.required,
             KfValidateurs.longueurMax(200),
+            KfValidateurs.trim,
             validateur
         ];
     }
@@ -104,7 +107,6 @@ export class ProduitEditeur extends KeyUidRnoNoEditeur<Produit> {
                 typeMesure.créeEtAjouteOption(Fabrique.texte.typeMesure(mesure), mesure);
             });
             typeMesure.ajouteValidateur(KfValidateurs.required);
-            typeMesure.créeOption0();
             typeMesure.valeur = TypeMesure.id.ALaPièce;
 
             const typeCommande = Fabrique.listeDéroulante.texte('typeCommande', titreCommande);
@@ -112,7 +114,6 @@ export class ProduitEditeur extends KeyUidRnoNoEditeur<Produit> {
                 typeCommande.créeEtAjouteOption(Fabrique.texte.typeCommande(commande), commande);
             });
             typeCommande.ajouteValidateur(KfValidateurs.required);
-            typeCommande.créeOption0();
             typeCommande.valeur = TypeCommande.id.ALUnité;
 
             this.ajouteChamps(typeMesure, typeCommande);
@@ -129,13 +130,13 @@ export class ProduitEditeur extends KeyUidRnoNoEditeur<Produit> {
             };
 
             rafraichit();
-            typeMesure.gereHtml.suitLaValeur = true;
+            typeMesure.gereHtml.suitLaValeur();
             typeMesure.gereHtml.ajouteTraiteur(KfTypeDEvenement.valeurChange, rafraichit);
         }
     }
 
     private créePrix(lectureSeule?: boolean) {
-        this.kfPrix = Fabrique.input.nombrePrix('prix', 'Nouveau prix');
+        this.kfPrix = Fabrique.input.nombrePrix('prix', 'Prix');
         this.kfPrix.min = 0;
         this.kfPrix.max = 999.99;
         this.kfPrix.pas = 0.05;
@@ -153,7 +154,6 @@ export class ProduitEditeur extends KeyUidRnoNoEditeur<Produit> {
             const etat = Fabrique.listeDéroulante.texte('etat', titre);
             EtatsProduits.etats.forEach(e => etat.créeEtAjouteOption(e.texte, e.valeur));
             etat.ajouteValidateur(KfValidateurs.required);
-            etat.créeOption0();
             etat.valeur = EtatsProduits.disponible.valeur;
             this.kfEtat = etat;
             this.ajouteChamps(etat);
@@ -170,11 +170,13 @@ export class ProduitEditeur extends KeyUidRnoNoEditeur<Produit> {
                 this.créeTypesMesureEtCommande();
                 this.créePrix();
                 this.créeEtat();
+                KfBootstrap.prépare(this.kfDeData, Fabrique.optionsBootstrap.formulaire);
                 break;
             case ProduitPages.edite:
                 this.créeCategorie();
                 this.créeNom(this.validateursNomEdite());
                 this.créeTypesMesureEtCommande();
+                KfBootstrap.prépare(this.kfDeData, Fabrique.optionsBootstrap.formulaire);
                 break;
             case ProduitPages.index:
                 this.créeCategorie(lectureSeule);
@@ -182,6 +184,7 @@ export class ProduitEditeur extends KeyUidRnoNoEditeur<Produit> {
                 this.créeTypesMesureEtCommande(lectureSeule);
                 this.créePrix();
                 this.créeEtat();
+                KfBootstrap.prépare(this.kfDeData, Fabrique.optionsBootstrap.dansVueTable);
                 break;
             default:
                 break;

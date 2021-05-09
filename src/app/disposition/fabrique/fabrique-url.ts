@@ -1,14 +1,23 @@
 import { KfTexteDef, ValeurTexteDef } from 'src/app/commun/kf-composants/kf-partages/kf-texte-def';
 import { PageDef } from 'src/app/commun/page-def';
 import { ISiteRoutes } from 'src/app/site/site-pages';
-import { AppRoutes } from 'src/app/app-pages';
+import { AppSiteRoutes } from 'src/app/app-site/app-site-pages';
 
 export interface IUrlDef {
     pageDef?: PageDef;
     routes?: ISiteRoutes;
-    nomSite?: KfTexteDef;
+    urlSite?: KfTexteDef;
+
+    /**
+     * Segments de l'url dépendant de la key d'un objet
+     */
     keys?: string[];
+
+    /**
+     * # fragment de la balise Html a
+     */
     fragment?: string;
+
     /**
      * vrai si le lien pointe vers une ancre de la page
      */
@@ -18,7 +27,7 @@ export interface IUrlDef {
 
 export class FabriqueUrl {
     url(def: IUrlDef): KfTexteDef {
-        let segments: string[];
+        let segments: string[] = [];
         if (def.pageDef) {
             segments = [def.pageDef.urlSegment];
         }
@@ -28,11 +37,12 @@ export class FabriqueUrl {
         if (!def.routes) {
             console.log(def);
         }
-        const url = def.nomSite
-            ? () => def.routes.url(ValeurTexteDef(def.nomSite), segments)
-            : () => AppRoutes.url(segments);
+        const url = def.urlSite
+            ? () => def.routes.url(ValeurTexteDef(def.urlSite), segments)
+            : () => AppSiteRoutes.url(segments);
         return url;
     }
+
     params(def: IUrlDef): any {
         if (def.params) {
             const params: { [key: string]: string } = {};

@@ -7,32 +7,32 @@ import { IContenuPhraseDef } from 'src/app/disposition/fabrique/fabrique-contenu
 import { IUrlDef } from 'src/app/disposition/fabrique/fabrique-url';
 
 export class DataKeyUtileLien<T extends IDataKey> {
-    protected _utile: DataKeyUtile<T>;
+    protected pUtile: DataKeyUtile<T>;
 
     constructor(utile: DataKeyUtile<T>) {
-        this._utile = utile;
+        this.pUtile = utile;
     }
 
     def(urlDef: IUrlDef, contenu?: IContenuPhraseDef): ILienDef {
-        return this._utile.lien.def('', urlDef, contenu);
+        return this.pUtile.lien.def('', urlDef, contenu);
     }
 
     index(): KfLien {
-        return Fabrique.lien.lien(this.def(this._utile.urlKey.index()));
+        return Fabrique.lien.lien(this.def(this.pUtile.urlKey.index()));
     }
     retourIndex(t: T, texte?: string): KfLien {
-        return Fabrique.lien.retour(this._utile.urlKey.retourIndex(t), texte);
+        return Fabrique.lien.retour(this.pUtile.urlKey.retourIndex(t), texte);
     }
     ajoute(): KfLien {
-        return Fabrique.lien.ajoute(this._utile.urlKey.ajoute());
+        return Fabrique.lien.ajoute(this.pUtile.urlKey.ajoute());
     }
     edite(t: T): KfLien {
-        return Fabrique.lien.lien(this.def(this._utile.urlKey.edite(t), Fabrique.contenu.edite));
+        return Fabrique.lien.lien(this.def(this.pUtile.urlKey.edite(t), Fabrique.contenu.edite));
     }
     aperçu(t: T): KfLien {
-        return Fabrique.lien.lien(this.def(this._utile.urlKey.edite(t), Fabrique.contenu.aperçu));
+        return Fabrique.lien.lien(this.def(this.pUtile.urlKey.edite(t), Fabrique.contenu.aperçu));
     }
     supprime(t: T): KfLien {
-        return Fabrique.lien.lien(this.def(this._utile.urlKey.supprime(t), Fabrique.contenu.supprime));
+        return Fabrique.lien.lien(this.def(this.pUtile.urlKey.supprime(t), Fabrique.contenu.supprime));
     }
 }

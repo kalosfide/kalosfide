@@ -1,15 +1,15 @@
 import { KfTypeDeComposant } from '../../kf-composants-types';
 import { KfComposant } from '../../kf-composant/kf-composant';
-import { KfRadio } from './kf-radio';
-import { KfEntrée } from '../../kf-composant/kf-entree';
+import { KfEntrée } from '../kf-entree/kf-entree';
 import { KfGereTabIndex } from '../../kf-composant/kf-composant-gere-tabindex';
+import { KfTexteDef } from '../../kf-partages/kf-texte-def';
 
 export class KfRadios extends KfEntrée {
 
     avecNgBootstrap: boolean;
 
-    constructor(nom: string) {
-        super(nom, KfTypeDeComposant.radios);
+    constructor(nom: string, texteLabel?: KfTexteDef) {
+        super(nom, KfTypeDeComposant.radios, texteLabel);
     }
 
     ajoute(composant: KfComposant) {

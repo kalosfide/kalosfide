@@ -1,4 +1,4 @@
-import { FournisseurRoutes, FournisseurPages } from '../fournisseur-pages';
+import { FournisseurRoutes, FournisseurPages, FournisseurSiteRoutes } from '../fournisseur-pages';
 import { iSiteRoutePlusSegments } from 'src/app/site/site-pages';
 import { PageDef } from 'src/app/commun/page-def';
 
@@ -18,9 +18,9 @@ export class FSitePages  {
     static edite: PageDef = {
         urlSegment: 'edite',
         lien: 'Modifier',
-        title: 'Produits - Modifier',
-        titre: 'Modifier un produit',
+        title: 'Modifier',
+        titre: 'Modifier le site',
     };
 }
 
-export const FSiteRoutes = iSiteRoutePlusSegments(FournisseurRoutes, [FournisseurPages.site.urlSegment]);
+export const FSiteRoutes = iSiteRoutePlusSegments(FournisseurSiteRoutes, [FournisseurPages.site.urlSegment]);

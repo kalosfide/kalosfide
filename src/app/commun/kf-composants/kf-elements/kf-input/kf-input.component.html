@@ -1,6 +1,6 @@
-<ng-template #labelTemplate>
-    <label #labelElement *ngIf="input.classeLabel" [attr.for]="input.nom" [ngClass]="input.classeLabel">
-        <app-kf-contenu-phrase [contenuPhrase]="input.contenuPhrase"></app-kf-contenu-phrase>
+<ng-template #labelTemplate let-avecLabel>
+    <label #labelElement [attr.for]="avecLabel.nom" [ngClass]="avecLabel.label.classe">
+        <app-kf-contenu-phrase [contenuPhrase]="avecLabel.label.contenuPhrase"></app-kf-contenu-phrase>
     </label>
 </ng-template>
 
@@ -20,17 +20,14 @@
 </ng-template>
 
 <ng-template #sansDivTemplate>
-    <ng-container *ngIf="input.avecLabel">
-        <ng-container *ngTemplateOutlet="labelTemplate"></ng-container>
+    <ng-container *ngIf="input.avecLabelAvant">
+        <ng-container *ngTemplateOutlet="labelTemplate; context: { $implicit: input }"></ng-container>
     </ng-container>
     <ng-container *ngIf="input.classeEntree; then entreeAvecDivTemplate; else entreeTemplate"></ng-container>
 
     <ng-template #entreeAvecDivTemplate>
         <div nom="classeEntree" [ngClass]="input.classeEntree">
             <ng-container *ngTemplateOutlet="entreeTemplate"></ng-container>
-            <ng-container *ngIf="input.boutonEfface">
-                <button type="button" role="efface" [ngClass]="input.boutonEfface.classe" (click)="input.efface()">x</button>
-            </ng-container>
             <ng-container *ngIf="input.iconeSurvol">
                 <app-kf-icone [composant]="input.iconeSurvol"></app-kf-icone>
             </ng-container>
@@ -39,38 +36,66 @@
 </ng-template>
 
 <ng-template #entreeTemplate>
-    <div *ngIf="input.composantAvant" class="input-group-prepend">
+    <div *ngIf="input.composantAvant" [ngClass]="input.classeComposantAvant">
         <app-kf-composant [composant]="input.composantAvant"></app-kf-composant>
     </div>
-    <ng-container *ngIf="nombre; then nombre_; else pasNombre_"></ng-container>
+    <ng-container *ngIf="!estNombre; else nombreTemplate">
+        <ng-container *ngIf="estTexte; then texteTemplate; else dateTempsTemplate">
+
+        </ng-container>
+
+    </ng-container>
+    <ng-container *ngIf="input.avecLabelApres">
+        <ng-container *ngTemplateOutlet="labelTemplate; context: { $implicit: input }"></ng-container>
+    </ng-container>
     <ng-container *ngTemplateOutlet="infoTemplate"></ng-container>
 </ng-template>
 
 
-<ng-template #nombre_>
+<ng-template #nombreTemplate>
     <input #inputElement [name]="input.nom" [type]="input.typeDInput" [formControl]="input.formControl"
         [ngClass]="input.classe" [readonly]="input.lectureSeule" [attr.disabled]="input.inactif"
         [attr.placeholder]="input.placeholder" [min]="nombre.min" [max]="nombre.max" [step]="nombre.pas" />
 </ng-template>
 
-<ng-template #pasNombre_>
-    <ng-container *ngIf="dateTemps; then dateTempsTemplate; else normalTemplate"></ng-container>
-    <ng-template #dateTempsTemplate>
-        <div class="input-group form-inline">
-            <input #inputElement [name]="input.nom" [type]="dateTemps.inputDate.typeDInput"
-                [formControl]="dateTemps.inputDate.formControl" [ngClass]="input.classe"
-                [readonly]="input.lectureSeule" [attr.disabled]="input.inactif"
-                [attr.placeholder]="dateTemps.inputDate.placeholder" (change)="dateTemps.quandValeurChange()" />
-            <input [name]="dateTemps.inputTemps.nom" [type]="dateTemps.inputTemps.typeDInput"
-                [formControl]="dateTemps.inputTemps.formControl" [ngClass]="input.classe"
-                [readonly]="input.lectureSeule" [attr.disabled]="input.inactif"
-                [attr.placeholder]="dateTemps.inputTemps.placeholder" (change)="dateTemps.quandValeurChange()" />
+<ng-template #dateTempsTemplate>
+    <div [ngClass]="input.classe">
+        <input #inputElement [name]="input.nom" [type]="dateTemps.inputDate.typeDInput"
+            [formControl]="dateTemps.inputDate.formControl" [ngClass]="dateTemps.inputDate.classe" [readonly]="input.lectureSeule"
+            [attr.disabled]="input.inactif" [attr.placeholder]="dateTemps.inputDate.placeholder"
+            (change)="dateTemps.quandValeurChange()" />
+        <input [name]="dateTemps.inputTemps.nom" [type]="dateTemps.inputTemps.typeDInput"
+            [formControl]="dateTemps.inputTemps.formControl" [ngClass]="dateTemps.inputTemps.classe" [readonly]="input.lectureSeule"
+            [attr.disabled]="input.inactif" [attr.placeholder]="dateTemps.inputTemps.placeholder"
+            (change)="dateTemps.quandValeurChange()" />
+    </div>
+</ng-template>
+
+<ng-template #texteTemplate>
+    <ng-container *ngIf="texte.iconesBoutons; then avecIconeBouton; else sansIconeBouton"></ng-container>
+</ng-template>
+
+<ng-template #sansIconeBouton>
+    <input #inputElement [name]="input.nom" [type]="input.typeDInput" [formControl]="input.formControl"
+        [ngClass]="input.classe" [readonly]="input.lectureSeule" [attr.disabled]="input.inactif"
+        [attr.placeholder]="input.placeholder" />
+</ng-template>
+
+<ng-template #avecIconeBouton>
+    <ng-container *ngIf="texte.cssDivBouton; else sansCssBouton">
+        <div [ngClass]="texte.cssDivBouton.classe">
+            <ng-container *ngTemplateOutlet="sansCssBouton"></ng-container>
         </div>
-    </ng-template>
-    <ng-template #normalTemplate>
-        <input #inputElement [name]="input.nom" [type]="input.typeDInput" [formControl]="input.formControl"
-            [ngClass]="input.classe" [readonly]="input.lectureSeule" [attr.disabled]="input.inactif"
-            [attr.placeholder]="input.placeholder" />
+    </ng-container>
+
+    <ng-template #sansCssBouton>
+        <ng-container *ngTemplateOutlet="sansIconeBouton"></ng-container>
+        <ng-container *ngFor="let iconeBouton of texte.iconesBoutons">
+            <span [class]="iconeBouton.icone.faClasse" [ngClass]="iconeBouton.icone.classe"
+                (pointerdown)="iconeBouton.quandEnfonce()" (pointerup)="iconeBouton.quandRelache()"
+                (click)="iconeBouton.quandClic()">
+            </span>
+        </ng-container>
     </ng-template>
 
 </ng-template>

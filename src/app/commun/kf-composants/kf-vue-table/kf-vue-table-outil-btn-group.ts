@@ -1,4 +1,3 @@
-import { KfGéreCss } from '../kf-partages/kf-gere-css';
 import { IKfVueTableOutil } from './kf-vue-table-outil';
 import { KfBBtnGroup, KfBBtnGroupElement } from '../kf-b-btn-group/kf-b-btn-group';
 import { KfBBtnToolbarElement } from '../kf-b-btn-toolbar/kf-b-btn-toolbar';

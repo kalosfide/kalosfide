@@ -5,17 +5,17 @@ import { Categorie } from './categorie';
 import { RouteurService } from 'src/app/services/routeur.service';
 import { CategorieService } from './categorie.service';
 import { mergeMap } from 'rxjs/operators';
-import { ApiResult404NotFound } from 'src/app/commun/api-results/api-result-404-not-found';
-import { DataKeyResolverService } from 'src/app/commun/data-par-key/data-key-resolver.service';
+import { ApiResult404NotFound } from 'src/app/api/api-results/api-result-404-not-found';
+import { DataResolverService } from 'src/app/services/data-resolver.service';
 
 @Injectable()
-export class CategorieResolverService extends DataKeyResolverService<Categorie> implements Resolve<Categorie> {
+export class CategorieResolverService extends DataResolverService implements Resolve<Categorie> {
 
     constructor(
         private routeur: RouteurService,
-        protected service: CategorieService,
+        private service: CategorieService,
     ) {
-        super(service);
+        super();
     }
 
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<never> | Categorie | Observable<Categorie> {
@@ -25,7 +25,7 @@ export class CategorieResolverService extends DataKeyResolverService<Categorie> 
                 if (catégorie) {
                     return of(catégorie);
                 } else {
-                    this.routeur.navigueVersErreur(new ApiResult404NotFound());
+                    this.service.routeur.navigueVersPageErreur(new ApiResult404NotFound());
                     return EMPTY;
                 }
             })

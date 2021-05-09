@@ -2,8 +2,8 @@ import { Observable } from 'rxjs';
 import { map, catchError, delay, take } from 'rxjs/operators';
 import { AbstractControl, ValidationErrors } from '@angular/forms';
 
-import { ApiResult200Ok } from '../commun/api-results/api-result-200-ok';
-import { ApiResult } from '../commun/api-results/api-result';
+import { ApiResult200Ok } from '../api/api-results/api-result-200-ok';
+import { ApiResult } from '../api/api-results/api-result';
 
 export abstract class TextePasPrisValidator {
     abstract textePris(texte: string): Observable<ApiResult>;

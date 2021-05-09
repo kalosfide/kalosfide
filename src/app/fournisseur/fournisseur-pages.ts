@@ -1,4 +1,4 @@
-import { SiteRoutes, ISiteRoutes, SitePages } from '../site/site-pages';
+import { SiteRoutes, ISiteRoutes, SitePages, iSiteRoutePlusSegments } from '../site/site-pages';
 import { PageDef, BaseRoutes } from '../commun/page-def';
 
 export class FournisseurPages {
@@ -38,11 +38,12 @@ export class FournisseurPages {
 }
 
 class CFournisseurRoutes extends BaseRoutes implements ISiteRoutes {
-    url(nomSite: string, segments: any[]): string {
-        return SiteRoutes.urlRole(nomSite, SitePages.fournisseur.urlSegment, segments);
+    url(urlSite: string, segments: any[]): string {
+        return SiteRoutes.urlDeRole(urlSite, SitePages.fournisseur.urlSegment, segments);
     }
     get urlBase(): string {
-        return SiteRoutes.urlRole(SiteRoutes.urlBase, SitePages.fournisseur.urlSegment);
+        return SiteRoutes.urlDeRole(SiteRoutes.urlBase, SitePages.fournisseur.urlSegment);
     }
 }
 export const FournisseurRoutes = new CFournisseurRoutes();
+export const FournisseurSiteRoutes = iSiteRoutePlusSegments(FournisseurRoutes, [FournisseurPages.site.urlSegment]);

@@ -2,12 +2,13 @@ import { PageDef } from '../page-def';
 import { KfGroupe } from '../kf-composants/kf-groupe/kf-groupe';
 import { KfSuperGroupe } from '../kf-composants/kf-groupe/kf-super-groupe';
 import { KfComposant } from '../kf-composants/kf-composant/kf-composant';
-import { IDataKeyComponent } from './i-data-key-component';
+import { IDataComponent } from './i-data-component';
 import { IDataKey } from './data-key';
+import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 
 export abstract class DataKeyEditeur<T extends IDataKey> {
     protected groupe: KfGroupe;
-    protected component: IDataKeyComponent;
+    protected component: IDataComponent;
 
     /**
      * vrai si la clé est générée par la base de données
@@ -22,7 +23,7 @@ export abstract class DataKeyEditeur<T extends IDataKey> {
      */
     kfDeData: KfComposant[];
 
-    constructor(component: IDataKeyComponent) {
+    constructor(component: IDataComponent) {
         this.component = component;
     }
 
@@ -39,7 +40,6 @@ export abstract class DataKeyEditeur<T extends IDataKey> {
     }
 
     private prepareGroupe() {
-        this.groupe.créeGereValeur();
         this.kfDeKey = [];
         this.créeKfDeKey();
         this.kfDeKey.forEach(c => this.groupe.ajoute(c));
@@ -48,8 +48,8 @@ export abstract class DataKeyEditeur<T extends IDataKey> {
         this.kfDeData.forEach(c => this.groupe.ajoute(c));
     }
 
-    créeEdition(pageDef: PageDef) {
-        this.groupe = new KfGroupe(pageDef.urlSegment);
+    créeFormulaire() {
+        this.groupe = Fabrique.formulaire.formulaire();
         this.prepareGroupe();
     }
     get edition(): KfGroupe {
@@ -68,6 +68,7 @@ export abstract class DataKeyEditeur<T extends IDataKey> {
 
     créeSuperGroupe(): KfSuperGroupe {
         this.groupe = new KfSuperGroupe('');
+        this.groupe.créeGereValeur();
         this.prepareGroupe();
         const superGroupe = this.groupe as KfSuperGroupe;
         superGroupe.quandTousAjoutés();

@@ -3,12 +3,13 @@ import { SitePages } from 'src/app/site/site-pages';
 import { ProduitIndexBaseComponent } from './produit-index-base.component';
 import { PageDef } from 'src/app/commun/page-def';
 import { BarreTitre, IBarreDef } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Data } from '@angular/router';
 import { ProduitService } from './produit.service';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
+import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
 
 @Component({
-    templateUrl: '../../disposition/page-base/page-base.html', styleUrls: ['../../commun/commun.scss']
+    templateUrl: '../../disposition/page-base/page-base.html',
 })
 export class VCProduitsComponent extends ProduitIndexBaseComponent implements OnInit, OnDestroy {
 
@@ -19,7 +20,6 @@ export class VCProduitsComponent extends ProduitIndexBaseComponent implements On
     }
     niveauTitre = 0;
 
-    barre: BarreTitre;
 
     constructor(
         protected route: ActivatedRoute,
@@ -41,12 +41,16 @@ export class VCProduitsComponent extends ProduitIndexBaseComponent implements On
         return def;
     }
 
-    créePageTableDef() {
-        this.pageTableDef = this.créePageTableDefBase();
-        this.pageTableDef.avantChargeData = () => this.avantChargeData();
-        this.pageTableDef.aprèsChargeData = () => {
-            this.barre.site = this.service.navigation.litSiteEnCours();
-            this.barre.rafraichit();
+    créePageTableDef(): IPageTableDef {
+        return {
+            avantChargeData: () => this.avantChargeData(),
+            chargeData: (data: Data) => this.chargeData(data),
+            créeSuperGroupe: () => this.créeGroupe('super'),
+            chargeGroupe: () => this.chargeGroupe(),
+            aprèsChargeData: () => {
+                this.barre.site = this.service.navigation.litSiteEnCours();
+                this.barre.rafraichit();
+            }
         };
     }
 

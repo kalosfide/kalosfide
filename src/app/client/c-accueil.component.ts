@@ -14,14 +14,12 @@ import { ActivatedRoute } from '@angular/router';
 
 @Component({
     templateUrl: '../disposition/page-base/page-base.html',
-    styleUrls: ['../commun/commun.scss']
 })
 export class CAccueilComponent extends PageBaseComponent implements OnInit {
 
     pageDef: PageDef = ClientPages.accueil;
 
     site: Site;
-    barre: BarreTitre;
 
     get titre(): string {
         return this.site.titre;

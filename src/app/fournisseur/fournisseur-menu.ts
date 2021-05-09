@@ -8,12 +8,14 @@ export class FournisseurMenu extends SiteMenu {
 
     protected créeItemsAction(): NavItemLien[] {
         return [
-            this.créeItemDeSite(FournisseurPages.catalogue, FournisseurRoutes),
-            this.créeItemDeSite(FournisseurPages.livraison, FournisseurRoutes),
-            this.créeItemDeSite(FournisseurPages.facture, FournisseurRoutes),
-            this.créeItemDeSite(FournisseurPages.documents, FournisseurRoutes),
-            this.créeItemDeSite(FournisseurPages.clients, FournisseurRoutes),
-            this.créeItemDeSite(FournisseurPages.site, FournisseurRoutes),
+            this.créeItem(FournisseurPages.livraison),
+            this.créeItem(FournisseurPages.facture),
+            this.créeItem(FournisseurPages.documents),
+            this.créeItemSite(
+                this.créeItemDeSite(FournisseurPages.catalogue),
+                this.créeItemDeSite(FournisseurPages.clients),
+                this.créeItemDeSite(FournisseurPages.site),
+            )
         ];
     }
 

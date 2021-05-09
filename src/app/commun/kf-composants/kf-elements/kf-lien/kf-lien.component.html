@@ -1,11 +1,18 @@
-<ng-container *ngIf="lien.routerLinkActive; else elseTemplate">
-    <a #baliseElement [routerLink]="lien.route" routerLinkActive="active" [queryParams]="lien.queryParams"
-        [fragment]="lien.fragment" [ngClass]="lien.classe" [ngStyle]="lien.style">
+<ng-container *ngIf="!lien.route; else routeTemplate">
+    <a #baliseElement [ngClass]="lien.classe" [ngStyle]="lien.style" href="">
         <app-kf-contenu-phrase [contenuPhrase]="lien.contenuPhrase"></app-kf-contenu-phrase>
     </a>
 </ng-container>
-<ng-template #elseTemplate>
-    <a #baliseElement [routerLink]="lien.route" [queryParams]="lien.queryParams"
+<ng-template #routeTemplate>
+    <ng-container *ngIf="!lien.routerLinkActive; else routerLinkActiveTemplate">
+        <a #baliseElement [routerLink]="lien.route" [queryParams]="lien.queryParams" [fragment]="lien.fragment"
+            [ngClass]="lien.classe" [ngStyle]="lien.style">
+            <app-kf-contenu-phrase [contenuPhrase]="lien.contenuPhrase"></app-kf-contenu-phrase>
+        </a>
+    </ng-container>
+</ng-template>
+<ng-template #routerLinkActiveTemplate>
+    <a #baliseElement [routerLink]="lien.route" routerLinkActive="active" [queryParams]="lien.queryParams"
         [fragment]="lien.fragment" [ngClass]="lien.classe" [ngStyle]="lien.style">
         <app-kf-contenu-phrase [contenuPhrase]="lien.contenuPhrase"></app-kf-contenu-phrase>
     </a>

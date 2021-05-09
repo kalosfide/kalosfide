@@ -1,29 +1,41 @@
 import { Injectable } from '@angular/core';
 import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
-import { Observable, EMPTY } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Site } from '../modeles/site/site';
-import { tap } from 'rxjs/operators';
 import { SiteService } from '../modeles/site/site.service';
-import { NavigationService } from '../services/navigation.service';
+import { ApiResult401Unauthorized } from '../api/api-results/api-result-401-unauthorized';
+import { ApiResult404NotFound } from '../api/api-results/api-result-404-not-found';
+import { AppPages } from '../app-pages';
+import { AppSiteRoutes } from '../app-site/app-site-pages';
+import { ComptePages } from '../compte/compte-pages';
 
 
 @Injectable()
 export class SiteResolverService implements Resolve<Site> {
 
     constructor(
-        private _siteService: SiteService,
-        private _navigation: NavigationService,
+        private siteService: SiteService,
     ) {
     }
 
-    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<never> | Observable<Site> {
-        const nomSite = route.paramMap.get('nomSite');
-        if (!nomSite) {
-            return EMPTY;
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<never> | Site | Observable<Site> {
+        const urlSite = route.paramMap.get('urlSite');
+        if (!urlSite) {
+            this.siteService.routeur.navigueVersPageErreur(new ApiResult404NotFound());
+            return null;
         }
-        return this._siteService.trouveParNom(nomSite).pipe(
-            tap(site => this._navigation.fixeSiteEnCours(site))
-        );
+        const identifiant = this.siteService.identification.litIdentifiant();
+        if (!identifiant) {
+            this.siteService.routeur.navigate([AppSiteRoutes.url([AppPages.compte.urlSegment, ComptePages.connection.urlSegment])]);
+            return null;
+        }
+        const site = identifiant.sites.find(s => s.url === urlSite);
+        if (!site) {
+            this.siteService.routeur.navigueVersPageErreur(new ApiResult404NotFound());
+            return null;
+        }
+        this.siteService.navigation.fixeSiteEnCours(site);
+        return site;
     }
 
 }

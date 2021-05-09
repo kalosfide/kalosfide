@@ -63,17 +63,6 @@ export class CommandePages {
     };
 
     /**
-     * Route: ./supprime/:[nomParamNoLigne]
-     * Page de visualisation d'une ligne avec bouton supprime
-     * Param nomParamNoLigne: no du produit de la ligne
-     */
-    static supprime: PageDef = {
-        urlSegment: CLFPages.supprime.urlSegment,
-        title: CLFPages.supprime.title,
-        titre: CLFPages.supprime.titre,
-    };
-
-    /**
      * Route: ./envoi (client).
      * Page de visualisation de la synthèse.
      * Bouton: avant envoi, Enregistrer.

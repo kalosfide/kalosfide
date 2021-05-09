@@ -34,7 +34,7 @@ export class EtapeDeFormulaire {
 
     créeEdition(): KfGroupe {
         this.groupeEditeur = new KfGroupe(this.nom);
-        this.groupeEditeur.ajouteClasseDef('tab-pane');
+        this.groupeEditeur.ajouteClasse('tab-pane');
         const titre = new KfEtiquette(this.nom + '-titre', this.pageDef.titre);
         titre.baliseHtml = KfTypeDeBaliseHTML.h5;
         this.groupeEditeur.ajoute(titre);
@@ -54,18 +54,17 @@ export class EtapeDeFormulaire {
     créeGroupeEtat(): KfGroupe {
         this.groupeEtat = new KfGroupe(this.nom + 'etat');
         const etiquette = new KfEtiquette('', this.texteLien);
-        etiquette.ajouteClasseDef('');
+        etiquette.ajouteClasse('');
         this.groupeEtat.ajoute(etiquette);
         this.etat = new KfEtiquette('', '');
         this.etat.fixeTexte(() => this.estInitial ? '' : this.estValide ? 'Ok' : 'INVALIDE');
-        this.etat.ajouteClasseDef(() => this.estInitial ? '' : this.estValide ? 'success' : 'danger');
+        this.etat.ajouteClasse(() => this.estInitial ? '' : this.estValide ? 'success' : 'danger');
         this.groupeEtat.ajoute(this.etat);
         return this.groupeEtat;
     }
 
     get estValide(): boolean {
-        for (let i = 0; i < this.groupeEditeur.contenus.length; i++) {
-            const contenu = this.groupeEditeur.contenus[i];
+        for (const contenu of this.groupeEditeur.contenus) {
             if (contenu.abstractControl && !contenu.abstractControl.valid) {
                 return false;
             }
@@ -74,8 +73,7 @@ export class EtapeDeFormulaire {
     }
 
     get estInitial(): boolean {
-        for (let i = 0; i < this.groupeEditeur.contenus.length; i++) {
-            const contenu = this.groupeEditeur.contenus[i];
+        for (const contenu of this.groupeEditeur.contenus) {
             if (contenu.abstractControl && !contenu.abstractControl.pristine) {
                 return false;
             }

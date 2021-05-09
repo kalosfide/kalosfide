@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ViewChildren, QueryList, AfterViewInit, ElementRef } from '@angular/core';
 import { KfComposantComponent } from '../../kf-composant/kf-composant.component';
-import { KFComposantService } from '../../kf-composant.service';
+import { TraiteKeydownService } from '../../../traite-keydown/traite-keydown.service';
 import { KfListeDeroulanteBase } from './kf-liste-deroulante-base';
 
 @Component({
@@ -12,7 +12,7 @@ export class KfListeDeroulanteComponent extends KfComposantComponent implements 
     @ViewChild('selectElement', {static: false}) selectElementRef: ElementRef;
     @ViewChildren('optionElement') optionElements: QueryList<ElementRef>;
 
-    constructor(protected service: KFComposantService) {
+    constructor(protected service: TraiteKeydownService) {
         super(service);
     }
 
@@ -31,11 +31,7 @@ export class KfListeDeroulanteComponent extends KfComposantComponent implements 
     }
 
     ngAfterViewInit() {
-        this.composant.gereHtml.htmlElement = this.selectElement;
-        this.composant.gereHtml.enfantsDeVue = {
-            selectElement: this.selectElement,
-        };
-        this.composant.gereHtml.initialiseHtml(this.output);
+        this.composant.initialiseHtml(this.selectElementRef.nativeElement, this.output);
     }
 
 }

@@ -8,7 +8,6 @@ import { ProduitService } from 'src/app/modeles/catalogue/produit.service';
 
 @Component({
     templateUrl: '../../../disposition/page-base/page-base.html',
-    styleUrls: ['../../../commun/commun.scss']
 })
 export class ProduitEditeComponent extends ProduitALESComponent {
     pageDef: PageDef = ProduitPages.edite;

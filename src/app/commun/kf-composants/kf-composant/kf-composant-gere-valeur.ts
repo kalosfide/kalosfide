@@ -1,6 +1,6 @@
 import { AbstractControl, FormArray, FormControl, FormGroup, ValidationErrors } from '@angular/forms';
 import { KfComposant } from './kf-composant';
-import { KfEntrée } from './kf-entree';
+import { KfEntrée } from '../kf-elements/kf-entree/kf-entree';
 import { KfListe } from '../kf-liste/kf-liste';
 import { KfGroupe } from '../kf-groupe/kf-groupe';
 import { KfTypeDeComposant, KfTypeDeValeur } from '../kf-composants-types';
@@ -75,7 +75,7 @@ export class KfComposantGereValeur {
      *  les autres utilisent leur ValeurDansParent
      */
 
-    constructor(composant: KfComposantAvecValeur, typeDeValeur?: KfTypeDeValeur) {
+    constructor(composant: KfComposantAvecValeur, typeDeValeur: KfTypeDeValeur) {
         this.icomposant = composant;
         this.composant = composant.composant;
         this.typeDeValeur = typeDeValeur ? typeDeValeur : KfTypeDeValeur.aucun;
@@ -85,7 +85,7 @@ export class KfComposantGereValeur {
 
     // avec disposition
     ajoute(gereValeur: KfComposantGereValeur) {
-        if (this.composant.type === KfTypeDeComposant.groupe) {
+        if (this.composant.estGroupe) {
             this.noeudV.Ajoute(gereValeur.noeudV);
             return;
         }
@@ -119,7 +119,7 @@ export class KfComposantGereValeur {
     get valeur(): any {
         if (this.abstractControl) {
             // après l'initialisation des controles
-            return this.abstractControl.value;
+            return this.valeurJson();
         }
         // avant l'initialisation des controles
         if (this.estRacineV) {
@@ -214,7 +214,7 @@ export class KfComposantGereValeur {
                     break;
                 case KfTypeDeComposant.vuetable:
                     const vueTable = gereValeur.icomposant as IKfVueTable;
-                    valeur[gereValeur.composant.nom] = vueTable.valeurs;
+                    valeur[gereValeur.composant.nom] = vueTable.superGroupes.map(g => g.valeur);
                     break;
                 default:
                     if (gereValeur.composant.estEntree) {
@@ -226,6 +226,42 @@ export class KfComposantGereValeur {
             enfant = enfant.suivant;
         }
         return valeur;
+    }
+
+    private valeurJson(): any {
+        switch (this.composant.type) {
+            case KfTypeDeComposant.groupe:
+                const valeurJson = {};
+                let enfant = this.noeudV.enfant;
+                while (enfant) {
+                    const gereValeur = enfant.objet as KfComposantGereValeur;
+                    valeurJson[gereValeur.composant.nom] = gereValeur.valeurJson();
+                    enfant = enfant.suivant;
+                }
+                return valeurJson;
+            case KfTypeDeComposant.liste:
+                const liste = this.composant as KfListe;
+                return [];
+            case KfTypeDeComposant.vuetable:
+                const vueTable = this.icomposant as IKfVueTable;
+                return vueTable.superGroupes.map(g => g.gereValeur.valeurJson());
+            default:
+                if (this.composant.estEntree) {
+                    const entrée = this.composant as KfEntrée;
+                    const estInputNombre = this.typeDeValeur === KfTypeDeValeur.avecEntreeInputNombre;
+                    const valeur = this.abstractControl.value;
+                    if (valeur !== undefined) {
+                        if (estInputNombre) {
+                            if (valeur !== '') {
+                                return +valeur;
+                            }
+                        } else {
+                            return valeur;
+                        }
+                    }
+                }
+                break;
+        }
     }
 
     // pour un groupe
@@ -244,7 +280,7 @@ export class KfComposantGereValeur {
                     break;
                 case KfTypeDeComposant.vuetable:
                     const vueTable = gereValeur.icomposant as IKfVueTable;
-                    abstractControl = new FormArray(vueTable.formGroups);
+                    abstractControl = new FormArray(vueTable.superGroupes.map(g => g.formGroup));
                     break;
                 default:
                     if (gereValeur.composant.estEntree) {
@@ -302,11 +338,11 @@ export class KfComposantGereValeur {
 
     /* VALIDATION */
 
-    AjouteValidateur(validateur: KfValidateur) {
+    ajouteValidateur(...validateurs: KfValidateur[]) {
         if (this.pValidateurs) {
-            this.pValidateurs.push(validateur);
+            this.pValidateurs.push(...validateurs);
         } else {
-            this.pValidateurs = [validateur];
+            this.pValidateurs = validateurs;
         }
     }
 
@@ -336,65 +372,6 @@ export class KfComposantGereValeur {
         if (asyncValidators.length > 0) {
             control.setAsyncValidators(asyncValidators);
         }
-    }
-
-    private _distribueErreurs(composant: KfComposant, champ: string, distribution: {
-        apiErreurs: { champ: string, code: string }[],
-        messages: string[]
-    }): {
-        apiErreurs: { champ: string, code: string }[],
-        messages: string[]
-    } {
-        if (composant.type === KfTypeDeComposant.groupe) {
-            const groupe = composant as KfGroupe;
-
-            groupe.contenus.forEach(c => distribution = this._distribueErreurs(c, c.nom.toLowerCase(), distribution));
-
-        }
-
-        if (!composant.gereValeur) {
-            return distribution;
-        }
-        const validateurs = composant.gereValeur.Validateurs;
-        if (!validateurs) {
-            return distribution;
-        }
-        const erreurs = distribution.apiErreurs.filter(e => e.champ.toLowerCase() === champ);
-        const traitées: { champ: string, code: string }[] = [];
-        erreurs.forEach(e => {
-            const code = e.code.toLowerCase();
-            const validateur: KfValidateur = composant.gereValeur.Validateurs.find(v => code === v.nom.toLowerCase());
-            if (validateur) {
-                if (validateur.marqueErreur) {
-                    validateur.marqueErreur(composant.abstractControl);
-                    traitées.push(e);
-                } else {
-                    if (validateur.message) {
-                        distribution.messages.push(validateur.message);
-                    } else {
-                        distribution.messages.push(e.code);
-                    }
-                }
-            }
-        });
-        distribution.apiErreurs = distribution.apiErreurs.filter(e => !traitées.find(t => t.champ === e.champ && t.code === e.code));
-        return distribution;
-
-    }
-
-    distribueErreurs(apiErreurs: { champ: string, code: string }[]): {
-        apiErreurs: { champ: string, code: string }[],
-        messages: string[]
-    } {
-        let distribution: {
-            apiErreurs: { champ: string, code: string }[],
-            messages: string[]
-        } = {
-            apiErreurs,
-            messages: []
-        };
-        distribution = this._distribueErreurs(this.composant, '2', distribution);
-        return distribution;
     }
 
     get invalide(): boolean {

@@ -19,8 +19,6 @@ export abstract class PageTableComponent<T> extends PageBaseComponent implements
         return this.groupeTable.vueTable;
     }
 
-    pageTableDef: IPageTableDef;
-
     fragment: string;
 
     constructor(
@@ -43,7 +41,7 @@ export abstract class PageTableComponent<T> extends PageBaseComponent implements
         this.liste = data.liste;
     }
 
-    protected abstract créePageTableDef(): void;
+    protected abstract créePageTableDef(): IPageTableDef;
 
     abstract créeGroupeTableDef(): IGroupeTableDef<T>;
 
@@ -68,41 +66,34 @@ export abstract class PageTableComponent<T> extends PageBaseComponent implements
     }
 
     protected _chargeVueTable(liste: T[]) {
-        const attente = this.service.attenteService.commence('chargeVueTable');
+        const attente = this.service.attenteService.attente('chargeVueTable');
+        attente.commence();
         this.vueTable.initialise(liste);
-        this.service.attenteService.finit(attente);
-    }
-
-    protected créePageTableDefBase(): IPageTableDef {
-        const def: IPageTableDef = {
-            chargeData: (data: Data) => this.chargeData(data),
-            créeSuperGroupe: () => this.créeGroupe('super'),
-            chargeGroupe: () => this.chargeGroupe(),
-        };
-        return def;
+        attente.finit();
     }
 
     ngOnInit() {
-        this.créePageTableDef();
-        if (this.pageTableDef.avantChargeData) { this.pageTableDef.avantChargeData(); }
+        const pageTableDef = this.créePageTableDef();
+        if (pageTableDef.avantChargeData) { pageTableDef.avantChargeData(); }
 
         this.subscriptions.push(
             this.route.data.subscribe((data: Data) => {
-                this.pageTableDef.chargeData(data);
+                pageTableDef.chargeData(data);
+                if (pageTableDef.initialiseUtile) { pageTableDef.initialiseUtile(); }
                 this.créeTitrePage();
-                if (this.pageTableDef.initialiseUtile) { this.pageTableDef.initialiseUtile(); }
-                this.pageTableDef.créeSuperGroupe();
-                this.pageTableDef.chargeGroupe();
-                if (this.pageTableDef.aprèsChargeData) { this.pageTableDef.aprèsChargeData(); }
+                pageTableDef.créeSuperGroupe();
+                pageTableDef.chargeGroupe();
+                if (pageTableDef.aprèsChargeData) { pageTableDef.aprèsChargeData(); }
 
-                if (this.groupeTable && this.vueTable.id) {
+                if (this.vueTable.id) {
                     this.subscriptions.push(
                         this.route.fragment.subscribe(
                             fragment => {
                                 this.fragment = fragment;
-                                const choisie = this.vueTable.fixeChoisie(fragment);
+                                const choisie = this.vueTable.ligne(fragment);
                                 if (choisie) {
-                                    choisie.géreCss.ajouteClasseTemp('bg-light', 3000);
+                                    this.vueTable.activeLigne(choisie);
+                                    choisie.géreCss.ajouteClasseTemp('table-active', 30000);
                                 }
                             }
                         )

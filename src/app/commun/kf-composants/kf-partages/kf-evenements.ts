@@ -73,22 +73,84 @@ import { KfComposant } from '../kf-composant/kf-composant';
  *  traitement: pas de traitement sauf dans le cas cité où la value du formGroup est sauvegardée dans la valeur du composant
  */
 
-export enum KfTypeDEvenement {
-    clic = 'clic',
-    retablit = 'retablit',
-    soumet = 'soumet',
-    statutChange = 'statutChange',
-    valeurChange = 'valeurChange',
-    menuChange = 'menuChange',
-    toucheBaissee = 'toucheBaissee',
-    toucheLevee = 'toucheLevee',
-    focusPris = 'focusPris',
-    focusPerdu = 'focusPerdu',
-    fichiersChoisis = 'fichiersChoisis',
-    fichierCharge = 'fichierOuvert',
-    fichierSauve = 'fichierSauve',
-    html = 'html',
-    patience = 'patience',
+export class KfTypeDHTMLEvents {
+    static abort = 'abort';
+    static activate = 'activate';
+    static beforeactivate = 'beforeactivate';
+    static beforecopy = 'beforecopy';
+    static beforecut = 'beforecut';
+    static beforedeactivate = 'beforedeactivate';
+    static beforepaste = 'beforepaste';
+    static blur = 'blur';
+    static canplay = 'canplay';
+    static canplaythrough = 'canplaythrough';
+    static change = 'change';
+    static click = 'click';
+    static contextmenu = 'contextmenu';
+    static copy = 'copy';
+    static cuechange = 'cuechange';
+    static cut = 'cut';
+    static dblclick = 'dblclick';
+    static deactivate = 'deactivate';
+    static drag = 'drag';
+    static dragend = 'dragend';
+    static dragenter = 'dragenter';
+    static dragleave = 'dragleave';
+    static dragover = 'dragover';
+    static dragstart = 'dragstart';
+    static drop = 'drop';
+    static durationchange = 'durationchange';
+    static emptied = 'emptied';
+    static ended = 'ended';
+    static error = 'error';
+    static focus = 'focus';
+    static input = 'input';
+    static invalid = 'invalid';
+    static keydown = 'keydown';
+    static keypress = 'keypress';
+    static keyup = 'keyup';
+    static load = 'load';
+    static loadeddata = 'loadeddata';
+    static loadedmetadata = 'loadedmetadata';
+    static loadstart = 'loadstart';
+    static mousedown = 'mousedown';
+    static mouseenter = 'mouseenter';
+    static mouseleave = 'mouseleave';
+    static mousemove = 'mousemove';
+    static mouseout = 'mouseout';
+    static mouseover = 'mouseover';
+    static mouseup = 'mouseup';
+    static mousewheel = 'mousewheel';
+    static mscontentzoom = 'mscontentzoom';
+    static msmanipulationstatechanged = 'msmanipulationstatechanged';
+    static paste = 'paste';
+    static pause = 'pause';
+    static play = 'play';
+    static playing = 'playing';
+    static progress = 'progress';
+    static ratechange = 'ratechange';
+    static reset = 'reset';
+    static scroll = 'scroll';
+    static seeked = 'seeked';
+    static seeking = 'seeking';
+    static select = 'select';
+    static selectstart = 'selectstart';
+    static stalled = 'stalled';
+    static submit = 'submit';
+    static suspend = 'suspend';
+    static timeupdate = 'timeupdate';
+    static volumechange = 'volumechange';
+    static waiting = 'waiting';
+}
+
+export class KfTypeDEvenement extends KfTypeDHTMLEvents {
+    static statutChange = 'statutChange';
+    static valeurChange = 'valeurChange';
+
+    static menuChange = 'menuChange';
+    static fichiersChoisis = 'fichiersChoisis';
+    static fichierCharge = 'fichierOuvert';
+    static fichierSauve = 'fichierSauve';
 }
 
 export enum KfStatutDEvenement {
@@ -98,11 +160,12 @@ export enum KfStatutDEvenement {
 }
 
 export class KfEvenement {
-    private _emetteurs: KfComposant[] = [];
+    private pEmetteurs: KfComposant[] = [];
     type: KfTypeDEvenement;
     parametres: any;
-    private _statut: KfStatutDEvenement;
+    private pStatut: KfStatutDEvenement;
 
+    /** */
     constructor(emetteur: KfComposant, type: KfTypeDEvenement, parametres?: any) {
         this.type = type;
         this.ajouteEmetteur(emetteur);
@@ -111,120 +174,27 @@ export class KfEvenement {
     }
 
     private ajouteEmetteur(emetteur: KfComposant) {
-        this._emetteurs.push(emetteur);
+        this.pEmetteurs.push(emetteur);
     }
 
-    public get emetteurInitial(): KfComposant { return this._emetteurs[0]; }
-    public get emetteur(): KfComposant { return this._emetteurs[this._emetteurs.length - 1]; }
+    public get emetteurInitial(): KfComposant { return this.pEmetteurs[0]; }
+    public get emetteur(): KfComposant { return this.pEmetteurs[this.pEmetteurs.length - 1]; }
     public set emetteur(emetteur: KfComposant) { this.ajouteEmetteur(emetteur); }
 
-    public get statut(): KfStatutDEvenement { return this._statut; }
+    public get statut(): KfStatutDEvenement { return this.pStatut; }
     public set statut(statut: KfStatutDEvenement) {
-        this._statut = statut;
+        this.pStatut = statut;
     }
 }
 
 export type KfTransformateurDEvenement = (event: Event) => KfEvenement;
-export type KfCapteurDEvenement = (element: HTMLElement, event: Event) => any;
 
 export type KfTraitementDEvenement = (evenement: KfEvenement) => void;
 
 export interface KFTraiteurDEvenement {
-    type: KfTypeDEvenement;
+    type: KfTypeDEvenement | KfTypeDHTMLEvents;
     traitement: KfTraitementDEvenement;
     info?: any;
-}
-
-/*
-Enchassement des templates à traverser
-
-<app-kf-groupe [composant]="groupe">
-    *ngFor... <app-kf-composant [composant]="composant" (output)=>"quandOutput($event)">
-        *ngIf...<app-kf-emetteur [composant]="emetteur" (output)=>"quandOutput($event)">
-            <htmlElement (anEvent)="quandAnEvent($event)">
-
-composantComponent et emetteurComponent ne sont pas le même objet
-composantComponent.composant et emetteurComponent.composant sont le même objet composant
-
-emetteurComponent.quandAnEvent($event): $event est un évènement système
-    crée le kfevenement evenement,
-    demande à composant de le traiter,
-    si pas traité, emetteurComponent.output.emit(evenement)
-
-composantComponent.quandOutput($event): $event est evenement
-    composantComponent.output.emit(evenement)
-
-groupeComponent.quandOutput($event): $event est evenement
-*/
-
-export enum KfTypeDHTMLEvents {
-    abort = 'abort',
-    activate = 'activate',
-    beforeactivate = 'beforeactivate',
-    beforecopy = 'beforecopy',
-    beforecut = 'beforecut',
-    beforedeactivate = 'beforedeactivate',
-    beforepaste = 'beforepaste',
-    blur = 'blur',
-    canplay = 'canplay',
-    canplaythrough = 'canplaythrough',
-    change = 'change',
-    click = 'click',
-    contextmenu = 'contextmenu',
-    copy = 'copy',
-    cuechange = 'cuechange',
-    cut = 'cut',
-    dblclick = 'dblclick',
-    deactivate = 'deactivate',
-    drag = 'drag',
-    dragend = 'dragend',
-    dragenter = 'dragenter',
-    dragleave = 'dragleave',
-    dragover = 'dragover',
-    dragstart = 'dragstart',
-    drop = 'drop',
-    durationchange = 'durationchange',
-    emptied = 'emptied',
-    ended = 'ended',
-    error = 'error',
-    focus = 'focus',
-    input = 'input',
-    invalid = 'invalid',
-    keydown = 'keydown',
-    keypress = 'keypress',
-    keyup = 'keyup',
-    load = 'load',
-    loadeddata = 'loadeddata',
-    loadedmetadata = 'loadedmetadata',
-    loadstart = 'loadstart',
-    mousedown = 'mousedown',
-    mouseenter = 'mouseenter',
-    mouseleave = 'mouseleave',
-    mousemove = 'mousemove',
-    mouseout = 'mouseout',
-    mouseover = 'mouseover',
-    mouseup = 'mouseup',
-    mousewheel = 'mousewheel',
-    mscontentzoom = 'mscontentzoom',
-    msmanipulationstatechanged = 'msmanipulationstatechanged',
-    paste = 'paste',
-    pause = 'pause',
-    play = 'play',
-    playing = 'playing',
-    progress = 'progress',
-    ratechange = 'ratechange',
-    reset = 'reset',
-    scroll = 'scroll',
-    seeked = 'seeked',
-    seeking = 'seeking',
-    select = 'select',
-    selectstart = 'selectstart',
-    stalled = 'stalled',
-    submit = 'submit',
-    suspend = 'suspend',
-    timeupdate = 'timeupdate',
-    volumechange = 'volumechange',
-    waiting = 'waiting',
 }
 
 export interface KFTraiteHTMLEvents {

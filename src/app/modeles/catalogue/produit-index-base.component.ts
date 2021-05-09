@@ -9,14 +9,13 @@ import { IdEtatProduit, EtatsProduits, EtatProduit } from './etat-produit';
 import { IKfVueTableDef } from '../../commun/kf-composants/kf-vue-table/i-kf-vue-table-def';
 import { Fabrique } from '../../disposition/fabrique/fabrique';
 import { Catalogue } from './catalogue';
-import { IKfVueTableColonneDef } from 'src/app/commun/kf-composants/kf-vue-table/i-kf-vue-table-colonne-def';
 import {
     KfListeDeroulanteNombre, KfListeDeroulanteTexte
 } from 'src/app/commun/kf-composants/kf-elements/kf-liste-deroulante/kf-liste-deroulante-texte';
 import { ILienDef } from 'src/app/disposition/fabrique/fabrique-lien';
 import { CategoriePages, CategorieRoutes } from 'src/app/fournisseur/catalogue/categories/categorie-pages';
 import { ProduitPages, ProduitRoutes } from 'src/app/fournisseur/catalogue/produits/produit-pages';
-import { BootstrapType, FabriqueBootstrap } from 'src/app/disposition/fabrique/fabrique-bootstrap';
+import { BootstrapType, KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
 import { IUrlDef } from 'src/app/disposition/fabrique/fabrique-url';
 import { IGroupeTableDef } from 'src/app/disposition/page-table/groupe-table';
 import { EtatTable } from 'src/app/disposition/fabrique/etat-table';
@@ -40,19 +39,16 @@ export abstract class ProduitIndexBaseComponent extends KeyUidRnoNoIndexComponen
     }
 
     protected _créeVueTableDef(): IKfVueTableDef<Produit> {
-        const outils = Fabrique.vueTable.outils<Produit>(this.nom);
+        const outils = Fabrique.vueTable.outils<Produit>();
         outils.ajoute(this.service.utile.outils.produit());
         outils.ajoute(this.service.utile.outils.catégorie());
-        outils.texteRienPasseFiltres = `Il n\'a pas de produits correspondant aux critères de recherche.`;
+        outils.texteRienPasseFiltres = `Il n'y a pas de produits correspondant aux critères de recherche.`;
 
         const vueTableDef: IKfVueTableDef<Produit> = {
             colonnesDef: this.service.utile.colonne.colonnes(),
             outils,
-            id: (produit: Produit) => '' + produit.no,
-            optionsDeTrieur: Fabrique.vueTable.optionsDeTrieur([
-                { nomTri: 'catégorie' },
-                { nomTri: 'produit' }
-            ])
+            triInitial: { colonne: this.service.utile.nom.catégorie, direction: 'asc' },
+            pagination: Fabrique.vueTable.pagination<Produit>()
         };
         return vueTableDef;
     }
@@ -107,23 +103,23 @@ export abstract class ProduitIndexBaseComponent extends KeyUidRnoNoIndexComponen
                 urlDef = {
                     pageDef: CategoriePages.ajoute,
                     routes: CategorieRoutes,
-                    nomSite: () => this.site.nomSite
+                    urlSite: () => this.site.url
                 };
                 texte = 'Créer une catégorie';
                 type = 'danger';
             } else {
-                message = 'Il n\'y a pas de produits dans le catalogue.';
+                message = `Il n'y a pas de produits dans le catalogue.`;
                 urlDef = {
                     pageDef: ProduitPages.ajoute,
                     routes: ProduitRoutes,
-                    nomSite: () => this.site.nomSite
+                    urlSite: () => this.site.url
                 };
                 texte = 'Créer un produit';
                 type = 'danger';
             }
         } else {
             if (nbDisponibles === 0) {
-                message = 'Il n\'y a pas de produits disponibles dans le catalogue.';
+                message = `Il n'y a pas de produits disponibles dans le catalogue.`;
                 type = 'warning';
             } else {
                 message = `Le catalogue propose ${nbDisponibles === 1 ? 'un produit' : nbDisponibles + ' produits'}`
@@ -132,9 +128,7 @@ export abstract class ProduitIndexBaseComponent extends KeyUidRnoNoIndexComponen
             }
         }
         etat.grBtnsMsgs.messages[0].fixeTexte(message);
-        if (type === 'success') {
-            etat.grBtnsMsgs.afficherBoutons = false;
-        } else {
+        if (type === 'danger') {
             let lienDef: ILienDef;
             if (urlDef || texte) {
                 lienDef = {
@@ -144,15 +138,17 @@ export abstract class ProduitIndexBaseComponent extends KeyUidRnoNoIndexComponen
             }
             etat.grBtnsMsgs.afficherBoutons = true;
             Fabrique.lien.fixeDef(etat.grBtnsMsgs.boutons[0] as KfLien, lienDef);
+        } else {
+            etat.grBtnsMsgs.afficherBoutons = false;
         }
         etat.grBtnsMsgs.alerte(type);
     }
 
     protected chargeGroupe() {
-        let filtre = this.vueTable.outils.outil(this.service.utile.outils.nomOutil.catégorie);
+        let filtre = this.vueTable.outils.outil(this.service.utile.nom.catégorie);
         const listeCatégories: KfListeDeroulanteNombre = filtre.composant as KfListeDeroulanteNombre;
         this.categories.forEach((c: Categorie) => listeCatégories.créeEtAjouteOption(c.nom, c.no));
-        filtre = this.vueTable.outils.outil(this.service.utile.outils.nomOutil.état);
+        filtre = this.vueTable.outils.outil(this.service.utile.nom.état);
         if (filtre) {
             const listeEtats: KfListeDeroulanteTexte = filtre.composant as KfListeDeroulanteTexte;
             EtatsProduits.etats.forEach((e: EtatProduit) => listeEtats.créeEtAjouteOption(e.texte, e.valeur));

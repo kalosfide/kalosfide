@@ -4,7 +4,7 @@
             *ngTemplateOutlet="texteTemplate"></ng-container>
     </ng-container>
     <ng-container *ngSwitchCase="'haut'">
-        <span [ngClass]="icone.classeFond" [ngStyle]="icone.styleFond">
+        <span [ngClass]="icone.classeFond" [ngStyle]="icone.styleFond" [id]="icone.nomIcone + '_fond'">
             <ng-container *ngTemplateOutlet="texteAvecCss"></ng-container>
             <ng-container *ngTemplateOutlet="iconeTemplate"></ng-container>
         </span>
@@ -14,14 +14,14 @@
             *ngTemplateOutlet="iconeTemplate"></ng-container>
     </ng-container>
     <ng-container *ngSwitchCase="'bas'">
-        <span [ngClass]="icone.classeFond" [ngStyle]="icone.styleFond">
+        <span [ngClass]="icone.classeFond" [ngStyle]="icone.styleFond" [id]="icone.nomIcone + '_fond'">
             <ng-container *ngTemplateOutlet="iconeTemplate"></ng-container>
             <ng-container *ngTemplateOutlet="texteAvecCss"></ng-container>
         </span>
     </ng-container>
     <ng-container *ngSwitchDefault>
         <ng-container *ngIf="icone.classeFond; else sansFondTemplate">
-            <span [ngClass]="icone.classeFond" [ngStyle]="icone.styleFond">
+            <span [ngClass]="icone.classeFond" [ngStyle]="icone.styleFond" [id]="icone.nomIcone + '_fond'">
                 <ng-container *ngTemplateOutlet="iconeTemplate"></ng-container>
             </span>
         </ng-container>
@@ -42,7 +42,6 @@
 </ng-template>
 
 <ng-template #iconeTemplate>
-    <span>
         <ng-container *ngIf="!icone.couches; else couchesTemplate">
             <i #htmlElement [class]="icone.faClasse" [ngClass]="icone.classe" [ngStyle]="icone.style"></i>
         </ng-container>
@@ -59,6 +58,7 @@
                 
             </span>
         </ng-template>
+    <span>
 
     </span>
 </ng-template>

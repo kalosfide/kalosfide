@@ -1,5 +1,5 @@
-import { KfVueTableCelluleDef } from './kf-vue-table-cellule';
 import { KfNgClasseDef } from '../kf-partages/kf-gere-css-classe';
+import { KfVueTableCelluleDef } from './i-kf-vue-table-cellule-def';
 
 export interface IKfVueTableEnTeteDef {
     /**

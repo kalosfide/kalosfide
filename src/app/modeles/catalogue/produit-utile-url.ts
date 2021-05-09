@@ -10,7 +10,7 @@ export class ProduitUtileUrl extends DataUtileUrl {
     }
 
     get utile(): ProduitUtile {
-        return this._parent as ProduitUtile;
+        return this.parent as ProduitUtile;
     }
 
     index(): IUrlDef {

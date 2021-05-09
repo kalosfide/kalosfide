@@ -21,9 +21,7 @@ export class ClientsResolverService implements Resolve<Client[]> {
     get routeur(): RouteurService { return this.router; }
 
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<never> | Observable<Client[]> {
-        return this.service.avecAttente(
-            () => this.service.clients$()
-        )(route, state);
+        return this.service.clients$();
     }
 
 }

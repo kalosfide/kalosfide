@@ -4,28 +4,25 @@ export type TypeRafraichitStockage = 'aucun' | 'déclenche' | 'rafraichi';
 
 export interface StockageOptions<T> {
     /**
-     * fonction à appeler quand on remplace un ancien stock par un nouveau
+     * Fonction à appeler quand on remplace un ancien stock par un nouveau qui est différent.
+     * Un stockage déclencheur de réinitialisation doit faire émettre déclencheVidage pendant l'éxécution de quandStockChange.
      */
     quandStockChange?: (ancien: T, nouveau: T) => void;
 
     /**
-     * si vrai, la date est enregistrée à chaque fixation du stock
+     * A chaque émission de déclencheVidage, les stockages dépendants sont réinitialisés.
+     * Si présent, le stockage est déclencheur et rafraichi est absent.
      */
-    avecDate?: boolean;
+    déclencheVidage?: Observable<any>;
 
     /**
-     * si 'déclenche', doitRéinitialiser est requis, le stockage déclenche la réinitialisation des stockages dépendants.
-     * si 'rafraichi', si dépendDe est absent, le stockage dépend de tous les déclencheurs.
+     * Si rafraichi est true, le stockage est dépendant et déclencheVidage est absent.
      */
-    rafraichit: TypeRafraichitStockage;
-
-    /**
-     * Observable qui à chaque émission, déclenche la réinitialisation des stockages dépendants
-     */
-    doitRéinitialiser?: Observable<any>;
+    rafraichi?: boolean;
 
     /**
      * Noms des stockages dont les changements de valeur doivent déclencher la réinitialisation de ce stockage
+     * Si présent, rafraichi doit être true et déclencheVidage absent.
      */
     dépendDe?: string[];
 }

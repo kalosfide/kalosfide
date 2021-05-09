@@ -4,8 +4,9 @@ import { KfInputTexte } from '../kf-elements/kf-input/kf-input-texte';
 import { KfInputNombre } from '../kf-elements/kf-input/kf-input-nombre';
 import { KfListeDeroulanteTexte, KfListeDeroulanteNombre } from '../kf-elements/kf-liste-deroulante/kf-liste-deroulante-texte';
 import { KfGroupe } from '../kf-groupe/kf-groupe';
-import { KfInput, KfTypeDInput } from '../kf-elements/kf-input/kf-input';
+import { KfInput } from '../kf-elements/kf-input/kf-input';
 import { KfComposant } from '../kf-composant/kf-composant';
+import { KfTypeDInput } from '../kf-elements/kf-input/kf-type-d-input';
 
 export type KfBBtnToolbarInputGroup = KfInputTexte | KfInputNombre | KfListeDeroulanteTexte | KfListeDeroulanteNombre;
 
@@ -33,6 +34,8 @@ export class KfBBtnToolbar extends KfGroupe {
             this.noeud.Ajoute(composant.noeud);
             return;
         }
-        throw new Error(`On ne peut ajouter que des KfBBtnGroup ou des KfInput ou KfListeDeroulante Texte ou Nombre à ${this.nom}`);
+        throw new Error(
+            `On ne peut ajouter que des KfBBtnGroup ou des KfInput ou KfListeDeroulante Texte ou Nombre au KfBBtnToolbar ${this.nom}`
+        );
     }
 }

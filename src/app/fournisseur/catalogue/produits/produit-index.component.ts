@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Data } from '@angular/router';
 
 import { ProduitPages, ProduitRoutes } from './produit-pages';
 import { ProduitIndexBaseComponent } from 'src/app/modeles/catalogue/produit-index-base.component';
@@ -18,12 +18,13 @@ import { IUrlDef } from 'src/app/disposition/fabrique/fabrique-url';
 import { IGroupeTableDef } from 'src/app/disposition/page-table/groupe-table';
 import { Produit } from 'src/app/modeles/catalogue/produit';
 import { ProduitEditeur } from '../../../modeles/catalogue/produit-editeur';
-import { ApiRequêteAction } from 'src/app/services/api-requete-action';
+import { ApiRequêteAction } from 'src/app/api/api-requete-action';
 import { CataloguePages, CatalogueRoutes } from '../catalogue-pages';
+import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
+import { Site } from 'src/app/modeles/site/site';
 
 @Component({
     templateUrl: '../../../disposition/page-base/page-base.html',
-    styleUrls: ['../../../commun/commun.scss']
 })
 export class ProduitIndexComponent extends ProduitIndexBaseComponent implements OnInit, OnDestroy {
 
@@ -49,7 +50,7 @@ export class ProduitIndexComponent extends ProduitIndexBaseComponent implements 
         const urlDef: IUrlDef = {
             pageDef: CataloguePages.categories,
             routes: CatalogueRoutes,
-            nomSite: this.site.nomSite
+            urlSite: this.site.url
         };
         const lien = Fabrique.lien.retour(urlDef);
         lien.afficherSi(this.service.utile.conditionSite.catalogue);
@@ -80,6 +81,10 @@ export class ProduitIndexComponent extends ProduitIndexBaseComponent implements 
     créeGroupeTableDef(): IGroupeTableDef<Produit> {
         const vueTableDef = this._créeVueTableDef();
         vueTableDef.colonnesDef = this.service.utile.colonne.colonnesFournisseur((this.quandLigneSupprimée).bind(this));
+        vueTableDef.navigationAuClavier = { type: 'cellules', controlePagination: true, entréesEtActionsSeulement: true };
+        vueTableDef.id = (produit: Produit) => {
+            return this.service.fragment(produit);
+        };
         vueTableDef.outils.ajoute(this.service.utile.outils.état());
         const outilAjoute = this.service.utile.outils.ajoute();
         outilAjoute.bbtnGroup.nePasAfficherSi(this.service.utile.conditionSite.pas_catalogue);
@@ -105,6 +110,7 @@ export class ProduitIndexComponent extends ProduitIndexBaseComponent implements 
                 formulaire: superGroupe
             };
             Fabrique.listeDéroulante.prépareSuitValeurEtFocus(editeur.kfEtat, apiAction, this.service);
+            superGroupe.avecInvalidFeedback = true;
             return superGroupe;
         };
         const etatTable = this._créeEtatTable();
@@ -114,30 +120,36 @@ export class ProduitIndexComponent extends ProduitIndexBaseComponent implements 
         };
     }
 
-    quandLigneSupprimée() {
-        this.liste = this.service.litProduits();
-        this.chargeGroupe();
+    quandLigneSupprimée(produit: Produit) {
+        const index = this.liste.findIndex(p => p.no === produit.no);
+        this.liste.splice(index);
+        this.vueTable.supprimeItem(index);
     }
 
     calculeModeTable(): ModeTable {
         return this.site.etat === IdEtatSite.catalogue ? ModeTable.edite : ModeTable.aperçu;
     }
 
-    rafraichit() {
+    rafraichit(site: Site) {
+        this.site = site;
         this.service.changeModeTable(this.calculeModeTable());
     }
 
     aprèsChargeData() {
         this.subscriptions.push(
-            this.service.navigation.siteObs().subscribe(() => this.rafraichit())
+            this.service.navigation.siteObs().subscribe((site: Site) => this.rafraichit(site))
         );
     }
 
-    créePageTableDef() {
-        this.pageTableDef = this.créePageTableDefBase();
-        this.pageTableDef.avantChargeData = () => this.avantChargeData();
-        this.pageTableDef.initialiseUtile = () => this.service.initialiseModeTable(this.calculeModeTable());
-        this.pageTableDef.aprèsChargeData = () => this.aprèsChargeData();
+    créePageTableDef(): IPageTableDef {
+        return {
+            avantChargeData: () => this.avantChargeData(),
+            chargeData: (data: Data) => this.chargeData(data),
+            créeSuperGroupe: () => this.créeGroupe('super'),
+            initialiseUtile: () => this.service.initialiseModeTable(this.calculeModeTable()),
+            chargeGroupe: () => this.chargeGroupe(),
+            aprèsChargeData: () => this.aprèsChargeData()
+        };
     }
 
 }

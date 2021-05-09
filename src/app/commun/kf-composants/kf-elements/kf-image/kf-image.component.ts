@@ -17,7 +17,6 @@ export class KfImageComponent extends KfComposantComponent implements OnInit, Af
     }
 
     ngAfterViewInit() {
-        this.composant.gereHtml.htmlElement = this.imgElement.nativeElement;
-        this.composant.gereHtml.initialiseHtml(this.output);
+        this.composant.initialiseHtml(this.imgElement.nativeElement, this.output);
     }
 }

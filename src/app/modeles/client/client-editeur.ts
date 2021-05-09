@@ -3,23 +3,21 @@ import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { KfInputTexte } from 'src/app/commun/kf-composants/kf-elements/kf-input/kf-input-texte';
 import {  Client } from 'src/app/modeles/client/client';
 import { KfValidateurs, KfValidateur } from 'src/app/commun/kf-composants/kf-partages/kf-validateur';
-import { ClientPages } from '../../fournisseur/clients/client-pages';
+import { FournisseurClientPages } from '../../fournisseur/clients/client-pages';
 import { TexteEtatClient } from 'src/app/modeles/client/etat-client';
 import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 import { KeyUidRnoEditeur } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno-no-editeur';
 import { ClientService } from './client.service';
-import { VisiteurPages } from 'src/app/visiteur/visiteur-pages';
-import { EtapeDeFormulaireEditeur } from 'src/app/disposition/formulaire/etape-de-formulaire';
-import { IDataKeyComponent } from 'src/app/commun/data-par-key/i-data-key-component';
+import { IDataComponent } from 'src/app/commun/data-par-key/i-data-component';
+import { AppSitePages } from 'src/app/app-site/app-site-pages';
+import { RoleEditeur } from '../role/role-editeur';
 
-export class ClientEditeur extends KeyUidRnoEditeur<Client> implements EtapeDeFormulaireEditeur {
-    texteEtat: KfInputTexte;
-    grMessage: KfGroupe;
-
+export class ClientEditeur extends KeyUidRnoEditeur<Client> {
     kfNom: KfInputTexte;
+    kfAdresse: KfInputTexte;
     kfTexteEtat: KfInputTexte;
 
-    constructor(component: IDataKeyComponent) {
+    constructor(component: IDataComponent) {
         super(component);
         this.keyAuto = true;
     }
@@ -28,106 +26,60 @@ export class ClientEditeur extends KeyUidRnoEditeur<Client> implements EtapeDeFo
         return this.component.iservice as ClientService;
     }
 
-    private validateursNomAjoute(): KfValidateur[] {
+    private validateurNomAprèsSoumission(): KfValidateur {
+        const validateur = KfValidateurs.validateurAMarque('nomPris',
+            'Ce nom est déjà pris');
+        return validateur;
+    }
+    private validateurNomAjoute(): KfValidateur {
         const validateur = KfValidateurs.validateurDeFn('nomPris',
             (value: any) => {
                 return this.service.nomPris(value);
             },
             'Ce nom est déjà pris');
-        return [
-            KfValidateurs.required,
-            KfValidateurs.longueurMax(200),
-            validateur
-        ];
+        return validateur;
     }
-    private validateursNomEdite(): KfValidateur[] {
+    private validateurNomEdite(): KfValidateur {
         const validateur = KfValidateurs.validateurDeFn('nomPris',
             (value: any) => {
                 return this.service.nomPrisParAutre(this._kfUid.valeur, this._kfRno.valeur, value);
             },
             'Ce nom est déjà pris');
-        return [
-            KfValidateurs.required,
-            KfValidateurs.longueurMax(200),
-            validateur
-        ];
-    }
-
-    créeNom(validateurs?: KfValidateur[]): KfInputTexte {
-        if (!validateurs) {
-            this.kfNom = Fabrique.input.texteLectureSeule('nom', 'Nom');
-        } else {
-            this.kfNom = Fabrique.input.texte('nom', 'Nom');
-            validateurs.forEach(v => this.kfNom.ajouteValidateur(v));
-        }
-        return this.kfNom;
-    }
-
-    private validateursAdresse(): KfValidateur[] {
-        const validateurs: KfValidateur[] = [
-            KfValidateurs.required,
-            KfValidateurs.longueurMax(200),
-        ];
-        return validateurs;
-    }
-
-    créeAdresse(validateurs?: KfValidateur[]): KfInputTexte {
-        if (!validateurs) {
-            return Fabrique.input.texteLectureSeule('adresse', 'Adresse');
-        } else {
-            const adresse = Fabrique.input.texte('adresse', 'Adresse');
-            validateurs.forEach(v => adresse.ajouteValidateur(v));
-            return adresse;
-        }
-    }
-
-    créeEtat(): KfInputTexte {
-        return Fabrique.input.texteInvisible('etat');
-    }
-
-    créeTexteEtat(): KfInputTexte {
-        this.kfTexteEtat = Fabrique.input.texteLectureSeule('texteEtat', 'Etat');
-        this.kfTexteEtat.estRacineV = true;
-        return this.kfTexteEtat;
+        return validateur;
     }
 
     créeKfDeData() {
+        const roleEditeur = new RoleEditeur(this.component);
+        roleEditeur.kfDeData = [];
+        this.kfDeData = roleEditeur.kfDeData;
         switch (this.pageDef) {
-            case VisiteurPages.devenirClient:
-                this.kfDeData = [
-                    this.créeNom(this.validateursNomAjoute()),
-                    this.créeAdresse(this.validateursAdresse()),
-                ];
+            case AppSitePages.devenirClient:
+                roleEditeur.ajouteAideNom('client'),
+                this.kfNom = roleEditeur.ajouteNom('client', roleEditeur.validateursNom());
+                this.kfNom.ajouteValidateur(this.validateurNomAprèsSoumission());
+                roleEditeur.ajouteAideAdresse('client');
+                this.kfAdresse = roleEditeur.ajouteAdresse(roleEditeur.validateursAdresse());
                 break;
-            case ClientPages.ajoute:
-                this.kfDeData = [
-                    this.créeNom(this.validateursNomAjoute()),
-                    this.créeAdresse(this.validateursAdresse()),
-                    this.créeEtat(),
-                ];
+            case FournisseurClientPages.ajoute:
+                roleEditeur.ajouteAideNom('client'),
+                this.kfNom = roleEditeur.ajouteNom('client', roleEditeur.validateursNom());
+                this.kfNom.ajouteValidateur(this.validateurNomAjoute());
+                roleEditeur.ajouteAideAdresse('client');
+                this.kfAdresse = roleEditeur.ajouteAdresse(roleEditeur.validateursAdresse());
                 break;
-            case ClientPages.edite:
-                this.kfDeData = [
-                    this.créeNom(this.validateursNomEdite()),
-                    this.créeAdresse(this.validateursAdresse()),
-                    this.créeEtat(),
-                ];
+            case FournisseurClientPages.edite:
+                roleEditeur.ajouteAideNom('client'),
+                this.kfNom = roleEditeur.ajouteNom('client', roleEditeur.validateursNom());
+                this.kfNom.ajouteValidateur(this.validateurNomEdite());
+                roleEditeur.ajouteAideAdresse('client');
+                this.kfAdresse = roleEditeur.ajouteAdresse(roleEditeur.validateursAdresse());
                 break;
-            case ClientPages.accepte:
-                this.kfDeData = [
-                    this.créeNom(),
-                    this.créeAdresse(),
-                    this.créeEtat(),
-                    this.créeTexteEtat()
-                ];
-                break;
-            case ClientPages.exclut:
-                this.kfDeData = [
-                    this.créeNom(),
-                    this.créeAdresse(),
-                    this.créeEtat(),
-                    this.créeTexteEtat()
-                ];
+            case FournisseurClientPages.accepte:
+            case FournisseurClientPages.exclut:
+                roleEditeur.ajouteNom('client');
+                roleEditeur.ajouteAdresse();
+                roleEditeur.ajouteEtat();
+                this.kfTexteEtat = roleEditeur.ajouteTexteEtat();
                 break;
             default:
                 break;
@@ -141,9 +93,7 @@ export class ClientEditeur extends KeyUidRnoEditeur<Client> implements EtapeDeFo
     }
 
     créeContenus(): KfComposant[] {
-        return [
-            this.créeNom(this.validateursNomAjoute()),
-            this.créeAdresse(this.validateursAdresse()),
-        ];
+        this.créeKfDeData();
+        return this.kfDeData;
     }
 }

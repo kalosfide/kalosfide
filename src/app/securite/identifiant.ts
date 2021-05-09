@@ -1,60 +1,121 @@
-import { Site } from '../modeles/site/site';
-import { KeyUidRno } from '../commun/data-par-key/key-uid-rno/key-uid-rno';
+import { ISiteData, Site } from '../modeles/site/site';
 import { IKeyUidRno } from '../commun/data-par-key/key-uid-rno/i-key-uid-rno';
+import { IRoleData, IRolePréférences, Role } from '../modeles/role/role';
+import { KeyUidRno } from '../commun/data-par-key/key-uid-rno/key-uid-rno';
+import { IdEtatSite } from '../modeles/etat-site';
 
 export class JwtIdentifiant {
+    /**
+     * userId
+     */
     Id: string;
     Jeton: string;
     ExpireDans: number;
 }
-export class IdentifiantRole {
-    rno: number;
-    etat: string;
-    nomSite: string;
 
-    constructor(iRole: IdentifiantRole) {
-        this.copie(iRole);
-    }
-    copie(iRole: IdentifiantRole) {
-        this.rno = iRole.rno;
-        this.etat = iRole.etat;
-        this.nomSite = iRole.nomSite;
-    }
+interface IRole extends IRoleData, IRolePréférences {
+    rno: number;
 }
-export class Identifiant {
+interface ISite extends IKeyUidRno, IRoleData, ISiteData {}
+
+class ApiRole implements IRoleData, IRolePréférences {
+    rno: number;
+    nom: string;
+    adresse: string;
+    ville: string;
+    etat: string;
+    formatNomFichierCommande: string;
+    formatNomFichierLivraison: string;
+    formatNomFichierFacture: string;
+}
+class ApiSite extends KeyUidRno implements ISiteData, IRoleData {
+    nom: string;
+    adresse: string;
+    ville: string;
+    url: string;
+    titre: string;
+    etat: IdEtatSite;
+}
+export interface IIdentifiant {
     userId: string;
     userName: string;
     uid: string;
     etat: string;
-    roles: IdentifiantRole[];
+    roles: IRole[];
+    sites: ISite[];
+    noDernierRole: number;
+}
+export class ApiIdentifiant implements IIdentifiant {
+    userId: string;
+    userName: string;
+    uid: string;
+    etat: string;
+    roles: ApiRole[];
+    sites: ApiSite[];
+    noDernierRole: number;
+}
+
+export class Identifiant implements IIdentifiant {
+    userId: string;
+    userName: string;
+    uid: string;
+    etat: string;
+    roles: Role[];
     sites: Site[];
     noDernierRole: number;
 
-    constructor(identifiant: Identifiant) {
-        this.copie(identifiant);
+    private static _copie(de: IIdentifiant, vers: IIdentifiant) {
+        vers.userId = de.userId;
+        vers.userName = de.userName;
+        vers.uid = de.uid;
+        vers.etat = de.etat;
+        vers.noDernierRole = de.noDernierRole;
+        vers.roles = [];
+        vers.sites = [];
+        for (let index = 0; index < de.roles.length; index++) {
+            const deRole = de.roles[index];
+            const deSite = de.sites[index];
+            const role = new Role();
+            role.uid = de.uid;
+            role.rno = deRole.rno;
+            Role.copieData(deRole, role);
+            Role.copiePréférences(deRole, role);
+            const site = new Site();
+            Site.copieKey(deSite, site);
+            Site.copieData(deSite, site);
+            Role.copieData(deSite, site);
+            role.site = site;
+            vers.roles.push(role);
+            vers.sites.push(site);
+        }
     }
 
-    static keyEnCours(identifiant: Identifiant, siteEnCours: Site): IKeyUidRno {
-        return identifiant.estUsager(siteEnCours) ? {
-            uid: identifiant.uid,
-            rno: identifiant.roles.find(r => r.nomSite === siteEnCours.nomSite).rno
-        } : null;
+    static crée(apiIdentifiant: ApiIdentifiant): Identifiant {
+        const créé = new Identifiant();
+        Identifiant._copie(apiIdentifiant, créé);
+        for (let index = 0; index < apiIdentifiant.sites.length; index++) {
+            const deSite = apiIdentifiant.sites[index];
+            const site = créé.sites[index];
+            site.etat = deSite.etat;
+        }
+        return créé;
     }
 
-    copie(identifiant: Identifiant) {
-        this.userId = identifiant.userId;
-        this.userName = identifiant.userName;
-        this.uid = identifiant.uid;
-        this.etat = identifiant.etat;
-        this.roles = identifiant.roles.map(role => new IdentifiantRole(role));
-        this.sites = identifiant.sites.map(site => new Site(site));
-        this.noDernierRole = identifiant.noDernierRole;
+    static copie(identifiant: Identifiant): Identifiant {
+        const créé = new Identifiant();
+        Identifiant._copie(identifiant, créé);
+        for (let index = 0; index < identifiant.sites.length; index++) {
+            const deSite = identifiant.sites[index];
+            const site = créé.sites[index];
+            site.etat = deSite.etat;
+        }
+        return créé;
     }
 
-    get nomSiteParDéfaut(): string {
+    get urlSiteParDéfaut(): string {
         if (this.roles.length > 0) {
             const role = this.roles.find(r => r.rno === this.noDernierRole);
-            return role ? role.nomSite : this.roles[0].nomSite;
+            return role ? role.site.url : this.roles[0].site.url;
         }
     }
 
@@ -62,23 +123,37 @@ export class Identifiant {
         return this.roles.length === 0;
     }
 
+    roleParUrl(urlSite: string): Role {
+        const role = this.roles.find(r => r.site.url === urlSite);
+        return role;
+    }
+
+    estUsagerDeSiteParUrl(urlSite: string): boolean {
+        return this.roleParUrl(urlSite) !== undefined;
+    }
+
     estUsager(site: Site): boolean {
-        return !!this.roles.find(role => role.nomSite === site.nomSite);
+        return this.estUsagerDeSiteParUrl(site.url) !== undefined;
+    }
+
+    estFournisseurDeSiteParUrl(urlSite: string): boolean {
+        const role = this.roleParUrl(urlSite);
+        if (role !== undefined) {
+            return this.uid === role.site.uid && role.rno === role.site.rno;
+        }
+        return false;
     }
 
     estFournisseur(site: Site): boolean {
-        return this.uid === site.uid;
+       return this.estFournisseurDeSiteParUrl(site.url);
     }
 
-    roleNo(site: Site): number {
-        if (this.uid === site.uid) {
-            return site.rno;
-        } else {
-            const role = this.roles.find(r => r.nomSite === site.nomSite);
-            if (role) {
-                return role.rno;
-            }
-        }
+    estClientDeSiteParUrl(urlSite: string): boolean {
+        return this.estUsagerDeSiteParUrl(urlSite) && !this.estFournisseurDeSiteParUrl(urlSite);
+    }
+
+    estClient(site: Site): boolean {
+       return this.estClientDeSiteParUrl(site.url);
     }
 
     /**
@@ -86,26 +161,11 @@ export class Identifiant {
      * @param site Site
      */
     keyClient(site: Site): IKeyUidRno {
-        if (this.uid !== site.uid) {
-            const role = this.roles.find(r => r.nomSite === site.nomSite);
-            if (role) {
+        const role = this.roleParUrl(site.url);
+        if (role !== undefined) {
+            if (this.uid !== site.uid || role.rno !== site.rno) {
                 return { uid: this.uid, rno: role.rno };
             }
         }
-    }
-    estClient(site: Site): boolean {
-        return this.keyClient(site) !== undefined;
-    }
-
-    estUsagerDeNomSite(nomSite: string): boolean {
-        return !!this.roles.find(role => role.nomSite === nomSite);
-    }
-
-    estFournisseurDeNomSite(nomSite: string): boolean {
-        return !!this.sites.find(site => site.nomSite === nomSite);
-    }
-
-    estClientDeNomSite(nomSite: string): boolean {
-        return this.estUsagerDeNomSite(nomSite) && !this.estFournisseurDeNomSite(nomSite);
     }
 }

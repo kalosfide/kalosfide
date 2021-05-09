@@ -1,6 +1,6 @@
-<ng-template #labelTemplate>
-    <label #labelElement *ngIf="liste.classeLabel" [attr.for]="liste.nom" [ngClass]="liste.classeLabel">
-        <app-kf-contenu-phrase [contenuPhrase]="liste.contenuPhrase"></app-kf-contenu-phrase>
+<ng-template #labelTemplate let-avecLabel>
+    <label #labelElement [attr.for]="avecLabel.nom" [ngClass]="avecLabel.label.classe">
+        <app-kf-contenu-phrase [contenuPhrase]="avecLabel.label.contenuPhrase"></app-kf-contenu-phrase>
     </label>
 </ng-template>
 
@@ -20,22 +20,28 @@
 </ng-template>
 
 <ng-template #sansDivTemplate>
-    <ng-container *ngIf="liste.avecLabel">
-        <ng-container *ngTemplateOutlet="labelTemplate"></ng-container>
+    <ng-container *ngIf="liste.avecLabelAvant">
+        <ng-container *ngTemplateOutlet="labelTemplate; context: { $implicit: liste }"></ng-container>
     </ng-container>
     <ng-container *ngIf="liste.classeEntree; then entreeAvecDivTemplate; else entreeTemplate"></ng-container>
     <ng-container *ngTemplateOutlet="infoTemplate"></ng-container>
+    <ng-container *ngIf="liste.avecLabelApres">
+        <ng-container *ngTemplateOutlet="labelTemplate; context: { $implicit: liste }"></ng-container>
+    </ng-container>
 
     <ng-template #entreeAvecDivTemplate>
         <div [ngClass]="liste.classeEntree">
             <ng-container *ngTemplateOutlet="entreeTemplate"></ng-container>
+            <ng-container *ngIf="liste.iconeSurvol">
+                <app-kf-icone [composant]="liste.iconeSurvol"></app-kf-icone>
+            </ng-container>
         </div>
     </ng-template>
 </ng-template>
 
 <ng-template #entreeTemplate>
 
-    <div *ngIf="liste.composantAvant" class="input-group-prepend">
+    <div *ngIf="liste.composantAvant" [ngClass]="liste.classeComposantAvant">
         <app-kf-composant [composant]="liste.composantAvant"></app-kf-composant>
     </div>
     <ng-container *ngIf="liste.valeurObjet; then valeurObjetTemplate; else pasValeurObjetTemplate"></ng-container>
@@ -52,7 +58,7 @@
             </option>
         
             <ng-container *ngFor="let option of liste.options">
-                <option #optionElement [ngValue]="option.valeur" [attr.disabled]="option.inactif">
+                <option #optionElement [ngValue]="option.valeur" [attr.disabled]="option.inactif" [ngClass]="option.classe" [ngStyle]="option.style">
                     <app-kf-contenu-phrase [contenuPhrase]="option.contenuPhrase"></app-kf-contenu-phrase>
                 </option>
             </ng-container>

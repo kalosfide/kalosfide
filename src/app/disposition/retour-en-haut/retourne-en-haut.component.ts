@@ -1,6 +1,6 @@
 import { Component, OnInit, Inject, HostListener } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { KfSuperGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-super-groupe';
+import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 import { IBoutonDef } from '../fabrique/fabrique-bouton';
 import { Fabrique } from '../fabrique/fabrique';
 
@@ -11,7 +11,7 @@ import { Fabrique } from '../fabrique/fabrique';
 export class RetourEnHautComponent implements OnInit {
     windowScrolled: boolean;
 
-    groupe: KfSuperGroupe;
+    groupe: KfGroupe;
 
     constructor(@Inject(DOCUMENT) private document: Document) { }
 
@@ -65,8 +65,8 @@ export class RetourEnHautComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.groupe = new KfSuperGroupe('retour-en-haut');
-        this.groupe.ajouteClasseDef('retour-en-haut', { nom: 'retour-en-haut-montre', active: () => this.windowScrolled });
+        this.groupe = new KfGroupe('retour-en-haut');
+        this.groupe.ajouteClasse('retour-en-haut', { nom: 'retour-en-haut-montre', active: () => this.windowScrolled });
         const def: IBoutonDef = {
             nom: 'retour-en-haut',
             action: () => this.retourneEnHaut(),

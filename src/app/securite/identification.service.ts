@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { Subject, Observable } from 'rxjs';
-import { JwtIdentifiant, Identifiant } from './identifiant';
+import { JwtIdentifiant, Identifiant, ApiIdentifiant } from './identifiant';
 import { Site } from '../modeles/site/site';
 import { Stockage } from '../services/stockage/stockage';
 import { StockageService } from '../services/stockage/stockage.service';
@@ -10,35 +10,43 @@ import { StockageService } from '../services/stockage/stockage.service';
     providedIn: 'root',
 })
 export class IdentificationService {
-
+    /**
+     * Stockage du jeton
+     */
     private stockageJwtIdentifiant: Stockage<JwtIdentifiant>;
+    /**
+     * Stockage de l'identifiant
+     */
     private stockageIdentifiant: Stockage<Identifiant>;
 
-    private utilisateurAChangé = new Subject<boolean>();
+    private utilisateurAChangé = new Subject<Identifiant>();
 
     constructor(
         stockageService: StockageService
     ) {
-        this.stockageJwtIdentifiant = stockageService.nouveau('JwtIdentifiant', { rafraichit: 'aucun'});
+        // quand un utilisateur se connecte ou se déconnecte, un identifiant est stocké
+        this.stockageJwtIdentifiant = stockageService.nouveau('JwtIdentifiant');
         this.stockageIdentifiant = stockageService.nouveau('Identifiant', {
-            quandStockChange : (ancien: Identifiant, nouveau: Identifiant) => {
-                if (!nouveau || !ancien || ancien.userId !== nouveau.userId) {
-                    this.utilisateurAChangé.next(true);
+            // appellé quand l'identifiant stocké change
+            quandStockChange: (ancien: Identifiant, nouveau: Identifiant) => {
+                if (ancien !== null && nouveau !== null && nouveau !== undefined && ancien.uid === nouveau.uid) {
+                    return;
                 }
+                this.utilisateurAChangé.next(nouveau);
             },
-            rafraichit: 'déclenche',
-            doitRéinitialiser: this.utilisateurAChangé.asObservable()
+            // tous les stockages dépendant de l'identité de l'utilisateur sont vidés quand l'utilisateur change
+            déclencheVidage: this.utilisateurAChangé.asObservable()
         });
     }
 
     public get estIdentifié(): boolean {
-        return !this.stockageIdentifiant.estNull();
+        return !this.stockageIdentifiant.estVide();
     }
 
     /**
-     * se produit à la connection et la déconnection
+     * Emet l'identifiant à la connection et null à la déconnection
      */
-    public changementDUtilisateur(): Observable<boolean> {
+    public changementDUtilisateur(): Observable<Identifiant> {
         return this.utilisateurAChangé.asObservable();
     }
 
@@ -53,12 +61,12 @@ export class IdentificationService {
 
     public litIdentifiant(): Identifiant {
         const stock = this.stockageIdentifiant.litStock();
-        return stock ? new Identifiant(stock) : null;
+        return stock ? Identifiant.copie(stock) : null;
     }
 
-    public fixeIdentifiants(jwtIdentifiantSérialisé: string, identifiant: Identifiant): void {
+    public fixeIdentifiants(jwtIdentifiantSérialisé: string, apiIdentifiant: ApiIdentifiant): void {
         this.stockageJwtIdentifiant.fixeStock(JSON.parse(jwtIdentifiantSérialisé) as JwtIdentifiant);
-        this.stockageIdentifiant.fixeStock(identifiant);
+        this.stockageIdentifiant.fixeStock(Identifiant.crée(apiIdentifiant));
     }
 
     public fixeSiteIdentifiant(site: Site) {

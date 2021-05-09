@@ -1,2 +1,70 @@
 /* You can add global styles to this file, and also import other style files */
 @import 'variables';
+
+/* div qui recouvre toute la fenêtre */
+.cache-tout {
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+    display: flex;              /* establish flex container */
+    flex-direction: column;     /* stack flex items vertically */
+    justify-content: center;    /* center items vertically, in this case */
+    align-items: center;        /* center items horizontally, in this case */
+    opacity: $cache-tout-opacity;
+    background-color: $cache-tout-background-color;
+}
+
+/* Colonnes des tables */
+.table .no-ligne {
+    width: $table-no-ligne;
+}
+
+table .date {
+    width: $table-date;
+}
+
+table .client-compte {
+    width: $table-client-compte;
+}
+
+table .nombre {
+    width: $table-nombre;
+}
+
+table .prix {
+    width: $table-prix;
+}
+
+table .unite {
+    width: $table-unite;
+}
+
+table .action {
+    width: $table-action;
+}
+
+table .action .texte-sous-icone {
+    width: $table-action-texte-sous-icone;
+}
+
+.btn-group .texte-sous-icone {
+    padding-left: 0;
+    padding-right: 0;
+}
+.colonne-btn-group-2 {
+    width: 158px; // 2 * 60 + 2 * 8 + 30
+    padding-right: 30px;;
+}
+.colonne-btn-group-3 {
+    width: 218px; // 3 * 60 + 2 * 8 + 30
+    padding-right: 30px;;
+}
+.colonne-btn-group-2 .texte-sous-icone, .colonne-btn-group-3 .texte-sous-icone {
+    width: 60px;
+}
+
+.titre-page .btn-light:not(:disabled):not(.disabled).active {
+    color: darkcyan;
+}

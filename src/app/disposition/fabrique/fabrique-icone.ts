@@ -6,16 +6,14 @@ import { FabriqueMembre } from './fabrique-membre';
 import { FabriqueClasse } from './fabrique';
 import { KfIconeTaille, KfIconePositionTexte } from 'src/app/commun/kf-composants/kf-elements/kf-icone/kf-icone-types';
 import { KfGéreCss } from 'src/app/commun/kf-composants/kf-partages/kf-gere-css';
-import { ApiRequêteAction } from 'src/app/services/api-requete-action';
-import { KfTexte } from 'src/app/commun/kf-composants/kf-elements/kf-texte/kf-texte';
-import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
+import { ApiRequêteAction } from 'src/app/api/api-requete-action';
 
 export class FabriqueIcone extends FabriqueMembre {
     n: FANomIcone = 'plus';
     nomIcone: {
         attente: 'spinner',
         utilisateur: 'user',
-        utilisateur_ouvert: 'user-circle-o',
+        utilisateur_ouvert: 'user-circle',
         cercle: 'circle',
         ouvert: 'angle-down',
         fermé: 'angle-up',
@@ -35,19 +33,27 @@ export class FabriqueIcone extends FabriqueMembre {
         verrou_ouvert: 'unlock',
         verrou_fermé: 'lock',
         carré: 'square',
+        envelope: 'envelope',
 
         retour: 'arrow-circle-left',
         ajoute: 'plus',
         rafraichit: 'refresh',
 
+        personnes: 'users',
         prix: 'euro',
         liste: 'list',
-        case_vide: 'square-o',
-        case_cochée: 'check-square-o',
+        case_vide: 'square',
+        case_cochée: 'check-square',
+        croix: 'times',
+
+        début: 'angle-double-left',
+        précédent: 'angle-left',
+        suivant: 'angle-right',
+        fin: 'angle-double-right',
     } = {
         attente: 'spinner',
         utilisateur: 'user',
-        utilisateur_ouvert: 'user-circle-o',
+        utilisateur_ouvert: 'user-circle',
         cercle: 'circle',
         ouvert: 'angle-down',
         fermé: 'angle-up',
@@ -67,15 +73,23 @@ export class FabriqueIcone extends FabriqueMembre {
         verrou_ouvert: 'unlock',
         verrou_fermé: 'lock',
         carré: 'square',
+        envelope: 'envelope',
 
         retour: 'arrow-circle-left',
         ajoute: 'plus',
         rafraichit: 'refresh',
 
+        personnes: 'users',
         prix: 'euro',
         liste: 'list',
-        case_vide: 'square-o',
-        case_cochée: 'check-square-o',
+        case_vide: 'square',
+        case_cochée: 'check-square',
+        croix: 'times',
+
+        début: 'angle-double-left',
+        précédent: 'angle-left',
+        suivant: 'angle-right',
+        fin: 'angle-double-right',
     };
     constructor(fabrique: FabriqueClasse) {
         super(fabrique);
@@ -133,30 +147,24 @@ export class FabriqueIcone extends FabriqueMembre {
         return icone;
     }
 
-    préparePourAttente(géreCss: KfGéreCss, apiAction: ApiRequêteAction): KfIcone {
-        const icone = this.iconeAttente();
-        icone.créegéreCssFond();
-        icone.géreCssFond.ajouteClasseDef('survol-centre');
-        icone.géreCssFond.fixeStyleDef('font-size', '1.25em');
-        icone.fondVisible = false;
-
-        apiAction.attente = {
-            commence: () => {
-                icone.fondVisible = true;
-                géreCss.fixeStyleDef('opacity', '.33');
-            },
-            finit: () => {
-                icone.fondVisible = false;
-                géreCss.supprimeStyleDef('opacity');
-            }
-        };
-        return icone;
-    }
-
     retourEnHaut(): KfIcone {
         const icone = new KfIcone('retourEnHaut', this.nomIcone.en_arrière);
         icone.rotation(90);
         return icone;
+    }
+
+    iconesPagination(): {
+        début: FANomIcone,
+        précédent: FANomIcone,
+        suivant: FANomIcone,
+        fin: FANomIcone,
+    } {
+        return {
+            début: this.nomIcone.début,
+            précédent: this.nomIcone.précédent,
+            suivant: this.nomIcone.suivant,
+            fin: this.nomIcone.fin,
+        };
     }
 
 }

@@ -1,5 +1,5 @@
 import { SitePages, iSiteRoutePlusSegments } from 'src/app/site/site-pages';
-import { FournisseurRoutes } from '../fournisseur-pages';
+import { FournisseurPages, FournisseurRoutes, FournisseurSiteRoutes } from '../fournisseur-pages';
 import { PageDef } from 'src/app/commun/page-def';
 
 export class CataloguePages {
@@ -17,4 +17,4 @@ export class CataloguePages {
     };
 }
 
-export const CatalogueRoutes = iSiteRoutePlusSegments(FournisseurRoutes, [SitePages.catalogue.urlSegment]);
+export const CatalogueRoutes = iSiteRoutePlusSegments(FournisseurSiteRoutes, [SitePages.catalogue.urlSegment]);

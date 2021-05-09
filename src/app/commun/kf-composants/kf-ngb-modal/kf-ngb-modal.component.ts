@@ -19,7 +19,7 @@ export class KfNgbModalComponent {
     }
 
     traiteClic(evenement: KfEvenement) {
-        if (evenement.type === KfTypeDEvenement.clic) {
+        if (evenement.type === KfTypeDEvenement.click) {
             this.activeModal.close(evenement.emetteur.nom);
         }
     }

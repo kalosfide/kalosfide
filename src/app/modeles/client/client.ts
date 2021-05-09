@@ -1,14 +1,5 @@
-import { KfComposant } from '../../commun/kf-composants/kf-composant/kf-composant';
-import { KfInputTexte } from '../../commun/kf-composants/kf-elements/kf-input/kf-input-texte';
-import { KfValidateurs, KfValidateur } from '../../commun/kf-composants/kf-partages/kf-validateur';
-import { EtapeDeFormulaireEditeur } from '../../disposition/formulaire/etape-de-formulaire';
-import { Fabrique } from '../../disposition/fabrique/fabrique';
 import { KeyUidRno } from '../../commun/data-par-key/key-uid-rno/key-uid-rno';
-import { PageDef } from 'src/app/commun/page-def';
-import { VisiteurPages } from 'src/app/visiteur/visiteur-pages';
-import { TexteEtatClient } from './etat-client';
-import { ClientPages } from 'src/app/fournisseur/clients/client-pages';
-import { ClientService } from './client.service';
+import { Role } from '../role/role';
 
 export interface IClientData {
     nom: string;
@@ -36,13 +27,12 @@ export class ClientData implements IClientData {
     }
 }
 
-export class Client extends KeyUidRno implements IClientData {
+/**
+ * Si dans liste ne contient que
+ */
+export class Client extends Role implements IClientData {
     // key du client
-    nom: string;
-    adresse?: string;
-    etat: string;
-    dateEtat: Date;
-    avecCompte: boolean;
+    compte: string;
     avecCommandes: boolean;
 
     /**

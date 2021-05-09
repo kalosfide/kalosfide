@@ -12,7 +12,6 @@ import { FDocumentPages } from './f-document-pages';
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
-    styleUrls: ['../../commun/commun.scss']
 })
 export class FDocumentDocumentsComponent extends CLFDocsComponent implements OnInit, OnDestroy {
 

@@ -1,6 +1,7 @@
 import { KfGéreCss } from 'src/app/commun/kf-composants/kf-partages/kf-gere-css';
 
 export enum Couleur {
+    black = 'black',
     blue = '#007bff',
     indigo = '#6610f2',
     purple = '#6f42c1',
@@ -60,7 +61,7 @@ export class FabriqueCouleur {
     private _ajouteClasse(géreCss: KfGéreCss, préfixe: string, couleur: Couleur, active?: () => boolean) {
         const classeCouleur = this._classe(préfixe, couleur);
         géreCss.supprimeClasseAPréfixe(préfixe);
-        géreCss.ajouteClasseDef({ nom: classeCouleur, active });
+        géreCss.ajouteClasse({ nom: classeCouleur, active });
     }
 
     classeCouleur(couleur: Couleur): string {

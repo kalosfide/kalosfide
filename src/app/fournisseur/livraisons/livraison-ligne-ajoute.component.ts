@@ -6,13 +6,12 @@ import { PageDef } from 'src/app/commun/page-def';
 import { ActivatedRoute } from '@angular/router';
 import { FournisseurCLFService } from '../fournisseur-c-l-f-.service';
 import { LivraisonPages } from './livraison-pages';
-import { CLFLigneComponent } from 'src/app/modeles/c-l-f/c-l-f-ligne.component';
+import { CLFLigneAjouteComponent } from 'src/app/modeles/c-l-f/c-l-f-ligne.component';
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
-    styleUrls: ['../../commun/commun.scss']
 })
-export class LivraisonLigneAjouteComponent extends CLFLigneComponent implements OnInit, OnDestroy, ComponentAAutoriserAQuitter {
+export class LivraisonLigneAjouteComponent extends CLFLigneAjouteComponent implements OnInit, OnDestroy, ComponentAAutoriserAQuitter {
     pageDef: PageDef = LivraisonPages.ajoute;
 
     constructor(
@@ -21,6 +20,5 @@ export class LivraisonLigneAjouteComponent extends CLFLigneComponent implements 
         protected peutQuitterService: PeutQuitterService,
     ) {
         super(route, service, peutQuitterService);
-        this.ajout = true;
     }
 }

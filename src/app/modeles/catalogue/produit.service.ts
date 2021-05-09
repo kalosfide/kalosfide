@@ -1,15 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiController, ApiAction } from '../../commun/api-route';
+import { ApiController, ApiAction } from '../../api/api-route';
 import { Produit } from './produit';
 import { KeyUidRnoNoService } from '../../commun/data-par-key/key-uid-rno-no/key-uid-rno-no.service';
 import { EtatsProduits } from './etat-produit';
 import { CatalogueService } from './catalogue.service';
 import { Catalogue } from './catalogue';
-import { ApiRequêteService } from 'src/app/services/api-requete.service';
+import { ApiRequêteService } from 'src/app/api/api-requete.service';
 import { CatalogueUtile } from './catalogue-utile';
 import { ProduitUtile } from './produit-utile';
-import { ApiResult } from 'src/app/commun/api-results/api-result';
+import { ApiResult } from 'src/app/api/api-results/api-result';
 
 
 @Injectable({

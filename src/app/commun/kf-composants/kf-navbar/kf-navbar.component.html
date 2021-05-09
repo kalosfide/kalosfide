@@ -1,6 +1,6 @@
 <nav #htmlElement [ngClass]="navbar.classe">
     <ng-container *ngFor="let contenu of navbar.contenus; index as i">
-        <app-kf-composant [attr.nom]="contenu.nom" [composant]="contenu" (output)="transmet($event)">
+        <app-kf-composant [attr.nom]="contenu.nom" [composant]="contenu">
         </app-kf-composant>
     </ng-container>
 </nav>

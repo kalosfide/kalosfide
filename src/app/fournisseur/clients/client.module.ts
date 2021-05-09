@@ -14,6 +14,10 @@ import { ClientRoutingModule } from './client-routing.module';
 import { ClientAccepteComponent } from './client-accepte.component';
 import { ClientExclutComponent } from './client-exclut.component';
 import { ClientComponent } from './client.component';
+import { ClientInviteComponent } from './client-invite.component';
+import { FClientAccueilComponent } from './client-accueil.component';
+import { ClientInvitationsComponent } from './client-invitations.component';
+import { ClientInviteParentResolverService } from './client-invite-parent-resolver.service';
 
 @NgModule({
     imports: [
@@ -25,15 +29,19 @@ import { ClientComponent } from './client.component';
     ],
     declarations: [
         ClientComponent,
+        FClientAccueilComponent,
         ClientIndexComponent,
         ClientAjouteComponent,
         ClientEditeComponent,
         ClientAccepteComponent,
         ClientExclutComponent,
+        ClientInviteComponent,
+        ClientInvitationsComponent,
     ],
     providers: [
         ClientResolverService,
         ClientsResolverService,
+        ClientInviteParentResolverService,
     ],
 })
 export class ClientModule { }

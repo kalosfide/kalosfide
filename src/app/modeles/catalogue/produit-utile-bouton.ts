@@ -7,7 +7,7 @@ import { KfBouton } from 'src/app/commun/kf-composants/kf-elements/kf-bouton/kf-
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
-import { ApiRequêteAction } from 'src/app/services/api-requete-action';
+import { ApiRequêteAction } from 'src/app/api/api-requete-action';
 
 export class ProduitUtileBouton extends DataUtileBouton {
     constructor(utile: ProduitUtile) {
@@ -15,7 +15,7 @@ export class ProduitUtileBouton extends DataUtileBouton {
     }
 
     get utile(): ProduitUtile {
-        return this._dataUtile as ProduitUtile;
+        return this.dataUtile as ProduitUtile;
     }
 
     get url(): ProduitUtileUrl {
@@ -43,7 +43,7 @@ export class ProduitUtileBouton extends DataUtileBouton {
             },
             ' au prix de ',
             {
-                texte: Fabrique.texte.prixAvecUnité(produit.typeMesure, produit.prix),
+                texte: Fabrique.texte.eurosAvecTypeMesure(produit.typeMesure, produit.prix),
                 balise: KfTypeDeBaliseHTML.b
             },
             ' va être supprimé.'
@@ -56,9 +56,9 @@ export class ProduitUtileBouton extends DataUtileBouton {
                 rafraichitTable(produit);
             },
         };
-        const bouton = Fabrique.bouton.boutonAttenteDeColonne('supprime' + produit.no,
+        const bouton = Fabrique.bouton.attenteDeColonne('supprime' + produit.no,
             Fabrique.contenu.supprime, apiRequêteAction, this.utile.service,
-            Fabrique.confirme(titre, [description])
+            Fabrique.confirmeModal(titre, [description])
         );
         return bouton;
     }

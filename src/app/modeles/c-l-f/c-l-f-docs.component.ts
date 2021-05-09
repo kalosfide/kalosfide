@@ -17,7 +17,7 @@ import { CLFUtile } from './c-l-f-utile';
 import { CLFDocs } from './c-l-f-docs';
 import { ModeAction } from './condition-action';
 import { EtatTable } from 'src/app/disposition/fabrique/etat-table';
-import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
+import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
 
 /**
  * Route: documents/liste
@@ -28,7 +28,6 @@ export abstract class CLFDocsComponent extends PageTableComponent<CLFDoc> implem
 
     site: Site;
     identifiant: Identifiant;
-    barre: BarreTitre;
 
     date: Date;
 
@@ -59,7 +58,7 @@ export abstract class CLFDocsComponent extends PageTableComponent<CLFDoc> implem
     }
 
     créeGroupeTableDef(): IGroupeTableDef<CLFDoc> {
-        const outils = Fabrique.vueTable.outils<CLFDoc>(this.nom);
+        const outils = Fabrique.vueTable.outils<CLFDoc>();
         if (this.identifiant.estFournisseur(this.site)) {
             outils.ajoute(this.utile.outils.clientDeDoc());
         }
@@ -70,16 +69,15 @@ export abstract class CLFDocsComponent extends PageTableComponent<CLFDoc> implem
             id: (clfDoc: CLFDoc) => this.utile.url.idDeDocument(clfDoc),
         };
         if (this.identifiant.estFournisseur(this.site)) {
-            vueTableDef.optionsDeTrieur = Fabrique.vueTable.optionsDeTrieur([
-                { nomTri: 'client' },
-            ]);
+            vueTableDef.triInitial = { colonne: this.utile.nom.client, direction: 'asc' };
+            vueTableDef.pagination = Fabrique.vueTable.pagination<CLFDoc>();
         }
         const etatTable = Fabrique.vueTable.etatTable({
             nePasAfficherSiPasVide: true,
             nbMessages: 1,
-            avecSolution: true,
+            avecSolution: false,
             charge: ((etat: EtatTable) => {
-                etat.grBtnsMsgs.messages[0].fixeTexte(`Il n\'a pas de documents enregistrés.`);
+                etat.grBtnsMsgs.messages[0].fixeTexte(`Il n'y a pas de documents enregistrés.`);
                 etat.grBtnsMsgs.alerte('info');
             }).bind(this)
         });
@@ -129,8 +127,8 @@ export abstract class CLFDocsComponent extends PageTableComponent<CLFDoc> implem
         this.rafraichit();
     }
 
-    créePageTableDef() {
-        this.pageTableDef = {
+    créePageTableDef(): IPageTableDef {
+        return {
             avantChargeData: () => this.avantChargeData(),
             chargeData: (data: Data) => this.chargeData(data),
             créeSuperGroupe: () => this.créeSuperGroupe(),

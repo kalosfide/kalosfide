@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { ClientPages } from './client-pages';
+import { FournisseurClientPages } from './client-pages';
 import { ClientIndexComponent } from './client-index.component';
 import { ClientAjouteComponent } from './client-ajoute.component';
 import { ClientEditeComponent } from './client-edite.component';
@@ -9,6 +9,11 @@ import { ClientsResolverService } from '../../modeles/client/clients-resolver.se
 import { ClientAccepteComponent } from './client-accepte.component';
 import { ClientExclutComponent } from './client-exclut.component';
 import { ClientComponent } from './client.component';
+import { ClientInviteComponent } from './client-invite.component';
+import { FClientAccueilComponent } from './client-accueil.component';
+import { ClientInvitationsComponent } from './client-invitations.component';
+import { InvitationsResolverService } from 'src/app/modeles/invitation/invitations-resolver.service';
+import { ClientInviteParentResolverService } from './client-invite-parent-resolver.service';
 
 const routes: Routes = [
     {
@@ -17,41 +22,79 @@ const routes: Routes = [
         children: [
             {
                 path: '',
-                redirectTo: ClientPages.index.urlSegment,
+                redirectTo: FournisseurClientPages.accueil.urlSegment,
                 pathMatch: 'full',
             },
             {
-                path: ClientPages.index.urlSegment,
-                data: { pageDef: ClientPages.index },
+                path: FournisseurClientPages.accueil.urlSegment,
+                data: {
+                    pageDef: FournisseurClientPages.accueil,
+                    estEnfantPathVide: true
+                },
+                component: FClientAccueilComponent,
+                resolve: {
+                    liste: ClientsResolverService,
+                }
+            },
+            {
+                path: FournisseurClientPages.index.urlSegment,
+                data: { pageDef: FournisseurClientPages.index },
                 component: ClientIndexComponent,
                 resolve: {
                     liste: ClientsResolverService,
                 }
             },
             {
-                path: ClientPages.ajoute.urlSegment,
-                data: { pageDef: ClientPages.ajoute },
+                path: FournisseurClientPages.invitations.urlSegment,
+                data: { pageDef: FournisseurClientPages.invitations },
+                component: ClientInvitationsComponent,
+                resolve: {
+                    liste: InvitationsResolverService,
+                }
+            },
+            {
+                path: FournisseurClientPages.ajoute.urlSegment,
+                data: { pageDef: FournisseurClientPages.ajoute },
                 component: ClientAjouteComponent,
             },
             {
-                path: ClientPages.edite.urlSegment + '/:key',
-                data: { pageDef: ClientPages.edite },
+                path: FournisseurClientPages.invite.urlSegment,
+                data: { pageDef: FournisseurClientPages.invite },
+                component: ClientInviteComponent,
+                resolve: {
+                    liste: InvitationsResolverService,
+                    retour: ClientInviteParentResolverService,
+                }
+            },
+            {
+                path: FournisseurClientPages.invite.urlSegment + '/:key',
+                data: { pageDef: FournisseurClientPages.invite },
+                component: ClientInviteComponent,
+                resolve: {
+                    valeur: ClientResolverService,
+                    liste: InvitationsResolverService,
+                    retour: ClientInviteParentResolverService,
+                },
+            },
+            {
+                path: FournisseurClientPages.edite.urlSegment + '/:key',
+                data: { pageDef: FournisseurClientPages.edite },
                 component: ClientEditeComponent,
                 resolve: {
                     valeur: ClientResolverService,
                 },
             },
             {
-                path: ClientPages.accepte.urlSegment + '/:key',
-                data: { pageDef: ClientPages.accepte },
+                path: FournisseurClientPages.accepte.urlSegment + '/:key',
+                data: { pageDef: FournisseurClientPages.accepte },
                 component: ClientAccepteComponent,
                 resolve: {
                     valeur: ClientResolverService,
                 },
             },
             {
-                path: ClientPages.exclut.urlSegment + '/:key',
-                data: { pageDef: ClientPages.exclut },
+                path: FournisseurClientPages.exclut.urlSegment + '/:key',
+                data: { pageDef: FournisseurClientPages.exclut },
                 component: ClientExclutComponent,
                 resolve: {
                     valeur: ClientResolverService,

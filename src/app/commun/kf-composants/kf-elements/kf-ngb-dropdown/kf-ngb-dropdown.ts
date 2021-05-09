@@ -1,9 +1,7 @@
 import { KfTypeDeComposant } from '../../kf-composants-types';
-import { KfElement } from '../../kf-composant/kf-element';
+import { KfComposant } from '../../kf-composant/kf-composant';
 import { KfTexteDef } from '../../kf-partages/kf-texte-def';
 import { KfBouton } from '../kf-bouton/kf-bouton';
-import { KfLien } from '../kf-lien/kf-lien';
-import { KfComposant } from '../../kf-composant/kf-composant';
 import { KfGéreCss } from '../../kf-partages/kf-gere-css';
 import { KfNgClasseDef, KfNgClasse } from '../../kf-partages/kf-gere-css-classe';
 import { KfContenuPhrase } from '../../kf-partages/kf-contenu-phrase/kf-contenu-phrase';
@@ -11,23 +9,23 @@ import { KfContenuPhrase } from '../../kf-partages/kf-contenu-phrase/kf-contenu-
 type TypePlacement = 'top' | 'top-left' | 'top-right' | 'bottom' | 'bottom-left' | 'bottom-right' |
     'left' | 'left-top' | 'left-bottom' | 'right' | 'right-top' | 'right-bottom';
 
-export class KfNgbDropdown extends KfElement {
+export class KfNgbDropdown extends KfComposant {
     autoClose: boolean | 'inside' | 'outside';
     placement: TypePlacement | TypePlacement[];
     ouvert: boolean;
     estADroiteDansMenu: boolean;
-    private _gereCssMenu: KfGéreCss;
+    private pGereCssMenu: KfGéreCss;
 
     // pour la classe et le contenu phrasé
     bouton: KfBouton;
 
     constructor(nom: string, texte?: KfTexteDef) {
         super(nom, KfTypeDeComposant.ngbDropdown);
-        this.ajouteClasseDef('dropdown');
+        this.ajouteClasse('dropdown');
         this.bouton = new KfBouton('', texte);
-        this.bouton.ajouteClasseDef('btn', 'dropdown-toggle');
-        this._gereCssMenu = new KfGéreCss();
-        this._gereCssMenu.ajouteClasseDef('dropdown-menu', {
+        this.bouton.ajouteClasse('btn', 'dropdown-toggle');
+        this.pGereCssMenu = new KfGéreCss();
+        this.pGereCssMenu.ajouteClasse('dropdown-menu', {
             nom: 'dropdown-menu-right',
             active: () => this.estADroiteDansMenu
         });
@@ -35,29 +33,18 @@ export class KfNgbDropdown extends KfElement {
 
     ajoute(item: KfComposant) {
         this.noeud.Ajoute(item.noeud);
-        item.ajouteClasseDef('dropdown-item');
+        item.ajouteClasse('dropdown-item');
     }
 
     ajouteClasseMenu(...classeDefs: (KfTexteDef | KfNgClasseDef)[]): void {
-        this._gereCssMenu.ajouteClasseDefArray(classeDefs);
+        this.pGereCssMenu.ajouteClasse(...classeDefs);
     }
 
     get classeMenu(): KfNgClasse {
-        return this._gereCssMenu.classe;
+        return this.pGereCssMenu.classe;
     }
 
     get contenuPhrase(): KfContenuPhrase {
         return this.bouton.contenuPhrase;
-    }
-}
-
-export class KfNgbDropdownGroup extends KfElement {
-    constructor(nom: string) {
-        super(nom, KfTypeDeComposant.ngbDropdownGroup);
-    }
-
-    ajoute(item: KfLien) {
-        this.noeud.Ajoute(item.noeud);
-        item.ajouteClasseDef('dropdown-item');
     }
 }

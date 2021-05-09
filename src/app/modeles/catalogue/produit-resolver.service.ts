@@ -2,20 +2,11 @@ import { Injectable } from '@angular/core';
 import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
 import { Produit } from './produit';
-import { ProduitService } from './produit.service';
-import { RouteurService } from 'src/app/services/routeur.service';
 import { DataResolverService } from 'src/app/services/data-resolver.service';
 import { Catalogue } from './catalogue';
-import { DataKeyResolverService } from 'src/app/commun/data-par-key/data-key-resolver.service';
 
 @Injectable()
-export class ProduitResolverService extends DataKeyResolverService<Produit> implements Resolve<Produit> {
-
-    constructor(
-        protected service: ProduitService,
-    ) {
-        super(service);
-    }
+export class ProduitResolverService extends DataResolverService implements Resolve<Produit> {
 
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<never> | Produit | Observable<Produit> {
         const catalogue: Catalogue = this.résolu(route, 'catalogue');

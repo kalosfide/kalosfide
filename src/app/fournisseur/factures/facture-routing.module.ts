@@ -20,7 +20,6 @@ import { FactureBonSupprimeComponent } from './facture-bon-supprime.component';
 import { FactureBonVirtuelGardeService } from './facture-bon-virtuel-garde.service';
 import { FactureLigneAjouteComponent } from './facture-ligne-ajoute.component';
 import { FactureLigneResolverService } from './facture-ligne-resolver.service';
-import { FactureLigneSupprimeComponent } from './facture-ligne-supprime.component';
 import { FactureChoixProduitComponent } from './facture-choix-produit.component';
 import { FactureProduitPasDansBonGardeService } from './facture-produit-pas-dans-bon-garde.service';
 import { FactureTitreComponent } from './facture-titre.component';
@@ -66,7 +65,7 @@ const routes: Routes = [
                 data: {
                     pageDef: FacturePages.client,
                     cheminDeTitre: ['clfDocs', 'client', 'nom'],
-                    pageDefEnfantPathVide: FacturePages.bons,
+                    pageDefDescendantParDéfaut: FacturePages.bons,
                 },
                 component: FactureClientComponent,
                 canActivate: [
@@ -118,7 +117,7 @@ const routes: Routes = [
                         path: FacturePages.bon.urlSegment + '/:' + CLFPages.nomParamNoDoc,
                         data: {
                             pageDef: FacturePages.bon,
-                            pageDefEnfantPathVide: FacturePages.lignes
+                            pageDefDescendantParDéfaut: FacturePages.lignes
                         },
                         resolve: {
                             // pour que les gardes des enfants aient accès au résolu de la route
@@ -198,17 +197,6 @@ const routes: Routes = [
                                 canActivate: [
                                     FactureBonVirtuelGardeService,
                                     FactureProduitPasDansBonGardeService
-                                ],
-                                resolve: {
-                                    clfLigne: FactureLigneResolverService,
-                                },
-                            },
-                            {
-                                path: FacturePages.supprime.urlSegment + '/:' + CLFPages.nomParamNoLigne,
-                                data: { pageDef: FacturePages.supprime },
-                                component: FactureLigneSupprimeComponent,
-                                canActivate: [
-                                    FactureBonVirtuelGardeService
                                 ],
                                 resolve: {
                                     clfLigne: FactureLigneResolverService,

@@ -8,7 +8,6 @@ import { FDocumentDocComponent } from './f-document-doc.component';
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
-    styleUrls: ['../../commun/commun.scss']
 })
 export class FDocumentFactureComponent extends FDocumentDocComponent implements OnInit, OnDestroy {
 

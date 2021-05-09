@@ -2,9 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { AppSite } from 'src/app/app-site/app-site';
 
 @Component({
-  selector: 'app-pied',
-  templateUrl: './pied.component.html',
-  styleUrls: ['../../commun/commun.scss']
+    selector: 'app-pied',
+    templateUrl: './pied.component.html',
 
 })
 export class PiedComponent implements OnInit {
@@ -15,7 +14,7 @@ export class PiedComponent implements OnInit {
         this.AppSite = AppSite;
     }
 
-  ngOnInit() {
-  }
+    ngOnInit() {
+    }
 
 }

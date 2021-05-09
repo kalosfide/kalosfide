@@ -9,7 +9,6 @@ import { ModeAction } from 'src/app/modeles/c-l-f/condition-action';
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
-    styleUrls: ['../../commun/commun.scss']
 })
 export class FactureBonNouveauComponent extends FactureBonComponent implements OnInit, OnDestroy {
 

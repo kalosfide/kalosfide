@@ -7,10 +7,10 @@ import { NavigationService } from '../services/navigation.service';
 import { AppSiteMenu } from './app-site-menu';
 import { Menu } from '../disposition/menu/menu';
 import { AlerteService } from '../disposition/alerte/alerte-service';
+import { Identifiant } from '../securite/identifiant';
 
 @Component({
     templateUrl: '../disposition/racine/racine.component.html',
-    styleUrls: ['../commun/commun.scss']
 })
 export class AppSiteComponent extends RacineComponent implements OnInit, OnDestroy {
 
@@ -38,7 +38,8 @@ export class AppSiteComponent extends RacineComponent implements OnInit, OnDestr
         this._ngOnInit();
         this.menu.créeItems();
         this.menu.rafraichit();
-        this.subscriptions.push(this.identification.changementDUtilisateur().subscribe(() => this.utilisateurChange()));
+        this.subscriptions.push(this.identification.changementDUtilisateur().subscribe(
+            (identifiant: Identifiant) => this.utilisateurChange(identifiant)));
     }
 
 }

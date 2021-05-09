@@ -1,74 +1,76 @@
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
-import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
+import { IKfComportementFormulaire, KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 import { KfSuperGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-super-groupe';
 import { KfBouton } from 'src/app/commun/kf-composants/kf-elements/kf-bouton/kf-bouton';
 import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
 import { AfficheResultat } from '../affiche-resultat/affiche-resultat';
-import { BootstrapType, FabriqueBootstrap } from './fabrique-bootstrap';
+import { BootstrapType, KfBootstrap } from '../../commun/kf-composants/kf-partages/kf-bootstrap';
 import { FabriqueMembre } from './fabrique-membre';
-import { FabriqueClasse } from './fabrique';
+import { Fabrique, FabriqueClasse } from './fabrique';
+import { KfValidateurs } from 'src/app/commun/kf-composants/kf-partages/kf-validateur';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
-import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
-import { KfContenuPhrase, KfTypeContenuPhrasé } from 'src/app/commun/kf-composants/kf-partages/kf-contenu-phrase/kf-contenu-phrase';
 
-export interface IFormulaireDef {
+export interface IFormulaireComponent {
     nom: string;
     /** retourne les composants à afficher avant l'éditeur */
-    avantEdition?: () => KfComposant[];
-    /** retourne le groupe des composant à éditer */
+    créeAvantFormulaire?: () => KfComposant[];
+    /** retourne le groupe des composants à éditer */
     créeEdition: () => KfGroupe;
 
-    créeBoutonsDeFormulaire?: (formulaire: KfSuperGroupe) => (KfBouton | KfLien)[];
-    neSoumetPasSiPristine?: boolean;
+    sontEgaux?: (a1: any, a2: any) => boolean;
+
+    créeBoutonsDeFormulaire?: (formulaire: KfGroupe) => (KfBouton | KfLien)[];
+
+    /** créé si pas défini */
     groupeBoutonsMessages?: GroupeBoutonsMessages;
 
     aprèsBoutons?: () => KfComposant[];
+
     /** défini après création */
-    edition?: KfGroupe;
+    avantFormulaire?: KfComposant[];
+    formulaire?: KfGroupe;
+    soumet: () => void;
     /** défini après création */
     afficheResultat?: AfficheResultat;
 }
 
+/**
+ * Objet gérant un groupe contenant des messages et une ligne de boutons ou liens
+ */
 export class GroupeBoutonsMessages {
     private pGroupe: KfGroupe;
     private pBoutons: (KfBouton | KfLien)[];
     private pLigneDesBoutons: KfGroupe;
     private pMessages: KfComposant[];
 
-    constructor(nom: string, messages?: KfComposant[]) {
-        const groupe = new KfGroupe(nom);
-        if (messages) {
-            const grRow = new KfGroupe(nom + '_msg');
-            grRow.ajouteClasseDef('row justify-content-center');
-            groupe.ajoute(grRow);
-            const grCol = new KfGroupe('');
-            grCol.ajouteClasseDef('col text-center');
+    constructor(nom: string, def: {
+        messages?: KfEtiquette[],
+        boutons?: (KfBouton | KfLien)[]
+    }) {
+        this.pGroupe = new KfGroupe(nom);
+        this.pGroupe.ajouteClasse('mb-2');
+        let grCol: KfGroupe;
+        let grRow: KfGroupe;
+        if (def.messages) {
+            this.pMessages = def.messages;
+            grRow = new KfGroupe(nom + '_msg');
+            grRow.ajouteClasse('row justify-content-center');
+            this.pGroupe.ajoute(grRow);
+            grCol = new KfGroupe('');
+            grCol.ajouteClasse('col text-center');
             grRow.ajoute(grCol);
-            messages.forEach(m => {
+            def.messages.forEach(m => {
                 grCol.ajoute(m);
             });
         }
-        this.pGroupe = groupe;
-        this.pMessages = messages;
-    }
-
-    get groupe(): KfGroupe { return this.pGroupe; }
-    get boutons(): (KfBouton | KfLien)[] { return this.pBoutons; }
-    get messages(): KfComposant[] { return this.pMessages; }
-
-    créeBoutons(boutons: (KfBouton | KfLien)[]) {
-        if (this.boutons) {
-            throw new Error('GroupeBoutonsMessages: boutons existe déjà.');
-        }
-        this.pBoutons = boutons;
-        if (boutons.length > 0) {
-            const grRow = new KfGroupe(this.groupe.nom + '_btn');
-            this.groupe.ajoute(grRow);
-            grRow.ajouteClasseDef('row justify-content-center');
-            let grCol: KfGroupe;
-            boutons.forEach(b => {
+        if (def.boutons) {
+            this.pBoutons = def.boutons;
+            grRow = new KfGroupe(nom + '_btn');
+            this.pGroupe.ajoute(grRow);
+            grRow.ajouteClasse('row justify-content-center');
+            def.boutons.forEach(b => {
                 grCol = new KfGroupe('');
-                grCol.ajouteClasseDef('col-sm');
+                grCol.ajouteClasse('col-sm');
                 grCol.ajoute(b);
                 grRow.ajoute(grCol);
             });
@@ -76,92 +78,97 @@ export class GroupeBoutonsMessages {
         }
     }
 
+    get groupe(): KfGroupe { return this.pGroupe; }
+    get boutons(): (KfBouton | KfLien)[] { return this.pBoutons; }
+    get messages(): KfComposant[] { return this.pMessages; }
+
+    /**
+     * Si pas true, la ligne des boutons n'est pas affichée
+     */
     set afficherBoutons(valeur: boolean) {
         if (this.pLigneDesBoutons) {
-            this.pLigneDesBoutons.nePasAfficher = valeur;
+            this.pLigneDesBoutons.nePasAfficher = valeur !== true;
         }
     }
 
     alerte(alerte: BootstrapType) {
-        FabriqueBootstrap.ajouteClasse(this.groupe, 'alert', alerte);
-    }
-
-    rafraichit(contenusMessages?: KfContenuPhrase[], contenusBoutons?: KfContenuPhrase[]) {
-        if (contenusMessages) {
-            for (let i = 0; i < this.pMessages.length; i++) {
-                const contenu = contenusMessages[i];
-                if (contenu) {
-                    this.pMessages[i].contenuPhrase = contenu;
-                }
-            }
-        }
-        if (contenusBoutons) {
-            for (let i = 0; i < this.pBoutons.length; i++) {
-                const contenu = contenusBoutons[i];
-                if (contenu) {
-                    this.pBoutons[i].contenuPhrase = contenu;
-                }
-            }
-        }
+        KfBootstrap.ajouteClasse(this.groupe, 'alert', alerte);
     }
 
 }
 
 export class FabriqueFormulaire extends FabriqueMembre {
+    static nomEdition = 'données';
     constructor(fabrique: FabriqueClasse) {
         super(fabrique);
     }
 
-    formulaire(def: IFormulaireDef): KfSuperGroupe {
-        const formulaire = new KfSuperGroupe(def.nom);
+    superGroupe(def: IFormulaireComponent): KfSuperGroupe {
+        const superGroupe = new KfSuperGroupe(def.nom);
 
-        const test = new KfEtiquette('', 'Test');
-        test.baliseHtml = KfTypeDeBaliseHTML.p;
-        test.fixeStyleDef('backgroundcolor', 'red');
-        formulaire.ajoute(test);
-
-        if (def.avantEdition) {
-            def.avantEdition().forEach(c => formulaire.ajoute(c));
+        if (def.créeAvantFormulaire) {
+            def.avantFormulaire = def.créeAvantFormulaire();
+            def.avantFormulaire.forEach(c => superGroupe.ajoute(c));
         }
-        def.edition = def.créeEdition();
-        if (def.edition.gereValeur) {
-            formulaire.créeGereValeur();
-            formulaire.sauveQuandChange = true;
-            formulaire.neSoumetPasSiPristine = def.neSoumetPasSiPristine;
+        def.formulaire = def.créeEdition();
+        KfBootstrap.prépare(def.formulaire.contenus, this.fabrique.optionsBootstrap.formulaire);
+        if (def.formulaire.gereValeur) {
         }
-        formulaire.ajoute(def.edition);
+        superGroupe.ajoute(def.formulaire);
 
         if (def.groupeBoutonsMessages) {
-            formulaire.ajoute(def.groupeBoutonsMessages.groupe);
-            if (def.créeBoutonsDeFormulaire) {
-                def.groupeBoutonsMessages.créeBoutons(def.créeBoutonsDeFormulaire(formulaire));
-                def.afficheResultat = this.ajouteResultat(formulaire);
-                formulaire.ajoute(def.afficheResultat.groupe);
+            superGroupe.ajoute(def.groupeBoutonsMessages.groupe);
+            if (def.groupeBoutonsMessages.boutons) {
+                def.afficheResultat = this.ajouteResultat(def.formulaire);
+                superGroupe.ajoute(def.afficheResultat.groupe);
             }
         } else {
             if (def.créeBoutonsDeFormulaire) {
-                def.groupeBoutonsMessages = new GroupeBoutonsMessages(formulaire.nom);
-                def.groupeBoutonsMessages.créeBoutons(def.créeBoutonsDeFormulaire(formulaire));
-                formulaire.ajoute(def.groupeBoutonsMessages.groupe);
-                def.afficheResultat = this.ajouteResultat(formulaire);
-                formulaire.ajoute(def.afficheResultat.groupe);
+                def.groupeBoutonsMessages = new GroupeBoutonsMessages(superGroupe.nom, {
+                    boutons: def.créeBoutonsDeFormulaire(def.formulaire)
+                });
+                superGroupe.ajoute(def.groupeBoutonsMessages.groupe);
+                def.afficheResultat = this.ajouteResultat(def.formulaire);
+                superGroupe.ajoute(def.afficheResultat.groupe);
             }
         }
 
         if (def.aprèsBoutons) {
-            def.aprèsBoutons().forEach(c => formulaire.ajoute(c));
+            def.aprèsBoutons().forEach(c => superGroupe.ajoute(c));
         }
 
-        if (def.edition.gereValeur) {
-            formulaire.avecInvalidFeedback = true;
-            formulaire.quandTousAjoutés();
+        if (def.formulaire.gereValeur) {
+//            formulaire.créeGereValeur();
+            const comportementFormulaire: IKfComportementFormulaire = {
+                sauveQuandChange: true,
+                neSoumetPasSiPristine: true,
+            };
+            if (def.soumet) {
+                comportementFormulaire.traiteSubmit = { traitement: def.soumet }
+            }
+            if (def.sontEgaux) {
+                def.formulaire.ajouteValidateur(KfValidateurs.validateurAMarqueDeFormulaire(def.sontEgaux));
+            }
+            def.formulaire.comportementFormulaire = comportementFormulaire;
+            def.formulaire.avecInvalidFeedback = true;
+            superGroupe.quandTousAjoutés();
         }
-        return formulaire;
+        return superGroupe;
     }
 
-    groupeEdition(nom: string): KfGroupe {
-        const groupe = new KfSuperGroupe(nom);
+    désactiveEtCacheBoutons(def: IFormulaireComponent) {
+        if (def.formulaire) {
+            def.formulaire.contenus.forEach(c => c.inactivité = true);
+        }
+        if (def.groupeBoutonsMessages) {
+            def.groupeBoutonsMessages.boutons.forEach(b => b.visible = false);
+        }
+    }
+
+    formulaire(nom?: string): KfGroupe {
+        const groupe = new KfGroupe(nom ? nom : FabriqueFormulaire.nomEdition);
         groupe.créeGereValeur();
+        groupe.estRacineV = true;
         return groupe;
     }
 

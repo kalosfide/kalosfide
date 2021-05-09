@@ -8,6 +8,7 @@ import { RacineComponent } from '../disposition/racine/racine.component';
 import { ActivatedRoute } from '@angular/router';
 import { Site } from '../modeles/site/site';
 import { AlerteService } from '../disposition/alerte/alerte-service';
+import { Identifiant } from '../securite/identifiant';
 
 export abstract class SiteRacineComponent extends RacineComponent implements OnInit, OnDestroy {
 
@@ -35,8 +36,10 @@ export abstract class SiteRacineComponent extends RacineComponent implements OnI
             this.menu.site = this.navigation.litSiteEnCours();
             this.menu.créeItems();
             this.menu.rafraichit();
+            // le site ne peut pas changer pendant que ce component est affiché mais ses propriétés dont son état peuvent changer
             this.subscriptions.push(this.navigation.siteObs().subscribe((site: Site) => this.siteChange(site)));
-            this.subscriptions.push(this.identification.changementDUtilisateur().subscribe(() => this.utilisateurChange()));
+            this.subscriptions.push(this.identification.changementDUtilisateur().subscribe(
+                (identifiant: Identifiant) => this.utilisateurChange(identifiant)));
         }));
     }
 

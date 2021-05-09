@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CommunModule } from 'src/app/commun/commun.module';
 import { DispositionModule } from 'src/app/disposition/disposition.module';
-import { MessagesModule } from 'src/app/messages/messages.module';
+import { ErreursModule } from 'src/app/erreurs/erreurs.module';
 import { FactureRoutingModule } from './facture-routing.module';
 import { FactureClientComponent } from './facture-client.component';
 import { FactureClientsComponent } from './facture-clients.component';
@@ -12,7 +12,6 @@ import { FactureBonNouveauComponent } from './facture-bon-nouveau.component';
 import { FactureBonSupprimeComponent } from './facture-bon-supprime.component';
 import { FactureChoixProduitComponent } from './facture-choix-produit.component';
 import { FactureLigneAjouteComponent } from './facture-ligne-ajoute.component';
-import { FactureLigneSupprimeComponent } from './facture-ligne-supprime.component';
 import { FactureEnvoiComponent } from './facture-envoi.component';
 import { FactureClientsResolverService } from './facture-clients-resolver.service';
 import { FactureAttenteBonsGardeService } from './facture-attente-bons-garde.service';
@@ -32,7 +31,7 @@ import { FactureTitreComponent } from './facture-titre.component';
         CommonModule,
         CommunModule,
         DispositionModule,
-        MessagesModule,
+        ErreursModule,
         FactureRoutingModule
     ],
     declarations: [
@@ -46,7 +45,6 @@ import { FactureTitreComponent } from './facture-titre.component';
         FactureChoixProduitComponent,
         FactureClientsComponent,
         FactureLigneAjouteComponent,
-        FactureLigneSupprimeComponent,
         FactureEnvoiComponent,
         FactureTitreComponent,
     ],

@@ -1,5 +1,5 @@
 export function formateNombre(valeur: any,
-    nbChiffresAvant: number, nbChiffresAprès: number, avecSigne?: '<' | '<=' | '>' | '>='
+                              nbChiffresAvant: number, nbChiffresAprès: number, avecSigne?: '<' | '<=' | '>' | '>='
 ): number {
     if (valeur === undefined || valeur === null) {
         return valeur;

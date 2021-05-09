@@ -1,9 +1,10 @@
 import { KfTypeDeComposant } from '../../kf-composants-types';
-import { KfElement } from '../../kf-composant/kf-element';
 import { KfSuperGroupe } from '../../kf-groupe/kf-super-groupe';
 import { KfParametres } from '../../kf-composants-parametres';
 import { KfFichier } from '../kf-fichier/kf-fichier';
 import { KfTexteDef } from '../../kf-partages/kf-texte-def';
+import { litFichierTexte } from 'src/app/commun/outils/lit-fichier-texte';
+import { KfEvenement } from '../../kf-partages/kf-evenements';
 
 export interface KfResultatFichierCharge {
     file: File;
@@ -11,9 +12,7 @@ export interface KfResultatFichierCharge {
     texte?: string;
 }
 
-export class KfFichierCharge extends KfElement {
-
-    fichier: KfFichier;
+export class KfFichierCharge extends KfFichier {
 
     superGroupe: KfSuperGroupe;
     decodeSelecteur: (selecteur: any) => KfSuperGroupe;
@@ -30,9 +29,25 @@ export class KfFichierCharge extends KfElement {
      */
     constructor(nom: string, extension?: string, texte?: KfTexteDef, ) {
         super(nom, KfTypeDeComposant.fichierCharge);
-        this.fichier = new KfFichier(nom + '_f', texte);
-        this.fichier.typesExtension.push(extension ? extension : KfParametres.fichierParDefaut.extension);
-        this.fichier.multiple = false;
+        this.typesExtension.push(extension ? extension : KfParametres.fichierParDefaut.extension);
+        this.multiple = false;
+    }
+
+    quandChange(evenement: KfEvenement) {
+        this._quandChange()
+        const resultat: KfResultatFichierCharge = { file: this.files[0] };
+        const subsbscription = litFichierTexte(this.files[0]).subscribe({
+            next: texte => {
+                subsbscription.unsubscribe();
+                resultat.texte = texte;
+                evenement.parametres = resultat;
+            },
+            error: err => {
+                subsbscription.unsubscribe();
+                resultat.erreur = err;
+                evenement.parametres = resultat;
+            }
+        });
     }
 
 }

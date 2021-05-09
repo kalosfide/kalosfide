@@ -7,23 +7,23 @@ import { DataKeyEditeur } from '../data-key editeur';
 
 export abstract class KeyUidRnoNoEditeur<T extends KeyUidRnoNo> extends DataKeyEditeur<T> {
 
-    protected _kfUid: KfInputTexte;
-    protected _kfRno: KfInputNombre;
-    protected _kfNo: KfInputNombre;
+    protected pKfUid: KfInputTexte;
+    protected pKfRno: KfInputNombre;
+    protected pKfNo: KfInputNombre;
 
     créeKfDeKey() {
-        this._kfUid = Fabrique.input.texteInvisible('uid');
-        this._kfRno = Fabrique.input.nombreInvisible('rno');
-        this._kfNo = Fabrique.input.nombreInvisible('no');
+        this.pKfUid = Fabrique.input.texteInvisible('uid');
+        this.pKfRno = Fabrique.input.nombreInvisible('rno');
+        this.pKfNo = Fabrique.input.nombreInvisible('no');
         this.kfDeKey = [
-            this._kfUid,
-            this._kfRno,
-            this._kfNo
+            this.pKfUid,
+            this.pKfRno,
+            this.pKfNo
         ];
     }
     fixeKfKey(key: IKeyUidRnoNo) {
-        this._kfUid.valeur = key.uid;
-        this._kfRno.valeur = key.rno;
-         this._kfNo.valeur = key.no;
-   }
+        this.pKfUid.valeur = key.uid;
+        this.pKfRno.valeur = key.rno;
+        this.pKfNo.valeur = key.no;
+    }
 }

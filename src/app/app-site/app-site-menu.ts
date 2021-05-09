@@ -22,7 +22,7 @@ export class AppSiteMenu extends Menu {
 
     protected créeMarqueTexte(): NavItemLien {
         const i = new NavItemLien('texteMarque', this);
-        i.lien.ajouteClasseDef('navbar-brand');
+        i.lien.ajouteClasse('navbar-brand');
         i.texte = AppSite.texte;
         i.url = AppRoutes.url();
         return i;
@@ -30,7 +30,7 @@ export class AppSiteMenu extends Menu {
 
     protected créeItemsAction(): (NavItemLien | NavItemDropdown)[] {
         return [
-            this.créeItemApp(AppSitePages.sites),
+            this.créeItemApp(AppSitePages.peuple),
             this.créeItemApp(AppSitePages.contact),
             this.créeItemApp(AppSitePages.apropos),
         ];
@@ -41,7 +41,10 @@ export class AppSiteMenu extends Menu {
         const itemFournisseur = new NavItemLien(AppSitePages.devenirFournisseur.urlSegment, this);
         itemFournisseur.url = AppSiteRoutes.url([AppSitePages.devenirFournisseur.urlSegment]);
         itemFournisseur.texte = AppSitePages.devenirFournisseur.lien;
-        itemDevenir.ajoute(itemFournisseur);
+        itemDevenir.fixeContenus([]);
+        itemDevenir.rafraichit = () => {
+            itemDevenir.fixeContenus(itemDevenir.identifiant ? [itemFournisseur] : []);
+        };
         return itemDevenir;
     }
 

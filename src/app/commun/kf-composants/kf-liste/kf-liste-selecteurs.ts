@@ -92,18 +92,18 @@ export class KfListeSelecteurs {
     /**
      * objet permettant à la KfListe parent de associer des sélecteurs aux items
      * @param liste parent du gestionnaire
-     * @param selecteursInterface {
-     *  @param creeSelecteur retourne le sélecteur du item passé en paramètre,sans paramètre celui de la commande nouveau
+     * @param selecteursInterface
+     *  creeSelecteur retourne le sélecteur du item passé en paramètre,sans paramètre celui de la commande nouveau
      *      valeur par défaut: créée à partir de texte, des images et du type
-     *  @param texte retourne le texte pour le item passé en paramètre, sans paramètre celui pour la commande nouveau
+     *  texte retourne le texte pour le item passé en paramètre, sans paramètre celui pour la commande nouveau
      *      valeur par défaut si imageAvant et imageApres ne sont pas définies: créée à partir de baseDesTextes
-     *  @param imageAvant retourne l'imageAvant pour le item passé en paramètre, sans paramètre celle pour la commande nouveau
-     *  @param imageApres retourne l'imageApres pour le item passé en paramètre, sans paramètre celle pour la commande nouveau
-     *  @param type type des composants des sélecteurs, doit être constructible par texte et images et emettre des clics
+     *  imageAvant retourne l'imageAvant pour le item passé en paramètre, sans paramètre celle pour la commande nouveau
+     *  imageApres retourne l'imageApres pour le item passé en paramètre, sans paramètre celle pour la commande nouveau
+     *  type type des composants des sélecteurs, doit être constructible par texte et images et emettre des clics
      *      valeur par défaut: LISTE_TYPE_EN_TETE_PAR_DEFAUT
-     *  @param baseDesTextes texte(item) sera baseDesTextes + ' ' + item.id si items avec ids
+     *  baseDesTextes texte(item) sera baseDesTextes + ' ' + item.id si items avec ids
      *      valeur par défaut: LISTE_TEXTE_EN_TETE_PAR_DEFAUT
-     *  @param texteNouveau texte() sera texteNouveau
+     *  texteNouveau texte() sera texteNouveau
      *      valeur par défaut: LISTE_TEXTE_EN_TETE_NOUVEAU_PAR_DEFAUT
      * }
      */
@@ -114,7 +114,7 @@ export class KfListeSelecteurs {
         if (inter.creeSelecteur) {
             this.creeSelecteur = (): KfComposant => {
                 const selecteur = inter.creeSelecteur();
-                selecteur.ajouteClasseDef({
+                selecteur.ajouteClasse({
                     nom: 'kf-choisi',
                     active:  () => selecteur === this.liste.selecteurChoisi
                 });
@@ -154,7 +154,7 @@ export class KfListeSelecteurs {
                 switch (this.type) {
                     case KfTypeDeComposant.bouton:
                         selecteur = new KfBouton(nom);
-                        selecteur.gereHtml.ajouteTraiteur(KfTypeDEvenement.clic,
+                        selecteur.gereHtml.ajouteTraiteur(KfTypeDEvenement.click,
                             (evenement: KfEvenement) => {
                                 this.liste.fixeChoisi(item);
                                 evenement.statut = KfStatutDEvenement.fini;
@@ -177,7 +177,7 @@ export class KfListeSelecteurs {
                     if (this.imageApres) {
                         selecteur.contenuPhrase.ajoute(new KfImage('', this.imageApres(item)));
                     }
-                    selecteur.ajouteClasseDef('kf-liste-selecteur', {
+                    selecteur.ajouteClasse('kf-liste-selecteur', {
                         nom: 'kf-choisi',
                         active:  () => selecteur === this.liste.selecteurChoisi
                     });
@@ -214,7 +214,7 @@ export class KfListeSelecteurs {
         this.tableDesSelecteurs.push(
             {
                 selecteur: this.creeSelecteur(item),
-                item: item
+                item
             }
         );
     }
@@ -233,7 +233,7 @@ export class KfListeSelecteurs {
             (item: object) => this.tableDesSelecteurs.push(
                 {
                     selecteur: this.creeSelecteur(item),
-                    item: item
+                    item
                 }
             )
         );
@@ -243,9 +243,9 @@ export class KfListeSelecteurs {
      * retourne l'item d'un sélecteur
      */
     item(selecteur: KfComposant): object {
-        const selecteur_item = this.tableDesSelecteurs.find(tc => tc.selecteur === selecteur);
-        if (selecteur_item) {
-            return selecteur_item.item;
+        const selecteurItem = this.tableDesSelecteurs.find(tc => tc.selecteur === selecteur);
+        if (selecteurItem) {
+            return selecteurItem.item;
         }
     }
 
@@ -254,15 +254,16 @@ export class KfListeSelecteurs {
      * retrouve le sélecteur d'un item
      */
     selecteur(item: object): KfComposant {
-        const selecteur_item = this.tableDesSelecteurs.find(tc => tc.item === item);
-        if (selecteur_item) {
-            return selecteur_item.selecteur;
+        const selecteurItem = this.tableDesSelecteurs.find(tc => tc.item === item);
+        if (selecteurItem) {
+            return selecteurItem.selecteur;
         }
     }
 
     /**
      * retourne l'array des selecteurs dans l'ordre des items
-     * */
+     *
+     */
     get selecteurs(): KfComposant[] {
         return this.liste.items.map(
             (item: object) => this.selecteur(item)

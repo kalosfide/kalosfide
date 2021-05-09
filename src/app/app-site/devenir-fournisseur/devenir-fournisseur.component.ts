@@ -2,83 +2,96 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { Observable } from 'rxjs';
-import { FormulaireAEtapesComponent } from '../../disposition/formulaire/formulaire-a-etapes.component';
-import { ApiResult } from '../../commun/api-results/api-result';
+import { ApiResult } from '../../api/api-results/api-result';
 
-import { FournisseurEditeur } from '../../fournisseur/fournisseur';
-import { DevenirFournisseurModel } from './devenir-fournisseur-model';
+import { FournisseurModel } from '../../fournisseur/fournisseur';
 import { PageDef } from 'src/app/commun/page-def';
-import { FormulaireAEtapeService } from 'src/app/disposition/formulaire/formulaire-a-etapes.service';
-import { DevenirFournisseurPages, DevenirFournisseurRoutes } from './devenir-fournisseur-pages';
-import { ReglesDeMotDePasse } from 'src/app/securite/mot-de-passe/mot-de-passe';
-import { ComponentAAutoriserAQuitter } from 'src/app/commun/peut-quitter/peut-quitter-garde.service';
 import { AppSite } from 'src/app/app-site/app-site';
 import { AppSitePages } from '../app-site-pages';
-import { DevenirConnectionEditeur } from 'src/app/compte/devenir/devenir-connection-model';
 import { FournisseurRoutes, FournisseurPages } from 'src/app/fournisseur/fournisseur-pages';
-import { PeutQuitterService } from 'src/app/commun/peut-quitter/peut-quitter.service';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { SiteEditeur } from 'src/app/modeles/site/site-editeur';
 import { CompteService } from 'src/app/compte/compte.service';
+import { FormulaireComponent } from 'src/app/disposition/formulaire/formulaire.component';
+import { BarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
+import { Identifiant } from 'src/app/securite/identifiant';
+import { KfSuperGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-super-groupe';
+import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
+import { KfTypeDEvenement } from 'src/app/commun/kf-composants/kf-partages/kf-evenements';
+import { AppPages } from 'src/app/app-pages';
 
 @Component({
-    templateUrl: '../../disposition/formulaire/formulaire-a-etapes.component.html',
-    styleUrls: ['../../commun/commun.scss']
+    templateUrl: '../../disposition/page-base/page-base.html',
 })
-export class DevenirFournisseurComponent extends FormulaireAEtapesComponent implements OnInit, OnDestroy, ComponentAAutoriserAQuitter {
+export class DevenirFournisseurComponent extends FormulaireComponent implements OnInit, OnDestroy {
 
     pageDef: PageDef = AppSitePages.devenirFournisseur;
 
+
     get titre(): string {
-        return `${AppSite.titre} - ${this.pageDef.titre}`;
+        return this.pageDef.titre;
     }
 
-    créeBoutonsDeFormulaire = () => [Fabrique.bouton.boutonSoumettre(this.formulaire, `S'enregistrer`)];
+    identifiant: Identifiant;
+    éditeurSite: SiteEditeur;
+
+    texteBoutonSoumettre: () => string;
+
+    créeBoutonsDeFormulaire = (formulaire: KfGroupe) => {
+        this.boutonSoumettre = Fabrique.bouton.soumettre(formulaire, this.texteBoutonSoumettre());
+        return [this.boutonSoumettre];
+    }
 
     apiDemande = (): Observable<ApiResult> => {
         const valeur = this.valeur;
-        const model = new DevenirFournisseurModel();
-        model.email = valeur.email;
-        model.password = valeur.password;
-        model.copieData(valeur);
-        console.log(model);
-        return this.service.enregistreFournisseur(model);
+        return this.service.créeSite(valeur);
     }
 
     actionSiOk = (): void => {
-        const identifiant = this.identification.litIdentifiant();
-        this.routeur.naviguePageDef(FournisseurPages.accueil, FournisseurRoutes, identifiant.nomSiteParDéfaut);
+        this.routeur.naviguePageDef(FournisseurPages.accueil, FournisseurRoutes, this.éditeurSite.kfUrl.valeur);
     }
 
     constructor(
         protected route: ActivatedRoute,
         protected service: CompteService,
-        protected etapesService: FormulaireAEtapeService,
-        protected peutQuitterService: PeutQuitterService,
     ) {
-        super(service, etapesService, peutQuitterService);
+        super(service);
 
         this.titreRésultatErreur = 'Enregistrement impossible';
         this.titreRésultatSucces = 'Enregistrement réussi.';
-        this.ajouteEtape(DevenirFournisseurPages.connection, new DevenirConnectionEditeur());
-        this.ajouteEtape(DevenirFournisseurPages.profil, new FournisseurEditeur());
-        this.ajouteEtape(DevenirFournisseurPages.site, new SiteEditeur(this));
-        const contenus = this.contenusValidationParDéfaut();
-        this.ajouteEtape(DevenirFournisseurPages.validation, { créeContenus() { return contenus; } });
+    }
+
+    créeEdition = (): KfGroupe => {
+        const groupe = Fabrique.formulaire.formulaire();
+
+        this.éditeurSite = new SiteEditeur(this);
+        this.éditeurSite.créeKfDeData();
+        this.éditeurSite.kfDeData.forEach(c => groupe.ajoute(c));
+
+        this.texteBoutonSoumettre = () => {
+            let texte = `Créer le site`;
+            if (this.éditeurSite.kfUrl.valeur && !this.éditeurSite.kfUrl.gereValeur.invalide) {
+                texte += ` d'adresse ${AppSite.nom}/${AppPages.site.urlSegment}/${this.éditeurSite.kfUrl.valeur}`;
+            }
+            return texte;
+        };
+        this.éditeurSite.kfUrl.gereHtml.suitLaValeur();
+        this.éditeurSite.kfUrl.gereHtml.ajouteTraiteur(KfTypeDEvenement.valeurChange,
+            () => {
+                this.boutonSoumettre.fixeTexte(this.texteBoutonSoumettre());
+            });
+
+
+        return groupe;
     }
 
     ngOnInit() {
-        this.route.data.subscribe((data: { motDePasse: ReglesDeMotDePasse }) => {
-            this.créeFormulaire();
-            const éditeur = this.etapes[0].éditeur as DevenirConnectionEditeur;
-            éditeur.kfTexteDuMotDePasse.gereValeur.FixeValidateurs(ReglesDeMotDePasse.créeValidateurs(data.motDePasse));
-        });
-        this.ngOnInit_Index();
-    }
-
-
-    construitUrl(routeEtape: string): string {
-        return DevenirFournisseurRoutes.url(routeEtape);
+        this.subscriptions.push(this.route.data.subscribe(() => {
+            this.niveauTitre = 0;
+            this.créeTitrePage();
+            this.identifiant = this.identification.litIdentifiant();
+            this.superGroupe = Fabrique.formulaire.superGroupe(this);
+        }));
     }
 
 }

@@ -3,7 +3,6 @@ import { KfMenu } from './kf-menu';
 import { KfParametres } from '../kf-composants-parametres';
 import { KfTypeDeComposant } from '../kf-composants-types';
 import { KfTraitementDEvenement, KfEvenement, KfTypeDEvenement, KfStatutDEvenement } from '../kf-partages/kf-evenements';
-import { KfElement } from '../kf-composant/kf-element';
 import { KfEtiquette } from '../kf-elements/kf-etiquette/kf-etiquette';
 import { KfBouton } from '../kf-elements/kf-bouton/kf-bouton';
 import { KfDefinitionDeMenu, KfMenuDirection, KfTypeDeSousMenu } from './kf-menu-types';
@@ -11,17 +10,17 @@ import { KfLien } from '../kf-elements/kf-lien/kf-lien';
 import { KfImage } from '../kf-elements/kf-image/kf-image';
 import { KfTexte } from '../kf-elements/kf-texte/kf-texte';
 
-export class KfSousMenu extends KfElement {
+export class KfSousMenu extends KfComposant {
     itemId: any;
 
-    private _ouvert: boolean;
+    private pOuvert: boolean;
 
     peutEtreChoisi?: boolean;
 
     constructor(no: number, def: KfDefinitionDeMenu) {
         super(KfParametres.menuParDefaut.nomDeBase + no, KfTypeDeComposant.sousmenu);
         this.itemId = def.id;
-        this._ouvert = true;
+        this.pOuvert = true;
         let selecteur: KfComposant;
         const fixeContenuPhrasé = (s: KfComposant, d: KfDefinitionDeMenu) => {
             if (d.imageAvant) {
@@ -42,16 +41,16 @@ export class KfSousMenu extends KfElement {
             case KfTypeDeSousMenu.bouton:
                 selecteur = new KfBouton(KfParametres.menuParDefaut.nomDeBaseSelecteur + no);
                 fixeContenuPhrasé(selecteur, def);
-                this.gereHtml.ajouteTraiteur(KfTypeDEvenement.clic, this.traiteClicSurSelecteur);
+                this.gereHtml.ajouteTraiteur(KfTypeDEvenement.click, this.traiteClicSurSelecteur);
                 break;
             case KfTypeDeSousMenu.lien:
                 selecteur = new KfLien(KfParametres.menuParDefaut.nomDeBaseSelecteur + no);
                 fixeContenuPhrasé(selecteur, def);
-                this.gereHtml.ajouteTraiteur(KfTypeDEvenement.clic, this.traiteClicSurSelecteur);
+                this.gereHtml.ajouteTraiteur(KfTypeDEvenement.click, this.traiteClicSurSelecteur);
                 break;
             case KfTypeDeSousMenu.special:
                 selecteur = def.selecteur;
-                this.gereHtml.ajouteTraiteur(KfTypeDEvenement.clic, this.traiteClicSurSelecteur);
+                this.gereHtml.ajouteTraiteur(KfTypeDEvenement.click, this.traiteClicSurSelecteur);
                 break;
             default:
                 break;
@@ -59,18 +58,18 @@ export class KfSousMenu extends KfElement {
         if (def.inactivitéFnc) {
             selecteur.inactivitéFnc = def.inactivitéFnc;
         }
-        this.ajouteClasseDef('kf-sous-menu');
-        this.ajouteClasseDef(() => {
+        this.ajouteClasse('kf-sous-menu');
+        this.ajouteClasse(() => {
             return this.niveau === 1 ? this.menu.direction : KfMenuDirection.vertical;
         });
-        this.ajouteClasseDef(() => {
+        this.ajouteClasse(() => {
             return 'kf-niveau-' + this.niveau;
         });
-        this.ajouteClasseDef(() => {
+        this.ajouteClasse(() => {
             return this.sansSousMenus ? '' : this.ouvert ? 'kf-ouvert' : 'kf-ferme';
         });
         this.noeud.Ajoute(selecteur.noeud);
-        this._ouvert = true;
+        this.pOuvert = true;
     }
 
     get selecteur(): KfComposant {
@@ -93,10 +92,10 @@ export class KfSousMenu extends KfElement {
     }
 
     get ouvert(): boolean {
-        return this._ouvert;
+        return this.pOuvert;
     }
     set ouvert(ouvert: boolean) {
-        this._ouvert = ouvert;
+        this.pOuvert = ouvert;
     }
 
     get niveau(): number {

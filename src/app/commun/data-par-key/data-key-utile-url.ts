@@ -4,28 +4,28 @@ import { DataKeyUtile } from './data-key-utile';
 import { PageDef } from '../page-def';
 
 export class DataKeyUtileUrl<T extends IDataKey> {
-    protected _utile: DataKeyUtile<T>;
+    protected pUtile: DataKeyUtile<T>;
 
     constructor(utile: DataKeyUtile<T>) {
-        this._utile = utile;
+        this.pUtile = utile;
     }
 
     index(): IUrlDef {
-        return this._utile.url.__urlDef(this._utile.dataRoutes, this._utile.dataPages.index);
+        return this.pUtile.url.__urlDef(this.pUtile.dataRoutes, this.pUtile.dataPages.index);
     }
     retourIndex(t: T): IUrlDef {
-        return this._utile.url.__urlDef(this._utile.dataRoutes, this._utile.dataPages.index, this._utile.urlSegmentDeKey(t), true);
+        return this.pUtile.url.__urlDef(this.pUtile.dataRoutes, this.pUtile.dataPages.index, this.pUtile.service.urlSegmentDeKey(t), true);
     }
     ajoute(): IUrlDef {
-        return this._utile.url.__urlDef(this._utile.dataRoutes, this._utile.dataPages.ajoute);
+        return this.pUtile.url.__urlDef(this.pUtile.dataRoutes, this.pUtile.dataPages.ajoute);
     }
     edite(t: T): IUrlDef {
-        return this.dePageDef(this._utile.dataPages.edite, t);
+        return this.dePageDef(this.pUtile.dataPages.edite, t);
     }
     supprime(t: T): IUrlDef {
-        return this.dePageDef(this._utile.dataPages.supprime, t);
+        return this.dePageDef(this.pUtile.dataPages.supprime, t);
     }
-    dePageDef(pageDef: PageDef, t: T): IUrlDef {
-        return this._utile.url.__urlDef(this._utile.dataRoutes, pageDef, this._utile.urlSegmentDeKey(t));
+    dePageDef(pageDef: PageDef, t?: T): IUrlDef {
+        return this.pUtile.url.__urlDef(this.pUtile.dataRoutes, pageDef, t ? this.pUtile.service.urlSegmentDeKey(t) : null);
     }
 }

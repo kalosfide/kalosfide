@@ -2,6 +2,8 @@ import { DataUtileColonne } from 'src/app/commun/data-par-key/data-utile-colonne
 import { IKfVueTableColonneDef } from 'src/app/commun/kf-composants/kf-vue-table/i-kf-vue-table-colonne-def';
 import { CategorieUtile } from './categorie-utile';
 import { Categorie } from './categorie';
+import { Compare } from '../../commun/outils/tri';
+import { KfBBtnGroup, KfBBtnGroupElement } from 'src/app/commun/kf-composants/kf-b-btn-group/kf-b-btn-group';
 
 export class CategorieUtileColonne extends DataUtileColonne {
     constructor(utile: CategorieUtile) {
@@ -13,39 +15,47 @@ export class CategorieUtileColonne extends DataUtileColonne {
     }
 
     nom(): IKfVueTableColonneDef<Categorie> {
+        const créeContenu = (catégorie: Categorie) => catégorie.nom;
         return {
-            nom: 'nom',
+            nom: this.utile.nom.catégorie,
             enTeteDef: { titreDef: 'Nom' },
-            créeContenu: (catégorie: Categorie) => catégorie.nom
+            créeContenu,
+            compare: Compare.texte(créeContenu)
         };
     }
 
     produits(): IKfVueTableColonneDef<Categorie> {
         return {
-            nom: 'produit',
+            nom: 'produits',
             enTeteDef: { titreDef: 'Produits' },
-            créeContenu: (catégorie: Categorie) => catégorie.nbProduits.toString()
+            créeContenu: (catégorie: Categorie) => catégorie.nbProduits.toString(),
+            compare: Compare.nombre((catégorie: Categorie) => catégorie.nbProduits)
         };
     }
 
-    supprime(quandLigneSupprimée: (catégorie: Categorie) => void): IKfVueTableColonneDef<Categorie> {
-        const def: IKfVueTableColonneDef<Categorie> = {
-            nom: 'supprime',
+    action(quandLigneSupprimée: (catégorie: Categorie) => void): IKfVueTableColonneDef<Categorie> {
+        return {
+            nom: 'action',
             créeContenu: (catégorie: Categorie) => {
-                const bouton = this.utile.bouton.supprime(catégorie, quandLigneSupprimée);
+                const btnGroup = new KfBBtnGroup('action');
+                let bouton: KfBBtnGroupElement;
+                bouton = this.utile.lien.edite(catégorie);
+                btnGroup.ajoute(bouton);
+                bouton = this.utile.bouton.supprime(catégorie, quandLigneSupprimée);
                 bouton.inactivité = catégorie.nbProduits > 0;
-                return { composant: bouton };
+                btnGroup.ajoute(bouton);
+                return btnGroup;
             },
-            nePasAfficherSi: this.utile.conditionSite.pas_catalogue
+            classeDefs: ['colonne-btn-group-2'],
+            nePasAfficherSi: this.utile.conditionTable.pasEdition,
         };
-        return def;
     }
 
     colonnes(quandLigneSupprimée: (catégorie: Categorie) => void): IKfVueTableColonneDef<Categorie>[] {
         return [
             this.nom(),
             this.produits(),
-            this.supprime(quandLigneSupprimée),
+            this.action(quandLigneSupprimée),
         ];
     }
 

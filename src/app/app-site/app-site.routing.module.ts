@@ -2,50 +2,48 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AppSitePages } from './app-site-pages';
 import { AppPages } from '../app-pages';
-import { PageInterditeComponent } from '../messages/page-interdite.component';
-import { PageConflitComponent } from '../messages/page-conflit.component';
-import { PageErreurComponent } from '../messages/page-erreur.component';
-import { AppSiteSitesComponent } from './app-site-sites.component';
-import { SitesResolverService } from './app-site-sites-resolver.service';
+import { PageErreurComponent } from '../erreurs/page-erreur.component';
 import { AppSiteAProposComponent } from './app-site-a-propos.component';
-import { PageIntrouvableComponent } from '../messages/page-introuvable.component';
-import { AppSiteIndexComponent } from './app-site-index.component';
+import { AppSitePeupleComponent } from './app-site-peuple.component';
 import { AppSiteContactComponent } from './app-site-contact.component';
 import { AppSiteComponent } from './app-site.component';
 import { DevenirFournisseurComponent } from './devenir-fournisseur/devenir-fournisseur.component';
-import { EtapeDeFormulaireComponent } from '../disposition/formulaire/etape-de-formulaire.component';
-import { DevenirFournisseurPages } from './devenir-fournisseur/devenir-fournisseur-pages';
-import { MotDePasseResolverService } from '../securite/mot-de-passe/mot-de-passe-resolver.service';
-import { PeutQuitterGarde } from '../commun/peut-quitter/peut-quitter-garde.service';
 import { PeupleResolverService } from './peuple-resolver.service';
+import { IdentifiantResolverService } from '../securite/identifiant-resolver.service';
+import { AppSiteAccueilComponent } from './app-site-accueil.component';
+import { DevenirClientComponent } from './devenir-client/devenir-client.component';
+import { DevenirClientResolverService } from './devenir-client/devenir-client-resolver.service';
+import { IdentifiantGardeService } from '../securite/identifant-garde.service';
+import { ApiErreurResolverService } from '../erreurs/api-erreur-resolver.service';
+import { ModalErreurComponent } from '../erreurs/modal-erreur.component';
 
 const routes: Routes = [
     {
         path: '',
         component: AppSiteComponent,
+        resolve: {
+            identifiant: IdentifiantResolverService,
+        },
         children: [
             {
                 path: '',
-                redirectTo: AppSitePages.index.urlSegment,
+                redirectTo: AppSitePages.accueil.urlSegment,
                 pathMatch: 'full',
             },
             {
-                path: AppSitePages.index.urlSegment,
-                component: AppSiteIndexComponent,
+                path: AppSitePages.accueil.urlSegment,
+                component: AppSiteAccueilComponent,
                 data: {
-                    pageDef: AppSitePages.index,
+                    pageDef: AppSitePages.accueil,
                     estEnfantPathVide: true
-                },
-                resolve: {
-                    estPeuplé: PeupleResolverService,
                 },
             },
             {
-                path: AppSitePages.sites.urlSegment,
-                data: { pageDef: AppSitePages.sites },
-                component: AppSiteSitesComponent,
+                path: AppSitePages.peuple.urlSegment,
+                data: { pageDef: AppSitePages.peuple },
+                component: AppSitePeupleComponent,
                 resolve: {
-                    sites: SitesResolverService,
+                    estPeuplé: PeupleResolverService,
                 }
             },
             {
@@ -62,72 +60,40 @@ const routes: Routes = [
                 path: AppSitePages.devenirFournisseur.urlSegment,
                 data: { pageDef: AppSitePages.devenirFournisseur },
                 component: DevenirFournisseurComponent,
+                canActivate: [
+                    IdentifiantGardeService,
+                ]
+            },
+            {
+                path: AppSitePages.devenirClient.urlSegment,
+                data: {
+                    pageDef: AppSitePages.devenirClient,
+                 },
+                component: DevenirClientComponent,
                 resolve: {
-                    motDePasse: MotDePasseResolverService,
+                    invitation: DevenirClientResolverService,
                 },
-                canDeactivate: [PeutQuitterGarde],
-                children: [
-                    {
-                        path: '',
-                        redirectTo: DevenirFournisseurPages.connection.urlSegment,
-                        pathMatch: 'full',
-                    },
-                    {
-                        path: DevenirFournisseurPages.connection.urlSegment,
-                        component: EtapeDeFormulaireComponent,
-                        data: { index: 0 }
-                    },
-                    {
-                        path: DevenirFournisseurPages.profil.urlSegment,
-                        component: EtapeDeFormulaireComponent,
-                        data: { index: 1 }
-                    },
-                    {
-                        path: DevenirFournisseurPages.site.urlSegment,
-                        component: EtapeDeFormulaireComponent,
-                        data: { index: 2 }
-                    },
-                    {
-                        path: DevenirFournisseurPages.validation.urlSegment,
-                        component: EtapeDeFormulaireComponent,
-                        data: { index: 3 }
-                    },
-                    {
-                        path: '*',
-                        redirectTo: DevenirFournisseurPages.connection.urlSegment,
-                        pathMatch: 'full',
-                    },
-                ],
             },
             {
                 path: AppPages.compte.urlSegment,
                 data: { pageDef: AppPages.compte },
                 loadChildren: () => import('../compte/compte.module').then(mod => mod.CompteModule)
             },
-            // pages d'erreur
-            {
-                path: AppPages.interdit.urlSegment,
-                data: { pageDef: AppPages.interdit },
-                component: PageInterditeComponent
-            },
-            {
-                path: AppPages.conflit.urlSegment,
-                data: { pageDef: AppPages.conflit },
-                component: PageConflitComponent
-            },
             {
                 path: AppPages.apiErreur.urlSegment,
                 data: { pageDef: AppPages.apiErreur },
                 component: PageErreurComponent,
+                resolve: {
+                    apiErreur: ApiErreurResolverService
+                }
             },
             {
-                path: AppPages.introuvable.urlSegment,
-                data: { pageDef: AppPages.introuvable },
-                component: PageIntrouvableComponent,
+                path: AppPages.apiErreurModal.urlSegment,
+                component: ModalErreurComponent,
             },
             {
                 path: '**',
-                redirectTo: AppPages.introuvable.urlSegment,
+                redirectTo: AppPages.apiErreur.urlSegment,
             },
         ]
     },

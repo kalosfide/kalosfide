@@ -9,7 +9,7 @@ import { Dateur } from '../commun/outils/dateur';
 import { KfInputDateTemps } from '../commun/kf-composants/kf-elements/kf-input/kf-input-date-temps';
 
 @Component({
-    templateUrl: '../disposition/page-base/page-base.html', styleUrls: ['../commun/commun.scss']
+    templateUrl: '../disposition/page-base/page-base.html',
 })
 export class AppSiteContactComponent extends PageBaseComponent {
 
@@ -42,7 +42,7 @@ export class AppSiteContactComponent extends PageBaseComponent {
             'La moment choisi est déjà passé.'));
         this.superGroupe.ajoute(dateTemps);
 
-        this.superGroupe.sauveQuandChange = true;
+        this.superGroupe.comportementFormulaire = { sauveQuandChange: true };
         this.superGroupe.quandTousAjoutés();
     }
 

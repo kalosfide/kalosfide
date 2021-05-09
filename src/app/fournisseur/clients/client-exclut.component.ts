@@ -2,27 +2,23 @@ import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ClientALESComponent } from './client-ales.component';
 import { PageDef } from 'src/app/commun/page-def';
-import { ClientPages } from './client-pages';
+import { FournisseurClientPages } from './client-pages';
 import { ClientService } from 'src/app/modeles/client/client.service';
 import { EtatClient } from 'src/app/modeles/client/etat-client';
 import { GroupeBoutonsMessages } from 'src/app/disposition/fabrique/fabrique-formulaire';
-import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
-    styleUrls: ['../../commun/commun.scss']
 })
 export class ClientExclutComponent extends ClientALESComponent {
 
-    pageDef: PageDef = ClientPages.exclut;
+    pageDef: PageDef = FournisseurClientPages.exclut;
 
     get titre(): string {
         return this.pageDef.titre;
     }
-
-    groupeBoutonsMessages: GroupeBoutonsMessages;
 
     constructor(
         protected route: ActivatedRoute,
@@ -39,14 +35,10 @@ export class ClientExclutComponent extends ClientALESComponent {
             actionSiOk: (créé?: any) => this.service.quandEtatChange(this.client)
         };
 
-        const messages: KfComposant[] = [];
+        const messages: KfEtiquette[] = [];
         Fabrique.ajouteEtiquetteP(messages);
         Fabrique.ajouteEtiquetteP(messages);
-        this.groupeBoutonsMessages = new GroupeBoutonsMessages('', messages);
-    }
-
-    private _message(i: number): KfEtiquette {
-        return (this.groupeBoutonsMessages.messages[i]) as KfEtiquette;
+        this.groupeBoutonsMessages = new GroupeBoutonsMessages('', { messages });
     }
 
     fixeGroupeBoutonsMessages = () => {

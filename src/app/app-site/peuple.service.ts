@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 
 import { Observable } from 'rxjs';
 import { DataService } from 'src/app/services/data.service';
-import { ApiController, ApiAction } from 'src/app/commun/api-route';
-import { ApiResult } from 'src/app/commun/api-results/api-result';
-import { ApiRequêteService } from '../services/api-requete.service';
+import { ApiController, ApiAction } from 'src/app/api/api-route';
+import { ApiResult } from 'src/app/api/api-results/api-result';
+import { ApiRequêteService } from '../api/api-requete.service';
 
 export class Peuple {
     peuple: boolean;
@@ -21,8 +21,8 @@ export class PeupleService extends DataService {
         super(apiRequeteService);
     }
 
-    estPeuplé(): Observable<boolean> {
-        return this.objet<boolean>(this.get<Peuple>(ApiController.peuple, ApiAction.peuple.estPeuple, ''));
+    estPeuplé(): Observable<ApiResult> {
+        return this.get<Peuple>(ApiController.peuple, ApiAction.peuple.estPeuple, '');
     }
 
     peuple(): Observable<ApiResult> {

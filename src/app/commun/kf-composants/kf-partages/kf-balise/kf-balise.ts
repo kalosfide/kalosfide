@@ -5,34 +5,34 @@ import { KfGéreCss } from '../kf-gere-css';
 export class KfBalise extends KfGéreCss {
     baliseHTML: KfTypeDeBaliseHTML;
 
-    private _contenuPhrase: KfContenuPhrase;
+    private pContenuPhrase: KfContenuPhrase;
 
     set contenuPhrase(contenuPhrase: KfContenuPhrase) {
-        this._contenuPhrase = contenuPhrase;
+        this.pContenuPhrase = contenuPhrase;
     }
 
     get contenuPhrase(): KfContenuPhrase {
-        return this._contenuPhrase;
+        return this.pContenuPhrase;
     }
 
-    private _contenuBalise: KfBalise;
+    private pContenuBalise: KfBalise;
 
     set contenuBalise(contenuBalise: KfBalise) {
-        this._contenuBalise = contenuBalise;
+        this.pContenuBalise = contenuBalise;
     }
 
     get contenuBalise(): KfBalise {
-        return this._contenuBalise;
+        return this.pContenuBalise;
     }
 
-    private _contenuTexte: string;
+    private pContenuTexte: string;
 
     set contenuTexte(contenuTexte: string) {
-        this._contenuTexte = contenuTexte;
+        this.pContenuTexte = contenuTexte;
     }
 
     get contenuTexte(): string {
-        return this._contenuTexte;
+        return this.pContenuTexte;
     }
 
     afterViewInit: (htmlElement: HTMLElement) => void;

@@ -24,7 +24,7 @@ export class CategorieSitePasCatalogueGarde implements CanActivate, CanActivateC
     canActivate(_route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): Observable<boolean> | boolean {
         const site = this.navigation.litSiteEnCours();
         if (site.etat !== IdEtatSite.catalogue) {
-            this.routeur.naviguePageDef(CategoriePages.index, CategorieRoutes, site.nomSite);
+            this.routeur.naviguePageDef(CategoriePages.index, CategorieRoutes, site.url);
             return false;
         }
         return true;

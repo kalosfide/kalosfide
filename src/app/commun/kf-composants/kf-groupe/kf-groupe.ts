@@ -7,25 +7,29 @@ import { KfDivTable, KfDivTableLigne } from './kf-div-table';
 import { KfGéreCss } from '../kf-partages/kf-gere-css';
 import { KfNgClasse } from '../kf-partages/kf-gere-css-classe';
 
+export interface IKfComportementFormulaire {
+    sauveQuandChange?: boolean;
+    traiteReset?: { traitement?: () => void; };
+    traiteSubmit?: { traitement: () => void; };
+    neSoumetPasSiPristine?: boolean;
+}
+
 export class KfGroupe extends KfComposant {
+
+    private pComportementFormulaire: IKfComportementFormulaire;
+
     /**
-     * doit être fixée avant quandTousAjoutés
+     * Doit être fixée avant quandTousAjoutés.
      * n'aura un effet que si le groupe est racine et avec valeur
      */
-    private pSauveQuandChange: boolean;
-    get sauveQuandChange(): boolean {
-        if (this.estRacineV) {
-            return this.pSauveQuandChange;
-        }
+    get comportementFormulaire(): IKfComportementFormulaire {
+        return this.pComportementFormulaire;
     }
-    /**
-     * doit être fixée avant quandTousAjoutés
-     * n'aura un effet que si le groupe est racine et avec valeur
-     */
-    set sauveQuandChange(sauveQuandChange: boolean) {
-        if (this.estRacineV) {
-            this.pSauveQuandChange = sauveQuandChange;
+    set comportementFormulaire(comportementFormulaire: IKfComportementFormulaire) {
+        if (comportementFormulaire.sauveQuandChange && comportementFormulaire.traiteReset) {
+            console.warn(`Avec l'option sauveQuandChange, traiteReset est sans effet.`)
         }
+        this.pComportementFormulaire = comportementFormulaire;
     }
 
     /**
@@ -42,18 +46,6 @@ export class KfGroupe extends KfComposant {
     }
     set avecInvalidFeedback(avecInvalidFeedback: boolean) {
         this.pAvecInvalidFeedback = avecInvalidFeedback;
-    }
-
-    /**
-     * si formulaire à soumettre et vrai, autorise la soumission si valid ET si dirty
-     * true pour les editions
-     */
-    private pNeSoumetPasSiPristine: boolean;
-    get neSoumetPasSiPristine(): boolean {
-        return this.pNeSoumetPasSiPristine;
-    }
-    set neSoumetPasSiPristine(neSoumetPasSiPristine: boolean) {
-        this.pNeSoumetPasSiPristine = neSoumetPasSiPristine;
     }
 
     /**
@@ -75,20 +67,8 @@ export class KfGroupe extends KfComposant {
         this.gereValeur = new KfComposantGereValeur(this, KfTypeDeValeur.avecGroupe);
     }
 
-    rétablitFormulaire() {
-        this.gereValeur.rétablit(this.valeur);
-        this.formGroup.reset(this.valeur);
-    }
-
-    peutSoumettre(): boolean {
-        return this.formGroup && (!(this.neSoumetPasSiPristine && this.formGroup.pristine) && this.formGroup.valid);
-    }
-
-    soumetFormulaire() {
-        if (!this.sauveQuandChange) {
-            this.valeur = this.formGroup.value;
-            this.formGroup.reset(this.valeur);
-        }
+    get peutSoumettre(): boolean {
+        return this.formGroup && (!(this.comportementFormulaire.neSoumetPasSiPristine && this.formGroup.pristine) && this.formGroup.valid);
     }
 
     /**
@@ -96,7 +76,7 @@ export class KfGroupe extends KfComposant {
      */
     contenusDansDiv(classe: string) {
         this.géreCssSousDiv = new KfGéreCss();
-        this.géreCssSousDiv.ajouteClasseDef(classe);
+        this.géreCssSousDiv.ajouteClasse(classe);
     }
     get classeSousDiv(): KfNgClasse {
         if (this.géreCssSousDiv) {
@@ -159,12 +139,6 @@ export class KfGroupe extends KfComposant {
 
     get formGroup(): FormGroup {
         return this.abstractControl as FormGroup;
-    }
-
-    /**
-     */
-    avecUnSeulContenuVisible(fncIndexSeulVisible: (() => number)) {
-        this.gereVisible.avecUnSeulContenuVisible(() => this.contenus, fncIndexSeulVisible);
     }
 
     // FOCUS

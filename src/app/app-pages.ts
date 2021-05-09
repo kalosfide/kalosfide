@@ -20,18 +20,13 @@ export class AppPages {
         title: 'Introuvable',
         titre: 'Ressources introuvables'
     };
-    static interdit: PageDef = {
-        urlSegment: 'interdit',
-        title: 'Interdit',
-        titre: 'Accès refusé'
-    };
-    static conflit: PageDef = {
-        urlSegment: 'conflit',
-        title: 'Verrouillé',
-        titre: 'Ressources verrouillées'
-    };
     static apiErreur: PageDef = {
-        urlSegment: 'apiErreur',
+        urlSegment: 'erreur',
+        title: 'Erreur',
+        titre: 'Erreur du serveur'
+    };
+    static apiErreurModal: PageDef = {
+        urlSegment: 'erreurModal',
         title: 'Erreur',
         titre: 'Erreur du serveur'
     };
@@ -43,14 +38,16 @@ export class AppPages {
         AppPages.site,
         AppPages.compte,
         AppPages.introuvable,
-        AppPages.interdit,
-        AppPages.conflit,
         AppPages.apiErreur,
         AppPages.administrateur,
     ];
+    /**
+     * Url de redirection des routes ** des RouterModule
+     */
+    static urlIntrouvable = `${AppPages.appSite.urlSegment}/${AppPages.introuvable.urlSegment}`;
 }
 
-class AppRoutesClass extends BaseRoutes {
+export class AppRoutesClass extends BaseRoutes {
     private images = '/assets';
 
     urlIntrouvable = AppPages.appSite.urlSegment + this.séparateur + AppPages.introuvable.urlSegment;

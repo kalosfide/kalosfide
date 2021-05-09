@@ -1,6 +1,5 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { KfComposantComponent } from '../kf-composant/kf-composant.component';
-import { KfNgClasse } from '../kf-partages/kf-gere-css-classe';
 import { KfUlComposant } from './kf-ul-composant';
 
 @Component({
@@ -20,7 +19,6 @@ export class KfUlComponent extends KfComposantComponent implements OnInit, After
     }
 
     ngAfterViewInit() {
-        this.composant.gereHtml.htmlElement = this.domElementRef.nativeElement;
-        this.composant.gereHtml.initialiseHtml(this.output);
+        this.composant.initialiseHtml(this.domElementRef.nativeElement, this.output);
     }
 }

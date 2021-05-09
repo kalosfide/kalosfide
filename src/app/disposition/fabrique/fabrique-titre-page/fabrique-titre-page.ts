@@ -10,10 +10,12 @@ import { IContenuPhraseDef } from '../fabrique-contenu-phrase';
 import { Couleur } from '../fabrique-couleurs';
 import { KfBBtnToolbar } from 'src/app/commun/kf-composants/kf-b-btn-toolbar/kf-b-btn-toolbar';
 import { Site } from 'src/app/modeles/site/site';
-import { FabriqueBootstrap } from '../fabrique-bootstrap';
+import { KfBootstrap } from '../../../commun/kf-composants/kf-partages/kf-bootstrap';
 import { GroupeAccès } from './groupe-acces';
 import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 import { KfDivTableColonne } from 'src/app/commun/kf-composants/kf-groupe/kf-div-table';
+import { EtatSite } from '../fabrique-etat-site';
+import { IdEtatSite } from 'src/app/modeles/etat-site';
 
 export interface IBtnGroupeDef {
     groupe: KfBBtnGroup;
@@ -29,7 +31,7 @@ export class BarreTitre {
     constructor(pageDef: PageDef) {
         this.pageDef = pageDef;
         this.toolbar = new KfBBtnToolbar(pageDef.urlSegment);
-        this.toolbar.ajouteClasseDef('justify-content-between');
+        this.toolbar.ajouteClasse('justify-content-between');
         this.rafraichissements = [];
     }
 
@@ -51,7 +53,7 @@ export class BarreTitre {
 
 export interface IBarreDef {
     /**
-     * Doit avoir un titre
+     * pageDef doit avoir un titre
      */
     pageDef: PageDef;
     contenuAidePage?: KfComposant[];
@@ -109,13 +111,13 @@ export class FabriqueTitrePage extends FabriqueMembre {
 
     boutonInfo(nom: string, titre?: string): KfBouton {
         const bouton = this.bouton(nom, this.contenuBoutonInfo(titre));
-        FabriqueBootstrap.ajouteClasse(bouton, 'btn', 'light');
+        KfBootstrap.ajouteClasse(bouton, 'btn', 'light');
         return bouton;
     }
 
     boutonAide(nom: string, titre?: string): KfBouton {
         const bouton = this.bouton(nom, this.fabrique.contenu.aide(titre));
-        FabriqueBootstrap.ajouteClasse(bouton, 'btn', 'light');
+        KfBootstrap.ajouteClasse(bouton, 'btn', 'light');
         return bouton;
     }
 
@@ -131,7 +133,7 @@ export class FabriqueTitrePage extends FabriqueMembre {
 
     boutonRafraichit(nom: string, titre?: string): KfBouton {
         const bouton = this.bouton(nom, this.contenuBoutonRafraichit(titre));
-        FabriqueBootstrap.ajouteClasse(bouton, 'btn', 'light');
+        KfBootstrap.ajouteClasse(bouton, 'btn', 'light');
         return bouton;
     }
 
@@ -143,7 +145,7 @@ export class FabriqueTitrePage extends FabriqueMembre {
             };
         }
         const bouton = this.bouton(nom, contenu);
-        FabriqueBootstrap.ajouteClasse(bouton, 'btn', 'secondary');
+        KfBootstrap.ajouteClasse(bouton, 'btn', 'secondary');
         return bouton;
     }
 
@@ -160,13 +162,49 @@ export class FabriqueTitrePage extends FabriqueMembre {
     }
 
     groupeDefAccès(estClient?: 'client'): IBtnGroupeDef {
-        return new GroupeAccès(this, !!estClient);
+        const boutonVerrou = this.fabrique.bouton.bouton({
+            nom: 'bouton_verrou',
+            contenu: {
+                nomIcone: this.fabrique.icone.nomIcone.verrou_fermé,
+            }
+        });
+        const etiquetteTitreVerrou = new KfEtiquette('titre_verrou', 'Site fermé');
+        const etat = this.fabrique.etatSite.état(IdEtatSite.catalogue);
+        const infos: KfComposant[] = [];
+
+        let etiquette: KfEtiquette;
+
+        etiquette = this.fabrique.ajouteEtiquetteP(infos);
+        this.fabrique.ajouteTexte(etiquette, etat.titre + ' en cours');
+        etiquette = this.fabrique.ajouteEtiquetteP(infos);
+        etiquette.ajouteClasse('alert-danger');
+        if (estClient) {
+            KfBootstrap.ajouteClasse(boutonVerrou, 'btn', 'light');
+            this.fabrique.ajouteTexte(etiquette,
+                `Votre accès au site est temporairement limité: vous ne pouvez pas commander.`
+            );
+        } else {
+            KfBootstrap.ajouteClasse(boutonVerrou, 'btn', 'danger');
+            this.fabrique.ajouteTexte(etiquette,
+                `Vos clients ont un accès limité à votre site.`
+            );
+        }
+        this.fabrique.bouton.fixePopover(boutonVerrou, etiquetteTitreVerrou, infos);
+        const groupe = this.bbtnGroup('verrou');
+        groupe.ajoute(boutonVerrou);
+        const def: IBtnGroupeDef = {
+            groupe,
+            rafraichit: (barre: BarreTitre) => {
+                groupe.nePasAfficher = barre.site.etat !== IdEtatSite.catalogue;
+            }
+        }
+        return def;
     }
 
     titrePage(titre: string, niveau: number, créeBarreTitre?: () => BarreTitre): KfGroupe {
         const groupe = new KfGroupe('titre');
         groupe.créeDivLigne();
-        groupe.divLigne.ajouteClasseDef('titre-page', 'row', 'align-items-center', 'couleur-fond-beige', 'px-1', 'py-1', 'mb-2');
+        groupe.divLigne.ajouteClasse('titre-page', 'row', 'align-items-center', 'couleur-fond-beige', 'px-1', 'py-1', 'mb-2');
 
         let col: KfDivTableColonne;
 
@@ -175,11 +213,11 @@ export class FabriqueTitrePage extends FabriqueMembre {
             niveauH = 6;
         }
         col = groupe.divLigne.ajoute(titre);
-        col.ajouteClasseDef('col h' + niveauH);
+        col.ajouteClasse('col h' + niveauH);
 
         if (créeBarreTitre) {
-            col = groupe.divLigne.ajoute(créeBarreTitre().barre);
-            col.ajouteClasseDef('col');
+            col = groupe.divLigne.ajoute([créeBarreTitre().barre]);
+            col.ajouteClasse('col');
         }
 
         return groupe;

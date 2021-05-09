@@ -1,20 +1,18 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { Catalogue, CatalogueApi } from './catalogue';
-import { map, take } from 'rxjs/operators';
+import { map, take, tap } from 'rxjs/operators';
 import { KeyUidRno } from '../../commun/data-par-key/key-uid-rno/key-uid-rno';
 import { DataService } from '../../services/data.service';
-import { ApiController, ApiAction } from 'src/app/commun/api-route';
+import { ApiController, ApiAction } from 'src/app/api/api-route';
 import { EtatsProduits } from './etat-produit';
 import { Site } from '../site/site';
-import { ApiRequêteService } from 'src/app/services/api-requete.service';
-import { ApiResult } from 'src/app/commun/api-results/api-result';
+import { ApiRequêteService } from 'src/app/api/api-requete.service';
+import { ApiResult } from 'src/app/api/api-results/api-result';
 import { SiteService } from '../site/site.service';
 import { IdEtatSite } from '../etat-site';
 import { Stockage } from 'src/app/services/stockage/stockage';
 import { StockageService } from 'src/app/services/stockage/stockage.service';
-import { IKeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/i-key-uid-rno';
-import { DATE_EST_NULLE, DATE_NULLE } from '../date-nulle';
 
 @Injectable({
     providedIn: 'root'
@@ -31,7 +29,10 @@ export class CatalogueService extends DataService {
         private siteService: SiteService,
     ) {
         super(apiRequeteService);
-        this.stockage = stockageService.nouveau<Catalogue>('Catalogue', { rafraichit: 'rafraichi' });
+        this.stockage = stockageService.nouveau<Catalogue>('Catalogue', {
+            // Le stockage sera réinitialisé à chaque changement de site ou d'identifiant
+            rafraichi: true
+        });
     }
 
     /**
@@ -46,12 +47,16 @@ export class CatalogueService extends DataService {
         return stock;
     }
 
+    litStockSiExistant(): Catalogue {
+        return this.stockage.litStock();
+    }
+
     litStock(): Catalogue {
-        const stock = this.stockage.litStock();
+        const stock = this.litStockSiExistant();
         if (!stock) {
             throw new Error('Catalogue: Pas de stock');
         }
-        return Catalogue.nouveau(stock);
+        return stock;
     }
 
     fixeStock(stock: Catalogue) {
@@ -59,24 +64,21 @@ export class CatalogueService extends DataService {
     }
 
     /**
-     * retourne le catalogue complet si l'identifiant est le fournisseur, des disponibles sinon
+     * Retourne le catalogue complet si @param avecIndisponibles n'est pas false
      */
-    catalogue$(): Observable<Catalogue> {
-        const site = this.navigation.litSiteEnCours();
-        const identifiant = this.identification.litIdentifiant();
-        const avecIndisponibles = !!identifiant && identifiant.estFournisseur(site);
-        const stock = this.stockage.litStock();
+    private _catalogue$(site: Site, avecIndisponibles: boolean): Observable<Catalogue> {
+        const stock = this.litStockSiExistant();
         if (!stock // pas de stock
-            || (site.uid !== stock.uid || site.rno !== stock.rno) // site changé
-            || (avecIndisponibles && !stock.avecIndisponibles)
+            || (avecIndisponibles && !stock.avecIndisponibles) // les indisponibles sont demandés mais pas en stock
         ) {
             const apiAction = avecIndisponibles ? ApiAction.catalogue.complet : ApiAction.catalogue.disponible;
-            return this.objet<CatalogueApi>(this.get(ApiController.catalogue, apiAction, KeyUidRno.créeParams(site))).pipe(
+            const demandeApi = () => this.get<CatalogueApi>(ApiController.catalogue, apiAction, KeyUidRno.créeParams(site));
+            return this.lectureObs<CatalogueApi>({ demandeApi }).pipe(
                 map(catalogueApi => {
-                    const nouveauStock: Catalogue = Catalogue.nouveau(catalogueApi);
-                    nouveauStock.avecIndisponibles = avecIndisponibles;
-                    this.stockage.fixeStock(nouveauStock);
-                    return nouveauStock;
+                    const catalogue: Catalogue = Catalogue.nouveau(catalogueApi);
+                    catalogue.avecIndisponibles = avecIndisponibles;
+                    this.stockage.fixeStock(catalogue);
+                    return catalogue;
                 }));
         }
         if (!avecIndisponibles && stock.avecIndisponibles) {
@@ -86,53 +88,19 @@ export class CatalogueService extends DataService {
     }
 
     /**
-     * Envoie à l'Api la key du site et, si le stock existe, la date du stock.
-     * Si le stock n'existe pas ou est obsolète, l'Api retourne un CatalogueApi qui contient les données du catalogue à jour.
-     * Si le stock existe et n'est pas obsolète, l'Api retourne un CatalogueApi vide
-     * Si le site est d'état Catalogue, le CatalogueApi retourné à une date égale à DATE_NULLE.
-     *
-     * Si le stock n'existe pas ou est obsolète, crée le Catalogue à jour, fixe le stock et retourne
-     * un Catalogue avec prix anciens créé à partir du stock et du @param anciens.
-     * Si le stock existe et n'est pas obsolète et si @param catalogue est présent, retourne un Catalogue vide.
-     * Si le stock existe et n'est pas obsolète et si @param catalogue est absent, retourne
-     * un Catalogue avec prix anciens créé à partir du stock et du @param anciens.
-     * Si le site est d'état Catalogue, le Catalogue retourné à une date égale à DATE_NULLE.
-     * @param keySite key du site
-     * @param anciens prix anciens à ajouter au catalogue en cours
-     * @param catalogue si présent, est identique au catalogue stocké
+     * Retourne le catalogue complet si l'utilisateur est le fournisseur
      */
-    cataloguePlusRécentQue$(keySite: IKeyUidRno, anciens: CatalogueApi[], catalogue?: Catalogue): Observable<Catalogue> {
-        let stock = this.stockage.litStock();
-        const params: { [param: string]: string } = {
-            uid: keySite.uid,
-            rno: '' + keySite.rno,
-        };
-        if (stock) {
-            const date = new Date(stock.date);
-            params.date = date.toJSON();
-        }
-        return this.objet<CatalogueApi>(this.get(ApiController.catalogue, ApiAction.catalogue.obsolete, params)).pipe(
-            take(1),
-            map(catalogueApi => {
-                if (catalogueApi.produits) {
-                    // le stock n'existe pas ou est obsolète
-                    stock = Catalogue.nouveau(catalogueApi);
-                    this.stockage.fixeStock(stock);
-                    catalogue = undefined;
-                }
-                let nouveau: Catalogue;
-                if (!catalogue) {
-                    // le catalogue n'existait pas ou est obsolète
-                    nouveau = stock;
-                    nouveau.prixDatés = Catalogue.prixDatés(anciens);
-                } else {
-                    nouveau = new Catalogue();
-                }
-                if (DATE_EST_NULLE(catalogueApi.date)) {
-                    // le site est d'état Catalogue
-                    nouveau.date = DATE_NULLE;
-                }
-                return nouveau;
+    catalogue$(): Observable<Catalogue> {
+        const site = this.navigation.litSiteEnCours();
+        const identifiant = this.identification.litIdentifiant();
+        const avecIndisponibles = identifiant.estFournisseur(site);
+        return this._catalogue$(site, avecIndisponibles);
+    }
+
+    disponiblesAvecPrixDatés(site: Site, tarifs: CatalogueApi[]): Observable<Catalogue> {
+        return this._catalogue$(site, false).pipe(
+            tap(catalogue => {
+                catalogue.prixDatés = Catalogue.prixDatés(tarifs);
             })
         );
     }

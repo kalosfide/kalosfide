@@ -17,13 +17,11 @@ import { ClientPages } from '../client-pages';
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
-    styleUrls: ['../../commun/commun.scss']
 })
 export class CommandeContexteComponent extends PageBaseComponent implements OnInit {
 
     pageDef: PageDef = CommandePages.contexte;
 
-    barre: BarreTitre;
 
     contexte: CLFDocs;
 
@@ -38,20 +36,11 @@ export class CommandeContexteComponent extends PageBaseComponent implements OnIn
         super();
     }
 
-    créeBarreTitre = (): BarreTitre => {
-        const barre = Fabrique.titrePage.barreTitre({
-            pageDef: this.pageDef,
-        });
-
-        this.barre = barre;
-        return barre;
-    }
-
     créeSuperGroupe() {
         this.superGroupe = new KfSuperGroupe(this.nom);
         const groupe = new KfGroupe('actionImpossible');
         let etiquette: KfEtiquette;
-        groupe.ajouteClasseDef('alert alert-warning');
+        groupe.ajouteClasse('alert alert-warning');
 
         etiquette = new KfEtiquette('état');
         etiquette.baliseHtml = KfTypeDeBaliseHTML.p;

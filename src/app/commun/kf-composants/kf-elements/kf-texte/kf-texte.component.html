@@ -1,8 +1,18 @@
-<ng-container *ngIf="balise; then baliseTemplate; else autreTemplate"></ng-container>
+<ng-container *ngIf="!balise; else baliseTemplate">
+    <ng-container *ngIf="!texte.morceaux; else morceauxTemplate">
+        {{ texte.texte }}
+    </ng-container>
+    <ng-template #morceauxTemplate>
+        <ng-container *ngFor="let morceau of texte.morceaux">
+            <ng-container *ngIf="morceau.highlight; else normalTemplate">
+                <span class="kf-éclairé">{{ morceau.texte }}</span>
+            </ng-container>
+            <ng-template #normalTemplate>{{ morceau.texte }}</ng-template>
+        </ng-container>
+        
+    </ng-template>    
+    <ng-container *ngIf="suiviDeSaut"><br></ng-container>
+</ng-container>
 <ng-template #baliseTemplate>
     <app-kf-balise [balise]="balise"></app-kf-balise>
 </ng-template>
-<ng-template #autreTemplate>
-    {{ texte.texte }}
-</ng-template>
-<ng-container *ngIf="suiviDeSaut"><br></ng-container>

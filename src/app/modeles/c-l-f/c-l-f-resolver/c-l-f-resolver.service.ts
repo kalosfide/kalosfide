@@ -3,7 +3,7 @@ import { Observable, EMPTY, of } from 'rxjs';
 import { DataResolverService } from '../../../services/data-resolver.service';
 import { CLFDoc } from '../c-l-f-doc';
 import { TypeCLF } from '../c-l-f-type';
-import { ApiResult404NotFound } from 'src/app/commun/api-results/api-result-404-not-found';
+import { ApiResult404NotFound } from 'src/app/api/api-results/api-result-404-not-found';
 import { CLFLigne } from '../c-l-f-ligne';
 import { CLFPages } from '../c-l-f-pages';
 import { KeyUidRnoNo } from 'src/app/commun/data-par-key/key-uid-rno-no/key-uid-rno-no';
@@ -20,50 +20,6 @@ export class CLFResolverService extends DataResolverService {
         protected service: CLFService,
     ) {
         super();
-    }
-
-    ligneParNoProduit(route: ActivatedRouteSnapshot): Observable<never> | CLFLigne | Observable<CLFLigne> {
-        const no = +route.paramMap.get(CLFPages.nomParamNoDoc);
-        const no2 = +route.paramMap.get(CLFPages.nomParamNoLigne);
-        return this.service.bons().pipe(
-            switchMap(clfDocs => {
-                const clfDoc = clfDocs.créeBon(no);
-                if (!clfDoc) {
-                    this.service.routeur.navigueVersErreur(new ApiResult404NotFound());
-                    return EMPTY;
-                }
-                if (!clfDoc.apiLignesData) {
-                    this.service.routeur.navigueVersErreur(new ApiResult404NotFound());
-                    return EMPTY;
-                }
-                const clfLigne = clfDoc.créeLigne(no2);
-                if (!clfLigne) {
-                    this.service.routeur.navigueVersErreur(new ApiResult404NotFound());
-                    return EMPTY;
-                }
-                return of(clfLigne);
-            })
-        );
-    }
-
-    /**
-     * Pour le client.
-     * Le CLFDocs lu dans l'Api contient la liste des résumés des documents envoyés du client.
-     * Le CLFDocs retourné contient le Client du client.
-     * Pas stocké.
-     */
-    documentsDuClient(): Observable<CLFDocs> {
-        return this.service.documentsDuClient();
-    }
-
-    /**
-     * Pour le fournisseur.
-     * Le CLFDocs lu dans l'Api contient la liste des résumés des documents envoyés de tous les clients.
-     * Le CLFDocs retourné contient les Client de tous les clients.
-     * Pas stocké.
-     */
-    documentsDuSite(): Observable<CLFDocs> {
-        return this.service.documentsDuSite();
     }
 
     /**

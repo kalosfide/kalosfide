@@ -34,19 +34,14 @@ export class KfBBtnGroup extends KfComposant {
             throw new Error(`On ne peut ajouter que des composants de type ${types.join(' ou ')} à ${this.nom}`);
         }
         */
-
         if (composant.type === KfTypeDeComposant.bouton) {
-            (composant as KfBouton).dansBtnGroup(this);
+            (composant as KfBouton).btnGroupe = this;
         }
         this.noeud.Ajoute(composant.noeud);
     }
 
     estBouton(composant: KfComposant): boolean {
         return composant.type === KfTypeDeComposant.bouton;
-    }
-    quandClic(bouton: KfBouton) {
-        const evenement: KfEvenement = new KfEvenement(bouton, KfTypeDEvenement.clic);
-        bouton.gereHtml.traite(evenement);
     }
 
     estLien(composant: KfComposant): boolean {
@@ -81,4 +76,6 @@ export class KfBBtnGroup extends KfComposant {
         }
         return classe;
     }
+
+    initialiseHtmlContenus() {}
 }

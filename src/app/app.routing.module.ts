@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes, PreloadAllModules } from '@angular/router';
 import { QuicklinkModule, QuicklinkStrategy } from 'ngx-quicklink';
 import { AppPages, AppRoutes } from './app-pages';
+import { IdentifiantGardeService } from './securite/identifant-garde.service';
 import { IdentifiantResolverService } from './securite/identifiant-resolver.service';
 
 const routes: Routes = [
@@ -23,11 +24,14 @@ const routes: Routes = [
             },
             {
                 path: AppPages.site.urlSegment,
-                loadChildren: () => import('./site/site.module').then(mod => mod.SiteModule)
+                loadChildren: () => import('./site/site.module').then(mod => mod.SiteModule),
+                canActivate: [
+                    IdentifiantGardeService,
+                ]
             },
             {
                 path: '**',
-                redirectTo: AppRoutes.url([AppPages.appSite.urlSegment, AppPages.introuvable.urlSegment]),
+                redirectTo: `${AppPages.appSite.urlSegment}/${AppPages.apiErreur.urlSegment}`,
             },
         ]
     },

@@ -44,6 +44,24 @@ export class FabriqueContenuPhrase extends FabriqueMembre {
         texte: 'Modifier',
         positionTexte: 'bas'
     };
+    invite: IContenuPhraseDef = {
+        nomIcone: { nom: this.fabrique.icone.nomIcone.envelope, regular: true },
+        couleurIcone: Couleur.dark,
+        texte: 'Inviter',
+        positionTexte: 'bas'
+    };
+    réinvite: IContenuPhraseDef = {
+        nomIcone: this.fabrique.icone.nomIcone.envelope,
+        couleurIcone: Couleur.dark,
+        texte: 'Réinviter',
+        positionTexte: 'bas'
+    };
+    invité: IContenuPhraseDef = {
+        nomIcone: this.fabrique.icone.nomIcone.envelope,
+        couleurIcone: Couleur.dark,
+        texte: 'Invité',
+        positionTexte: 'bas'
+    };
     supprime: IContenuPhraseDef = {
         nomIcone: this.fabrique.icone.nomIcone.supprimer,
         couleurIcone: Couleur.dark,
@@ -165,13 +183,13 @@ export class FabriqueContenuPhrase extends FabriqueMembre {
             if (def.texte !== undefined) {
                 switch (def.positionTexte) {
                     case 'bas':
-                        composant.ajouteClasseDef('texte-sous-icone');
+                        composant.ajouteClasse('texte-sous-icone');
                         break;
                     case 'gauche':
-                        icone.ajouteClasseDef('ml-2');
+                        icone.ajouteClasse('ml-2');
                         break;
                     case 'droite':
-                        icone.ajouteClasseDef('mr-1');
+                        icone.ajouteClasse('mr-1');
                         break;
                     default:
                         break;

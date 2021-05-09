@@ -13,7 +13,6 @@ import { CLFLigne } from 'src/app/modeles/c-l-f/c-l-f-ligne';
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
-    styleUrls: ['../../commun/commun.scss']
 })
 export class CommandeEnvoiComponent extends CommandeComponent implements OnInit, OnDestroy {
 

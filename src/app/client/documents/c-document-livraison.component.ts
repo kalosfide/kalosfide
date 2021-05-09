@@ -8,7 +8,6 @@ import { ClientCLFService } from '../client-c-l-f.service';
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
-    styleUrls: ['../../commun/commun.scss']
 })
 export class CDocumentLivraisonComponent extends CDocumentDocComponent implements OnInit, OnDestroy {
 

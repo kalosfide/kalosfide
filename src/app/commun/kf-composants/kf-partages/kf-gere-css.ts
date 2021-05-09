@@ -209,14 +209,11 @@ export class KfGéreCss {
         }
     }
 
-    ajouteClasseDefArray(classeDefs: (KfTexteDef | KfNgClasseDef)[]): void {
+    ajouteClasse(...classeDefs: (KfTexteDef | KfNgClasseDef)[]): void {
         classeDefs.forEach(classeDef => this._ajouteClasseDef(classeDef));
     }
-    ajouteClasseDef(...classeDefs: (KfTexteDef | KfNgClasseDef)[]): void {
-        this.ajouteClasseDefArray(classeDefs);
-    }
 
-    supprimeClasseDefArray(classeDefs: KfTexteDef[]): void {
+    supprimeClasse(...classeDefs: KfTexteDef[]): void {
         const motsOuFonctions = this._motsOuFonctions(classeDefs);
         if (this.pClasseDefs) {
             this.pClasseDefs = this.pClasseDefs.filter(c => !motsOuFonctions.find(c1 => c1 === c));
@@ -225,14 +222,11 @@ export class KfGéreCss {
             }
         }
     }
-    supprimeClasseDef(...classeDefs: KfTexteDef[]): void {
-        this.supprimeClasseDefArray(classeDefs);
-    }
 
     ajouteClasseTemp(nomClasse: string, durée: number) {
-        this.ajouteClasseDef(nomClasse);
+        this.ajouteClasse(nomClasse);
         const idTimeOut = window.setTimeout(() => {
-            this.supprimeClasseDef(nomClasse);
+            this.supprimeClasse(nomClasse);
             clearTimeout(idTimeOut);
         }, durée);
     }
@@ -254,100 +248,127 @@ export class KfGéreCss {
     }
 
     private ngClasseSansInvisible(): KfNgClasse {
-    let ngClasse: { [noms: string]: boolean | (() => boolean) };
-    if (this.pClasseDefs && this.pClasseDefs.length > 0) {
-        let classes = '';
-        this.pClasseDefs.forEach(
-            classeDef => {
-                const texteClasse = typeof (classeDef) === 'string' ? classeDef : classeDef();
-                const cs = texteClasse.split(' ');
-                if (cs.length > 0) {
-                    cs.forEach(classe => classes = classes + ' ' + classe);
-                }
-            });
-        ngClasse = {};
-        ngClasse[classes] = true;
-    }
-    if (this.pNgClasseDefs && this.pNgClasseDefs.length > 0) {
-        if (!ngClasse) {
+        let ngClasse: { [noms: string]: boolean | (() => boolean) };
+        if (this.pClasseDefs && this.pClasseDefs.length > 0) {
+            let classes = '';
+            this.pClasseDefs.forEach(
+                classeDef => {
+                    const texteClasse = typeof (classeDef) === 'string' ? classeDef : classeDef();
+                    const cs = texteClasse.split(' ');
+                    if (cs.length > 0) {
+                        cs.forEach(classe => classes = classes + ' ' + classe);
+                    }
+                });
             ngClasse = {};
+            ngClasse[classes] = true;
         }
-        this.pNgClasseDefs.forEach(
-            ngClasseDef => ngClasse[ngClasseDef.nom] = !ngClasseDef.active || ngClasseDef.active()
-        );
+        if (this.pNgClasseDefs && this.pNgClasseDefs.length > 0) {
+            if (!ngClasse) {
+                ngClasse = {};
+            }
+            this.pNgClasseDefs.forEach(
+                ngClasseDef => ngClasse[ngClasseDef.nom] = !ngClasseDef.active || ngClasseDef.active()
+            );
+        }
+        return ngClasse;
     }
-    return ngClasse;
-}
 
-get classe(): KfNgClasse {
-    let ngClasse: { [noms: string]: boolean | (() => boolean) };
-    ngClasse = this.pSuitLesClasses ? this.pSuitLesClasses.ngClasseSansInvisible() : this.ngClasseSansInvisible();
-    if (this.ngInvisible) {
-        if (!ngClasse) {
-            ngClasse = {};
+    get classe(): KfNgClasse {
+        let ngClasse: { [noms: string]: boolean | (() => boolean) };
+        ngClasse = this.pSuitLesClasses ? this.pSuitLesClasses.ngClasseSansInvisible() : this.ngClasseSansInvisible();
+        if (this.ngInvisible) {
+            if (!ngClasse) {
+                ngClasse = {};
+            }
+            ngClasse[this.ngInvisible.nom] = this.ngInvisible.active ? this.ngInvisible.active() : true;
         }
-        ngClasse[this.ngInvisible.nom] = this.ngInvisible.active ? this.ngInvisible.active() : true;
+        return ngClasse;
     }
-    return ngClasse;
-}
 
-fixeStyleDef(nom: string, valeur: KfTexteDef, active ?: () => boolean) {
-    let def: KfNgStyleDef;
-    if (this.pStyleDefs) {
-        def = this.pStyleDefs.find(d => d.nom === nom);
-    }
-    if (!def) {
-        def = new KfNgStyleDef();
-        def.nom = nom;
-        if (!this.pStyleDefs) {
-            this.pStyleDefs = [];
+    fixeStyleDef(nom: string, valeur: KfTexteDef, active?: () => boolean) {
+        let def: KfNgStyleDef;
+        if (this.pStyleDefs) {
+            def = this.pStyleDefs.find(d => d.nom === nom);
         }
-        this.pStyleDefs.push(def);
-    }
-    def.valeur = valeur;
-    def.active = active;
-}
-supprimeStyleDef(nom: string) {
-    const index = this.pStyleDefs.findIndex(d => d.nom === nom);
-    if (index !== -1) {
-        this.pStyleDefs.splice(index, 1);
-        if (this.pStyleDefs.length === 0) {
-            this.pStyleDefs = undefined;
+        if (!def) {
+            def = new KfNgStyleDef();
+            def.nom = nom;
+            if (!this.pStyleDefs) {
+                this.pStyleDefs = [];
+            }
+            this.pStyleDefs.push(def);
         }
+        def.valeur = valeur;
+        def.active = active;
     }
-}
-effaceStyles() {
-    this.pStyleDefs = undefined;
-}
-
-get style(): KfNgStyle {
-    if (this.pSuitLeStyle) {
-        return this.pSuitLeStyle.style;
-    }
-    if (this.pStyleDefs) {
-        const defs = this.pStyleDefs.filter(d => !d.active || d.active());
-        if (defs.length > 0) {
-            const style: KfNgStyle = {};
-            this.pStyleDefs.forEach(d => style[d.nom] = ValeurTexteDef(d.valeur));
-            return style;
+    supprimeStyleDef(nom: string) {
+        const index = this.pStyleDefs.findIndex(d => d.nom === nom);
+        if (index !== -1) {
+            this.pStyleDefs.splice(index, 1);
+            if (this.pStyleDefs.length === 0) {
+                this.pStyleDefs = undefined;
+            }
         }
     }
-}
+    effaceStyles() {
+        this.pStyleDefs = undefined;
+    }
+
+    get style(): KfNgStyle {
+        if (this.pSuitLeStyle) {
+            return this.pSuitLeStyle.style;
+        }
+        if (this.pStyleDefs) {
+            const defs = this.pStyleDefs.filter(d => !d.active || d.active());
+            if (defs.length > 0) {
+                const style: KfNgStyle = {};
+                this.pStyleDefs.forEach(d => style[d.nom] = ValeurTexteDef(d.valeur));
+                return style;
+            }
+        }
+    }
 
 
-get avecClassesOuStyle(): boolean {
-    return !!this.pClasseDefs || !!this.pNgClasseDefs || !!this.pStyleDefs;
-}
+    get avecClassesOuStyle(): boolean {
+        return !!this.pClasseDefs || !!this.pNgClasseDefs || !!this.pStyleDefs;
+    }
 
-copieClassesEtStyle(gereCss: KfGéreCss) {
-    if (gereCss.pClasseDefs) {
-        this.pClasseDefs = gereCss.pClasseDefs.map(def => def);
+    /**
+     * Copie les classes et les styles du gereCss passé en paramétre.
+     */
+    copieClassesEtStyle(gereCss: KfGéreCss) {
+        if (gereCss.pClasseDefs) {
+            this.pClasseDefs = gereCss.pClasseDefs.map(def => def);
+        }
+        if (gereCss.pNgClasseDefs) {
+            this.pNgClasseDefs = gereCss.pNgClasseDefs.map(def => def);
+        }
+        if (gereCss.pStyleDefs) {
+            this.pStyleDefs = gereCss.pStyleDefs.map(def => def.clone());
+        }
     }
-    if (gereCss.pNgClasseDefs) {
-        this.pNgClasseDefs = gereCss.pNgClasseDefs.map(def => def);
+
+    /**
+     * Ajoute les classes et les styles du gereCss passé en paramétre.
+     */
+    ajouteClassesEtStyle(gereCss: KfGéreCss) {
+        if (gereCss.pClasseDefs) {
+            if (!this.pClasseDefs) {
+                this.pClasseDefs = [];
+            }
+            this.pClasseDefs = this.pClasseDefs.concat(gereCss.pClasseDefs);
+        }
+        if (gereCss.pNgClasseDefs) {
+            if (!this.pNgClasseDefs) {
+                this.pNgClasseDefs = [];
+            }
+            this.pNgClasseDefs = this.pNgClasseDefs.concat(gereCss.pNgClasseDefs);
+        }
+        if (gereCss.pStyleDefs) {
+            if (!this.pStyleDefs) {
+                this.pStyleDefs = [];
+            }
+            this.pStyleDefs = this.pStyleDefs.concat(gereCss.pStyleDefs);
+        }
     }
-    if (gereCss.pStyleDefs) {
-        this.pStyleDefs = gereCss.pStyleDefs.map(def => def.clone());
-    }
-}
 }

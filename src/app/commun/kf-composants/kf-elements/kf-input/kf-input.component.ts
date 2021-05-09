@@ -1,11 +1,12 @@
 import { Component, OnInit, Input, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
 import { KfComposantComponent } from '../../kf-composant/kf-composant.component';
-import { KfInput, KfTypeDInput } from './kf-input';
+import { KfInput } from './kf-input';
 import { KfInputNombre } from './kf-input-nombre';
 import { KfContenuPhrase } from '../../kf-partages/kf-contenu-phrase/kf-contenu-phrase';
 import { KfInputDateTemps } from './kf-input-date-temps';
-import { KfComposant } from '../../kf-composant/kf-composant';
-import { KFComposantService } from '../../kf-composant.service';
+import { TraiteKeydownService } from '../../../traite-keydown/traite-keydown.service';
+import { KfInputTexte } from './kf-input-texte';
+import { KfTypeDInput } from './kf-type-d-input';
 
 @Component({
     selector: 'app-kf-input',
@@ -16,7 +17,9 @@ export class KfInputComponent extends KfComposantComponent implements OnInit, Af
     @ViewChild('inputElement', {static: false}) inputElement: ElementRef;
     @ViewChild('labelElement', {static: false}) labelElement: ElementRef;
 
-    constructor(protected service: KFComposantService) {
+    typeDInput = KfTypeDInput;
+
+    constructor(protected service: TraiteKeydownService) {
         super(service);
     }
 
@@ -28,13 +31,37 @@ export class KfInputComponent extends KfComposantComponent implements OnInit, Af
         console.log(this.composant);
         return this.composant.avecInvalidFeedback;
     }
+
+    get estNombre(): boolean {
+        return this.input.typeDInput === KfTypeDInput.nombre;
+    }
+
+    get estTexte(): boolean {
+        return this.input.typeDInput === KfTypeDInput.texte
+            || this.input.typeDInput === KfTypeDInput.email
+            || this.input.typeDInput === KfTypeDInput.password;
+    }
+
+    get estDateTemps(): boolean {
+        return this.input.typeDInput === KfTypeDInput.date
+            || this.input.typeDInput === KfTypeDInput.datetemps
+            || this.input.typeDInput === KfTypeDInput.temps;
+    }
+
     get nombre(): KfInputNombre {
-        if (this.input.typeDInput === KfTypeDInput.nombre) {
+        if (this.estNombre) {
             return this.composant as KfInputNombre;
         }
     }
+
+    get texte(): KfInputTexte {
+        if (this.estTexte) {
+            return this.composant as KfInputTexte;
+        }
+    }
+
     get dateTemps(): KfInputDateTemps {
-        if (this.input.typeDInput === KfTypeDInput.datetemps) {
+        if (this.estDateTemps) {
             return this.composant as KfInputDateTemps;
         }
     }
@@ -46,17 +73,7 @@ export class KfInputComponent extends KfComposantComponent implements OnInit, Af
     }
 
     ngAfterViewInit() {
-        if (this.inputElement) {
-            this.composant.gereHtml.htmlElement = this.inputElement.nativeElement;
-            this.composant.gereHtml.enfantsDeVue = this.labelElement
-                ? {
-                    inputElement: this.inputElement.nativeElement,
-                    labelElement: this.labelElement.nativeElement,
-                } : {
-                    inputElement: this.inputElement.nativeElement,
-                };
-            this.composant.gereHtml.initialiseHtml(this.output);
-        }
+        this.composant.initialiseHtml(this.inputElement.nativeElement, this.output);
     }
 
 }

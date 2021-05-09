@@ -5,26 +5,26 @@ import { Identifiant } from 'src/app/securite/identifiant';
 
 export abstract class NavItem {
     nom: string;
-    protected _parent: NavBar | NavItem;
+    protected pParent: NavBar | NavItem;
 
-    private _inactif = false;
-    get inactif(): boolean { return this._inactif; }
-    set inactif(valeur: boolean) { this._inactif = valeur; }
+    private pInactif = false;
+    get inactif(): boolean { return this.pInactif; }
+    set inactif(valeur: boolean) { this.pInactif = valeur; }
 
-    private _visible = true;
-    get visible(): boolean { return this._visible; }
-    set visible(valeur: boolean) { this._visible = valeur; }
+    private pVisible = true;
+    get visible(): boolean { return this.pVisible; }
+    set visible(valeur: boolean) { this.pVisible = valeur; }
 
     rafraichit?: () => void;
-    protected _quandChange?: () => void;
+    protected pQuandChange?: () => void;
 
     constructor(nom: string, parent: NavBar | NavItem) {
         this.nom = nom;
-        this._parent = parent;
+        this.pParent = parent;
     }
 
     get navBar(): NavBar {
-        return this._parent.navBar;
+        return this.pParent.navBar;
     }
 
     get site(): Site {
@@ -40,8 +40,8 @@ export abstract class NavItem {
         if (this.rafraichit) {
             this.rafraichit();
         }
-        if (this._quandChange) {
-            this._quandChange();
+        if (this.pQuandChange) {
+            this.pQuandChange();
         }
     }
 }

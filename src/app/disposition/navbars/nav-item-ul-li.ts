@@ -12,7 +12,7 @@ export class NavItemUlLi extends NavItem {
     constructor(nom: string, parent: NavBar) {
         super(nom, parent);
         this.pItems = [];
-        this._quandChange = () => {
+        this.pQuandChange = () => {
             this.pItems.forEach(item => item.quandChange());
         };
     }

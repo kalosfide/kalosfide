@@ -4,13 +4,13 @@ import { Routes, RouterModule } from '@angular/router';
 import { FournisseurPages } from './fournisseur-pages';
 import { FAccueilComponent } from './f-accueil.component';
 import { AppPages } from '../app-pages';
-import { PageInterditeComponent } from '../messages/page-interdite.component';
-import { PageConflitComponent } from '../messages/page-conflit.component';
-import { PageErreurComponent } from '../messages/page-erreur.component';
-import { PageIntrouvableComponent } from '../messages/page-introuvable.component';
+import { PageErreurComponent } from '../erreurs/page-erreur.component';
 import { LivraisonPages } from './livraisons/livraison-pages';
 import { FacturePages } from './factures/facture-pages';
 import { FDocumentPages } from './documents/f-document-pages';
+import { ModalErreurComponent } from '../erreurs/modal-erreur.component';
+import { ApiErreurResolverService } from '../erreurs/api-erreur-resolver.service';
+import { FournisseurClientPages } from './clients/client-pages';
 
 const routes: Routes = [
     {
@@ -18,26 +18,15 @@ const routes: Routes = [
         redirectTo: FournisseurPages.accueil.urlSegment,
         pathMatch: 'full',
     },
-{
+    {
         path: FournisseurPages.accueil.urlSegment,
         component: FAccueilComponent,
-    },
-    {
-        path: FournisseurPages.catalogue.urlSegment,
-        data: {
-            pageDef: FournisseurPages.catalogue,
-        },
-        loadChildren: () => import('./catalogue/catalogue.module').then(mod => mod.CatalogueModule)
-    },
-    {
-        path: FournisseurPages.clients.urlSegment,
-        loadChildren: () => import('./clients/client.module').then(mod => mod.ClientModule)
     },
     {
         path: FournisseurPages.livraison.urlSegment,
         data: {
             pageDef: FournisseurPages.livraison,
-            pageDefEnfantPathVide: LivraisonPages.choixClient
+            pageDefDescendantParDéfaut: LivraisonPages.choixClient
         },
         loadChildren: () => import('./livraisons/livraison.module').then(mod => mod.LivraisonModule)
     },
@@ -45,7 +34,7 @@ const routes: Routes = [
         path: FournisseurPages.facture.urlSegment,
         data: {
             pageDef: FournisseurPages.facture,
-            pageDefEnfantPathVide: FacturePages.choixClient
+            pageDefDescendantParDéfaut: FacturePages.choixClient
         },
         loadChildren: () => import('./factures/facture.module').then(mod => mod.FactureModule)
     },
@@ -53,7 +42,7 @@ const routes: Routes = [
         path: FournisseurPages.documents.urlSegment,
         data: {
             pageDef: FournisseurPages.documents,
-            pageDefEnfantPathVide: FDocumentPages.liste,
+            pageDefDescendantParDéfaut: FDocumentPages.liste,
         },
         loadChildren: () => import('./documents/f-document.module').then(mod => mod.FDocumentModule),
     },
@@ -61,8 +50,37 @@ const routes: Routes = [
         path: FournisseurPages.site.urlSegment,
         data: {
             pageDef: FournisseurPages.site,
+            pageDefDescendantParDéfaut: FournisseurPages.catalogue,
         },
-        loadChildren: () => import('./f-site/f-site.module').then(mod => mod.FSiteModule),
+        children: [
+            {
+                path: '',
+                redirectTo: FournisseurPages.catalogue.urlSegment,
+                pathMatch: 'full',
+            },
+            {
+                path: FournisseurPages.site.urlSegment,
+                data: {
+                    pageDef: FournisseurPages.site,
+                },
+                loadChildren: () => import('./f-site/f-site.module').then(mod => mod.FSiteModule),
+            },
+            {
+                path: FournisseurPages.catalogue.urlSegment,
+                data: {
+                    pageDef: FournisseurPages.catalogue,
+                },
+                loadChildren: () => import('./catalogue/catalogue.module').then(mod => mod.CatalogueModule)
+            },
+            {
+                path: FournisseurPages.clients.urlSegment,
+                data: {
+                    pageDef: FournisseurPages.clients,
+                    pageDefDescendantParDéfaut: FournisseurClientPages.accueil,
+                },
+                loadChildren: () => import('./clients/client.module').then(mod => mod.ClientModule)
+            },
+        ],
     },
     {
         path: AppPages.compte.urlSegment,
@@ -70,24 +88,20 @@ const routes: Routes = [
     },
     // pages d'erreur
     {
-        path: AppPages.interdit.urlSegment,
-        component: PageInterditeComponent
-    },
-    {
-        path: AppPages.conflit.urlSegment,
-        component: PageConflitComponent
-    },
-    {
         path: AppPages.apiErreur.urlSegment,
+        data: { pageDef: AppPages.apiErreur },
         component: PageErreurComponent,
+        resolve: {
+            apiErreur: ApiErreurResolverService
+        }
     },
     {
-        path: AppPages.introuvable.urlSegment,
-        component: PageIntrouvableComponent,
+        path: AppPages.apiErreurModal.urlSegment,
+        component: ModalErreurComponent,
     },
     {
         path: '**',
-        redirectTo: AppPages.introuvable.urlSegment,
+        redirectTo: AppPages.apiErreur.urlSegment,
     },
 ];
 

@@ -3,20 +3,21 @@
     <ng-container *ngFor="let contenu of bbtnToolbar.contenus">
         <ng-container *ngIf="!contenu.nePasAfficher">
             <ng-container *ngIf="bbtnToolbar.estBtnGroup(contenu); else inputTemplate">
-                <app-kf-b-btn-group [composant]="contenu" (output)="transmet($event)"></app-kf-b-btn-group>
+                <app-kf-b-btn-group [composant]="contenu"></app-kf-b-btn-group>
             </ng-container>
             <ng-template #inputTemplate>
                 <ng-container *ngIf="bbtnToolbar.estInput(contenu); else listeTemplate">
-                    <app-kf-input [composant]="contenu" (output)="transmet($event)"></app-kf-input>
+                    <app-kf-input [composant]="contenu"></app-kf-input>
                 </ng-container>
                 <ng-template #listeTemplate>
                     <ng-container *ngIf="bbtnToolbar.estListederoulante(contenu); else erreurTemplate">
-                        <app-kf-liste-deroulante [composant]="contenu" (output)="transmet($event)"></app-kf-liste-deroulante>
+                        <app-kf-liste-deroulante [composant]="contenu">
+                        </app-kf-liste-deroulante>
                     </ng-container>
                     <ng-template #erreurTemplate>
                         !!! ERREUR !!!
                     </ng-template>
-                    
+
                 </ng-template>
             </ng-template>
         </ng-container>

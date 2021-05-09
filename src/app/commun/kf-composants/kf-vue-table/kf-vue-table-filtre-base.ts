@@ -2,11 +2,12 @@ import { KfTypeDEvenement } from '../kf-partages/kf-evenements';
 import { KfVueTableOutils } from './kf-vue-table-outils';
 import { IKfVueTableOutil } from './kf-vue-table-outil';
 import { KfBBtnToolbarInputGroup } from '../kf-b-btn-toolbar/kf-b-btn-toolbar';
+import { KfVueTableLigne } from './kf-vue-table-ligne';
 
 export abstract class KfVueTableFiltreBase<T> implements IKfVueTableOutil<T> {
     private pNom: string;
 
-    protected pValide: (t: T, valeur: string | number) => boolean;
+    protected pValide: (ligne: KfVueTableLigne<T>) => boolean;
 
     constructor(nom: string) {
         this.pNom = nom;
@@ -23,22 +24,17 @@ export abstract class KfVueTableFiltreBase<T> implements IKfVueTableOutil<T> {
         return valeur !== undefined && valeur !== null && valeur !== '';
     }
 
-    get valide(): (t: T) => boolean {
-        if (this.pValide) {
-            return (t: T) => {
-                const valeur = this.composant.valeur;
-                return valeur ? this.pValide(t, valeur) : true;
-            };
-        }
+    get valide(): (ligne: KfVueTableLigne<T>) => boolean {
+        return this.pValide;
+    }
+
+    protected _initialise(parent: KfVueTableOutils<T>) {
+        this.composant.estRacineV = true;
+        this.composant.gereHtml.suitLaValeur();
     }
 
     initialise(parent: KfVueTableOutils<T>) {
-        this.composant.estRacineV = true;
-        this.composant.gereHtml.suitLaValeur = true;
-        this.composant.gereHtml.ajouteTraiteur(KfTypeDEvenement.valeurChange,
-            () => {
-                parent.appliqueFiltres();
-            });
+        this._initialise(parent);
     }
 
 }

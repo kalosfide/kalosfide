@@ -8,14 +8,14 @@ import { EtapeDeFormulaire } from './etape-de-formulaire';
 export class FormulaireAEtapeResolverService implements Resolve<EtapeDeFormulaire> {
 
     constructor(
-        private _formulaireAEtapesService: FormulaireAEtapeService,
+        private formulaireAEtapesService: FormulaireAEtapeService,
     ) {
     }
 
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): EtapeDeFormulaire | Observable<EtapeDeFormulaire> {
         const urlSegment = route.paramMap.get('etape');
         console.log(route, state);
-        return this._formulaireAEtapesService.trouveEtape(urlSegment);
+        return this.formulaireAEtapesService.trouveEtape(urlSegment);
     }
 
 }

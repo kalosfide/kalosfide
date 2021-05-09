@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LitFichierTexteService } from './lit-fichier-texte.service';
 
 @NgModule({
   declarations: [
@@ -9,7 +8,6 @@ import { LitFichierTexteService } from './lit-fichier-texte.service';
       CommonModule,
   ],
   providers: [
-      LitFichierTexteService,
   ],
 })
 export class OutilsModule { }

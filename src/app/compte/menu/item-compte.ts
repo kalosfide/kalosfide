@@ -4,15 +4,17 @@ import { ItemMesSites } from './item-mes-sites';
 import { ItemMonCompte } from './item-mon-compte';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { NavItemDropdown } from 'src/app/disposition/navbars/nav-item-dropdown';
+import { ItemAjoute } from './item-ajoute';
 
 export class ItemCompte extends NavItemDropdown {
 
     constructor(parent: Menu) {
         super('compte', parent);
         this.dropdown.estADroiteDansMenu = true;
-        this.dropdown.bouton.ajouteClasseDef('btn btn-sm btn-light');
+        this.dropdown.bouton.ajouteClasse('btn btn-sm btn-light');
 
         this.ajoute(new ItemConnection(this));
+        this.ajoute(new ItemAjoute(this));
         this.ajoute(new ItemMesSites(this));
         this.ajoute(new ItemMonCompte(this));
 

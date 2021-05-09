@@ -1,5 +1,5 @@
-import { KfVueTableCelluleDef } from './kf-vue-table-cellule';
 import { KfNgClasseDef } from '../kf-partages/kf-gere-css-classe';
+import { KfVueTableCelluleDef } from './i-kf-vue-table-cellule-def';
 
 export interface IKfVueTableBilanDef<T> {
     /**
@@ -8,12 +8,7 @@ export interface IKfVueTableBilanDef<T> {
     titreDef?: KfVueTableCelluleDef;
 
     /**
-     * Si agrégation des valeurs ne sert que pour la classe css
-     */
-    valeurDef?: KfVueTableCelluleDef;
-
-    /**
-     * Si présent, une étiquette vide est crée pour afficher la valeur agrégée de la colonne
+     * Si présent, une étiquette vide est crée pour afficher la valeur agrégée de la colonne.
      */
     texteAgrégé?: (items: T[]) => string;
 
@@ -24,13 +19,14 @@ export interface IKfVueTableBilanDef<T> {
 
 
     /**
-     * Si vrai, seules les valeurs des lignes qui passent les filtres sont agrégées
+     * Si vrai, seules les valeurs des lignes qui passent les filtres sont agrégées.
+     * Ignoré si titreBilanDesVisibles est défini.
      */
     visiblesSeulement?: boolean;
 
     /**
-     * Si présent dans l'une des colonnes, une autre ligne est affichée avec ce titre
+     * Si présent dans l'une des colonnes, une seconde ligne de bilan est affichée avec ce titre
      * où seules les valeurs des lignes qui passent les filtres sont agrégées
      */
-    titreVisiblesSeulement?: KfVueTableCelluleDef;
+    titreBilanDesVisibles?: KfVueTableCelluleDef;
 }

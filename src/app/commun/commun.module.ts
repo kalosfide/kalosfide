@@ -1,8 +1,7 @@
-import { NgModule } from '@angular/core';
+import { ModuleWithProviders, NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { KfComposantsModule } from './kf-composants/kf-composants.module';
 import { RouterModule } from '@angular/router';
-import { RouteurService } from '../services/routeur.service';
 import { KfComposantComponent } from './kf-composants/kf-composant/kf-composant.component';
 import { PeutQuitterComponent } from './peut-quitter/peut-quitter.component';
 import { PeutQuitterGarde } from './peut-quitter/peut-quitter-garde.service';
@@ -29,7 +28,6 @@ import { QuicklinkModule } from 'ngx-quicklink';
         PeutQuitterComponent
     ],
     providers: [
-        RouteurService,
         PeutQuitterGarde,
         PeutQuitterService,
     ],
@@ -42,4 +40,5 @@ import { QuicklinkModule } from 'ngx-quicklink';
         QuicklinkModule
     ]
 })
-export class CommunModule { }
+export class CommunModule {
+}

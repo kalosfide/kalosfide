@@ -27,7 +27,7 @@ export class CLFUtileUrl extends DataUtileUrl {
     }
 
     get utile(): CLFUtile {
-        return this._parent as CLFUtile;
+        return this.parent as CLFUtile;
     }
 
     /**
@@ -196,7 +196,7 @@ export class CLFUtileUrl extends DataUtileUrl {
     }
     routeBonVirtuel(client: Client): string {
         const def = this.bonVirtuel(client);
-        return def.routes.url(ValeurTexteDef(def.nomSite), [CLFPages.nouveau.urlSegment]);
+        return def.routes.url(ValeurTexteDef(def.urlSite), [CLFPages.nouveau.urlSegment]);
     }
 
     /**

@@ -24,11 +24,11 @@ export class ClientPages  {
 }
 
 class CClientRoutes extends BaseRoutes implements ISiteRoutes {
-    url(nomSite: string, segments: string[]): string {
-        return SiteRoutes.urlRole(nomSite, SitePages.client.urlSegment, segments);
+    url(urlSite: string, segments: string[]): string {
+        return SiteRoutes.urlDeRole(urlSite, SitePages.client.urlSegment, segments);
     }
     get urlBase(): string {
-        return SiteRoutes.urlRole(SiteRoutes.urlBase, SitePages.client.urlSegment);
+        return SiteRoutes.urlDeRole(SiteRoutes.urlBase, SitePages.client.urlSegment);
     }
 }
 export const ClientRoutes = new CClientRoutes();

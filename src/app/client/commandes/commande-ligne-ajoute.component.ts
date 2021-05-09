@@ -6,13 +6,12 @@ import { ClientCLFService } from '../client-c-l-f.service';
 import { PeutQuitterService } from 'src/app/commun/peut-quitter/peut-quitter.service';
 import { ComponentAAutoriserAQuitter } from 'src/app/commun/peut-quitter/peut-quitter-garde.service';
 import { CommandePages } from './commande-pages';
-import { CLFLigneComponent } from 'src/app/modeles/c-l-f/c-l-f-ligne.component';
+import { CLFLigneAjouteComponent } from 'src/app/modeles/c-l-f/c-l-f-ligne.component';
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
-    styleUrls: ['../../commun/commun.scss']
 })
-export class CommandeLigneAjouteComponent extends CLFLigneComponent
+export class CommandeLigneAjouteComponent extends CLFLigneAjouteComponent
     implements OnInit, OnDestroy, ComponentAAutoriserAQuitter {
 
     pageDef: PageDef = CommandePages.ajoute;
@@ -27,6 +26,5 @@ export class CommandeLigneAjouteComponent extends CLFLigneComponent
         protected peutQuitterService: PeutQuitterService,
     ) {
         super(route, service, peutQuitterService);
-        this.ajout = true;
     }
 }

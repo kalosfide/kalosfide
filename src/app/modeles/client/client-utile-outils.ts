@@ -33,7 +33,7 @@ export class ClientUtileOutils extends DataUtileOutils {
     }
 
     client(): KfVueTableFiltreCherche<Client> {
-        return Fabrique.vueTable.cherche<Client>('Nom', 'Nom',     (client: Client) => client.nom, 'Rechercher un client');
+        return Fabrique.vueTable.cherche<Client>('nom', 'Nom', 'nom', 'Rechercher un client');
     }
 
     ajoute(): KfVueTableOutilBtnGroupe<Client> {

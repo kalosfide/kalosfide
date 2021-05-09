@@ -8,7 +8,6 @@ import { CDocumentPages } from './c-document-pages';
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
-    styleUrls: ['../../commun/commun.scss']
 })
 export class CDocumentCommandeComponent extends CDocumentDocComponent implements OnInit, OnDestroy {
 

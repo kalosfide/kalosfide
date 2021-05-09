@@ -1,13 +1,9 @@
 import {
     KfEvenement, KfTypeDEvenement,
-    KfTraitementDEvenement, KFTraiteurDEvenement, KfTypeDHTMLEvents, KfTransformateurDEvenement, KfCapteurDEvenement, KfStatutDEvenement
+    KfStatutDEvenement
 } from '../kf-partages/kf-evenements';
 import { KfComposant } from './kf-composant';
-import { KfDocumentContexte } from '../kf-constantes';
-import { KfBouton } from '../kf-elements/kf-bouton/kf-bouton';
-import { KfTypeDeBouton, KfTypeDeComposant, KfKeyboardKey } from '../kf-composants-types';
-import { KfComposantGereHtml } from './kf-composant-gere-html';
-import { KfSuperGroupe } from '../kf-groupe/kf-super-groupe';
+import { KfClavierTouche } from '../kf-partages/kf-clavier/kf-clavier-touche';
 
 /**
  * certains composants: liste, menu, radios, peuvent gérer les tabIndex de leurs contenus
@@ -15,7 +11,10 @@ import { KfSuperGroupe } from '../kf-groupe/kf-super-groupe';
  * si la navigation au clavier est activée, le conteneur a un contenu qui le représente pour le focus lors d'une arrivée par tab
  */
 export interface KfGereTabIndexInterface {
-    contenus: () => KfComposant[]; // sous composants qui peuvent prendre le focus
+    /**
+     * sous composants qui peuvent prendre le focus
+     */
+    contenus: () => KfComposant[];
     haut?: (contenu: KfComposant) => KfComposant;
     bas?: (contenu: KfComposant) => KfComposant;
     gauche?: (contenu: KfComposant) => KfComposant;
@@ -25,7 +24,7 @@ export interface KfGereTabIndexInterface {
 export class KfGereTabIndex {
     composant: KfComposant;
 
-    _contenus: () => KfComposant[]; // sous composants qui peuvent prendre le focus
+    pContenus: () => KfComposant[]; // sous composants qui peuvent prendre le focus
 
     /**
      * fixé dans rafraichit (à appeler quand les contenus ou enCours changent)
@@ -43,27 +42,27 @@ export class KfGereTabIndex {
 
     constructor(composant: KfComposant, tabIndexInterface: KfGereTabIndexInterface) {
         this.composant = composant;
-        this._contenus = tabIndexInterface.contenus;
+        this.pContenus = tabIndexInterface.contenus;
         this.liéAChoisi = tabIndexInterface.liéAChoisi;
         this.haut = tabIndexInterface.haut ? tabIndexInterface.haut : (contenu: KfComposant) => this.precedent(contenu);
         this.droite = tabIndexInterface.droite ? tabIndexInterface.droite : this.haut;
         this.bas = tabIndexInterface.bas ? tabIndexInterface.bas : (contenu: KfComposant) => this.suivant(contenu);
         this.gauche = tabIndexInterface.gauche ? tabIndexInterface.gauche : this.bas;
-        this.composant.gereHtml.ajouteTraiteur(KfTypeDEvenement.focusPris,
+        this.composant.gereHtml.ajouteTraiteur(KfTypeDEvenement.focus,
             (evenement: KfEvenement) => {
                 if (this.traiteFocusPris(evenement.emetteur)) {
                     evenement.statut = KfStatutDEvenement.fini;
                 }
             }
         );
-        this.composant.gereHtml.ajouteTraiteur(KfTypeDEvenement.focusPerdu,
+        this.composant.gereHtml.ajouteTraiteur(KfTypeDEvenement.blur,
             (evenement: KfEvenement) => {
-                if (this.traiteFocusPerdu(evenement.emetteur)) {
+                if (this.traiteFocusPerdu()) {
                     evenement.statut = KfStatutDEvenement.fini;
                 }
             }
         );
-        this.composant.gereHtml.ajouteTraiteur(KfTypeDEvenement.toucheBaissee,
+        this.composant.gereHtml.ajouteTraiteur(KfTypeDEvenement.keydown,
             (evenement: KfEvenement) => {
                 if (this.traiteToucheBaissee(evenement)) {
                     evenement.statut = KfStatutDEvenement.fini;
@@ -73,7 +72,7 @@ export class KfGereTabIndex {
     }
 
     get contenus(): KfComposant[] {
-        return this._contenus();
+        return this.pContenus();
     }
 
     index(contenu: KfComposant): number {
@@ -81,10 +80,10 @@ export class KfGereTabIndex {
     }
 
     suivant(contenu: KfComposant) {
-        const contenus = this._contenus();
+        const contenus = this.pContenus();
         if (contenus && contenus.length > 0) {
             let index = this.index(contenu);
-            index = !(index >= 0 && index < this.contenus.length - 1) ? 0 : index + 1;
+            index = !(index >= 0 && index < contenus.length - 1) ? 0 : index + 1;
             return this.contenus[index];
         } else {
             return this.composant;
@@ -92,10 +91,10 @@ export class KfGereTabIndex {
     }
 
     precedent(contenu: KfComposant) {
-        const contenus = this._contenus();
+        const contenus = this.pContenus();
         if (contenus && contenus.length > 0) {
             let index = this.index(contenu);
-            index = !(index > 0 && index <= this.contenus.length - 1) ? 0 : index - 1;
+            index = !(index > 0 && index <= contenus.length - 1) ? 0 : index - 1;
             return this.contenus[index];
         } else {
             return this.composant;
@@ -126,7 +125,7 @@ export class KfGereTabIndex {
 
     // TRAITEMENT DES EVENEMENTS
     traiteFocusPris(emetteur: KfComposant): boolean {
-        const contenus = this._contenus();
+        const contenus = this.pContenus();
 //        console.log('focus pris', emetteur);
         if (contenus.find(c => c === emetteur)) {
             if (emetteur !== this.contenuDuFocus) {
@@ -139,7 +138,7 @@ export class KfGereTabIndex {
             return true;
         }
     }
-    traiteFocusPerdu(emetteur: KfComposant): boolean {
+    traiteFocusPerdu(): boolean {
 //        console.log('focus perdu', emetteur);
         //        this.contenuDuFocus = emetteur;
         return true;
@@ -150,24 +149,24 @@ export class KfGereTabIndex {
         let traité = false;
         const ancien = this.contenuDuFocus;
         let nouveau: KfComposant;
-        switch (event.key) {
-            case KfKeyboardKey.down:
-            case KfKeyboardKey.arrowDown:
+        switch (event.key as KfClavierTouche) {
+            case 'Down':
+            case 'ArrowDown':
                 nouveau = this.bas(ancien);
                 traité = true;
                 break;
-            case KfKeyboardKey.left:
-            case KfKeyboardKey.arrowLeft:
+            case 'Left':
+            case 'ArrowLeft':
                 nouveau = this.gauche(ancien);
                 traité = true;
                 break;
-            case KfKeyboardKey.right:
-            case KfKeyboardKey.arrowRight:
+            case 'Right':
+            case 'ArrowRight':
                 nouveau = this.droite(ancien);
                 traité = true;
                 break;
-            case KfKeyboardKey.up:
-            case KfKeyboardKey.arrowUp:
+            case 'Up':
+            case 'ArrowUp':
                 nouveau = this.haut(ancien);
                 traité = true;
                 break;
@@ -188,7 +187,7 @@ export class KfGereTabIndex {
     // _contenus() ou _liéAChoisi ont changé
     // il faut mettre à jour contenuDuFocus et les tabIndex
     rafraichit() {
-        const contenus = this._contenus();
+        const contenus = this.pContenus();
         if (this.liéAChoisi) {
             this.contenuDuFocus = this.liéAChoisi();
         } else {

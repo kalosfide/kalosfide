@@ -1,12 +1,21 @@
+import { KfClavierTouche } from '../kf-partages/kf-clavier/kf-clavier-touche';
 import { KfInputTexte } from '../kf-elements/kf-input/kf-input-texte';
+import { KfTexte } from '../kf-elements/kf-texte/kf-texte';
+import { KfTypeDHTMLEvents, KfTypeDEvenement, KfEvenement, KfStatutDEvenement } from '../kf-partages/kf-evenements';
 import { KfVueTableFiltreBase } from './kf-vue-table-filtre-base';
+import { KfVueTableLigne } from './kf-vue-table-ligne';
+import { KfVueTableOutils } from './kf-vue-table-outils';
 
 export class KfVueTableFiltreCherche<T> extends KfVueTableFiltreBase<T> {
     private pTexte: KfInputTexte;
 
-    constructor(nom: string, texte: (t: T) => string) {
+    constructor(nom: string, colonne: string) {
         super(nom);
-        this.pValide = (t: T, valeur: string) => texte(t).toLowerCase().indexOf(valeur.toLowerCase()) > -1;
+        this.pValide = (ligne: KfVueTableLigne<T>) => {
+            const cellule = ligne.cellulesVisibles.find(c => c.colonne.nom === colonne);
+            const kftexte = cellule.contenu as KfTexte;
+            return kftexte.éclairage(this.pTexte.valeur);
+        };
 
         this.pTexte = new KfInputTexte(nom + '_T');
     }
@@ -17,5 +26,40 @@ export class KfVueTableFiltreCherche<T> extends KfVueTableFiltreBase<T> {
 
     get composant(): KfInputTexte {
         return this.pTexte;
+    }
+
+    initialise(parent: KfVueTableOutils<T>) {
+        this._initialise(parent);
+        if (parent.vueTable.navigationAuClavier) {
+            this.pTexte.gereHtml.suitLeFocus(
+                () => parent.quandFiltreCherchePrendLeFocus(),
+                () => parent.quandFiltreCherchePerdLeFocus()
+            );
+            this.pTexte.gereHtml.ajouteEvenementASuivre(KfTypeDHTMLEvents.keydown)
+            this.pTexte.gereHtml.ajouteTraiteur(KfTypeDEvenement.keydown,
+                (evenement: KfEvenement) => {
+                    let traité = false;
+                    const event: KeyboardEvent = evenement.parametres;
+                    switch (event.key as KfClavierTouche) {
+                        case 'Delete':
+                            if (!event.ctrlKey && !event.altKey && !event.shiftKey) {
+                                this.texte.valeur = null;
+                                traité = true;
+                            }
+                            break;
+                        case 'Enter':
+                            if (!event.ctrlKey && !event.altKey && !event.shiftKey) {
+                                parent.vueTable.navigationAuClavier.fixeLeFocus();
+                                traité = true;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                    if (traité) {
+                        evenement.statut = KfStatutDEvenement.fini;
+                    }
+                });
+        }
     }
 }

@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
 import { KfComposantComponent } from '../kf-composant/kf-composant.component';
-import { KFComposantService } from '../kf-composant.service';
+import { TraiteKeydownService } from '../../traite-keydown/traite-keydown.service';
 import { KfBBtnToolbar } from './kf-b-btn-toolbar';
 
 @Component({
@@ -11,7 +11,7 @@ import { KfBBtnToolbar } from './kf-b-btn-toolbar';
 export class KfBBtnToolbarComponent extends KfComposantComponent implements OnInit, AfterViewInit {
     @ViewChild('htmlElement', {static: false}) domElementRef: ElementRef;
 
-    constructor(protected service: KFComposantService) {
+    constructor(protected service: TraiteKeydownService) {
         super(service);
     }
 
@@ -27,8 +27,7 @@ export class KfBBtnToolbarComponent extends KfComposantComponent implements OnIn
     }
 
     ngAfterViewInit() {
-        this.composant.gereHtml.htmlElement = this.domElementRef.nativeElement;
-        this.composant.gereHtml.initialiseHtml(this.output);
+        this.composant.initialiseHtml(this.domElementRef.nativeElement, this.output);
     }
 
 }

@@ -1,5 +1,6 @@
 import { KfTexteDef } from '../../kf-partages/kf-texte-def';
-import { KfInput, KfTypeDInput } from './kf-input';
+import { KfInput } from './kf-input';
+import { KfTypeDInput } from './kf-type-d-input';
 import { KfInputDate } from './kf-input-date';
 import { KfInputTemps } from './kf-input-temps';
 import { Dateur } from 'src/app/commun/outils/dateur';
@@ -10,8 +11,8 @@ export class KfInputDateTemps extends KfInput {
     inputDate: KfInputDate;
     inputTemps: KfInputTemps;
 
-    private _min: Date;
-    private _max: Date;
+    private pMin: Date;
+    private pMax: Date;
 
     constructor(nom: string, texte?: KfTexteDef) {
         super(nom, texte);
@@ -23,6 +24,8 @@ export class KfInputDateTemps extends KfInput {
         this.inputTemps = new KfInputTemps('time');
         this.inputTemps.estRacineV = true;
 
+        // crée la div englobante
+        const g = this.géreClasseDiv;
     }
 
     get valeur(): Date {
@@ -39,40 +42,40 @@ export class KfInputDateTemps extends KfInput {
     }
 
     get min(): Date {
-        return this._min;
+        return this.pMin;
     }
     set min(valeur: Date) {
-        this._min = valeur;
+        this.pMin = valeur;
     }
 
     get minDate(): string {
-        if (this._min) {
-            return Dateur.InputDateValue(this._min);
+        if (this.pMin) {
+            return Dateur.InputDateValue(this.pMin);
         }
     }
 
     get minTemps(): string {
-        if (this._min) {
-            return this.inputDate.valeur === this.minDate ? Dateur.InputTimeValue(this._min) : '00:00';
+        if (this.pMin) {
+            return this.inputDate.valeur === this.minDate ? Dateur.InputTimeValue(this.pMin) : '00:00';
         }
     }
 
     get max(): Date {
-        return this._max;
+        return this.pMax;
     }
     set max(valeur: Date) {
-        this._max = valeur;
+        this.pMax = valeur;
     }
 
     get maxDate(): string {
-        if (this._max) {
-            return Dateur.InputDateValue(this._max);
+        if (this.pMax) {
+            return Dateur.InputDateValue(this.pMax);
         }
     }
 
     get maxTemps(): string {
-        if (this._max) {
-            return this.inputDate.valeur === this.maxDate ? Dateur.InputTimeValue(this._max) : '23:59';
+        if (this.pMax) {
+            return this.inputDate.valeur === this.maxDate ? Dateur.InputTimeValue(this.pMax) : '23:59';
         }
     }
 }

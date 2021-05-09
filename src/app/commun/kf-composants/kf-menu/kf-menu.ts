@@ -1,13 +1,12 @@
 import { KfComposant } from '../kf-composant/kf-composant';
 import { Noeud } from '../../outils/arbre/noeud';
-import { KfElement } from '../kf-composant/kf-element';
 import { KfTypeDEvenement, KfEvenement, KfStatutDEvenement, KfTraitementDEvenement } from '../kf-partages/kf-evenements';
 import { KfSousMenu } from './kf-sous-menu';
 import { KfGereTabIndex } from '../kf-composant/kf-composant-gere-tabindex';
 import { KfMenuDirection, KfDefinitionDeMenu } from './kf-menu-types';
 import { KfTypeDeComposant } from '../kf-composants-types';
 
-export class KfMenu extends KfElement {
+export class KfMenu extends KfComposant {
 
     /**
      * pour créer un id distinct pour chaque sous-menu
@@ -42,7 +41,7 @@ export class KfMenu extends KfElement {
         this.gereHtml.ajouteTraiteur(KfTypeDEvenement.menuChange, this.traiteMenuChange);
         // classe css
         this.direction = direction ? direction : KfMenuDirection.vertical;
-        this.ajouteClasseDef(this.direction);
+        this.ajouteClasse(this.direction);
     }
 
     // OUVRIR FERMER
@@ -118,7 +117,7 @@ export class KfMenu extends KfElement {
     // EVENEMENT
 
     traiteMenuChange: KfTraitementDEvenement = (evenement: KfEvenement) => {
-        const sousMenu = evenement.emetteur as KfSousMenu;
+        const sousMenu = this.sousMenus.find(sm => sm === evenement.emetteur);
         evenement.emetteur = this;
         if (this.avecOuvrirFermer) {
             if (sousMenu.sansSousMenus) {

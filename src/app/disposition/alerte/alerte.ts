@@ -1,5 +1,5 @@
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
-import { BootstrapType } from '../fabrique/fabrique-bootstrap';
+import { BootstrapType } from '../../commun/kf-composants/kf-partages/kf-bootstrap';
 
 export enum TypeAlerte {
     success = 1,

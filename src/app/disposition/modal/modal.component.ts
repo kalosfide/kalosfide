@@ -9,6 +9,7 @@ import { IBoutonDef } from '../fabrique/fabrique-bouton';
 import { NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { Fabrique } from '../fabrique/fabrique';
 import { IUrlDef } from '../fabrique/fabrique-url';
+import { IAvecServices } from 'src/app/services/i-avec-services';
 
 export interface IModalComponentDef {
     titre: string;
@@ -19,7 +20,7 @@ export interface IModalComponentDef {
      */
     boutonDefs: IBoutonDef[];
     options?: NgbModalOptions;
-    urlSiPasAction: IUrlDef;
+    urlSiPasAction: string | IUrlDef;
 }
 
 export abstract class ModalComponent extends PageBaseComponent implements OnInit, OnDestroy {
@@ -29,13 +30,9 @@ export abstract class ModalComponent extends PageBaseComponent implements OnInit
 
     constructor(
         protected route: ActivatedRoute,
-        protected service: DataService
+        protected service: IAvecServices
     ) {
         super();
-    }
-
-    get iservice(): DataService {
-        return this.service;
     }
 
     ngOnInit() {
@@ -59,7 +56,7 @@ export abstract class ModalComponent extends PageBaseComponent implements OnInit
                 modal.avecFond = 'static';
                 modal.ferméSiEchap = true;
                 modal.windowClass = 'modal-component';
-                this.iservice.modalService.résultat(modal).subscribe((résultat) => {
+                this.service.modalService.résultat(modal).subscribe((résultat) => {
                     let action: () => void;
                     if (typeof (résultat) === 'string') {
                         const actionDef = actionDefs.find(a => a.nom === résultat);
@@ -68,7 +65,13 @@ export abstract class ModalComponent extends PageBaseComponent implements OnInit
                         }
                     }
                     if (!action) {
-                        action = () => this.iservice.routeur.navigueUrlDef(modalComponentDef.urlSiPasAction);
+                        action = () => {
+                            if (typeof (modalComponentDef.urlSiPasAction) === 'string') {
+                                this.service.routeur.navigate([modalComponentDef.urlSiPasAction]);
+                            } else {
+                                this.service.routeur.navigueUrlDef(modalComponentDef.urlSiPasAction);
+                            }
+                        };
                     }
                     action();
                 });

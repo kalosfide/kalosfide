@@ -19,13 +19,4 @@ export class KfContenuPhraseComponent implements AfterViewInit {
     ngAfterViewInit() {
     }
 
-    /**
-     * transmission d'un évènement à l'Angular component qui utilise le template de ce component
-     */
-    transmet(evenement: KfEvenement) {
-        if (this.contenuPhrase.composant) {
-            this.contenuPhrase.composant.gereHtml.traite(evenement);
-        }
-    }
-
 }

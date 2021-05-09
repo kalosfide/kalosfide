@@ -2,7 +2,7 @@ import { Component, OnInit, Input, ViewChild, ViewChildren, QueryList, AfterView
 import { KfRadios } from './kf-radios';
 import { KfComposantComponent } from '../../kf-composant/kf-composant.component';
 import { KfRadio } from './kf-radio';
-import { KFComposantService } from '../../kf-composant.service';
+import { TraiteKeydownService } from '../../../traite-keydown/traite-keydown.service';
 
 @Component({
     selector: 'app-kf-radio',
@@ -13,7 +13,7 @@ export class KfRadioComponent extends KfComposantComponent implements OnInit, Af
     @ViewChild('inputElement', {static: false}) inputElement: ElementRef;
     @ViewChild('labelElement', {static: false}) labelElement: ElementRef;
 
-    constructor(protected service: KFComposantService) {
+    constructor(protected service: TraiteKeydownService) {
         super(service);
     }
 
@@ -25,36 +25,11 @@ export class KfRadioComponent extends KfComposantComponent implements OnInit, Af
         return this.radio.radios;
     }
 
-    get classe(): string {
-        return 'form-check-input'
-            + (!this.composant.contenuPhrase ? 'position-static' : '')
-            + this.composant.classe;
-    }
-
     ngOnInit() {
     }
 
     ngAfterViewInit() {
-        this.composant.gereHtml.htmlElement = this.inputElement.nativeElement,
-        this.composant.gereHtml.enfantsDeVue = {
-            inputElement: this.inputElement.nativeElement,
-            labelElement: this.labelElement.nativeElement,
-        };
-        this.composant.gereHtml.initialiseHtml(this.output);
-/*
-        let i = 0;
-        (this.composant as KfRadios).enfants.forEach(
-            radio => {
-                const r = (radio as KfRadio)
-                r.enfantsDeVue = {
-                   this.composant.htmlElement = r.inputElement.nativeElement),
-                    inputElement: r.inputElement.nativeElement),
-                    labelElement: r.labelElement.nativeElement),
-                };
-                i++;
-            }
-        );
-*/
+        this.composant.initialiseHtml(this.inputElement.nativeElement, this.output);
     }
 
 }

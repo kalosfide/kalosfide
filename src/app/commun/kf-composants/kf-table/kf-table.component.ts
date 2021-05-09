@@ -19,7 +19,6 @@ export class KfTableComponent extends KfComposantComponent implements OnInit, Af
     }
 
     ngAfterViewInit() {
-        this.composant.gereHtml.htmlElement = this.domElementRef.nativeElement;
-        this.composant.gereHtml.initialiseHtml(this.output);
+        this.composant.initialiseHtml(this.domElementRef.nativeElement, this.output);
     }
 }

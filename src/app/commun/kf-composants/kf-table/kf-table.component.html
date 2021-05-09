@@ -37,7 +37,7 @@
 <!-- cellule -->
 <ng-template #celluleTemplate let-cellule="cellule1">
     <ng-container *ngIf="cellule.composant; else texteTemplate">
-        <app-kf-composant [composant]="cellule.composant" (output)="transmet($event)"></app-kf-composant>
+        <app-kf-composant [composant]="cellule.composant"></app-kf-composant>
     </ng-container>
     <ng-template #texteTemplate>
         {{ cellule.texte }}

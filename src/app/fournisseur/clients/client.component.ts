@@ -11,19 +11,20 @@ import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-t
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
 import { PageBaseComponent } from 'src/app/disposition/page-base/page-base.component';
 import { BarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
-import { ModeTable } from 'src/app/commun/data-par-key/condition-table';
 import { ClientService } from 'src/app/modeles/client/client.service';
+import { FournisseurClientRoutes, FournisseurClientPages } from './client-pages';
+import { FANomIcone } from 'src/app/commun/kf-composants/kf-partages/kf-icone-def';
+import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
+import { BootstrapNom } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
-    styleUrls: ['../../commun/commun.scss']
 })
 export class ClientComponent extends PageBaseComponent implements OnInit, OnDestroy {
 
     pageDef: PageDef = FournisseurPages.clients;
 
     site: Site;
-    barre: BarreTitre;
 
     constructor(
         protected route: ActivatedRoute,
@@ -33,29 +34,34 @@ export class ClientComponent extends PageBaseComponent implements OnInit, OnDest
         super();
     }
 
+    barrelien(nom: string, pageDef: PageDef, nomIcone: FANomIcone, texte?: string): KfLien {
+        return Fabrique.lien.lienBouton({
+            nom,
+            urlDef: {
+                routes: FournisseurClientRoutes,
+                pageDef,
+                urlSite: this.site.url
+            },
+            contenu: {
+                nomIcone,
+                texte: texte ? texte : pageDef.lien,
+                positionTexte: 'droite',
+            }
+        },
+        BootstrapNom.light);
+    }
+
     créeBarreTitre = (): BarreTitre => {
         const barre = Fabrique.titrePage.barreTitre({
             pageDef: this.pageDef,
-            contenuAidePage: this.contenuAidePage(),
+            boutonsPourBtnGroup: [
+                [
+                    this.service.utile.lien.accueil(),
+                    this.service.utile.lien.clients(),
+                    this.service.utile.lien.invitations()
+                ]
+            ]
         });
-
-        const modeTable = Fabrique.bouton.bouton({
-            nom: 'table',
-            contenu: { texte: '' }
-        });
-        modeTable.ajouteClasseDef('btn btn-light');
-        const modes = Fabrique.titrePage.bbtnGroup('modes');
-        modes.ajoute(modeTable);
-
-        const rafraichitModes = () => {
-            modeTable.fixeTexte('Table: ' + this.service.modeTable);
-            Fabrique.bouton.fixeActionBouton(modeTable, () => {
-                this.service.changeModeTable(ModeTable.aperçu);
-                modeTable.fixeTexte('Table: ' + this.service.modeTable);
-            });
-        };
-
-        barre.ajoute({ groupe: modes, rafraichit: rafraichitModes });
 
         barre.ajoute(Fabrique.titrePage.groupeDefAccès());
 
@@ -71,7 +77,7 @@ export class ClientComponent extends PageBaseComponent implements OnInit, OnDest
         etiquette = Fabrique.ajouteEtiquetteP(infos);
         Fabrique.ajouteTexte(etiquette,
             `Ceci est `,
-            { texte: 'à faire', balise: KfTypeDeBaliseHTML.b},
+            { texte: 'à faire', balise: KfTypeDeBaliseHTML.b },
             '.'
         );
 

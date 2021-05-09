@@ -8,7 +8,7 @@ import { KfListeEditions } from './kf-liste-editions';
 import { KfListeSelecteurs } from './kf-liste-selecteurs';
 import { KfListeCommandes } from './kf-liste-commandes';
 import { Router, ActivatedRoute } from '@angular/router';
-import { KFComposantService } from '../kf-composant.service';
+import { TraiteKeydownService } from '../../traite-keydown/traite-keydown.service';
 
 @Component({
     selector: 'app-kf-liste-avec-dialogue',
@@ -23,7 +23,7 @@ export class KfListeAvecDialogueComponent extends KfComposantComponent implement
     constructor(
         private router: Router,
         private route: ActivatedRoute,
-        protected service: KFComposantService) {
+        protected service: TraiteKeydownService) {
         super(service);
     }
 
@@ -58,12 +58,11 @@ export class KfListeAvecDialogueComponent extends KfComposantComponent implement
     }
 
     ngAfterViewInit() {
-        this.composant.gereHtml.htmlElement = this.htmlElement.nativeElement;
-        this.composant.gereHtml.initialiseHtml(this.output);
+        this.composant.initialiseHtml(this.htmlElement.nativeElement, this.output);
     }
 
     traiteCommande(evenement: KfEvenement) {
-        if (evenement.type === KfTypeDEvenement.clic) {
+        if (evenement.type === KfTypeDEvenement.click) {
             const idAvant = this.liste.idEdition;
             this.commandes.traiteClic(evenement.emetteur);
             if (this.liste.avecLiens) {

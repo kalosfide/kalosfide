@@ -1,5 +1,5 @@
 import { Subscription, Observable } from 'rxjs';
-import { ApiRequêteService } from 'src/app/services/api-requete.service';
+import { ApiRequêteService } from 'src/app/api/api-requete.service';
 import { Site } from '../site/site';
 import { ModeTable } from 'src/app/commun/data-par-key/condition-table';
 import { KfInitialObservable } from 'src/app/commun/kf-composants/kf-partages/kf-initial-observable';
@@ -8,7 +8,7 @@ import { ApiDocument } from './api-document';
 import { CatalogueService } from '../catalogue/catalogue.service';
 import { StockageService } from 'src/app/services/stockage/stockage.service';
 import { IKeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/i-key-uid-rno';
-import { ApiController, ApiAction } from 'src/app/commun/api-route';
+import { ApiController, ApiAction } from 'src/app/api/api-route';
 import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
 import { ClientService } from '../client/client.service';
 import { CLFDoc } from './c-l-f-doc';
@@ -16,12 +16,20 @@ import { IKeyUidRnoNo } from 'src/app/commun/data-par-key/key-uid-rno-no/i-key-u
 import { KeyUidRnoNo } from 'src/app/commun/data-par-key/key-uid-rno-no/key-uid-rno-no';
 import { CLFLectureService } from './c-l-f-lecture.service';
 import { CLFUtile } from './c-l-f-utile';
-import { ApiResult } from 'src/app/commun/api-results/api-result';
+import { ApiResult } from 'src/app/api/api-results/api-result';
 import { CLFLigne } from './c-l-f-ligne';
 import { ApiLigne } from './api-ligne';
 import { KeyUidRnoNo2 } from 'src/app/commun/data-par-key/key-uid-rno-no-2/key-uid-rno-no-2';
 import { IdEtatSite } from '../etat-site';
+import { ApiRequêteAction } from 'src/app/api/api-requete-action';
+import { IUrlDef } from 'src/app/disposition/fabrique/fabrique-url';
+import { KfSuperGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-super-groupe';
+import { AfficheResultat } from 'src/app/disposition/affiche-resultat/affiche-resultat';
+import { CLFDocs } from './c-l-f-docs';
 
+/**
+ * Implémentations: ClientCLFService, FournisseurCLFService
+ */
 export abstract class CLFService extends CLFLectureService {
 
     private pModeActionIO: KfInitialObservable<ModeAction>;
@@ -57,7 +65,7 @@ export abstract class CLFService extends CLFLectureService {
                 case ModeAction.edite:
                     return ModeTable.edite;
                 case ModeAction.envoi:
-                    return ModeTable.bilan;
+                    return ModeTable.aperçu;
                 default:
                     return ModeTable.aperçu;
             }
@@ -119,6 +127,7 @@ export abstract class CLFService extends CLFLectureService {
     // Actions sur les commandes
 
     protected _paramsAvecContexte(params: { [param: string]: string }): { [param: string]: string } {
+//        params.dateCatalogue = null;
         return params;
     }
 
@@ -132,6 +141,9 @@ export abstract class CLFService extends CLFLectureService {
         return this._paramsAvecContexte(params);
     }
 
+    /**
+     * Contient key et àFixer de la ligne
+     */
     protected paramsFixeLigne(ligne: CLFLigne): { [param: string]: string } {
         const params = KeyUidRnoNo2.créeParams(ligne);
         params.aFixer = '' + ligne.aFixerAEnvoyer;
@@ -149,31 +161,64 @@ export abstract class CLFService extends CLFLectureService {
     }
 
     /**
-     * Crée une nouvelle commande vide d'un client
-     * @param ikeyClient tout objet ayant l'uid et le rno du client
+     * 
+     * @param demandeApi fonction retournant l'Observable du POST à l'Api
+     * @param metAJourStock fonction de mise à jour du stock si l'action réussit
+     * @param urlSiOk si présent, quand l'action a réussi, redirection après la mise à jour du stock
+     * @param formulaire 
+     * @param afficheResultat 
+     * @returns 
      */
-    créeVide(ikeyClient: IKeyUidRno): Observable<ApiResult> {
-        return this.post(ApiController.commande, ApiAction.commande.nouveau, null, this.paramsKeyClient(ikeyClient));
-    }
-    /** actionSiOk de créeVide */
-    siCréeVideOk(créé: ApiDocument) {
-        const documents = this.litStock();
-        documents.quandCommandeCréée(créé);
-        this.fixeStock(documents);
+    private apiRequêteAction(
+        demandeApi: () => Observable<ApiResult>,
+        metAJourStock?: (stock: CLFDocs, créé?: any) => void,
+        urlSiOk?: IUrlDef,
+        formulaire?: KfSuperGroupe,
+        afficheResultat?: AfficheResultat
+    ): ApiRequêteAction {
+        const apiRequêteAction: ApiRequêteAction = {
+            formulaire,
+            demandeApi,
+            actionSiOk: (créé?: any): void => {
+                const stock = this.litStock();
+                metAJourStock(stock, créé);
+                this.fixeStock(stock);
+                if (urlSiOk) {
+                    this.routeur.navigueUrlDef(urlSiOk);
+                }
+            },
+            afficheResultat,
+            traiteErreur: this.traiteErreur
+        };
+        return apiRequêteAction;
     }
 
     /**
-     * Crée une nouvelle commande d'un client en copiant les lignes de la commande précédente
+     * Crée une nouvelle commande vide d'un client.
      * @param ikeyClient tout objet ayant l'uid et le rno du client
      */
-    créeCopie(ikeyClient: IKeyUidRno): Observable<ApiResult> {
-        return this.post(ApiController.commande, ApiAction.commande.clone, null, this.paramsKeyClient(ikeyClient));
+    public apiRequêteCrée(ikeyClient: IKeyUidRno, formulaire?: KfSuperGroupe, afficheResultat?: AfficheResultat): ApiRequêteAction {
+        return this.apiRequêteAction(
+            () => this.post(ApiController.commande, ApiAction.commande.nouveau, null, this.paramsKeyClient(ikeyClient)),
+            (stock: CLFDocs, créé: ApiDocument) => stock.quandCommandeCréée(créé),
+            this.utile.url.bon(),
+            formulaire,
+            afficheResultat
+        );
     }
-    /** actionSiOk de créeCopie */
-    siCréeCopieOk(créé: ApiDocument) {
-        const documents = this.litStock();
-        documents.quandCommandeCréée(créé, true);
-        this.fixeStock(documents);
+
+    /**
+     * Crée une nouvelle commande d'un client copie de la précédente commande.
+     * @param ikeyClient tout objet ayant l'uid et le rno du client
+     */
+    public apiRequêteCréeCopie(ikeyClient: IKeyUidRno, formulaire?: KfSuperGroupe, afficheResultat?: AfficheResultat): ApiRequêteAction {
+        return this.apiRequêteAction(
+            () => this.post(ApiController.commande, ApiAction.commande.clone, null, this.paramsKeyClient(ikeyClient)),
+            (stock: CLFDocs, créé: ApiDocument) => stock.quandCommandeCréée(créé),
+            this.utile.url.bon(),
+            formulaire,
+            afficheResultat
+        );
     }
 
     /**
@@ -191,169 +236,179 @@ export abstract class CLFService extends CLFLectureService {
     }
 
     // Actions sur les lignes
-    private _editeLigne(ligne: CLFLigne, ajout?: boolean): Observable<ApiResult> {
-        const controller = this.controller(ligne.parent.type);
-        const apiLigne = ligne.apiLigneAEnvoyer();
-        return ajout
-            ? this.post<ApiLigne>(controller, ApiAction.commande.ajoute, apiLigne, this.paramsVide())
-            : this.put<ApiLigne>(controller, ApiAction.docCLF.edite, apiLigne, this.paramsVide());
-    }
+
     /**
-     * ajoute ou modifie une ligne
-     * @param ligne ligne à ajouter ou à modifier
+     * ajoute une ligne
+     * @param ligne ligne à ajouter
      * @param ajout true pour un ajout
      */
-    editeLigne(ligne: CLFLigne, ajout?: boolean): Observable<ApiResult> {
-        return this._editeLigne(ligne, ajout);
-    }
-    /** actionSiOk de editeLigne */
-    siEditeLigneOk(ligne: CLFLigne) {
-        const stock = this.litStock();
-        if (!stock) {
-            throw new Error('Documents: Pas de stock');
-        }
-        stock.quandLigneEditée(ligne);
-        this.fixeStock(stock);
-    }
-
-    protected _supprimeLigne(ligne: CLFLigne): Observable<ApiResult> {
-        return this.delete(ApiController.commande, ApiAction.commande.supprime, this.paramsKeyLigne(ligne));
+    private ajouteLigne(ligne: CLFLigne): Observable<ApiResult> {
+        const controller = this.controller(ligne.parent.type);
+        const apiLigne = ligne.apiLigneAEnvoyer();
+        return this.post<ApiLigne>(controller, ApiAction.commande.ajoute, apiLigne, this.paramsVide());
     }
     /**
-     * supprime une ligne
-     * @param ligne ligne à supprimer
+     * modifie une ligne
+     * @param ligne ligne à modifier
      */
-    supprimeLigne(ligne: CLFLigne): Observable<ApiResult> {
-        return this._supprimeLigne(ligne);
+    private editeLigne(ligne: CLFLigne): Observable<ApiResult> {
+        const controller = this.controller(ligne.parent.type);
+        const apiLigne = ligne.apiLigneAEnvoyer();
+        return this.put<ApiLigne>(controller, ApiAction.docCLF.edite, apiLigne, this.paramsVide());
     }
-    /** actionSiOk de supprimeLigne */
-    siSupprimeLigneOk(ligne: CLFLigne) {
-        const stock = this.litStock();
-        if (!stock) {
-            throw new Error('Commandes: Pas de stock');
-        }
-        stock.quandLigneSupprimée(ligne);
-        this.fixeStock(stock);
+
+    /**
+     * Modifie une ligne
+     * @param ligne ligne modifiée à sauvegarder
+     */
+    public apiRequêteEditeLigne(ligne: CLFLigne, formulaire?: KfSuperGroupe, afficheResultat?: AfficheResultat): ApiRequêteAction {
+        return this.apiRequêteAction(
+            () => this.editeLigne(ligne),
+            (stock: CLFDocs) => stock.quandLigneEditée(ligne),
+            this.utile.url.bon(),
+            formulaire,
+            afficheResultat
+        );
+    }
+
+    /**
+     * Ajoute une ligne
+     * @param ligne ligne à ajouter
+     */
+    public apiRequêteAjouteLigne(ligne: CLFLigne, formulaire?: KfSuperGroupe, afficheResultat?: AfficheResultat): ApiRequêteAction {
+        return this.apiRequêteAction(
+            () => this.ajouteLigne(ligne),
+            (stock: CLFDocs) => stock.quandLigneEditée(ligne),
+            this.utile.url.bon(),
+            formulaire,
+            afficheResultat
+        );
+    }
+
+    /**
+     * Supprime une ligne
+     * @param ligne ligne à supprimer
+     * @param rafraichitTable fonction à appeler après la mise à jour du stock
+     */
+    public apiRequêteSupprimeLigne(ligne: CLFLigne, rafraichitTable: (stock: CLFDocs) => void): ApiRequêteAction {
+        return this.apiRequêteAction(
+                () => this.delete(ApiController.commande, ApiAction.commande.supprime, this.paramsKeyLigne(ligne)),
+                (stock: CLFDocs) => {
+                    stock.quandLigneSupprimée(ligne);
+                    rafraichitTable(stock);
+                }
+            );
     }
 
     /**
      * Fixe la valeur de AFixer de la ligne
      */
-    fixeAFixer(ligne: CLFLigne): Observable<ApiResult> {
+    public apiRequêtefixeAFixer(ligne: CLFLigne, formulaire?: KfSuperGroupe): ApiRequêteAction {
         const controller = this.controller(ligne.parent.type);
-        return this.post(controller, ApiAction.docCLF.fixe, null, this.paramsFixeLigne(ligne));
-    }
-    sifixeAFixerOk(ligne: CLFLigne) {
-        const stock = this.litStock();
-        if (!stock) {
-            throw new Error('Commandes: Pas de stock');
-        }
-        stock.quandAFixerFixé(ligne);
-        this.fixeStock(stock);
+        return this.apiRequêteAction(
+            () => this.post(controller, ApiAction.docCLF.fixe, null, this.paramsFixeLigne(ligne)),
+            (stock: CLFDocs) => stock.quandAFixerFixé(ligne),
+        );
     }
 
     /**
      * Copie la valeur de Quantité dans AFixer pour la ligne
      */
-    copieSourceDansAFixer1(ligne: CLFLigne): Observable<ApiResult> {
+    public apiRequêteCopieSourceDansAFixer1(ligne: CLFLigne): ApiRequêteAction {
         const controller = this.controller(ligne.parent.type);
-        return this.post(controller, ApiAction.docCLF.copie1, null, KeyUidRnoNo2.créeParams(ligne));
-    }
-    /** actionSiOk de supprimeLigne */
-    siCopieSourceDansAFixer1Ok(ligne: CLFLigne) {
-        const stock = this.litStock();
-        if (!stock) {
-            throw new Error('Commandes: Pas de stock');
-        }
-        stock.quandSourceCopiéeDansAFixer1(ligne);
-        this.fixeStock(stock);
+        return this.apiRequêteAction(
+            () => this.post(controller, ApiAction.docCLF.copie1, null, this.paramsKeyLigne(ligne)),
+            (stock: CLFDocs) => stock.quandSourceCopiéeDansAFixer1(ligne),
+        );
     }
 
     /**
      * Copie la valeur de Quantité dans AFixer pour chaque ligne du document
      */
-    copieSourceDansAFixerDoc(doc: CLFDoc): Observable<ApiResult> {
+    public apiRequêteCopieSourceDansAFixerDoc(doc: CLFDoc, rafraichitTable?: () => void): ApiRequêteAction {
         const controller = this.controller(doc.type);
-        return this.post(controller, ApiAction.docCLF.copieD, null, KeyUidRnoNo.créeParams(doc));
-    }
-    siCopieSourceDansAFixerDocOk(doc: CLFDoc) {
-        const stock = this.litStock();
-        if (!stock) {
-            throw new Error('Commandes: Pas de stock');
-        }
-        stock.quandSourceCopiéeDansAFixerDoc(doc);
-        this.fixeStock(stock);
+        return this.apiRequêteAction(
+            () => this.post(controller, ApiAction.docCLF.copie1, null, KeyUidRnoNo.créeParams(doc)),
+            (stock: CLFDocs) => {
+                stock.quandSourceCopiéeDansAFixerDoc(doc);
+                rafraichitTable();
+            },
+        );
     }
 
     /**
      * Copie la valeur de Quantité dans AFixer pour chaque ligne des documents
      * dont le client est celui du clfDocs et le numéro l'un de ceux des documents du clfDocs
      */
-    copieSourceDansAFixerDocs(doc: CLFDoc): Observable<ApiResult> {
+    public apiRequêteCopieSourceDansAFixerDocs(doc: CLFDoc, rafraichitTable?: () => void): ApiRequêteAction {
         const controller = this.controller(doc.type);
         const clfDocs = doc.apiSynthèseAEnvoyer(d => d.lignes && d.nbCopiables > 0);
-        return this.post(controller, ApiAction.docCLF.copieT, clfDocs);
+        return this.apiRequêteAction(
+            () => this.post(controller, ApiAction.docCLF.copieT, clfDocs),
+            (stock: CLFDocs) => {
+                stock.quandSourceCopiéeDansAFixerDocs(doc);
+                rafraichitTable();
+            },
+        );
     }
-    siCopieSourceDansAFixerDocsOk(doc: CLFDoc) {
-        const stock = this.litStock();
-        if (!stock) {
-            throw new Error('Commandes: Pas de stock');
-        }
-        stock.quandSourceCopiéeDansAFixerDocs(doc);
-        this.fixeStock(stock);
+
+    /**
+     * Annule la valeur de AFixer pour la ligne
+     * @param rafraichitTable fonction à appeler après la mise à jour du stock
+     */
+    public apiRequêteAnnuleLigne(ligne: CLFLigne, rafraichitTable?: () => void): ApiRequêteAction {
+        const demandeApi = () => {
+            ligne.aFixer = 0;
+            return this.editeLigne(ligne);
+        };
+        return rafraichitTable
+            ? this.apiRequêteAction(
+                demandeApi,
+                (stock: CLFDocs) => {
+                    stock.quandLigneEditée(ligne);
+                    rafraichitTable();
+                },
+            )
+            : this.apiRequêteAction(
+                demandeApi,
+                (stock: CLFDocs) => stock.quandLigneEditée(ligne),
+                this.utile.url.bon(),
+            );
     }
 
     /**
      * Annule la valeur de AFixer pour chaque ligne du document
+     * @param rafraichitTable fonction à appeler après la mise à jour du stock
      */
-    annuleLigne(ligne: CLFLigne): Observable<ApiResult> {
-        const controller = this.controller(ligne.parent.type);
-        return this.post(controller, ApiAction.docCLF.annule1, null, KeyUidRnoNo2.créeParams(ligne));
-    }
-    siAnnuleLigneOk(ligne: CLFLigne) {
-        const stock = this.litStock();
-        if (!stock) {
-            throw new Error('Commandes: Pas de stock');
-        }
-        stock.quandAnnule1(ligne);
-        this.fixeStock(stock);
-    }
-
-    /**
-     * Annule la valeur de AFixer pour chaque ligne du document
-     */
-    annuleDoc(doc: CLFDoc): Observable<ApiResult> {
+    public apiRequêteAnnuleDoc(doc: CLFDoc, rafraichitTable: () => void): ApiRequêteAction {
         const controller = this.controller(doc.type);
-        return this.post(controller, ApiAction.docCLF.annuleD, null, KeyUidRnoNo.créeParams(doc));
-    }
-    siAnnuleDocOk(doc: CLFDoc) {
-        const stock = this.litStock();
-        if (!stock) {
-            throw new Error('Commandes: Pas de stock');
-        }
-        stock.quandAnnuleDoc(doc);
-        this.fixeStock(stock);
+        return this.apiRequêteAction(
+            () => this.post(controller, ApiAction.docCLF.annuleD, null, KeyUidRnoNo.créeParams(doc)),
+            (stock: CLFDocs) => {
+                stock.quandAnnuleDoc(doc);
+                rafraichitTable();
+            },
+        );
     }
 
     /**
      * Annule la valeur de AFixer pour chaque ligne des documents
      * dont le client est celui du clfDocs et le numéro l'un de ceux des documents du clfDocs
+     * @param rafraichitTable fonction à appeler après la mise à jour du stock
      */
-    annuleDocs(doc: CLFDoc): Observable<ApiResult> {
+    public apiRequêteAnnuleDocs(doc: CLFDoc, rafraichitTable: () => void): ApiRequêteAction {
         const controller = this.controller(doc.type);
         const clfDocs = doc.apiSynthèseAEnvoyer(d => d.lignes && d.nbCopiables > 0);
-        return this.post(controller, ApiAction.docCLF.copieT, clfDocs);
-    }
-    siAnnuleDocsOk(doc: CLFDoc) {
-        const stock = this.litStock();
-        if (!stock) {
-            throw new Error('Commandes: Pas de stock');
-        }
-        stock.quandSourceCopiéeDansAFixerDoc(doc);
-        this.fixeStock(stock);
+        return this.apiRequêteAction(
+            () => this.post(controller, ApiAction.docCLF.copieT, clfDocs),
+            (stock: CLFDocs) => {
+                stock.quandAnnuleDocs(doc);
+                rafraichitTable();
+            },
+        );
     }
 
-    envoieBon(document: CLFDoc): Observable<ApiResult> {
+    envoi(document: CLFDoc): Observable<ApiResult> {
         if (document.type === 'commande') {
             const params: { [param: string]: string } = this.paramsKeyClient(document.client);
             return this.post(ApiController.commande, ApiAction.docCLF.envoi, null, params);
@@ -362,12 +417,5 @@ export abstract class CLFService extends CLFLectureService {
             const clfDocs = document.apiSynthèseAEnvoyer(d => d.choisi);
             return this.post(controller, ApiAction.docCLF.envoi, clfDocs);
         }
-    }
-
-    /**
-     * efface le stock
-     */
-    quandEnvoyé() {
-        this.pStockage.initialise();
     }
 }

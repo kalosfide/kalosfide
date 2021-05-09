@@ -12,6 +12,7 @@ import { CLFService } from './c-l-f.service';
 import { CLFUtile } from './c-l-f-utile';
 import { RouteurService } from 'src/app/services/routeur.service';
 import { CLFDoc } from './c-l-f-doc';
+import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
 
 export abstract class CLFChoixProduitComponent extends PageTableComponent<CLFLigne> implements OnInit, OnDestroy {
 
@@ -47,19 +48,19 @@ export abstract class CLFChoixProduitComponent extends PageTableComponent<CLFLig
     }
 
     créeGroupeTableDef(): IGroupeTableDef<CLFLigne> {
-        const outils = Fabrique.vueTable.outils<CLFLigne>(this.nom);
+        const outils = Fabrique.vueTable.outils<CLFLigne>();
         outils.ajoute(this._utile.outils.catégorie());
         outils.ajoute(this._utile.outils.produit());
 
         const vueTableDef: IKfVueTableDef<CLFLigne> = {
             colonnesDef: this._utile.colonne.ligne.defsChoixProduit(),
             outils,
-            id: (ligne: CLFLigne) => this._utile.url.id('' + ligne.produit.no),
-            quandClic: (ligne: CLFLigne) => (() => this.routeur.navigueUrlDef(this._utile.url.ajoute(ligne))).bind(this),
-            optionsDeTrieur: Fabrique.vueTable.optionsDeTrieur([
-                { nomTri: 'catégorie' },
-                { nomTri: 'produit' }
-            ])
+            id: (ligne: CLFLigne) => {
+                return this.service.fragment(ligne);
+            },
+            quandClic: { colonneDuClic: this._utile.nom.choisit }, // (ligne: CLFLigne) => (() => this.routeur.navigueUrlDef(this._utile.url.ajoute(ligne))).bind(this),
+            triInitial: { colonne: this._utile.nom.catégorie, direction: 'asc' },
+            pagination: Fabrique.vueTable.pagination<CLFLigne>()
         };
         return {
             vueTableDef
@@ -83,8 +84,8 @@ export abstract class CLFChoixProduitComponent extends PageTableComponent<CLFLig
         this._chargeVueTable(this.liste);
     }
 
-    créePageTableDef() {
-        this.pageTableDef = {
+    créePageTableDef(): IPageTableDef {
+        return {
             avantChargeData: () => this.avantChargeData(),
             chargeData: (data: Data) => this.chargeData(data),
             créeSuperGroupe: () => this.créeSuperGroupe(),

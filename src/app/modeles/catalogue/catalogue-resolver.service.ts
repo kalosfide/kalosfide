@@ -14,9 +14,7 @@ export class CatalogueResolverService implements Resolve<Catalogue> {
     }
 
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Catalogue> {
-        return this.service.avecAttente(
-            () => this.service.catalogue$()
-        )(route, state);
+        return this.service.catalogue$();
     }
 
 }

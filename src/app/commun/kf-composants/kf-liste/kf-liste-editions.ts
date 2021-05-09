@@ -200,7 +200,7 @@ export class KfListeEditions {
             };
             if (inter.dansTable.titresDesColonnes) {
                 const enTetesDesColonnes = new KfGroupe('');
-                enTetesDesColonnes.ajouteClasseDef('kf-row');
+                enTetesDesColonnes.ajouteClasse('kf-row');
                 const nbColonnes = 0;
                 if (nbColonnes > 0) {
                     this.dansTable.enTetesDesColonnes = enTetesDesColonnes;
@@ -242,8 +242,8 @@ export class KfListeEditions {
             this.editeur = new KfListeEditeur(this);
         } else {
             if (this.typeDeMiseAJour !== KfListeMiseAJour.immédiate) {
-                this.boutonOk.gereHtml.ajouteTraiteur(KfTypeDEvenement.clic, this.traiteOk);
-                this.boutonAnnuler.gereHtml.ajouteTraiteur(KfTypeDEvenement.clic, this.traiteAnnuler);
+                this.boutonOk.gereHtml.ajouteTraiteur(KfTypeDEvenement.click, this.traiteOk);
+                this.boutonAnnuler.gereHtml.ajouteTraiteur(KfTypeDEvenement.click, this.traiteAnnuler);
                 this.itemNouveau = this.liste.creeItems.creeItem();
             }
         }
@@ -329,8 +329,8 @@ export class KfListeEditions {
         const composant = this.liste.creeItems.composant(item);
         if (this.dansTable && composant.type === KfTypeDeComposant.groupe) {
             const g = composant as KfGroupe;
-            g.ajouteClasseDef('kf-row');
-            g.contenus.forEach(c => c.ajouteClasseDef('kf-cell'));
+            g.ajouteClasse('kf-row');
+            g.contenus.forEach(c => c.ajouteClasse('kf-cell'));
         }
     }
 

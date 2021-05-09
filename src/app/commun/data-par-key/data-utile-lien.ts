@@ -1,24 +1,23 @@
 import { DataUtile } from './data-utile';
 import { DataUtileUrl } from './data-utile-url';
 import { ILienDef } from 'src/app/disposition/fabrique/fabrique-lien';
-import { KfLien } from '../kf-composants/kf-elements/kf-lien/kf-lien';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { IUrlDef } from 'src/app/disposition/fabrique/fabrique-url';
 import { IContenuPhraseDef } from 'src/app/disposition/fabrique/fabrique-contenu-phrase';
 
 export class DataUtileLien {
-    protected _parent: DataUtile;
+    protected parent: DataUtile;
 
     constructor(dataUtile: DataUtile) {
-        this._parent = dataUtile;
+        this.parent = dataUtile;
     }
 
     get dataUtile(): DataUtile {
-        return this._parent;
+        return this.parent;
     }
 
     get url(): DataUtileUrl {
-        return this._parent.url;
+        return this.parent.url;
     }
 
     texte(urlDef: IUrlDef): string {
@@ -28,7 +27,7 @@ export class DataUtileLien {
     def(nom: string, urlDef: IUrlDef, contenu?: IContenuPhraseDef): ILienDef {
         const def: ILienDef = {
             nom: nom ? nom : urlDef.pageDef.urlSegment,
-            urlDef: urlDef,
+            urlDef,
             contenu: contenu
                 ? contenu
                 : { texte: this.texte(urlDef) },

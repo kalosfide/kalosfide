@@ -9,7 +9,6 @@ import { FournisseurCLFService } from '../fournisseur-c-l-f-.service';
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
-    styleUrls: ['../../commun/commun.scss']
 })
 export class FactureClientComponent extends CLFClientComponent implements OnInit, OnDestroy {
 

@@ -1,9 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CompteService } from '../compte.service';
-import { AttenteService } from '../../services/attente.service';
+import { Attente, AttenteService } from '../../services/attente.service';
 import { Subscription } from 'rxjs';
-import { RouteurService } from 'src/app/services/routeur.service';
-import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
+import { AppSitePages } from 'src/app/app-site/app-site-pages';
 
 @Component({
     selector: 'app-deconnection',
@@ -13,7 +12,7 @@ import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 export class DeconnectionComponent implements OnInit, OnDestroy {
 
     subscription: Subscription;
-    attente: number;
+    attente: Attente;
 
     constructor(
         private service: CompteService,
@@ -21,14 +20,15 @@ export class DeconnectionComponent implements OnInit, OnDestroy {
     ) { }
 
     ngOnInit() {
-        this.attente = this.attenteService.commence('déconnecte');
+        this.attente = this.attenteService.attente('déconnecte');
+        this.attente.commence();
         this.subscription = this.service.déconnecte().subscribe(
             () => {
-                this.attenteService.finit(this.attente);
-                this.service.routeur.navigue();
+                this.attente.finit();
+                this.service.routeur.naviguePageDef(AppSitePages.accueil);
             },
             () => {
-                this.attenteService.finit(this.attente);
+                this.attente.finit();
             }
         );
     }

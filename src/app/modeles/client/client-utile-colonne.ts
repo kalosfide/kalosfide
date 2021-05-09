@@ -2,10 +2,10 @@ import { ClientUtile } from './client-utile';
 import { DataUtileColonne } from 'src/app/commun/data-par-key/data-utile-colonne';
 import { IKfVueTableColonneDef } from 'src/app/commun/kf-composants/kf-vue-table/i-kf-vue-table-colonne-def';
 import { Client } from './client';
-import { Tri } from 'src/app/commun/outils/tri';
 import { TexteEtatClient, EtatClient } from './etat-client';
-import { Compare } from '../compare';
+import { Compare } from '../../commun/outils/tri';
 import { TexteOutils } from 'src/app/commun/outils/texte-outils';
+import { KfTexte } from 'src/app/commun/kf-composants/kf-elements/kf-texte/kf-texte';
 
 export class ClientUtileColonne extends DataUtileColonne {
     constructor(utile: ClientUtile) {
@@ -17,19 +17,22 @@ export class ClientUtileColonne extends DataUtileColonne {
     }
 
     nom(): IKfVueTableColonneDef<Client> {
+        const créeContenu = (client: Client) => client.nom;
         return {
             nom: 'nom',
             enTeteDef: { titreDef: 'Nom' },
-            tri: new Tri<Client>('Nom', Compare.nomClient),
-            créeContenu: (client: Client) => client.nom
+            créeContenu,
+            compare: Compare.texte(créeContenu),
         };
     }
 
     adresse(): IKfVueTableColonneDef<Client> {
+        const créeContenu = (client: Client) => client.adresse;
         return {
             nom: 'adresse',
             enTeteDef: { titreDef: 'Adresse' },
-            créeContenu: (client: Client) => client.adresse
+            créeContenu,
+            compare: Compare.texte(créeContenu),
         };
     }
 
@@ -37,7 +40,11 @@ export class ClientUtileColonne extends DataUtileColonne {
         return {
             nom: 'état',
             enTeteDef: { titreDef: 'Etat' },
-            créeContenu: (client: Client) => ({ texteDef: () => TexteEtatClient(client.etat) })
+            créeContenu: (client: Client) => () => TexteEtatClient(client.etat),
+            compare: Compare.enchaine(
+                Compare.texte((client: Client) => TexteEtatClient(client.etat)),
+                Compare.date((client: Client) => client.dateEtat)
+            )
         };
     }
 
@@ -45,15 +52,38 @@ export class ClientUtileColonne extends DataUtileColonne {
         return {
             nom: 'date',
             enTeteDef: { titreDef: 'Date' },
-            créeContenu: (client: Client) => ({ texteDef: () => TexteOutils.date.en_chiffres(client.dateEtat) })
+            créeContenu: (client: Client) => () => TexteOutils.date.en_chiffres(client.dateEtat),
+            classeDefs: ['date'],
+            compare: Compare.date((client: Client) => client.dateEtat)
         };
     }
 
     connection(): IKfVueTableColonneDef<Client> {
         return {
             nom: 'connection',
-            enTeteDef: { titreDef: 'Connection' },
-            créeContenu: (client: Client) => client.avecCompte ? 'Oui' : 'Non'
+            enTeteDef: { titreDef: 'Avec compte' },
+            créeContenu: (client: Client) => client.compte === 'O' ? 'Oui' : 'Non',
+            compare: Compare.texte((client: Client) => client.compte)
+        };
+    }
+
+    invite(): IKfVueTableColonneDef<Client> {
+        return {
+            nom: 'invite',
+            enTeteDef: { titreDef: 'Avec compte' },
+            créeContenu: (client: Client) => {
+                if (client.compte === 'O') {
+                    const texte = new KfTexte('', 'Oui');
+                    texte.ajouteClasse('btn texte-sous-icone'); // pour centrer
+                    return texte;
+                }
+                const lien = client.compte === 'I' ? this.utile.lien.invité(client) : this.utile.lien.invite(client);
+                lien.inactivité = client.etat !== EtatClient.actif;
+                return lien;
+            },
+            classeDefs: ['client-compte'],
+            compare: Compare.texte((client: Client) => client.compte),
+            nePasAfficherSi: this.utile.conditionTable.pasEdition,
         };
     }
 
@@ -62,12 +92,13 @@ export class ClientUtileColonne extends DataUtileColonne {
             nom: 'edite',
             créeContenu: (client: Client) => {
                 if (client.etat === EtatClient.nouveau) {
-                    return { composant: this.utile.lien.accepte(client) };
+                    return this.utile.lien.accepte(client);
                 }
                 const lien = this.utile.lien.edite(client);
-                lien.inactivité = client.avecCompte || client.etat !== EtatClient.actif;
-                return { composant: lien };
+                lien.inactivité = client.compte !== 'N' || client.etat !== EtatClient.actif;
+                return lien;
             },
+            classeDefs: ['action'],
             nePasAfficherSi: this.utile.conditionTable.pasEdition,
         };
     }
@@ -77,31 +108,38 @@ export class ClientUtileColonne extends DataUtileColonne {
             nom: 'exclut',
             créeContenu: (client: Client) => {
                 if (client.etat === EtatClient.inactif) {
-                    return { composant: this.utile.lien.accepte(client) };
+                    return this.utile.lien.accepte(client);
                 }
-                if (client.etat === EtatClient.actif && !client.avecCompte && !client.avecCommandes) {
-                    return { composant: this.utile.lien.supprime(client) };
+                if (client.etat === EtatClient.actif && !client.compte && !client.avecCommandes) {
+                    return this.utile.lien.supprime(client);
                 }
                 const lien = this.utile.lien.exclut(client);
                 lien.inactivité = client.etat === EtatClient.exclu;
-                return { composant: lien };
+                return lien;
             },
+            classeDefs: ['action'],
             nePasAfficherSi: this.utile.conditionTable.pasEdition,
         };
     }
 
-    colonnesLivraison(): IKfVueTableColonneDef<Client>[] {
+    colonnesBase(): IKfVueTableColonneDef<Client>[] {
         return [
             this.nom(),
             this.adresse(),
             this.état(),
             this.date(),
-            this.connection(),
         ];
     }
 
+    colonnesLivraison(): IKfVueTableColonneDef<Client>[] {
+        return this.colonnesBase().concat([
+            this.connection(),
+        ]);
+    }
+
     colonnes(): IKfVueTableColonneDef<Client>[] {
-        return this.colonnesLivraison().concat([
+        return this.colonnesBase().concat([
+            this.invite(),
             this.edite(),
             this.exclut(),
         ]);

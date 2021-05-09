@@ -3,7 +3,7 @@ import { KfTypeDeComposant, KfTypeDeValeur } from '../kf-composants-types';
 import { KfComposantComponent } from '../kf-composant/kf-composant.component';
 import { KfGroupe } from './kf-groupe';
 import { FormGroup } from '@angular/forms';
-import { KFComposantService } from '../kf-composant.service';
+import { TraiteKeydownService } from '../../traite-keydown/traite-keydown.service';
 
 @Component({
     selector: 'app-kf-groupe',
@@ -16,7 +16,7 @@ export class KfGroupeComponent extends KfComposantComponent implements OnInit, A
     type = KfTypeDeComposant;
     typeDeValeur = KfTypeDeValeur;
 
-    constructor(protected service: KFComposantService) {
+    constructor(protected service: TraiteKeydownService) {
         super(service);
     }
 
@@ -32,8 +32,7 @@ export class KfGroupeComponent extends KfComposantComponent implements OnInit, A
     }
 
     ngAfterViewInit() {
-        this.composant.gereHtml.htmlElement = this.domElementRef.nativeElement;
-        this.composant.gereHtml.initialiseHtml(this.output);
+        this.composant.initialiseHtml(this.domElementRef.nativeElement, this.output);
     }
 
 }

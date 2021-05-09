@@ -4,7 +4,6 @@ import { OnDestroy } from '@angular/core';
 import { KfSuperGroupe } from '../../commun/kf-composants/kf-groupe/kf-super-groupe';
 import { KfEvenement, KfTypeDEvenement } from '../../commun/kf-composants/kf-partages/kf-evenements';
 import { KfBouton } from '../../commun/kf-composants/kf-elements/kf-bouton/kf-bouton';
-import { TypeResultatAffichable } from '../affiche-resultat/type-resultat-affichable';
 import { KfGroupe } from '../../commun/kf-composants/kf-groupe/kf-groupe';
 
 import { DataService } from '../../services/data.service';
@@ -14,10 +13,7 @@ import { EtapeDeFormulaire, EtapeDeFormulaireEditeur } from './etape-de-formulai
 import { KfComposant } from '../../commun/kf-composants/kf-composant/kf-composant';
 import { ResultatAction } from 'src/app/disposition/affiche-resultat/resultat-affichable';
 import { FormulaireAEtapeService } from './formulaire-a-etapes.service';
-import { NavigationEnd } from '@angular/router';
 import { PageDef } from 'src/app/commun/page-def';
-import { filter } from 'rxjs/operators';
-import { AppRoutes } from 'src/app/app-pages';
 import { Observable } from 'rxjs';
 import { PeutQuitterService } from 'src/app/commun/peut-quitter/peut-quitter.service';
 import { Fabrique } from '../fabrique/fabrique';
@@ -26,8 +22,8 @@ import { GroupeBoutonsMessages } from '../fabrique/fabrique-formulaire';
 
 export interface IFormulaireAEtapes {
     etapes: EtapeDeFormulaire[];
-    formulaire: KfSuperGroupe;
-    edition: KfGroupe;
+    superGroupe: KfSuperGroupe;
+    formulaire: KfGroupe;
     fixeIndex: (index: number) => void;
 }
 
@@ -56,7 +52,7 @@ export abstract class FormulaireAEtapesComponent extends FormulaireBaseComponent
     }
 
     peutQuitter = (): boolean | Observable<boolean> | Promise<boolean> => {
-        if (this.formulaire.formGroup.pristine) {
+        if (this.superGroupe.formGroup.pristine) {
             return true;
         }
         return this.peutQuitterService.confirme(this.pageDef.titre);
@@ -73,13 +69,14 @@ export abstract class FormulaireAEtapesComponent extends FormulaireBaseComponent
     }
 
     url(etape: EtapeDeFormulaire): string {
-        if (this.inactive(etape)) {
-            etape = this.etapes[this.index];
+        let e = etape;
+        if (this.inactive(e)) {
+            e = this.etapes[this.index];
         }
-        if (!etape) {
-            etape = this.etapes[0];
+        if (!e) {
+            e = this.etapes[0];
         }
-        return this.construitUrl(etape.pageDef.urlSegment);
+        return this.construitUrl(e.pageDef.urlSegment);
     }
 
     choisie(etape: EtapeDeFormulaire): boolean {
@@ -131,7 +128,7 @@ export abstract class FormulaireAEtapesComponent extends FormulaireBaseComponent
         if (index < this.etapes.length - 1) {
             return [this.créeBoutonPrécédent(index), this.créeBoutonSuivant(index)];
         }
-        this.boutonSoumettre = Fabrique.bouton.boutonSoumettre(this.formulaire, this.texteSoumettre);
+        this.boutonSoumettre = Fabrique.bouton.soumettre(this.superGroupe, this.texteSoumettre);
         return [this.créeBoutonPrécédent(index), this.boutonSoumettre];
     }
 
@@ -140,54 +137,52 @@ export abstract class FormulaireAEtapesComponent extends FormulaireBaseComponent
     }
 
     protected créeFormulaire() {
-        this.formulaire = new KfSuperGroupe(this.nom);
-        this.formulaire.créeGereValeur();
+        this.superGroupe = new KfSuperGroupe(this.nom);
+        this.superGroupe.créeGereValeur();
 
-        this.edition = new KfGroupe(this.nom);
-        this.edition.créeGereValeur();
+        this.formulaire = new KfGroupe(this.nom);
+        this.formulaire.créeGereValeur();
         for (let i = 0; i < this.etapes.length; i++) {
             const etape = this.etapes[i];
             etape.créeEdition();
-            const btnsMsgs = new GroupeBoutonsMessages(etape.nom);
-            etape.groupeEditeur.ajoute(btnsMsgs.groupe);
             if (i < this.etapes.length - 1) {
-                btnsMsgs.créeBoutons([this.créeBoutonSuivant(i)]);
+                const btnsMsgs = new GroupeBoutonsMessages(etape.nom, { boutons: [this.créeBoutonSuivant(i)] });
+                etape.groupeEditeur.ajoute(btnsMsgs.groupe);
             } else {
-                this.boutonSoumettre = Fabrique.bouton.boutonSoumettre(this.formulaire, this.texteSoumettre);
-                btnsMsgs.créeBoutons([this.boutonSoumettre]);
-                this.afficheResultat = Fabrique.formulaire.ajouteResultat(this.formulaire);
+                this.boutonSoumettre = Fabrique.bouton.soumettre(this.superGroupe, this.texteSoumettre);
+                const btnsMsgs = new GroupeBoutonsMessages(etape.nom, { boutons: [this.boutonSoumettre] });
+                etape.groupeEditeur.ajoute(btnsMsgs.groupe);
+                this.afficheResultat = Fabrique.formulaire.ajouteResultat(this.superGroupe);
                 etape.groupeEditeur.ajoute(this.afficheResultat.groupe);
             }
-            this.edition.ajoute(etape.groupeEditeur);
+            this.formulaire.ajoute(etape.groupeEditeur);
         }
-        this.edition.avecUnSeulContenuVisible(() => this.index);
 
-        this.formulaire.ajoute(this.edition);
-        this.formulaire.sauveQuandChange = true;
-        this.formulaire.gereHtml.ajouteTraiteur(KfTypeDEvenement.clic, (evenement: KfEvenement) => {
+        this.superGroupe.ajoute(this.formulaire);
+        this.superGroupe.comportementFormulaire = { sauveQuandChange: true };
+        this.superGroupe.gereHtml.ajouteTraiteur(KfTypeDEvenement.click, (evenement: KfEvenement) => {
             if (evenement.emetteur === this.boutonSoumettre) {
                 this.soumet();
             }
         });
-        this.formulaire.gereHtml.ajouteTraiteur(KfTypeDEvenement.soumet, (evenement: KfEvenement) => {
+        this.superGroupe.gereHtml.ajouteTraiteur(KfTypeDEvenement.submit, (evenement: KfEvenement) => {
             if (evenement.emetteur === this.boutonSoumettre) {
                 this.soumet();
             }
         });
-        this.formulaire.quandTousAjoutés();
+        this.superGroupe.quandTousAjoutés();
     }
 
     ngOnInit_Index() {
-        this.routeur.router.events
-            .pipe(filter(event => event instanceof NavigationEnd))
-            .subscribe((navigationEnd: NavigationEnd) => {
-                const segments = navigationEnd.urlAfterRedirects.split(AppRoutes.séparateur);
-                const nomEtape = segments[segments.length - 1];
-                const index = this.etapes.findIndex(etape => etape.pageDef.urlSegment === nomEtape);
-                this.index = index === -1 ? 0 : index;
-            });
         this.index = 0;
         this.etapesService.initialise(this);
+        this.etapesService.index$().subscribe((index: number) => {
+            this.index = index;
+            for (let i = 0; i < this.etapes.length; i++) {
+                const etape = this.etapes[i];
+                etape.groupeEditeur.visible = i === index;
+            }
+        });
     }
 
     ngOnDestroy() {
@@ -197,7 +192,7 @@ export abstract class FormulaireAEtapesComponent extends FormulaireBaseComponent
 
     actionSiErreur = (resultat: ResultatAction) => {
         if (!resultat.ok) {
-            if (!this.formulaire.formGroup.valid) {
+            if (!this.superGroupe.formGroup.valid) {
                 // TODO
                 // marquer les erreurs de validation a posteriori dans les étapes
                 // mettre des liens vers les étapes avec erreur
@@ -207,10 +202,10 @@ export abstract class FormulaireAEtapesComponent extends FormulaireBaseComponent
 
     traite(evenement: KfEvenement) {
         switch (evenement.type) {
-            case KfTypeDEvenement.soumet:
+            case KfTypeDEvenement.submit:
                 this.soumet();
                 break;
-            case KfTypeDEvenement.clic:
+            case KfTypeDEvenement.click:
                 const index: number = evenement.parametres;
                 this.routeur.navigate([this.url(this.etapes[index])]);
                 break;

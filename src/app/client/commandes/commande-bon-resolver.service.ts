@@ -3,7 +3,6 @@ import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/r
 import { Observable, of, EMPTY } from 'rxjs';
 import { ClientCLFService } from '../client-c-l-f.service';
 import { DataResolverService } from 'src/app/services/data-resolver.service';
-import { CLFDocs } from 'src/app/modeles/c-l-f/c-l-f-docs';
 import { CLFDoc } from 'src/app/modeles/c-l-f/c-l-f-doc';
 
 @Injectable()

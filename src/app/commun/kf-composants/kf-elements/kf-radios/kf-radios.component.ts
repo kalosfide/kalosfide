@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
 import { KfRadios } from './kf-radios';
 import { KfComposantComponent } from '../../kf-composant/kf-composant.component';
-import { KFComposantService } from '../../kf-composant.service';
+import { TraiteKeydownService } from '../../../traite-keydown/traite-keydown.service';
 
 @Component({
     selector: 'app-kf-radios',
@@ -15,18 +15,14 @@ export class KfRadiosComponent extends KfComposantComponent implements OnInit, A
         return this.composant as KfRadios;
     }
 
-    constructor(protected service: KFComposantService) {
+    constructor(protected service: TraiteKeydownService) {
         super(service);
     }
     ngOnInit() {
     }
 
     ngAfterViewInit() {
-        this.composant.gereHtml.htmlElement = this.divElement.nativeElement;
-        this.composant.gereHtml.enfantsDeVue = {
-            divElement: this.divElement.nativeElement,
-        };
-        this.composant.gereHtml.initialiseHtml(this.output);
+        this.composant.initialiseHtml(this.divElement.nativeElement, this.output);
     }
 
 }

@@ -18,9 +18,7 @@ export class ClientResolverService implements Resolve<Client> {
 
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<never> | Observable<Client> {
         const key = KeyUidRno.keyDeTexte(route.paramMap.get('key'));
-        return this.service.avecAttente(
-            () => this.service.client$(key, false)
-        )(route, state);
+        return this.service.client$(key);
     }
 
 }

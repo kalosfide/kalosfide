@@ -13,8 +13,8 @@ export class CommandeDoitCréerGardeService extends CLFGardeService implements C
         protected service: ClientCLFService,
     ) {
         super(service);
-        this.nom = 'CommanderDoitCréerGardeService';
-        this.nomResolver = 'CommanderBonResolverService';
+        this.nom = 'CommandeDoitCréerGardeService';
+        this.nomResolver = 'CommandeBonResolverService';
         this.gardes = [
             {
                 condition: this.commandeNExistePasOuEstEnvoyée.bind(this),

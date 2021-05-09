@@ -8,12 +8,12 @@ import { IdentificationService } from './identification.service';
 export class IdentifiantResolverService implements Resolve<Identifiant> {
 
     constructor(
-        private _identification: IdentificationService,
+        private identification: IdentificationService,
     ) {
     }
 
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Identifiant | Observable<never> | Observable<Identifiant> {
-        return this._identification.litIdentifiant();
+        return this.identification.litIdentifiant();
     }
 
 }

@@ -51,4 +51,12 @@ export class CategorieUtile extends DataKeyUtile<Categorie> {
     get colonne(): CategorieUtileColonne {
         return this.pColonne as CategorieUtileColonne;
     }
+
+    get nom(): {
+        catégorie: string,
+    } {
+        return {
+            catégorie: 'catégorie',
+        };
+    }
 }

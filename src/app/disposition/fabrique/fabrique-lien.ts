@@ -5,7 +5,8 @@ import { IContenuPhraseDef } from './fabrique-contenu-phrase';
 import { IUrlDef } from './fabrique-url';
 import { FabriqueMembre } from './fabrique-membre';
 import { FabriqueClasse } from './fabrique';
-import { BootstrapType, FabriqueBootstrap } from './fabrique-bootstrap';
+import { BootstrapNom, BootstrapType, KfBootstrap } from '../../commun/kf-composants/kf-partages/kf-bootstrap';
+import { FANomIcone } from 'src/app/commun/kf-composants/kf-partages/kf-icone-def';
 
 export interface ILienDef {
     nom?: string;
@@ -17,13 +18,13 @@ export class FabriqueLien extends FabriqueMembre {
     constructor(fabrique: FabriqueClasse) { super(fabrique); }
 
     fixeDef(lien: KfLien, def: ILienDef) {
-        let params: { [key: string]: string };
+        let queryParams: { [key: string]: string };
         if (def.urlDef.params) {
-            params = {};
-            def.urlDef.params.forEach(p => params[p.nom] = p.valeur);
+            queryParams = {};
+            def.urlDef.params.forEach(p => queryParams[p.nom] = p.valeur);
         }
         if (!def.urlDef.local) {
-            lien.fixeRoute(this.fabrique.url.url(def.urlDef), params);
+            lien.fixeRoute(this.fabrique.url.url(def.urlDef), queryParams);
         }
         if (def.urlDef.fragment) {
             lien.fragment = def.urlDef.fragment;
@@ -48,7 +49,7 @@ export class FabriqueLien extends FabriqueMembre {
     }
     lien(nomOuDef: string | ILienDef): KfLien {
         const lien = this._lien(nomOuDef);
-        lien.ajouteClasseDef('btn btn-link');
+        lien.ajouteClasse('btn btn-link');
         return lien;
     }
     lienEnLigne(nomOuDef: string | ILienDef): KfLien {
@@ -57,13 +58,13 @@ export class FabriqueLien extends FabriqueMembre {
     }
     lienBouton(nomOuDef: string | ILienDef, bootstrap: BootstrapType): KfLien {
         const lien = this._lien(nomOuDef);
-        FabriqueBootstrap.ajouteClasse(lien, 'btn', bootstrap);
+        KfBootstrap.ajouteClasse(lien, 'btn', bootstrap);
         return lien;
     }
 
     petitBouton(nomOuDef: string | ILienDef): KfLien {
         const lien = this._lien(nomOuDef);
-        lien.ajouteClasseDef('btn btn-link btn-sm');
+        lien.ajouteClasse('btn btn-link btn-sm');
         return lien;
     }
 
@@ -72,13 +73,14 @@ export class FabriqueLien extends FabriqueMembre {
             texte = urlDef.pageDef.lien ? urlDef.pageDef.lien : urlDef.pageDef.urlSegment;
         }
         const def: ILienDef = {
+            nom: 'retour',
             urlDef,
             contenu: this.fabrique.contenu.retour(texte)
         };
         return this.petitBouton(def);
     }
 
-    ajoute(urlDef: IUrlDef, texte?: string): KfLien {
+    ajouteDef(urlDef: IUrlDef, texte?: string): ILienDef {
         if (texte === null || texte === undefined) {
             texte = urlDef.pageDef.lien ? urlDef.pageDef.lien : 'Ajoute';
         }
@@ -86,7 +88,11 @@ export class FabriqueLien extends FabriqueMembre {
             urlDef,
             contenu: this.fabrique.contenu.ajoute(texte)
         };
-        return this.petitBouton(def);
+        return def;
+    }
+
+    ajoute(urlDef: IUrlDef, texte?: string): KfLien {
+        return this.petitBouton(this.ajouteDef(urlDef, texte));
     }
 
     boutonAnnuler(urlDef: IUrlDef): KfLien {
@@ -97,7 +103,7 @@ export class FabriqueLien extends FabriqueMembre {
             },
         };
         const lien = this._lien(def);
-        FabriqueBootstrap.ajouteClasse(lien, 'btn', 'dark');
+        KfBootstrap.ajouteClasse(lien, 'btn', 'dark');
         return lien;
     }
 
@@ -106,10 +112,10 @@ export class FabriqueLien extends FabriqueMembre {
     }
     groupeDeLiens(...nomOuLienDefOuLiens: (string | ILienDef | KfLien)[]) {
         const groupe = new KfGroupe('');
-        groupe.ajouteClasseDef('mb-2');
+        groupe.ajouteClasse('mb-2');
         const ul = new KfUlComposant('');
-        ul.ajouteClasseDef('nav row');
-        ul.gereCssLi.ajouteClasseDef('nav-item col');
+        ul.ajouteClasse('nav row');
+        ul.gereCssLi.ajouteClasse('nav-item col');
         groupe.ajoute(ul);
 
         let lien: KfLien;
@@ -120,14 +126,27 @@ export class FabriqueLien extends FabriqueMembre {
                 lien = nomOuLienDefOuLien as KfLien;
                 if (lien.type === undefined) {
                     lien = this._lien(nomOuLienDefOuLien as ILienDef);
-                    lien.ajouteClasseDef('nav-link');
+                    lien.ajouteClasse('nav-link');
                 }
             }
             ul.ajoute(lien);
         });
         if (lien && nomOuLienDefOuLiens.length > 1) {
-            lien.ajouteClasseDef('text-sm-right');
+            lien.ajouteClasse('text-sm-right');
         }
         return groupe;
+    }
+
+    deBarre(urlDef: IUrlDef, nomIcone: FANomIcone, texte?: string): KfLien {
+        return this.lienBouton({
+            nom: urlDef.pageDef.urlSegment,
+            urlDef,
+            contenu: {
+                nomIcone,
+                texte: texte ? texte : urlDef.pageDef.lien,
+                positionTexte: 'droite',
+            }
+        },
+        BootstrapNom.light);
     }
 }

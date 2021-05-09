@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { ApiController } from '../../commun/api-route';
+import { ApiController } from '../../api/api-route';
 import { Categorie } from './categorie';
 import { KeyUidRnoNoService } from '../../commun/data-par-key/key-uid-rno-no/key-uid-rno-no.service';
 import { CatalogueService } from './catalogue.service';
-import { ApiRequêteService } from 'src/app/services/api-requete.service';
+import { ApiRequêteService } from 'src/app/api/api-requete.service';
 import { CatalogueUtile } from './catalogue-utile';
 import { CategorieUtile } from './categorie-utile';
 import { Observable } from 'rxjs';

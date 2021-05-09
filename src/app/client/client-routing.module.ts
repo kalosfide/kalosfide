@@ -4,13 +4,10 @@ import { Routes, RouterModule } from '@angular/router';
 import { ClientPages } from './client-pages';
 import { CAccueilComponent } from './c-accueil.component';
 import { AppPages } from '../app-pages';
-import { PageInterditeComponent } from '../messages/page-interdite.component';
-import { PageConflitComponent } from '../messages/page-conflit.component';
-import { PageErreurComponent } from '../messages/page-erreur.component';
-import { PageIntrouvableComponent } from '../messages/page-introuvable.component';
-import { CProduitsComponent } from './c-produits.component';
-import { SiteOuvertGarde, EtatSiteChangeGarde } from '../securite/site-ouvert-garde';
-import { CatalogueResolverService } from 'src/app/modeles/catalogue/catalogue-resolver.service';
+import { PageErreurComponent } from '../erreurs/page-erreur.component';
+import { EtatSiteChangeGarde } from '../securite/site-ouvert-garde';
+import { ApiErreurResolverService } from '../erreurs/api-erreur-resolver.service';
+import { ModalErreurComponent } from '../erreurs/modal-erreur.component';
 
 const routes: Routes = [
     {
@@ -47,24 +44,20 @@ const routes: Routes = [
     },
     // pages d'erreur
     {
-        path: AppPages.interdit.urlSegment,
-        component: PageInterditeComponent
-    },
-    {
-        path: AppPages.conflit.urlSegment,
-        component: PageConflitComponent
-    },
-    {
         path: AppPages.apiErreur.urlSegment,
+        data: { pageDef: AppPages.apiErreur },
         component: PageErreurComponent,
+        resolve: {
+            apiErreur: ApiErreurResolverService
+        }
     },
     {
-        path: AppPages.introuvable.urlSegment,
-        component: PageIntrouvableComponent,
+        path: AppPages.apiErreurModal.urlSegment,
+        component: ModalErreurComponent,
     },
     {
         path: '**',
-        redirectTo: AppPages.introuvable.urlSegment,
+        redirectTo: AppPages.apiErreur.urlSegment,
     },
 ];
 

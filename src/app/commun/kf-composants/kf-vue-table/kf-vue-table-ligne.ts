@@ -1,101 +1,97 @@
-import { KfComposant } from '../kf-composant/kf-composant';
-import {
-    KfVueTableCellule, KfVueTableCelluleBase, KfVueTableCelluleBilan, IKfVueTableCellule
-} from './kf-vue-table-cellule';
 import { KfSuperGroupe } from '../kf-groupe/kf-super-groupe';
 import { FormGroup } from '@angular/forms';
-import { KfVueTable } from './kf-vue-table';
 import { KfGéreCss } from '../kf-partages/kf-gere-css';
-import { KfNgClasse } from '../kf-partages/kf-gere-css-classe';
-import { KfNgStyle } from '../kf-partages/kf-gere-css-style';
-
-/** pour que le component soit indépendant du générique T */
-export interface IKfVueTableLigne {
-    cellules: IKfVueTableCellule[];
-    passeFiltres?: boolean;
-    formGroup?: FormGroup;
-    id?: string;
-}
-
-export abstract class KfVueTableLigneBase<T> {
-    protected pVueTable: KfVueTable<T>;
-    protected pCellules: KfVueTableCelluleBase<T>[];
-    protected pGereCss: KfGéreCss;
-
-    constructor(vueTable: KfVueTable<T>) {
-        this.pVueTable = vueTable;
-    }
-
-    get vueTable(): KfVueTable<T> {
-        return this.pVueTable;
-    }
-
-    public get cellules(): IKfVueTableCellule[] {
-        const cellulesVisibles = this.pCellules.filter(cellule => !cellule.nePasAfficher);
-        return cellulesVisibles;
-    }
-
-    public get composants(): KfComposant[] {
-        return this.pCellules.map(cellule => cellule.composant).filter(composant => !!composant);
-    }
-
-    get géreCss(): KfGéreCss {
-        return this.pGereCss;
-    }
-
-    get classe(): KfNgClasse {
-        if (this.pGereCss) {
-            return this.pGereCss.classe;
-        }
-    }
-    get style(): KfNgStyle {
-        if (this.pGereCss) {
-            return this.pGereCss.style;
-        }
-    }
-}
+import { KfVueTableCellule } from './kf-vue-table-cellule';
+import { KfVueTableLigneBase, IKfVueTableLigne } from './kf-vue-table-ligne-base';
+import { KfVueTableCorps } from './kf-vue-table-section-corps';
+import { KfEvenement, KfTypeDEvenement, KfTypeDHTMLEvents } from '../kf-partages/kf-evenements';
+import { EventEmitter } from '@angular/core';
+import { KfVueTableNavigationParLigne } from './kf-vue-table-navigation-par-ligne';
+import { KfComposant } from '../kf-composant/kf-composant';
+import { KfTypeDeComposant } from '../kf-composants-types';
 
 export class KfVueTableLigne<T> extends KfVueTableLigneBase<T> implements IKfVueTableLigne {
-    private pIndex: number;
+    /**
+     * Index de la ligne. Fixé à la création.
+     */
+    index: number;
+    /**
+     * Numéro de la ligne. Fixé s'il y a une colonne des numéros à la création ou après le tri initial s'il y en a un.
+     */
+    no: number;
+    /**
+     * Objet à afficher dans la ligne
+     */
     private pItem: T;
-    private pId: string;
+    /**
+     * Présent quand la l'item a une valeur
+     */
     private pSuperGroupe: KfSuperGroupe;
-    passeFiltres: boolean;
+    /**
+     * Index de la ligne parmi les lignes triées filtrées
+     */
+    indexFiltré: number;
 
-    constructor(vueTable: KfVueTable<T>, item: T, index: number) {
-        super(vueTable);
+    /**
+     * Crée une ligne pour l'item à ajouter aux lignes de la vueTable
+     * @param corps corps de la table contenant la ligne
+     * @param item item de la ligne
+     * @param index index de la ligne dans l'ordre de création (pour nommer les cellules)
+     */
+    constructor(corps: KfVueTableCorps<T>, item: T, index: number) {
+        super(corps);
+        this.index = index;
+        const vueTable = corps.vueTable;
         if (vueTable.superGroupe) {
             this.pSuperGroupe = vueTable.superGroupe(item);
             this.pSuperGroupe.listeParent = vueTable;
         }
         this.pItem = item;
-        this.pIndex = index;
-        this.pCellules = vueTable.colonnes.map(colonne => new KfVueTableCellule<T>(vueTable, colonne, index, item));
+        this.pCellules = vueTable.colonnes.map(colonne => new KfVueTableCellule<T>(colonne, this, item));
         if (vueTable.avecEnTêtesDeLigne) {
             this.pCellules[0].thScope = 'row';
         }
-        this.passeFiltres = true;
-        if (vueTable.id) {
-            this.pId = vueTable.id(item);
+        if (vueTable.gereCssLigne) {
+            this.pGéreCss = vueTable.gereCssLigne(item);
         }
-        if (vueTable.gereCss) {
-            this.pGereCss = vueTable.gereCss(item);
-        } else {
-            if (vueTable.fixeChoisie || vueTable.avecClic) {
-                this.pGereCss = new KfGéreCss();
+        const équivalentPourClic = this.équivalentPourClic;
+        if (vueTable.quandClic && équivalentPourClic) {
+            let quandClic: () => void;
+            if (typeof(vueTable.quandClic) === 'function') {
+                quandClic = vueTable.quandClic(item);
+            } else {
+                const def: { colonneDuClic?: string } = vueTable.quandClic;
+                const celluleDuClic = this.pCellules.find(c => c.colonne.nom === def.colonneDuClic);
+                if (!celluleDuClic.colonne.nePasAfficher) {
+                    quandClic = () => {
+                        celluleDuClic.contenu.gereHtml.htmlElement.click();
+                    };
+                }
+            }
+            if (quandClic) {
+                if (!this.pGéreCss) {
+                    this.pGéreCss = new KfGéreCss();
+                }
+                this.pGéreCss.ajouteClasse('kf-bouton');
+                this.pGéreHtml.ajouteEvenementASuivre(KfTypeDHTMLEvents.click);
+                this.pGéreHtml.ajouteTraiteur(KfTypeDEvenement.click, quandClic);
             }
         }
-        if (vueTable.avecClic) {
-            this.pGereCss.ajouteClasseDef('kf-bouton');
+        if (vueTable.navigationAuClavier && vueTable.navigationAuClavier.type === 'lignes') {
+            const navigation = vueTable.navigationAuClavier as KfVueTableNavigationParLigne<T>;
+            const quandFocusPris = () => navigation.quandLignePrendFocus(this);
+            const quandFocusPerdu = () => navigation.quandLignePerdFocus();
+            this.pGéreHtml.fixeAttribut('tabindex', '0');
+            this.pGéreHtml.suitLeFocus(quandFocusPris, quandFocusPerdu);
         }
     }
 
-    get choisie(): boolean {
-        return this.pIndex === this.vueTable.index;
+    get corps(): KfVueTableCorps<T> {
+        return this.pSection as KfVueTableCorps<T>;
     }
 
-    public get index(): number {
-        return this.pIndex;
+    public get nom(): string {
+        return '' + this.index;
     }
 
     public get item(): T {
@@ -103,27 +99,61 @@ export class KfVueTableLigne<T> extends KfVueTableLigneBase<T> implements IKfVue
     }
 
     get id(): string {
-        return this.pId;
+        if (this.pSection.vueTable.id) {
+            return this.pSection.vueTable.id(this.pItem);
+        }
     }
 
     public get superGroupe(): KfSuperGroupe {
         return this.pSuperGroupe;
     }
 
+    public get erreurs(): string[] {
+        if (this.pSuperGroupe.avecInvalidFeedback) {
+            const erreurs: string[] = [];
+            this.pSuperGroupe.contenus.forEach(c => {
+                const errs = c.erreurs;
+                if (errs) {
+                    erreurs.push(...errs);
+                }
+            });
+            if (erreurs.length > 0) {
+                return erreurs;
+            }
+        }
+    }
+
     public get formGroup(): FormGroup {
         return this.pSuperGroupe.formGroup;
     }
 
-    public get composantsAValider(): KfComposant[] {
-        return this.pVueTable.composantsAValider(this.pItem);
-    }
-}
-
-export class KfVueTableBilan<T> extends KfVueTableLigneBase<T> implements IKfVueTableLigne {
-
-    constructor(vueTable: KfVueTable<T>, ligneDesVisibles?: boolean) {
-        super(vueTable);
-        this.pCellules = vueTable.colonnes.map(colonne => new KfVueTableCelluleBilan<T>(vueTable, colonne, ligneDesVisibles));
+    public quandItemModifié() {
+        this.pCellules.forEach(c => (c as KfVueTableCellule<T>).quandItemModifié());
+        if (this.vueTable.bilan) {
+            this.vueTable.bilan.quandBilanChange();
+        }
     }
 
+    /**
+     * Fixe le contenu de la première cellule avec le numéro de la ligne dans la liste des lignes triées par le tri initial s'il y en a un
+     * @param index index de la ligne parmi les lignes aprés le chargement et le tri initial éventuel
+     */
+    public fixeNuméro(index: number) {
+        this.no = index + 1;
+        this.pCellules[0].fixeTexte('' + this.no);
+    }
+
+    public get équivalentPourClic(): KfComposant {
+        const équivalents = this.cellulesVisibles.filter(c => {
+            const type = c.contenu.type;
+            return type === KfTypeDeComposant.lien || type === KfTypeDeComposant.bouton;
+        });
+        if (équivalents.length === 1) {
+            return équivalents[0].contenu;
+        }
+    }
+
+    public prendLeFocus(): boolean {
+        return this.pGéreHtml.prendLeFocus()
+    }
 }

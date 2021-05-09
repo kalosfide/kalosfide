@@ -6,7 +6,7 @@ import { IUrlDef } from 'src/app/disposition/fabrique/fabrique-url';
 import { DATE_EST_NULLE } from '../../date-nulle';
 import { CLFPages } from '../c-l-f-pages';
 import { CLFDocs } from '../c-l-f-docs';
-import { ApiResult404NotFound } from 'src/app/commun/api-results/api-result-404-not-found';
+import { ApiResult404NotFound } from 'src/app/api/api-results/api-result-404-not-found';
 import { Observable } from 'rxjs';
 
 export class CLFGardeService extends DataResolverService {
@@ -57,10 +57,10 @@ export class CLFGardeService extends DataResolverService {
 
     /**
      * Recherche KeyClient et noDoc dans les params de la route et de ses parents.
-     * Redirige si le bon créée à partir de ces params ne satisfait pas la condition.
+     * Redirige si le bon créé à partir de ces params ne satisfait pas la condition.
      * @param route route à garder
      */
-    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | boolean {
+    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
         const clfDocs: CLFDocs = this.service.litStock();
         if (!clfDocs) {
             throw new Error('CLFGarde: La garde précédente doit avoir déjà résolu le clfDocs');
@@ -71,13 +71,13 @@ export class CLFGardeService extends DataResolverService {
         } else {
             const noString = route.paramMap.get(CLFPages.nomParamNoDoc);
             if (!noString) {
-                this.service.routeur.navigueVersErreur(new ApiResult404NotFound());
+                this.service.routeur.navigueVersPageErreur(new ApiResult404NotFound());
                 return false;
             }
             clfDoc = clfDocs.créeBon(+noString);
         }
         if (!clfDoc) {
-            this.service.routeur.navigueVersErreur(new ApiResult404NotFound());
+            this.service.routeur.navigueVersPageErreur(new ApiResult404NotFound());
             return false;
         }
         for (const garde of this.gardes) {

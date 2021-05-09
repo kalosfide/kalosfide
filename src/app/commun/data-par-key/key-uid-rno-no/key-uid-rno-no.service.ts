@@ -5,9 +5,9 @@ import { KeyUidRnoNo } from './key-uid-rno-no';
 import { IKeyUidRnoNo } from './i-key-uid-rno-no';
 import { IDataKey } from '../data-key';
 import { Observable } from 'rxjs';
-import { ApiResult } from '../../api-results/api-result';
+import { ApiResult } from 'src/app/api/api-results/api-result';
 import { KeyUidRno } from '../key-uid-rno/key-uid-rno';
-import { ApiAction } from '../../api-route';
+import { ApiAction } from '../../../api/api-route';
 
 export abstract class KeyUidRnoNoService<T extends KeyUidRnoNo> extends DataKeyService<T> {
 

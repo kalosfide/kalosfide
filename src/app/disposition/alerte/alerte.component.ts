@@ -9,7 +9,6 @@ import { NavigationService } from 'src/app/services/navigation.service';
     templateUrl: 'alerte.component.html',
     styleUrls: [
         'alerte.component.css',
-        '../../commun/commun.scss'
     ]
 })
 

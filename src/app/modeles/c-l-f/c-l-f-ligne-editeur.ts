@@ -1,7 +1,7 @@
 import { Produit } from '../catalogue/produit';
 import { KeyUidRnoNo2Editeur } from 'src/app/commun/data-par-key/key-uid-rno-no-2/key-uid-rno-no-2-editeur';
 import { ApiLigneData } from './api-ligne';
-import { IDataKeyComponent } from 'src/app/commun/data-par-key/i-data-key-component';
+import { IDataComponent } from 'src/app/commun/data-par-key/i-data-component';
 import { KfListeDeroulanteTexte } from 'src/app/commun/kf-composants/kf-elements/kf-liste-deroulante/kf-liste-deroulante-texte';
 import { KfInputTexte } from 'src/app/commun/kf-composants/kf-elements/kf-input/kf-input-texte';
 import { KfInputNombre } from 'src/app/commun/kf-composants/kf-elements/kf-input/kf-input-nombre';
@@ -30,7 +30,7 @@ export class CLFLigneEditeur extends KeyUidRnoNo2Editeur<CLFLigne> {
     kfAFixerLS: KfInputTexte;
     kfAFixer: KfInputNombre;
 
-    constructor(ligne: CLFLigne, component: IDataKeyComponent) {
+    constructor(ligne: CLFLigne, component: IDataComponent) {
         super(component);
         this.ligne = ligne;
     }
@@ -54,7 +54,7 @@ export class CLFLigneEditeur extends KeyUidRnoNo2Editeur<CLFLigne> {
     private créeUnitéPrix(): KfInputTexte {
         const input = Fabrique.input.texteLectureSeule('unité-prix', 'Unité',
             TypeMesure.texteUnités(this.produit.typeMesure, this.produit.typeCommande));
-        input.ajouteClasseDef('unite');
+        input.ajouteClasse('unite');
         return input;
     }
 
@@ -84,7 +84,7 @@ export class CLFLigneEditeur extends KeyUidRnoNo2Editeur<CLFLigne> {
             this.kfTypeCommande.valeur = valeur;
             input = this.kfTypeCommande;
         }
-        input.ajouteClasseDef('unite');
+        input.ajouteClasse('unite');
         return input;
     }
 
@@ -106,7 +106,7 @@ export class CLFLigneEditeur extends KeyUidRnoNo2Editeur<CLFLigne> {
             this.kfQuantité.ajouteValidateur(KfValidateurs.nombreNonNul);
             input = this.kfQuantité;
         }
-        input.ajouteClasseDef('nombre', 'quantite');
+        input.ajouteClasse('nombre', 'quantite');
         return input;
     }
 
@@ -114,7 +114,7 @@ export class CLFLigneEditeur extends KeyUidRnoNo2Editeur<CLFLigne> {
         if (!this.kfTypeCommande) {
             return;
         }
-        this.kfTypeCommande.gereHtml.suitLaValeur = true;
+        this.kfTypeCommande.gereHtml.suitLaValeur();
         this.kfTypeCommande.gereHtml.ajouteTraiteur(KfTypeDEvenement.valeurChange,
             (evenement: KfEvenement) => {
                 const pas = TypeCommande.pasInputNombre(this.kfTypeCommande.valeur);
@@ -144,20 +144,8 @@ export class CLFLigneEditeur extends KeyUidRnoNo2Editeur<CLFLigne> {
             this.kfAFixer.ajouteValidateur(KfValidateurs.required);
             input = this.kfAFixer;
         }
-        input.ajouteClasseDef('nombre', 'quantite');
+        input.ajouteClasse('nombre', 'quantite');
         return input;
-    }
-
-    private créeKfDeDataSupprime(titre: string) {
-        const lectureSeule = true;
-        this.kfDeData = [
-            this.créeCatégorie(),
-            this.créeProduit(),
-            this.créePrix(),
-            this.créeUnitéPrix(),
-            this.créeQuantité(titre, lectureSeule),
-            this.créeTypeCommandeListe(lectureSeule),
-        ];
     }
 
     créeKfDeData() {
@@ -191,16 +179,6 @@ export class CLFLigneEditeur extends KeyUidRnoNo2Editeur<CLFLigne> {
                 this.kfQuantitéLS.nePasAfficher = true;
                 this.kfTypeCommandeLS.nePasAfficher = true;
                 this.kfAFixer.ajouteValidateur(KfValidateurs.min(0));
-                break;
-            case CommandePages.supprime:
-                champ = this.service.utile.texte.commande.champ;
-                this.créeKfDeDataSupprime(champ.aFixer);
-                break;
-            case LivraisonPages.supprime:
-            case FacturePages.supprime:
-                champ = this.service.utile.texte.livraison.champ;
-                this.créeKfDeDataSupprime(champ.source);
-                this.kfDeData.push(this.créeAFixer(champ.aFixer, lectureSeule));
                 break;
             case CommandePages.lignes:
                 champ = this.service.utile.texte.commande.champ;

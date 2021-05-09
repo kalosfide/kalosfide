@@ -7,6 +7,8 @@ import { DispositionModule } from 'src/app/disposition/disposition.module';
 import { ModelesModule } from 'src/app/modeles/modeles.module';
 import { CatalogueComponent } from './catalogue.component';
 import { CatalogueRoutingModule } from './catalogue-routing.module';
+import { CatalogueFinitService } from './catalogue-finit.service';
+import { CatalogueCommenceService } from './catalogue-commence.service';
 
 @NgModule({
     imports: [
@@ -20,6 +22,8 @@ import { CatalogueRoutingModule } from './catalogue-routing.module';
         CatalogueComponent,
     ],
     providers: [
+        CatalogueCommenceService,
+        CatalogueFinitService,
     ],
 })
 export class CatalogueModule { }

@@ -1,5 +1,5 @@
 import { TypeResultatAffichable } from './type-resultat-affichable';
-import { ApiResult } from 'src/app/commun/api-results/api-result';
+import { ApiResult } from 'src/app/api/api-results/api-result';
 
 export interface IResultatAffichable {
     typeAlert: TypeResultatAffichable;

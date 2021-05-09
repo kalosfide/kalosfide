@@ -1,13 +1,26 @@
 import { KfVueTableOutils } from './kf-vue-table-outils';
 import { KfBBtnToolbarElement } from '../kf-b-btn-toolbar/kf-b-btn-toolbar';
+import { KfVueTableLigne } from './kf-vue-table-ligne';
 
 export interface IKfVueTableOutilVue {
     composant: KfBBtnToolbarElement;
 }
 
 export interface IKfVueTableOutil<T> extends IKfVueTableOutilVue {
+    /**
+     * Nom de l'outil unique parmi les outils de la vueTable
+     */
     nom: string;
-    valide?: (t: T) => boolean;
+    /**
+     * Si l'outil est un filtre (ou cherche), retourne une fonction indiquant si la ligne passe le filtre.
+     */
+    valide?: (ligne: KfVueTableLigne<T>) => boolean;
+    /**
+     * Présent si le changement de valeur de l'outil doit déclencher le filtrage de la table
+     */
     initialise?: (parent: KfVueTableOutils<T>) => void;
+    /**
+     * Présent et vrai si l'outil est un filtre (ou cherche) qui a une valeur
+     */
     filtreActif?: boolean;
 }

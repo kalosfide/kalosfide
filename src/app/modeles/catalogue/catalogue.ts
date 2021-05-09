@@ -2,6 +2,9 @@ import { Categorie, CategorieData, ICategorieData } from './categorie';
 import { Produit, ProduitData, IProduitData } from './produit';
 import { PrixDaté } from './prix-date';
 
+/**
+ * Interface implémentée par Catalogue et CatalogueApi
+ */
 export interface ICatalogue {
     /** uid du site */
     uid: string;
@@ -17,7 +20,9 @@ export interface ICatalogue {
     prixDatés?: PrixDaté[];
 }
 
-
+/**
+ * Catalogue lu dans l'Api
+ */
 export class CatalogueApi implements ICatalogue {
     /** uid du site */
     uid: string;
@@ -57,36 +62,46 @@ export class Catalogue implements ICatalogue {
      */
     prixDatés?: PrixDaté[];
 
+    private constructor() {}
+
     /**
-     * crée un catalogue à partir d'une lecture de l'Api
+     * Crée un catalogue à partir d'un catalogue ou d'une lecture de l'Api
+     * @param icatalogue Catalogue stocké ou CatalogueApi lu
      */
-    static nouveau(catalogueApi: ICatalogue): Catalogue {
+    static nouveau(icatalogue: ICatalogue): Catalogue {
         const catalogue = new Catalogue();
-        catalogue.uid = catalogueApi.uid;
-        catalogue.rno = catalogueApi.rno;
-        catalogue.date = catalogueApi.date;
-        catalogue.catégories = catalogueApi.catégories.map(
+        catalogue.uid = icatalogue.uid;
+        catalogue.rno = icatalogue.rno;
+        catalogue.date = icatalogue.date;
+        catalogue.catégories = icatalogue.catégories.map(
             (data: CategorieData) => {
                 const categorie = new Categorie();
-                categorie.uid = catalogueApi.uid;
-                categorie.rno = catalogueApi.rno;
+                categorie.uid = icatalogue.uid;
+                categorie.rno = icatalogue.rno;
                 categorie.no = data.no;
                 categorie.copieData(data);
                 return categorie;
             }
         );
-        catalogue.produits = catalogueApi.produits.map(
+        catalogue.produits = icatalogue.produits.map(
             (data: ProduitData) => {
                 const produit = new Produit();
-                produit.uid = catalogueApi.uid;
-                produit.rno = catalogueApi.rno;
+                produit.uid = icatalogue.uid;
+                produit.rno = icatalogue.rno;
                 produit.no = data.no;
                 Produit.copieData(data, produit);
-                const categorie = catalogueApi.catégories.find(c => c.no === produit.categorieNo);
+                const categorie = icatalogue.catégories.find(c => c.no === produit.categorieNo);
                 produit.nomCategorie = categorie.nom;
                 return produit;
             }
         );
+        return catalogue;
+    }
+
+    /** */
+    static deDate(date: Date): Catalogue {
+        const catalogue = new Catalogue();
+        catalogue.date = date;
         return catalogue;
     }
 

@@ -7,7 +7,7 @@ import { KfBouton } from 'src/app/commun/kf-composants/kf-elements/kf-bouton/kf-
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
-import { ApiRequêteAction } from 'src/app/services/api-requete-action';
+import { ApiRequêteAction } from 'src/app/api/api-requete-action';
 
 export class CategorieUtileBouton extends DataUtileBouton {
     constructor(utile: CategorieUtile) {
@@ -15,7 +15,7 @@ export class CategorieUtileBouton extends DataUtileBouton {
     }
 
     get utile(): CategorieUtile {
-        return this._dataUtile as CategorieUtile;
+        return this.dataUtile as CategorieUtile;
     }
 
     get url(): CategorieUtileUrl {
@@ -46,9 +46,9 @@ export class CategorieUtileBouton extends DataUtileBouton {
                 rafraichitTable(catégorie);
             },
         };
-        const bouton = Fabrique.bouton.boutonAttenteDeColonne('supprime' + catégorie.no,
+        const bouton = Fabrique.bouton.attenteDeColonne('supprime' + catégorie.no,
             Fabrique.contenu.supprime, apiRequêteAction, this.utile.service,
-            Fabrique.confirme(titre, [description])
+            Fabrique.confirmeModal(titre, [description])
         );
         return bouton;
     }

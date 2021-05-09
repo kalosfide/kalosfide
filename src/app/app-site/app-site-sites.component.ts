@@ -12,11 +12,10 @@ import { KfUlComposant } from '../commun/kf-composants/kf-ul/kf-ul-composant';
 
 @Component({
     templateUrl: '../disposition/page-base/page-base.html',
-    styleUrls: ['../commun/commun.scss']
 })
 export class AppSiteSitesComponent extends PageBaseComponent implements OnInit {
 
-    pageDef = AppSitePages.sites;
+    pageDef = AppSitePages.peuple;
 
     get titre(): string {
         return `${AppSite.titre} - ${this.pageDef.titre}`;
@@ -37,8 +36,8 @@ export class AppSiteSitesComponent extends PageBaseComponent implements OnInit {
         if (this.sites.length > 0) {
             const ul = new KfUlComposant(this.nom);
             this.sites.forEach(site => {
-                ul.ajoute(new KfLien(site.nomSite,
-                    SiteRoutes.urlSite(site.nomSite, identifiant, [SitePages.accueil.urlSegment]), site.titre + site.etat));
+                ul.ajoute(new KfLien(site.url,
+                    SiteRoutes.urlDIdentifiant(site.url, identifiant, [SitePages.accueil.urlSegment]), site.titre + site.etat));
             });
             this.superGroupe.ajoute(ul);
         } else {

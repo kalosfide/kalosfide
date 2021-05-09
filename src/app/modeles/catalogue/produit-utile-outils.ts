@@ -27,29 +27,17 @@ export class ProduitUtileOutils extends DataUtileOutils {
         return this.utile.lien;
     }
 
-    get nomOutil(): {
-        catégorie: string,
-        produit: string,
-        état: string,
-    } {
-        return {
-            produit: 'produit',
-            catégorie: 'catégorie',
-            état: 'état',
-        };
-    }
-
     produit(): KfVueTableFiltreCherche<Produit> {
-        return Fabrique.vueTable.cherche<Produit>(this.nomOutil.produit, 'Produit', (p: Produit) => p.nom, 'Rechercher un produit');
+        return Fabrique.vueTable.cherche<Produit>(this.utile.nom.produit, 'Produit', this.utile.nom.produit, 'Rechercher un produit');
     }
 
     catégorie(): KfVueTableFiltreNombre<Produit> {
-        return Fabrique.vueTable.filtreNombre<Produit>(this.nomOutil.catégorie, 'Catégorie',
+        return Fabrique.vueTable.filtreNombre<Produit>(this.utile.nom.catégorie, 'Catégorie',
             (p: Produit, noCategorie: number) => p.categorieNo === noCategorie, 'Filtrer par catégorie');
     }
 
     état(): KfVueTableFiltreTexte<Produit> {
-        return Fabrique.vueTable.filtreTexte<Produit>(this.nomOutil.état, 'Etat',
+        return Fabrique.vueTable.filtreTexte<Produit>(this.utile.nom.état, 'Etat',
         (p: Produit, idEtat: IdEtatProduit) => {
             const etat = EtatsProduits.etat(idEtat);
             return etat ? etat.vérifie(p) : true;

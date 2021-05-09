@@ -4,6 +4,22 @@ import { TypeCommande } from 'src/app/modeles/type-commande';
 import { ICoût } from 'src/app/modeles/c-l-f/cout';
 import { estNombre } from 'src/app/commun/outils/est-nombre';
 import { TexteOutils } from 'src/app/commun/outils/texte-outils';
+import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
+import { KfTypeContenuPhrasé } from 'src/app/commun/kf-composants/kf-partages/kf-contenu-phrase/kf-contenu-phrase';
+
+export interface IDefTexte {
+    nom?: string;
+    texte: string;
+    balise?: KfTypeDeBaliseHTML;
+    suiviDeSaut?: boolean;
+    classe?: string;
+}
+
+export type DefTexte = string | IDefTexte;
+export type DefsTextes = DefTexte | DefTexte[];
+
+export type DefContenu = DefTexte | KfTypeContenuPhrasé;
+export type DefContenus = DefContenu | DefContenu[];
 
 export class FabriqueTexte {
 
@@ -13,14 +29,14 @@ export class FabriqueTexte {
 
     /**
      * Retourne le texte du prix, précédé de > si incomplet, suivi de €.
-     * @param prix valeur du prix ou objet contenant la valeur et un champ incomplet
+     * @param valeur valeur du prix ou objet contenant la valeur et un champ incomplet
      */
-    prix(prix: number | ICoût): string {
+    euros(valeur: number | ICoût): string {
         let icoût: ICoût;
-        if (typeof (prix) === 'number') {
-            icoût = { valeur: prix, complet: true };
+        if (typeof (valeur) === 'number') {
+            icoût = { valeur, complet: true };
         } else {
-            icoût = prix;
+            icoût = valeur;
         }
         let texte: string;
         if (estNombre(icoût.valeur)) {
@@ -37,25 +53,31 @@ export class FabriqueTexte {
         return texte;
     }
 
+    /**
+     * Texte de l'option de la liste déroulante de choix du type de commande d'un produit
+     */
     typeCommande(typeCommande: string): string {
         const exemple = TypeCommande.pourExemple(typeCommande);
         return TypeCommande.pourListe(typeCommande) + (exemple ? ' (ex: ' + exemple + ')' : '');
     }
 
-    typeMesure(typeMesure: string, ) {
-        return TypeMesure.texte_au(typeMesure) + ' (ex: ' + this.prixAvecUnité(typeMesure, 12.5) + ')';
+    /**
+     * Texte de l'option de la liste déroulante de choix du type de commande d'un produit
+     */
+    typeMesure(typeMesure: string): string {
+        return TypeMesure.texte_au(typeMesure) + ' (ex: ' + this.eurosAvecTypeMesure(typeMesure, 12.5) + ')';
     }
 
     /**
      * Retourne le texte du prix, précédé de > si incomplet, suivi de € et de l'unité du type de mesure
-     * @param prix valeur du prix ou objet contenant la valeur et un champ incomplet
+     * @param valeur valeur du prix ou objet contenant la valeur et un champ incomplet
      */
-    prixAvecUnité(typeMesure: string, prix: number | ICoût): string {
-        return prix <= 0 ? 'indisponible' : this.prix(prix) + ' ' + TypeMesure.texte_le(typeMesure);
+    eurosAvecTypeMesure(typeMesure: string, valeur: number | ICoût): string {
+        return valeur <= 0 ? 'indisponible' : this.euros(valeur) + ' ' + TypeMesure.texte_le(typeMesure);
     }
 
-    prixEnToutesLettres(prix: number): string {
-        return TexteOutils.en_toutes_lettres(prix, {
+    eurosEnToutesLettres(valeur: number): string {
+        return TexteOutils.en_toutes_lettres(valeur, {
             unité: 'euro',
             unités: 'euros',
             séparateur: 'et',
@@ -65,36 +87,38 @@ export class FabriqueTexte {
         });
     }
 
+    get produit(): {
+        seCommande: (produit: Produit) => string,
+        seMesure: (produit: Produit) => string,
+        /**
+         * Retourne le texte du prix du produit suivi de € et de l'unité du type de mesure du produit
+         */
+        produit_prix: (produit: Produit) => string,
+        unité: (produit: Produit) => string,
+    } {
+        return {
+            seCommande: (produit: Produit) => TypeMesure.texteSeCommande(produit.typeMesure, produit.typeCommande),
+            seMesure: (produit: Produit) => TypeMesure.texte_au(produit.typeMesure),
+            produit_prix: (produit: Produit) => this.eurosAvecTypeMesure(produit.typeMesure, produit.prix),
+            unité: (produit: Produit) => TypeMesure.unité(produit.typeMesure),
+        };
+    }
+
     private _testAvecProduit(nomFonction: string, avecProduit: IAvecProduit): Produit {
         if (!avecProduit.produit) {
             throw new Error(`${nomFonction}: le paramètre doit avoir une propriété 'produit' de type Produit`);
         }
         return avecProduit.produit as Produit;
     }
-    nomCatégorie(avecProduit: IAvecProduit): string {
-        const produit = this._testAvecProduit('', avecProduit);
-        return produit.nomCategorie;
-    }
-    nomProduit(avecProduit: IAvecProduit): string {
-        const produit = this._testAvecProduit('', avecProduit);
-        return produit.nom;
-    }
-    seCommande(produit: Produit): string {
-        return TypeMesure.texteSeCommande(produit.typeMesure, produit.typeCommande);
-    }
     seMesure(produit: Produit): string {
         return TypeMesure.texte_au(produit.typeMesure);
-    }
-    avecProduit_seCommande(avecProduit: IAvecProduit): string {
-        const produit = this._testAvecProduit('', avecProduit);
-        return this.seCommande(produit);
     }
 
     /**
      * Retourne le texte du prix du produit suivi de € et de l'unité du type de mesure du produit
      */
     produit_prix(produit: Produit): string {
-        return this.prixAvecUnité(produit.typeMesure, produit.prix);
+        return this.eurosAvecTypeMesure(produit.typeMesure, produit.prix);
     }
     /**
      * Retourne le texte du prix du produit suivi de € et de l'unité du type de mesure du produit
@@ -149,7 +173,7 @@ export class FabriqueTexte {
 
     coût(produit: Produit, quantité: number): string {
         return quantité !== undefined && quantité !== null && isNaN(quantité)
-            ? this.prix(produit.prix * quantité)
+            ? this.euros(produit.prix * quantité)
             : '';
     }
 

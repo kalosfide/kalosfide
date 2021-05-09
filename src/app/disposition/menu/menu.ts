@@ -32,14 +32,6 @@ export abstract class Menu extends NavBar {
         return this;
     }
 
-    get idBascule(): string {
-        return this.nom + '_bascule';
-    }
-
-    get idContenu(): string {
-        return this.nom + '_contenu';
-    }
-
     protected créeMarqueImage(): NavItemLien {
         const i = new NavItemLien('imageMarque', this);
         const imageDef: KfImageDef = {
@@ -49,7 +41,7 @@ export abstract class Menu extends NavBar {
         };
         i.image = imageDef;
         i.url = AppRoutes.url();
-        i.lien.ajouteClasseDef('navbar-brand');
+        i.lien.ajouteClasse('navbar-brand');
         return i;
     }
 
@@ -62,14 +54,14 @@ export abstract class Menu extends NavBar {
         this.marqueTexte = this.créeMarqueTexte();
         this.enTetes = [this.marqueImage, this.marqueTexte];
         this.itemsAction = new NavItemUlLi('actions', this);
-        this.itemsAction.géreCss.ajouteClasseDef('mr-auto');
+        this.itemsAction.géreCss.ajouteClasse('mr-auto');
         this.créeItemsAction().forEach(i => {
             this.itemsAction.ajoute(i);
         });
         this.itemsAction.fermeQuandClick();
         this.compte = this.créeItemCompte();
         const groupeCompte = new NavItemUlLi('compte', this);
-        groupeCompte.géreCss.ajouteClasseDef('ml-auto');
+        groupeCompte.géreCss.ajouteClasse('ml-auto');
         groupeCompte.ajoute(this.compte);
         this.contenus = [this.itemsAction, groupeCompte];
     }

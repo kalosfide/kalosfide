@@ -1,6 +1,6 @@
 import { KeyUidRnoNoService } from 'src/app/commun/data-par-key/key-uid-rno-no/key-uid-rno-no.service';
 import { Observable, of, Subject } from 'rxjs';
-import { ApiRequêteService } from 'src/app/services/api-requete.service';
+import { ApiRequêteService } from 'src/app/api/api-requete.service';
 import { Site } from '../site/site';
 import { KfInitialObservable } from 'src/app/commun/kf-composants/kf-partages/kf-initial-observable';
 import { ApiDocument } from './api-document';
@@ -10,43 +10,31 @@ import { Stockage } from 'src/app/services/stockage/stockage';
 import { CLFDocs } from './c-l-f-docs';
 import { map, tap, mergeMap, concatMap } from 'rxjs/operators';
 import { ApiDocumentsData } from './api-documents-client-data';
-import { IKeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/i-key-uid-rno';
-import { ApiController, ApiAction } from 'src/app/commun/api-route';
-import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
-import { Catalogue } from '../catalogue/catalogue';
+import { ApiController, ApiAction } from 'src/app/api/api-route';
 import { ClientService } from '../client/client.service';
 import { TypeCLF } from './c-l-f-type';
 import { IKeyUidRnoNo } from 'src/app/commun/data-par-key/key-uid-rno-no/i-key-uid-rno-no';
 import { CLFBilan } from './c-l-f-bilan';
-import { DATE_EST_NULLE } from '../date-nulle';
-import { IdEtatSite } from '../etat-site';
 import { CLFFiltre } from './c-l-f-filtre';
-import { ApiResult } from 'src/app/commun/api-results/api-result';
-import { ApiResult409Conflict } from 'src/app/commun/api-results/api-result-409-conflict';
+import { ApiResult } from 'src/app/api/api-results/api-result';
+import { CLFDoc } from './c-l-f-doc';
+import { KfCaseACocher } from 'src/app/commun/kf-composants/kf-elements/kf-case-a-cocher/kf-case-a-cocher';
 
 export abstract class CLFLectureService extends KeyUidRnoNoService<ApiDocument> {
 
-    protected pStockage: Stockage<CLFDocs>;
+    private pStockage: Stockage<CLFDocs>;
 
     private pClsBilanIO?: KfInitialObservable<CLFBilan>;
 
-    protected siDoitRecharger: (contenuARecharger: CLFDocs) => void;
-    get traiteErreur(): (apiResult: ApiResult) => boolean {
-        if (this.siDoitRecharger) {
-            return ((apiResult: ApiResult) => {
-                if (apiResult.statusCode === ApiResult409Conflict.code) {
-                    this.siDoitRecharger(((apiResult as ApiResult409Conflict).erreur as CLFDocs));
-                    return true;
-                }
-                return false;
-            }).bind(this);
-        }
-    }
+    protected pFiltre: CLFFiltre;
 
-    private pFiltre: CLFFiltre;
+    /**
+     * Défini par la classe dérivée Client.
+     * Traite l'erreur retournée par l'Api quand le contexte a changé.
+     */
+    public traiteErreur: (apiResult: ApiResult) => boolean;
 
-    private clientAvecBonsSubject: Subject<CLFDocs>;
-    clientAvecBonsObs: Observable<CLFDocs>;
+    caseToutSélectionner: KfCaseACocher;
 
     constructor(
         protected catalogueService: CatalogueService,
@@ -56,8 +44,8 @@ export abstract class CLFLectureService extends KeyUidRnoNoService<ApiDocument> 
     ) {
         super(apiRequeteService);
         this.pStockage = stockageService.nouveau<CLFDocs>('Documents', {
-            rafraichit: 'rafraichi',
-            avecDate: true
+            // Le stockage sera réinitialisé à chaque changement de site ou d'identifiant
+            rafraichi: true,
         });
         this.pClsBilanIO = KfInitialObservable.nouveau(CLFBilan.bilanVide());
     }
@@ -78,18 +66,45 @@ export abstract class CLFLectureService extends KeyUidRnoNoService<ApiDocument> 
                 : undefined;
     }
 
-    changeChoisi(noDoc: number, choisi: boolean) {
+    /**
+     * Enregistre dans le stock le changement de valeur de la propriété qui indique si le bon fera partie de la synthèse
+     * et emet un observable du bilan
+     * @param noBon no du document
+     * @param choisi true ou false
+     */
+    changeChoisi(noBon: number, choisi: boolean) {
         const clfDocs = this.litStock();
-        clfDocs.changeChoisi(noDoc, choisi);
-        this.pStockage.fixeStock(clfDocs);
-        this.pClsBilanIO.changeValeur(clfDocs.clfBilan);
+        clfDocs.changeChoisi(noBon, choisi);
+        this.fixeStock(clfDocs);
+    }
+
+    /**
+     * Enregistre dans le stock le changement de valeur de la propriété qui indique si le document fera partie de la synthèse
+     * et emet un observable du bilan
+     * @param noDoc no du document
+     * @param choisi true ou false
+     */
+    changeChoisis(synthèse: CLFDoc, choisi: boolean) {
+        const clfDocs = this.litStock();
+        // appel à changeChoisi pour chaque bon
+        synthèse.àSynthétiser
+            .filter(bon => bon.préparé)
+            .forEach(bon => {
+                const kfChoisi = bon.éditeur.kfChoisi;
+                kfChoisi.gereHtml.actionSansSuiviValeur(() => kfChoisi.valeur = choisi)();
+                clfDocs.changeChoisi(bon.no, choisi);
+            });
+        this.fixeStock(clfDocs);
     }
 
     get clsBilanIO(): KfInitialObservable<CLFBilan> {
         return this.pClsBilanIO;
     }
 
-    litStock(): CLFDocs {
+    /**
+     * Retourne un CLFDocs avec méthodes créé en copiant le stock si le stock existe
+     */
+    litStockSiExistant(): CLFDocs {
         const stocké = this.pStockage.litStock();
         if (stocké) {
             const stock = new CLFDocs();
@@ -98,111 +113,52 @@ export abstract class CLFLectureService extends KeyUidRnoNoService<ApiDocument> 
         }
     }
 
+    /**
+     * Retourne un CLFDocs avec méthodes créé en copiant le stock.
+     * Lance une erreur si le stockage est vide.
+     */
+    litStock(): CLFDocs {
+        const stock = this.litStockSiExistant();
+        if (!stock) {
+            throw new Error(`${this.pStockage.nom}: Pas de stock`);
+        }
+        return stock;
+    }
+
     fixeStock(stock: CLFDocs) {
+        if (!stock) {
+            throw new Error(`${this.pStockage.nom}: Pas de stock`);
+        }
         if (stock.type !== 'commande' && !stock.estContexte) {
             stock.créeBilan();
         }
         this.pStockage.fixeStock(stock);
         if (stock.type !== 'commande') {
+            // L'observable du bilan émet si le bilan a changé
             this.pClsBilanIO.changeValeur(stock.clfBilan);
         }
+    }
+
+    videStock() {
+        this.pStockage.vide();
+
     }
 
     // Lectures de CLFDocs
 
     /**
      * Le CLFDocs lu dans l'Api.
-     * Le CLFDocs retourné contient le Site et la key du role de l'utilisateur.
      * Pas stocké.
      */
-    protected litClfDocs(controller: string, action: string, params: { [param: string]: string }): Observable<CLFDocs> {
-        const apiResult$ = this.get<ApiDocumentsData>(controller, action, params);
-        const clfDocs$: Observable<CLFDocs> = this.objet<ApiDocumentsData>(apiResult$, this.traiteErreur).pipe(
+    protected _clfDocs$(site: Site, controller: string, action: string, params: { [param: string]: string }): Observable<CLFDocs> {
+        const clfDocs$: Observable<CLFDocs> = this.lectureObs<ApiDocumentsData>({
+            demandeApi: () => this.get<ApiDocumentsData>(controller, action, params),
+        }).pipe(
             map(datas => {
                 const clfDocs = new CLFDocs();
                 clfDocs.charge(datas);
+                clfDocs.site = site;
                 return clfDocs;
-            })
-        );
-        return clfDocs$;
-    }
-
-    /**
-     * Le CLFDocs lu dans l'Api.
-     * Le CLFDocs retourné contient le Site et la key du role de l'utilisateur.
-     * Pas stocké.
-     */
-    private _clfDocs$(controller: string, action: string, params: { [param: string]: string }): Observable<CLFDocs> {
-        const apiResult$ = this.get<ApiDocumentsData>(controller, action, params);
-        const clfDocs$: Observable<CLFDocs> = this.objet<ApiDocumentsData>(apiResult$, this.traiteErreur).pipe(
-            map(datas => {
-                const clfDocs = new CLFDocs();
-                clfDocs.charge(datas);
-                clfDocs.site = this.navigation.litSiteEnCours();
-                const identifiant = this.identification.litIdentifiant();
-                clfDocs.keyIdentifiant = { uid: identifiant.uid, rno: identifiant.roleNo(clfDocs.site) };
-                return clfDocs;
-            })
-        );
-        return clfDocs$;
-    }
-
-    protected _fixeCatalogue$(clfDocs$: Observable<CLFDocs>): Observable<CLFDocs> {
-        clfDocs$ = clfDocs$.pipe(
-            concatMap(clfDocs => {
-                const tarifs = clfDocs.documents.filter(d => !!d.tarif).map(d => d.tarif);
-                return this.catalogueService.cataloguePlusRécentQue$(clfDocs.site, tarifs, clfDocs.catalogue).pipe(
-                    mergeMap((catalogue: Catalogue) => {
-                        if (catalogue.produits) {
-                            clfDocs.catalogue = catalogue;
-                            if (DATE_EST_NULLE(catalogue.date)) {
-                                // le site est d'état Catalogue
-                                // lancer une erreur?
-                            }
-                        }
-                        return of(clfDocs);
-                    })
-                );
-            })
-        );
-        return clfDocs$;
-    }
-
-    protected fixeSiteEtIdentifiant(clfDocs: CLFDocs, site?: Site, keyIdentifiant?: KeyUidRno) {
-        if (!site) {
-            site = this.navigation.litSiteEnCours();
-        }
-        clfDocs.site = site;
-        if (!keyIdentifiant) {
-            const identifiant = this.identification.litIdentifiant();
-            keyIdentifiant = { uid: identifiant.uid, rno: identifiant.roleNo(site) };
-        }
-        clfDocs.keyIdentifiant = keyIdentifiant;
-    }
-
-    protected _fixeClient$(clfDocs$: Observable<CLFDocs>, keyClient: IKeyUidRno, estClient: boolean): Observable<CLFDocs> {
-        clfDocs$ = clfDocs$.pipe(
-            concatMap(clfDocs => {
-                return this.clientService.client$(keyClient, estClient).pipe(
-                    mergeMap(client => {
-                        clfDocs.client = client;
-                        return of(clfDocs);
-                    })
-                );
-            })
-        );
-        return clfDocs$;
-    }
-
-    private _fixeClients$(clfDocs$: Observable<CLFDocs>): Observable<CLFDocs> {
-        clfDocs$ = clfDocs$.pipe(
-            concatMap(clfDocs => {
-                return this.clientService.clients$().pipe(
-                    mergeMap(clients => {
-                        clfDocs.clients = clients;
-                        return of(clfDocs);
-                    })
-                );
             })
         );
         return clfDocs$;
@@ -217,42 +173,13 @@ export abstract class CLFLectureService extends KeyUidRnoNoService<ApiDocument> 
     }
 
     /**
-     * Pour le client.
-     * Le CLFDocs lu dans l'Api contient les listes des résumés des documents du client avec leur type.
-     * Le CLFDocs retourné contient le Client du client.
+     * Pour le client, le CLFDocs lu dans l'Api contient les listes des résumés des documents du client avec leur type
+     * et le CLFDocs retourné contient le Client du client.
+     * Pour le fournisseur, le CLFDocs lu dans l'Api contient les listes des résumés des documents de tous les clients avec leur type
+     * et le CLFDocs retourné contient les Client de tous les clients.
      * Pas stocké.
      */
-    documentsDuClient(): Observable<CLFDocs> {
-        const site = this.navigation.litSiteEnCours();
-        const identifiant = this.identification.litIdentifiant();
-        const keyClient = { uid: identifiant.uid, rno: identifiant.roleNo(site) };
-        const controller = ApiController.document;
-        const action = ApiAction.document.client;
-        if (!this.pFiltre || this.pFiltre.uid !== keyClient.uid || this.pFiltre.rno !== keyClient.rno) {
-            this.pFiltre = new CLFFiltre(keyClient);
-        }
-        let clfDocs$ = this._clfDocs$(controller, action, this.pFiltre.créeParams());
-        clfDocs$ = this._fixeClient$(clfDocs$, keyClient, true);
-        return clfDocs$;
-    }
-
-    /**
-     * Pour le fournisseur.
-     * Le CLFDocs lu dans l'Api contient les listes des résumés des documents de tous les clients avec leur type.
-     * Le CLFDocs retourné contient les Client de tous les clients.
-     * Pas stocké.
-     */
-    documentsDuSite(): Observable<CLFDocs> {
-        const site = this.navigation.litSiteEnCours();
-        if (!this.pFiltre || this.pFiltre.uid !== site.uid || this.pFiltre.rno !== site.rno) {
-            this.pFiltre = new CLFFiltre(site);
-        }
-        const controller = ApiController.document;
-        const action = ApiAction.document.clients;
-        let clfDocs$ = this._clfDocs$(controller, action, this.pFiltre.créeParams());
-        clfDocs$ = this._fixeClients$(clfDocs$);
-        return clfDocs$;
-    }
+    abstract documents(): Observable<CLFDocs>;
 
     /**
      * Pour le client et le fournisseur.
@@ -263,6 +190,7 @@ export abstract class CLFLectureService extends KeyUidRnoNoService<ApiDocument> 
      * Pas stocké.
      */
     document(keyDocument: IKeyUidRnoNo, type: TypeCLF): Observable<CLFDocs> {
+        const site = this.navigation.litSiteEnCours();
         const controller = ApiController.document;
         const action = type === 'commande'
             ? ApiAction.document.commande
@@ -274,129 +202,19 @@ export abstract class CLFLectureService extends KeyUidRnoNoService<ApiDocument> 
             rno: '' + keyDocument.rno,
             no: '' + keyDocument.no,
         };
-        let clfDocs$ = this._clfDocs$(controller, action, params);
-        clfDocs$ = this._fixeCatalogue$(clfDocs$);
-        return clfDocs$.pipe(
-            tap(clfDocs => {
-                clfDocs.catalogue = Catalogue.nouveau(clfDocs.documents[0].tarif);
+        return this._clfDocs$(site, controller, action, params).pipe(
+            concatMap(clfDocs => {
                 clfDocs.type = type;
+                const tarifs = clfDocs.documents.filter(d => !!d.tarif).map(d => d.tarif);
+                return this.catalogueService.disponiblesAvecPrixDatés(site, tarifs).pipe(
+                    map(catalogue => {
+                        clfDocs.catalogue = catalogue;
+                        this.fixeStock(clfDocs);
+                        return clfDocs;
+                    })
+                );
             })
         );
     }
-
-    /**
-     * Pour le fournisseur.
-     * Le CLFDocs lu dans l'Api contient les listes des résumés des bons envoyés et sans synthèse de tous les clients.
-     * Le CLFDocs retourné contient les Client de tous les clients.
-     * Pas stocké.
-     * @param type type du document de synthèse
-     */
-    clientsAvecRésumésBons(type: TypeCLF): Observable<CLFDocs> {
-        const action = ApiAction.docCLF.clients;
-        const site = this.navigation.litSiteEnCours();
-        const params: { [param: string]: string } = {
-            uid: site.uid,
-            rno: '' + site.rno,
-        };
-        let clfDocs$ = this._clfDocs$(this.controller(type), action, params);
-        clfDocs$ = this._fixeClients$(clfDocs$);
-        return clfDocs$.pipe(tap(clfDocs => clfDocs.type = type));
-    }
-
-    private créeClientAvecBonsSubject() {
-        this.clientAvecBonsSubject = new Subject<CLFDocs>();
-        this.clientAvecBonsSubject.asObservable().subscribe(clfDocs => console.log('créeClientAvecBonsSubject', clfDocs));
-    }
-
-    private détruitClientAvecBonsSubject(clfDocs: CLFDocs) {
-        this.clientAvecBonsSubject.next(clfDocs);
-        this.clientAvecBonsSubject = undefined;
-    }
-
-    /**
-     * Pour le fournisseur.
-     * Le CLFDocs lu dans l'Api contient les documents envoyés et sans synthèse du client avec les lignes.
-     * Le CLFDocs retourné contient le Client du client.
-     * Le CLFDocs retourné contient le catalogue à appliquer.
-     * Stocké.
-     * @param keyClient key du client
-     */
-    clientAvecBons(keyClient: IKeyUidRno, type: TypeCLF): Observable<CLFDocs> {
-        if (!this.clientAvecBonsSubject) {
-            this.clientAvecBonsSubject = new Subject<CLFDocs>();
-            this.clientAvecBonsObs = this.clientAvecBonsSubject.asObservable();
-        }
-        const stock = this.litStock();
-        const site = this.navigation.litSiteEnCours();
-        const keySite = {
-            uid: site.uid,
-            rno: site.rno
-        };
-        let clfDocs$: Observable<CLFDocs>;
-        if (!stock
-            || stock.type !== type
-            || !KeyUidRno.compareKey(stock.keyClient, keyClient) // client changé
-            || !KeyUidRno.compareKey(stock.site, keySite) // site changé
-        ) {
-            const action = ApiAction.docCLF.client;
-            const params: { [param: string]: string } = {
-                uid: keyClient.uid,
-                rno: '' + keyClient.rno,
-            };
-            clfDocs$ = this._clfDocs$(this.controller(type), action, params);
-            clfDocs$ = this._fixeClient$(clfDocs$, keyClient, false).pipe(
-                tap(clfDocs => {
-                    clfDocs.type = type;
-                    this.fixeSiteEtIdentifiant(clfDocs, site);
-                }));
-        } else {
-            clfDocs$ = of(stock);
-        }
-
-        clfDocs$ = clfDocs$.pipe(
-            concatMap(clfDocs => {
-                const tarifs = clfDocs.documents.filter(d => !!d.tarif).map(d => d.tarif);
-                return this.catalogueService.cataloguePlusRécentQue$(clfDocs.site, tarifs, clfDocs.catalogue).pipe(
-                    mergeMap((catalogue?: Catalogue) => {
-                        if (!catalogue.produits) {
-                            // clfDocs.catalogue est à jour. Il n'y a rien à faire
-                        } else {
-                            clfDocs.catalogue = catalogue;
-                            // clfDocs.catalogue n'existe pas ou est obsolète
-                            if (DATE_EST_NULLE(catalogue.date)) {
-                                // le site est d'état Catalogue
-                                if (site.etat !== IdEtatSite.catalogue) {
-                                    this.catalogueService.commenceModification(site);
-                                }
-                            } else {
-                                // le site n'est pas d'état Catalogue
-                                if (site.etat === IdEtatSite.catalogue) {
-                                    this.catalogueService.termineModification(site);
-                                }
-                            }
-                        }
-                        this.fixeStock(clfDocs);
-                        this.détruitClientAvecBonsSubject(clfDocs);
-                        return of(clfDocs);
-                    })
-                );
-            }),
-        );
-
-        return clfDocs$;
-    }
-
-    bons(): Observable<CLFDocs> {
-        if (this.clientAvecBonsSubject) {
-            //            return this.clientAvecBonsSubject.asObservable();
-        }
-        return of(this.litStock());
-    }
-
-    /**
-     * Fixe le stock.
-     * @param clfDocs le documents ne contient que les bons sélectionnés pour la synthèse
-     */
-    fixeAPréparer(clfDocs: CLFDocs) { }
 
 }

@@ -66,6 +66,10 @@ export enum KfTypeDeValeur {
      */
     avecEntree,
     /**
+     * input nombre (type de la valeur: number)
+     */
+    avecEntreeInputNombre,
+    /**
      * liste (type de la valeur: any[])
      *  le type est fixé dans le constructeur
      */
@@ -77,12 +81,7 @@ export enum KfTypeDeValeur {
     avecGroupe,
 }
 
-export enum KfTypeDeBouton {
-    bouton = 0,
-    retablir,
-    soumettre,
-    annuler
-}
+export type KfTypeDeBouton = 'button' | 'reset' | 'submit'
 
 export enum KfTypeDActionDeListe {
     ajouter = 'ajouter',
@@ -91,23 +90,6 @@ export enum KfTypeDActionDeListe {
     descendre = 'descendre',
     supprimer = 'supprimer',
     effacerTout = 'effacerTout',
-}
-
-export enum KfKeyboardKey {
-    enter = 'Enter',
-    space = ' ',
-    down = 'Down',
-    left = 'Left',
-    right = 'Right',
-    up = 'Up',
-    arrowDown = 'ArrowDown',
-    arrowLeft = 'ArrowLeft',
-    arrowRight = 'ArrowRight',
-    arrowUp = 'ArrowUp',
-    end = 'End',
-    home = 'Home',
-    pageDown = 'PageDown',
-    pageUp = 'PageUp',
 }
 
 export enum KfTypeDeBaliseHTML {

@@ -1,5 +1,6 @@
 import { KfTexteDef } from '../../kf-partages/kf-texte-def';
-import { KfInput, KfTypeDInput } from './kf-input';
+import { KfInput } from './kf-input';
+import { KfTypeDInput } from './kf-type-d-input';
 import { Dateur } from 'src/app/commun/outils/dateur';
 
 export class KfInputTemps extends KfInput {

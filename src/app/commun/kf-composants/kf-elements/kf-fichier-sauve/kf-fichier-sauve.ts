@@ -1,11 +1,11 @@
 import { KfTypeDeComposant } from '../../kf-composants-types';
-import { KfElement } from '../../kf-composant/kf-element';
-import { KfTypeDHTMLEvents } from '../../kf-partages/kf-evenements';
+import { KfComposant } from '../../kf-composant/kf-composant';
+import { KfEvenement, KfTypeDEvenement, KfTypeDHTMLEvents } from '../../kf-partages/kf-evenements';
 import { KfParametres } from '../../kf-composants-parametres';
 import { KfTexteDef } from '../../kf-partages/kf-texte-def';
 import { KfContenuPhrase } from '../../kf-partages/kf-contenu-phrase/kf-contenu-phrase';
 
-export class KfFichierSauve extends KfElement {
+export class KfFichierSauve extends KfComposant {
     texteASauver: () => string;
     private _nomFichier: () => string;
 
@@ -22,8 +22,11 @@ export class KfFichierSauve extends KfElement {
             this.fixeTexte(KfParametres.fichierParDefaut.texteSauve);
         }
         this.gereHtml.ajouteEvenementASuivre(KfTypeDHTMLEvents.click);
-        this.gereHtml.ajouteEvenementASuivre(KfTypeDHTMLEvents.keypress);
-        this.ajouteClasseDef('kf-fichier kf-bouton');
+        this.gereHtml.ajouteTraiteur(KfTypeDEvenement.click, () => {
+            const evenement = new KfEvenement(this, KfTypeDEvenement.fichierSauve);
+            this.gereHtml.traite(evenement);
+        });
+        this.ajouteClasse('kf-fichier kf-bouton');
     }
 
     get dataUrl(): string {

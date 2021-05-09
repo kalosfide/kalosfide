@@ -12,8 +12,8 @@ import { KfComposant } from '../kf-composants/kf-composant/kf-composant';
 export abstract class DataKeyIndexComponent<T extends IDataKey> extends PageTableComponent<T>  {
 
     abstract site: Site;
-    get nomSiteDef(): KfTexteDef {
-        return () => this.site.nomSite;
+    get urlSiteDef(): KfTexteDef {
+        return () => this.site.url;
     }
     protected contenuAidePage: () => KfComposant[];
 

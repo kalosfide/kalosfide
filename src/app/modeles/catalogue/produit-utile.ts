@@ -51,4 +51,16 @@ export class ProduitUtile extends DataKeyUtile<Produit> {
     get colonne(): ProduitUtileColonne {
         return this.pColonne as ProduitUtileColonne;
     }
+
+    get nom(): {
+        catégorie: string,
+        produit: string,
+        état: string,
+    } {
+        return {
+            produit: 'produit',
+            catégorie: 'catégorie',
+            état: 'état',
+        };
+    }
 }

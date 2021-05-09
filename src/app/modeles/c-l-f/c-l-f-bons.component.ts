@@ -21,7 +21,7 @@ import { CLFUtile } from './c-l-f-utile';
 import { CLFDocs } from './c-l-f-docs';
 import { GroupeBoutonsMessages } from 'src/app/disposition/fabrique/fabrique-formulaire';
 import { KfBouton } from 'src/app/commun/kf-composants/kf-elements/kf-bouton/kf-bouton';
-import { FabriqueBootstrap } from 'src/app/disposition/fabrique/fabrique-bootstrap';
+import { KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
 import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
 import { IBoutonDef } from 'src/app/disposition/fabrique/fabrique-bouton';
 import { ModeAction } from './condition-action';
@@ -29,6 +29,8 @@ import { ILienDef } from 'src/app/disposition/fabrique/fabrique-lien';
 import { TexteOutils } from 'src/app/commun/outils/texte-outils';
 import { FournisseurRoutes, FournisseurPages } from 'src/app/fournisseur/fournisseur-pages';
 import { KfCaseACocher } from 'src/app/commun/kf-composants/kf-elements/kf-case-a-cocher/kf-case-a-cocher';
+import { KfVueTableLigne } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-ligne';
+import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
 
 /**
  * Route: ./client/:key/bons
@@ -40,7 +42,6 @@ export abstract class CLFBonsComponent extends PageTableComponent<CLFDoc> implem
 
     site: Site;
     identifiant: Identifiant;
-    barre: BarreTitre;
 
     date: Date;
 
@@ -118,7 +119,7 @@ export abstract class CLFBonsComponent extends PageTableComponent<CLFDoc> implem
             nom: 'infos_bon_virtuel',
             infos
         });
-        FabriqueBootstrap.ajouteClasse(bouton, 'btn', 'light');
+        KfBootstrap.ajouteClasse(bouton, 'btn', 'light');
         return bouton;
     }
 
@@ -132,27 +133,29 @@ export abstract class CLFBonsComponent extends PageTableComponent<CLFDoc> implem
                 }
                 return doc.éditeur.superGroupe;
             },
+            itemRéférenceLigne: (doc: CLFDoc, ligne: KfVueTableLigne<CLFDoc>) => {
+                doc.vueTableLigne = ligne;
+            }
         };
         if (!this.clfDocs.apiBonVirtuel) {
-            const outils = Fabrique.vueTable.outils<CLFDoc>(this.nom);
+            const outils = Fabrique.vueTable.outils<CLFDoc>();
             const outilAjoute = Fabrique.vueTable.outilAjoute(this.utile.lien.bonVirtuel(this.clfDocs.client), this.infosBonVirtuel());
             outilAjoute.bbtnGroup.afficherSi(this.utile.conditionTable.edition);
             outils.ajoute(outilAjoute);
             vueTableDef.outils = outils;
         }
-        const txts: () => string[] = () => [
-            `Il n\'a pas de ${this.texteUtile.def.bon} envoyé par ${this.clfDocs.client.nom}`
-            + ` pour servir de base à ${this.texteUtile.un_doc}.`,
-            `Vous pouvez cependant créer ${this.texteUtile.un_doc} en utilisant`
-            + ` un ${this.texteUtile.def.bon} virtuel où vous pourrez ajouter les produits à ${this.texteUtile.def.faire}.`,
-            this.texteUtile.descriptionBonVirtuel
-        ];
         const etatTable = Fabrique.vueTable.etatTable({
             nePasAfficherSiPasVide: true,
             nbMessages: 3,
             avecSolution: true,
             charge: ((etat: EtatTable) => {
-                const texts = txts();
+                const texts = [
+                    `Il n'y a pas de ${this.texteUtile.def.bon} envoyé par ${this.clfDocs.client.nom}`
+                    + ` pour servir de base à ${this.texteUtile.un_doc}.`,
+                    `Vous pouvez cependant créer ${this.texteUtile.un_doc} en utilisant`
+                    + ` un ${this.texteUtile.def.bon} virtuel où vous pourrez ajouter les produits à ${this.texteUtile.def.faire}.`,
+                    this.texteUtile.descriptionBonVirtuel
+                ];
                 for (let i = 0; i < 3; i++) {
                     (etat.grBtnsMsgs.messages[i] as KfEtiquette).fixeTexte(texts[i]);
                 }
@@ -177,7 +180,7 @@ export abstract class CLFBonsComponent extends PageTableComponent<CLFDoc> implem
     }
 
     private ajouteGroupeCréer() {
-        const messages: KfComposant[] = [];
+        const messages: KfEtiquette[] = [];
         let etiquette: KfEtiquette;
         etiquette = Fabrique.ajouteEtiquetteP(messages);
         this.étiquetteSélectionnés = etiquette;
@@ -193,8 +196,7 @@ export abstract class CLFBonsComponent extends PageTableComponent<CLFDoc> implem
         };
         this.boutonCréer = Fabrique.bouton.bouton(def);
         boutons.push(this.boutonCréer);
-        const groupe = new GroupeBoutonsMessages('creer', messages);
-        groupe.créeBoutons(boutons);
+        const groupe = new GroupeBoutonsMessages('creer', { messages, boutons });
         groupe.alerte('primary');
         this.groupeCréer = groupe.groupe;
         this.superGroupe.ajoute(groupe.groupe);
@@ -257,6 +259,7 @@ export abstract class CLFBonsComponent extends PageTableComponent<CLFDoc> implem
     rafraichit() {
         this.barre.rafraichit();
         this.rafraichitCréer();
+        this.document.rafraichitCaseToutSélectionner();
         this.étiquetteSélectionnez.nePasAfficher = this.document.àSynthétiser.length === 0;
     }
 
@@ -278,7 +281,10 @@ export abstract class CLFBonsComponent extends PageTableComponent<CLFDoc> implem
     créeSuperGroupe() {
         this.superGroupe = new KfSuperGroupe(this.nom);
         this.superGroupe.créeGereValeur();
-        this.superGroupe.sauveQuandChange = true;
+        this.superGroupe.comportementFormulaire = {
+            sauveQuandChange: true,
+            neSoumetPasSiPristine: true,
+        };
 
         if (this.clfDocs.catalogue.produits.length === 0) {
             const message = `Il n'y a pas de produits dans le catalogue.`;
@@ -286,7 +292,7 @@ export abstract class CLFBonsComponent extends PageTableComponent<CLFDoc> implem
                 urlDef: {
                     routes: FournisseurRoutes,
                     pageDef: FournisseurPages.catalogue,
-                    nomSite: this.site.nomSite
+                    urlSite: this.site.url
                 }
             };
             this.superGroupe.ajoute(this.utile.groupeCréationImpossible(this.clfDocs.type, message, lienDef));
@@ -294,7 +300,7 @@ export abstract class CLFBonsComponent extends PageTableComponent<CLFDoc> implem
             // il faut ajouter la case à cocher de l'en-tête de la colonne Inclure
             // pour que son formControl soit créé.
             const groupe = new KfGroupe('');
-            groupe.ajoute(this.document.créeCaseACocherTout());
+            groupe.ajoute(this.document.créeCaseACocherTout(this.service));
             groupe.nePasAfficher = true;
             this.superGroupe.ajoute(groupe);
 
@@ -302,7 +308,7 @@ export abstract class CLFBonsComponent extends PageTableComponent<CLFDoc> implem
             this.étiquetteSélectionnez.baliseHtml = KfTypeDeBaliseHTML.p;
             Fabrique.ajouteTexte(this.étiquetteSélectionnez,
                 `Sélectionnez les ${this.texteUtile.def.bons} à inclure dans ${this.texteUtile.le_doc}. `,
-                { texte: `(Un bon doit être prêt pour pouvoir être sélectionné.)`, balise: KfTypeDeBaliseHTML.small}
+                { texte: `(Un bon doit être prêt pour pouvoir être sélectionné.)`, balise: KfTypeDeBaliseHTML.small }
             );
             this.superGroupe.ajoute(this.étiquetteSélectionnez);
             this.ajouteGroupeDétails();
@@ -326,13 +332,17 @@ export abstract class CLFBonsComponent extends PageTableComponent<CLFDoc> implem
 
     protected aprèsChargeData() {
         this.subscriptions.push(
-            this.service.modeActionIO.observable.subscribe(() => this.rafraichit()),
-            this.service.clsBilanIO.observable.subscribe(() => this.rafraichit())
+            this.service.modeActionIO.observable.subscribe(() => {
+                this.rafraichit();
+            }),
+            this.service.clsBilanIO.observable.subscribe(() => {
+                this.rafraichit();
+            })
         );
     }
 
-    créePageTableDef() {
-        this.pageTableDef = {
+    créePageTableDef(): IPageTableDef {
+        return {
             avantChargeData: () => this.avantChargeData(),
             chargeData: (data: Data) => this.chargeData(data),
             créeSuperGroupe: () => this.créeSuperGroupe(),

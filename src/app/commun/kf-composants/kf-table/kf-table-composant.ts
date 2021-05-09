@@ -5,6 +5,9 @@ import { KfNgClasse } from '../kf-partages/kf-gere-css-classe';
 import { KfNgStyle } from '../kf-partages/kf-gere-css-style';
 
 export interface IKfTableCellule {
+    /**
+     * Si présent et vrai, affichage dans un th. Sinon, affichage dans un td.
+     */
     enTete?: boolean;
     texte?: string;
     composant?: KfComposant;

@@ -8,22 +8,23 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app.routing.module';
 
 import { CommunModule } from './commun/commun.module';
-import { ApiConfigService } from './services/api-config.service';
+import { ApiConfigService } from './api/api-config.service';
 import { IdentificationService } from './securite/identification.service';
 import { DispositionModule } from './disposition/disposition.module';
-import { MotDePasseService } from './securite/mot-de-passe/mot-de-passe.service';
 import { httpInterceptorProviders } from './services/http-interceptor-provider';
 import { NavigationService } from './services/navigation.service';
-import { MotDePasseResolverService } from './securite/mot-de-passe/mot-de-passe-resolver.service';
-import { MessagesModule } from './messages/messages.module';
+import { ErreursModule } from './erreurs/erreurs.module';
 import { AlerteService } from './disposition/alerte/alerte-service';
-import { ClientGarde } from './site/client-garde';
 import { IdentifiantResolverService } from './securite/identifiant-resolver.service';
 import { CatalogueService } from './modeles/catalogue/catalogue.service';
-import { ApiRequêteService } from './services/api-requete.service';
+import { ApiRequêteService } from './api/api-requete.service';
 import { RetourneVraiResolverService } from './services/retourne-vrai-resolver.service';
 import { EtatSiteChangeGarde, SiteOuvertGarde } from './securite/site-ouvert-garde';
 import { StockageService } from './services/stockage/stockage.service';
+import { IdentifiantGardeService } from './securite/identifant-garde.service';
+import { RouteurService } from './services/routeur.service';
+import { ClientService } from './modeles/client/client.service';
+import { TraiteKeydownService } from './commun/traite-keydown/traite-keydown.service';
 
 @NgModule({
     imports: [
@@ -35,7 +36,7 @@ import { StockageService } from './services/stockage/stockage.service';
 
         CommunModule,
         DispositionModule,
-        MessagesModule,
+        ErreursModule,
         AppRoutingModule,
     ],
     declarations: [
@@ -47,20 +48,22 @@ import { StockageService } from './services/stockage/stockage.service';
         ApiConfigService,
         NavigationService,
         IdentificationService,
+        IdentifiantGardeService,
         httpInterceptorProviders,
+        RouteurService,
         NgbActiveModal,
         AlerteService,
+        TraiteKeydownService,
 
         ApiRequêteService,
 
-        MotDePasseService,
-        MotDePasseResolverService,
         IdentifiantResolverService,
 
         EtatSiteChangeGarde,
         SiteOuvertGarde,
 
         CatalogueService,
+        ClientService,
 
         RetourneVraiResolverService,
     ],

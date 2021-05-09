@@ -1,5 +1,7 @@
+import { KfTypeDeValeur } from '../../kf-composants-types';
 import { KfTexteDef } from '../../kf-partages/kf-texte-def';
-import { KfInput, KfTypeDInput } from './kf-input';
+import { KfInput } from './kf-input';
+import { KfTypeDInput } from './kf-type-d-input';
 
 export class KfInputNombre extends KfInput {
     typeDInput: KfTypeDInput;
@@ -10,6 +12,7 @@ export class KfInputNombre extends KfInput {
     constructor(nom: string, texte?: KfTexteDef) {
         super(nom, texte);
         this.typeDInput = KfTypeDInput.nombre;
+        this.gereValeur.typeDeValeur = KfTypeDeValeur.avecEntreeInputNombre;
     }
 
     get valeur(): number {

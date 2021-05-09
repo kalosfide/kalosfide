@@ -1,8 +1,6 @@
 import { FabriqueClasse, Fabrique } from './fabrique';
 import { KfVueTable } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table';
-import {
-    KfTypeDEvenement, KfEvenement, KfTypeDHTMLEvents, KfStatutDEvenement
-} from 'src/app/commun/kf-composants/kf-partages/kf-evenements';
+import { KfTypeDEvenement } from 'src/app/commun/kf-composants/kf-partages/kf-evenements';
 import { FabriqueMembre } from './fabrique-membre';
 import { KfVueTableOutils } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-outils';
 import { KfVueTableFiltreBase } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-filtre-base';
@@ -15,14 +13,9 @@ import { KfVueTableOutilBtnGroupe } from 'src/app/commun/kf-composants/kf-vue-ta
 import { IKfVueTableDef } from 'src/app/commun/kf-composants/kf-vue-table/i-kf-vue-table-def';
 import { EtatTable, IEtatTableDef } from './etat-table';
 import { GroupeBoutonsMessages } from './fabrique-formulaire';
-import { IUrlDef } from './fabrique-url';
-import { IContenuPhraseDef } from './fabrique-contenu-phrase';
-import { KfVueTableCelluleEnTete } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-en-tete';
-import { KfIcone } from 'src/app/commun/kf-composants/kf-elements/kf-icone/kf-icone';
-import { FANomIcone } from 'src/app/commun/kf-composants/kf-partages/kf-icone-def';
-import { IKfVueTableTrieurOptions } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-trieur';
-import { KfGéreCss } from 'src/app/commun/kf-composants/kf-partages/kf-gere-css';
 import { KfBouton } from 'src/app/commun/kf-composants/kf-elements/kf-bouton/kf-bouton';
+import { IKfVueTablePaginationDef, KfVueTablePagination } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-pagination';
+import { KfGéreCss } from 'src/app/commun/kf-composants/kf-partages/kf-gere-css';
 
 export class FabriqueVueTable extends FabriqueMembre {
 
@@ -38,67 +31,76 @@ export class FabriqueVueTable extends FabriqueMembre {
         return this.fabrique.couleur.classeCouleurFond(Couleur.whitesmoke);
     }
 
-    vueTable<T>(nom: string, vueTableDef: IKfVueTableDef<T>, classe?: string): KfVueTable<T> {
-        const vueTable = new KfVueTable(nom + '_table', vueTableDef);
-        vueTable.ajouteClasseDef('table-sm table-hover');
-        vueTable.ajouteClasseEnTete('thead-light');
-        vueTable.ajouteClasseBilan('thead-light');
-        if (classe !== null) {
-            if (classe === undefined) {
-                classe = 'align-middle';
-            }
-            vueTable.colonnes.forEach(colonne => {
-                colonne.ajouteClasseItem(classe);
-                if (colonne.enTeteDef) {
-                    colonne.ajouteClasseEntete(classe);
-                }
-                if (colonne.bilanDef) {
-                    colonne.ajouteClasseBilan(classe);
-                }
-            });
+    private get classeOutilActif(): string {
+        return this.fabrique.couleur.classeCouleurFond(Couleur.orange);
+    }
+
+    vueTable<T>(nom: string, vueTableDef: IKfVueTableDef<T>): KfVueTable<T> {
+        vueTableDef.nePasMontrerIconeDeTriSiPasTrié = true;
+        vueTableDef.colonneNoLigneDef = {
+            classeDefs: ['no-ligne'],
+        };
+        const vueTable = new KfVueTable<T>(nom + '_table', vueTableDef);
+        vueTable.ajouteClasse('table-sm table-hover');
+        if (vueTable.enTete) {
+            vueTable.enTete.gereCss.ajouteClasse('thead-light');
         }
+        if (vueTable.bilan) {
+            vueTable.bilan.gereCss.ajouteClasse('thead-light');
+        }
+        vueTable.colonnes.forEach(colonne => {
+            colonne.ajouteClasseItem('align-middle');
+            if (colonne.enTeteDef) {
+                colonne.ajouteClasseEntete('align-middle');
+            }
+            if (colonne.bilanDef) {
+                colonne.ajouteClasseBilan('align-middle');
+            }
+        });
 
         if (vueTable.outils) {
             vueTable.fixeClassesFiltre(this.classeFondFiltre);
-            vueTable.outils.ajouteClasseDef('border border-rounded p-1 mb-2');
+            vueTable.outils.ajouteClasse('border border-rounded p-1 mb-2');
             vueTable.outils.fixeClassesFiltre(this.classeFondFiltre, this.classeFondFiltreInactif);
         }
 
         return vueTable;
     }
 
-    outils<T>(nom: string): KfVueTableOutils<T> {
+    outils<T>(): KfVueTableOutils<T> {
         const outils = new KfVueTableOutils<T>();
-        outils.btnToolbar.ajouteClasseDef('justify-content-between');
+        outils.btnToolbar.ajouteClasse('justify-content-between');
         return outils;
     }
 
     private _prépareFiltreOuCherche<T>(filtre: KfVueTableFiltreBase<T>) {
-        filtre.composant.géreClasseEntree.ajouteClasseDef('input-group input-group-sm');
+        filtre.composant.géreClasseEntree.ajouteClasse('input-group input-group-sm');
     }
 
     private _prépareFiltre<T>(filtre: KfVueTableFiltreTexte<T> | KfVueTableFiltreNombre<T>, titre: string, placeholder?: string) {
         this._prépareFiltreOuCherche<T>(filtre);
-        filtre.composant.ajouteClasseDef('form-control-sm');
+        filtre.composant.ajouteClasse('form-control-sm');
         const fauxBouton = this.fabrique.bouton.bouton({
             nom: '',
             contenu: { nomIcone: this.fabrique.icone.nomIcone.filtre }
         });
         fauxBouton.inactivité = true;
-        filtre.liste.composantAvant = fauxBouton;
+        filtre.liste.fixeComposantAvant(fauxBouton, 'input-group-prepend');
         if (placeholder) {
             const option0 = filtre.liste.créeOption0();
             option0.contenuPhrase.fixeTexte(placeholder);
             filtre.liste.gereHtml.ajouteTraiteur(KfTypeDEvenement.valeurChange,
-                (évènement: KfEvenement) => {
+                () => {
                     console.log(filtre.liste.valeur);
                     const estSur0 = filtre.liste.valeur === undefined;
                     if (estSur0) {
                         option0.contenuPhrase.fixeTexte(placeholder);
-                        option0.supprimeClasseDef('font-italic');
+                        option0.supprimeClasse('font-italic');
+                        fauxBouton.supprimeClasse(this.classeOutilActif);
                     } else {
                         option0.contenuPhrase.fixeTexte('Annuler le filtre');
-                        option0.ajouteClasseDef('font-italic font-weight-bold');
+                        option0.ajouteClasse('font-italic font-weight-bold');
+                        fauxBouton.ajouteClasse(this.classeOutilActif);
                     }
 
                 });
@@ -106,16 +108,18 @@ export class FabriqueVueTable extends FabriqueMembre {
         return filtre;
     }
 
-    cherche<T>(nom: string, titre: string, texte: (t: T) => string, placeholder?: string): KfVueTableFiltreCherche<T> {
-        const filtre = new KfVueTableFiltreCherche<T>(nom, texte);
+    cherche<T>(nom: string, titre: string, colonne: string, placeholder?: string): KfVueTableFiltreCherche<T> {
+        const filtre = new KfVueTableFiltreCherche<T>(nom, colonne);
         this._prépareFiltreOuCherche<T>(filtre);
         const fauxBouton = this.fabrique.bouton.bouton({
             nom: '',
             contenu: { nomIcone: this.fabrique.icone.nomIcone.cherche }
         });
         fauxBouton.inactivité = true;
-        filtre.texte.composantAvant = fauxBouton;
-        filtre.texte.créeBoutonEfface();
+        fauxBouton.ajouteClasse({ nom: this.classeOutilActif, active: () => filtre.texte.valeur && filtre.texte.valeur !== '' });
+        filtre.texte.fixeComposantAvant(fauxBouton, 'input-group-prepend');
+        filtre.texte.ajouteEffaceur(this.fabrique.icone.nomIcone.croix);
+        filtre.texte.ajouteCssDivBouton('input-group-sm');
         filtre.texte.placeholder = placeholder;
         return filtre;
     }
@@ -139,46 +143,46 @@ export class FabriqueVueTable extends FabriqueMembre {
             outilAjoute.bbtnGroup.ajoute(aide);
         }
         outilAjoute.bbtnGroup.taille('sm');
-        outilAjoute.bbtnGroup.ajouteClasseDef('ml-4');
+        outilAjoute.bbtnGroup.ajouteClasse('ml-4');
         return outilAjoute;
     }
 
     etatTable(def: IEtatTableDef): EtatTable {
-        const etiquettes = [];
+        const messages = [];
         for (let i = 0; i < def.nbMessages; i++) {
-            this.fabrique.ajouteEtiquetteP(etiquettes);
+            this.fabrique.ajouteEtiquetteP(messages);
         }
-        const groupe = new GroupeBoutonsMessages('etat', etiquettes);
+        let boutons: (KfBouton | KfLien)[];
         if (def.avecSolution) {
-            const bouton = this.fabrique.lien.petitBouton('solution');
-            groupe.créeBoutons([bouton]);
+            const bouton = this.fabrique.lien.lien('solution');
+            boutons = [bouton];
         }
+        const groupe = new GroupeBoutonsMessages('etat', { messages, boutons });
         const etatTable = new EtatTable(groupe, def);
         return etatTable;
     }
 
-    private créeDéclencheTri<T>(enTête: KfVueTableCelluleEnTete<T>): KfGéreCss {
-        const i = new KfIcone('i' + (enTête.colonne.index + 1));
-        i.gereHtml.ajouteEvenementASuivre(KfTypeDHTMLEvents.click);
-        enTête.composant.contenuPhrase.ajoute(i);
-        return i;
-    }
-
-    private rafraichitDéclencheTri(déclencheur: any, desc: boolean, estDernierTri: boolean) {
-        const icone = déclencheur as KfIcone;
-        if (desc !== true) {
-            icone.nomIcone = 'sort-asc';
-        } else {
-            icone.nomIcone = 'sort-desc';
-        }
-    }
-
-    optionsDeTrieur<T>(inits?: { nomTri: string, desc?: boolean }[]): IKfVueTableTrieurOptions<T> {
-        return {
-            inits,
-            créeDéclencheur: (this.créeDéclencheTri).bind(this),
-            rafraichitDéclencheur: (this.rafraichitDéclencheTri).bind(this)
+    pagination<T>(): KfVueTablePagination<T> {
+        const def: IKfVueTablePaginationDef = {
+            icone: this.fabrique.icone.iconesPagination(),
+            nbBoutons: 5,
+            choixNbParPage: [4, 8, 12],
+            nbParPage: 8,
+            avecEtat: true,
+            optionToutesLesLignes: true,
+            nePasAfficherSiUneSeulePage: true,
         };
+        const pagination = new KfVueTablePagination<T>(def);
+        pagination.btnToolbar.ajouteClasse('justify-content-between pt-1');
+        pagination.etat.bbtnGroup.taille('sm');
+        pagination.etat.etiquette.ajouteClasse('form-control-sm');
+        pagination.boutons.bbtnGroup.taille('sm');
+        pagination.boutons.bbtnGroup.ajouteClasse('pagination');
+        pagination.boutons.boutons.forEach(b => {
+            b.ajouteClasse('btn btn-light btn-sm');
+            });
+        pagination.choixNbParPage.liste.géreClasseEntree.ajouteClasse('input-group input-group-sm');
+        pagination.choixNbParPage.liste.ajouteClasse('form-control-sm');
+        return pagination;
     }
-
 }

@@ -4,7 +4,7 @@ import {
 } from '@angular/core';
 import { KfComposantComponent } from '../kf-composant/kf-composant.component';
 import { KfSousMenu } from './kf-sous-menu';
-import { KFComposantService } from '../kf-composant.service';
+import { TraiteKeydownService } from '../../traite-keydown/traite-keydown.service';
 
 @Component({
     selector: 'app-kf-sous-menu',
@@ -14,7 +14,7 @@ import { KFComposantService } from '../kf-composant.service';
 export class KfSousMenuComponent extends KfComposantComponent implements OnInit, AfterViewInit {
     @ViewChild('divElement', {static: false}) divElementRef: ElementRef;
 
-    constructor(protected service: KFComposantService) {
+    constructor(protected service: TraiteKeydownService) {
         super(service);
     }
 
@@ -22,8 +22,7 @@ export class KfSousMenuComponent extends KfComposantComponent implements OnInit,
     }
 
     ngAfterViewInit() {
-        this.composant.gereHtml.htmlElement = this.divElementRef.nativeElement;
-        this.composant.gereHtml.initialiseHtml(this.output);
+        this.composant.initialiseHtml(this.divElementRef.nativeElement, this.output);
     }
 
     get sousMenu(): KfSousMenu {

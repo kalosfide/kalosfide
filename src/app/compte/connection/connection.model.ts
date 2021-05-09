@@ -1,5 +1,4 @@
 export class ConnectionModel {
-    userName: string;
+    email: string;
     password: string;
-    persistant: boolean;
 }

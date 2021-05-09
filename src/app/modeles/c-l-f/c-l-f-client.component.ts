@@ -18,7 +18,6 @@ import { ModeAction } from './condition-action';
 /** page titre */
 export abstract class CLFClientComponent extends PageBaseComponent implements OnInit, OnDestroy {
     site: Site;
-    barre: BarreTitre;
 
     clfDocs: CLFDocs;
 

@@ -1,6 +1,6 @@
-<ng-template #labelTemplate>
-    <label #labelElement [attr.for]="radios.nom" [ngClass]="radios.classeLabel">
-        <app-kf-contenu-phrase [contenuPhrase]="radios.contenuPhrase"></app-kf-contenu-phrase>
+<ng-template #labelTemplate let-avecLabel>
+    <label #labelElement [attr.for]="avecLabel.nom" [ngClass]="avecLabel.label.classe">
+        <app-kf-contenu-phrase [contenuPhrase]="avecLabel.label.contenuPhrase"></app-kf-contenu-phrase>
     </label>
 </ng-template>
 
@@ -19,7 +19,7 @@
 </ng-template>
 <ng-template #sansDivTemplate>
     <ng-container *ngIf="radios.avecLabel">
-        <ng-container *ngTemplateOutlet="labelTemplate"></ng-container>
+        <ng-container *ngTemplateOutlet="labelTemplate; context: { $implicit: radios }"></ng-container>
     </ng-container>
     <ng-container *ngIf="radios.classeEntree; then entreeAvecDivTemplate; else entreeTemplate"></ng-container>
     <ng-template #entreeAvecDivTemplate>
@@ -52,7 +52,7 @@
 
     <div #divElement [ngClass]="radios.classe" [ngStyle]="radios.style">
         <ng-container *ngFor="let radio of radios.contenus">
-            <app-kf-composant [composant]="radio" (output)="transmet($event)"></app-kf-composant>
+            <app-kf-radio [composant]="radio"></app-kf-radio>
         </ng-container>
         <ng-container *ngTemplateOutlet="infoTemplate"></ng-container>
     </div>

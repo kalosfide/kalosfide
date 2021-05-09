@@ -30,7 +30,7 @@ export class KfInitialObservable<T> {
 
     /**
      * Crée un KfInitialObservable<V2> dont la valeur et l'observable sont les transformés de ceux d'un KfInitialObservable<V1>.
-     * L'observable transformé n'emet pas si la valeur transformée est nulle.
+     * L'observable transformé n'emet pas si la valeur transformée est nulle ou indéfinie ou égale à sa valeur.
      * @param initialObservable KfInitialObservable<V1> à transformer
      * @param transforme transformation de V1 en V2
      */
@@ -40,6 +40,9 @@ export class KfInitialObservable<T> {
             filter((v1: V1) => {
                 const v2 = transforme(v1);
                 if (v2 === null || v2 === undefined) {
+                    return false;
+                }
+                if (v2 === io.valeur) {
                     return false;
                 } else {
                     io.pValeur = v2;
@@ -100,7 +103,7 @@ export class KfInitialObservable<T> {
     changeValeur(valeur: T) {
         this.pValeur = valeur;
         if (this.nom) {
-//            console.log(`IO ${this.nom}: ${valeur}`);
+            console.log(`IO ${this.nom}: ${valeur}`);
         }
         if (this.pSubject) {
             this.pSubject.next(valeur);

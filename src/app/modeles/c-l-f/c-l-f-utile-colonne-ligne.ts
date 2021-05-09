@@ -1,12 +1,11 @@
 import { IKfVueTableColonneDef } from 'src/app/commun/kf-composants/kf-vue-table/i-kf-vue-table-colonne-def';
-import { Tri } from 'src/app/commun/outils/tri';
 import { CLFUtileUrl } from './c-l-f-utile-url';
 import { CLFUtileLien } from './c-l-f-utile-lien';
 import { CLFUtile } from './c-l-f-utile';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
-import { Compare } from '../compare';
+import { Compare } from '../../commun/outils/tri';
 import { TypeMesure } from '../type-mesure';
 import { CLFLigne } from './c-l-f-ligne';
 import { CoûtDef, LigneDocumentCoût } from './cout';
@@ -14,7 +13,7 @@ import { CLFDoc } from './c-l-f-doc';
 import { KfInitialObservable } from 'src/app/commun/kf-composants/kf-partages/kf-initial-observable';
 import { TexteOutils } from 'src/app/commun/outils/texte-outils';
 import { KfBBtnGroup, KfBBtnGroupElement } from 'src/app/commun/kf-composants/kf-b-btn-group/kf-b-btn-group';
-import { ApiResult } from 'src/app/commun/api-results/api-result';
+import { CLFDocs } from './c-l-f-docs';
 
 export class CLFUtileColonneLigne {
     protected utile: CLFUtile;
@@ -37,12 +36,15 @@ export class CLFUtileColonneLigne {
      */
     catégorie(): IKfVueTableColonneDef<CLFLigne> {
         const def: IKfVueTableColonneDef<CLFLigne> = {
-            nom: 'catégorie',
-            créeContenu: (ligne: CLFLigne) => Fabrique.texte.nomCatégorie(ligne),
+            nom: this.utile.nom.catégorie,
+            créeContenu: (ligne: CLFLigne) => ligne.produit.nomCategorie,
+            compare: Compare.enchaine(
+                Compare.texte((ligne: CLFLigne) => ligne.produit.nomCategorie),
+                Compare.texte((ligne: CLFLigne) => ligne.produit.nom),
+            ),
+            nePasAfficherTriSi: this.utile.conditionTable.aperçu,
             enTeteDef: { titreDef: 'Catégorie' },
         };
-        def.tri = new Tri('catégorie', (d1: CLFLigne, d2: CLFLigne): number => Compare.nomCatégorie(d1, d2));
-        def.nePasAfficherTriSi = this.utile.conditionTable.aperçu;
         return def;
     }
 
@@ -51,19 +53,19 @@ export class CLFUtileColonneLigne {
      * Tri si pas modeTable aperçu.
      */
     produit(): IKfVueTableColonneDef<CLFLigne> {
+        const créeContenu = (ligne: CLFLigne) => ligne.produit.nom;
         const def: IKfVueTableColonneDef<CLFLigne> = {
-            nom: 'produit',
-            créeContenu: (ligne: CLFLigne) => Fabrique.texte.nomProduit(ligne),
+            nom: this.utile.nom.produit,
+            créeContenu,
+            compare: Compare.texte(créeContenu),
+            nePasAfficherTriSi: this.utile.conditionTable.aperçu,
             enTeteDef: { titreDef: 'Produit' },
             bilanDef: {
                 titreDef: 'Total',
-                titreVisiblesSeulement: 'Affichés',
-                valeurDef: '',
+                titreBilanDesVisibles: 'Affichés',
                 texteAgrégé: (détails: CLFLigne[]) => '' + détails.length,
             }
         };
-        def.tri = new Tri('produit', (d1: CLFLigne, d2: CLFLigne) => Compare.nomProduit(d1, d2));
-        def.nePasAfficherTriSi = this.utile.conditionTable.aperçu;
         return def;
     }
 
@@ -73,34 +75,30 @@ export class CLFUtileColonneLigne {
     prix(): IKfVueTableColonneDef<CLFLigne> {
         return {
             nom: 'prix',
-            créeContenu: (ligne: CLFLigne) => Fabrique.texte.avecProduit_prix(ligne),
+            créeContenu: (ligne: CLFLigne) => Fabrique.texte.euros(ligne.prix),
+            compare: Compare.enchaine(
+                Compare.texte((ligne: CLFLigne) => ligne.typeMesure),
+                Compare.nombre((ligne: CLFLigne) => ligne.prix)
+            ),
             enTeteDef: { titreDef: 'Prix' },
         };
     }
 
     seCommande(): IKfVueTableColonneDef<CLFLigne> {
+        const créeContenu = (ligne: CLFLigne) => TypeMesure.texteSeCommande(ligne.produit.typeMesure, ligne.produit.typeCommande);
         const def: IKfVueTableColonneDef<CLFLigne> = {
             nom: 'seCommande',
             enTeteDef: { titreDef: 'Se commande' },
-            créeContenu: (ligne: CLFLigne) => Fabrique.texte.avecProduit_seCommande(ligne)
+            créeContenu,
+            compare: Compare.texte(créeContenu),
         };
         return def;
     }
 
-    typeCommande(titre: string): IKfVueTableColonneDef<CLFLigne> {
-        return {
-            nom: 'typeCommande',
-            créeContenu: (ligne: CLFLigne) => Fabrique.texte.avecProduit_unités(ligne, ligne.typeCommande),
-            enTeteDef: { titreDef: titre },
-            nePasAfficherSi: this.utile.conditionTable.edition,
-        };
-    }
     typeCommande_edite(titre: string): IKfVueTableColonneDef<CLFLigne> {
         return {
             nom: 'typeCommande',
-            créeContenu: (ligne: CLFLigne) => ({
-                composant: ligne.éditeur.kfTypeCommande ? ligne.éditeur.kfTypeCommande : ligne.éditeur.kfTypeCommandeLS
-            }),
+            créeContenu: (ligne: CLFLigne) => ligne.éditeur.kfTypeCommande ? ligne.éditeur.kfTypeCommande : ligne.éditeur.kfTypeCommandeLS,
             enTeteDef: { titreDef: titre },
             afficherSi: this.utile.conditionTable.edition,
         };
@@ -113,9 +111,11 @@ export class CLFUtileColonneLigne {
     quantité(titre: string): IKfVueTableColonneDef<CLFLigne> {
         return {
             nom: 'quantité',
-            créeContenu: (ligne: CLFLigne) => {
-                return Fabrique.texte.quantitéAvecUnité(ligne.produit, ligne.quantité, ligne.typeCommande);
-            },
+            créeContenu: (ligne: CLFLigne) => Fabrique.texte.quantitéAvecUnité(ligne.produit, ligne.quantité, ligne.typeCommande),
+            compare: Compare.enchaine(
+                Compare.texte((ligne: CLFLigne) => ligne.typeMesure),
+                Compare.nombre((ligne: CLFLigne) => ligne.quantité)
+            ),
             enTeteDef: { titreDef: titre },
         };
     }
@@ -130,9 +130,7 @@ export class CLFUtileColonneLigne {
                     composant = ligne.éditeur.kfQuantitéLS;
                     ligne.éditeur.kfQuantitéLS.valeur = TexteOutils.nombre(ligne.quantité ? ligne.quantité : ligne.aFixer);
                 }
-                return {
-                    composant
-                };
+                return composant;
             },
             enTeteDef: { titreDef: titre },
             afficherSi: this.utile.conditionTable.edition,
@@ -148,7 +146,7 @@ export class CLFUtileColonneLigne {
                 switch (texte) {
                     case '0':
                         etiquette.fixeTexte('refusé');
-                        etiquette.ajouteClasseDef('text-danger');
+                        etiquette.ajouteClasse('text-danger');
                         break;
                     case '':
                         etiquette.fixeTexte('à faire');
@@ -158,6 +156,15 @@ export class CLFUtileColonneLigne {
                 }
                 return etiquette;
             },
+            compare: Compare.texteOuNombre((ligne: CLFLigne) => {
+                if (ligne.aFixer === 0) {
+                    return 'refusé';
+                }
+                if (ligne.aFixer > 0) {
+                    return ligne.aFixer;
+                }
+                return 'à faire';
+            }),
             enTeteDef: { titreDef: titre },
         };
         aFixer.afficherSi = this.utile.conditionTable.aperçu;
@@ -167,16 +174,18 @@ export class CLFUtileColonneLigne {
     aFixer_edite(titre: string): IKfVueTableColonneDef<CLFLigne> {
         return {
             nom: 'aFixer',
-            créeContenu: (ligne: CLFLigne) => ({ composant: ligne.éditeur.kfAFixer }),
+            créeContenu: (ligne: CLFLigne) => ligne.éditeur.kfAFixer,
             enTeteDef: { titreDef: titre },
             nePasAfficherSi: this.utile.conditionTable.pasEdition
         };
     }
 
     typeMesure(titre: string): IKfVueTableColonneDef<CLFLigne> {
+        const créeContenu = (ligne: CLFLigne) => TypeMesure.texteUnités(ligne.produit.typeMesure, ligne.produit.typeCommande);
         return {
             nom: 'typeMesure',
-            créeContenu: (ligne: CLFLigne) => TypeMesure.texteUnités(ligne.produit.typeMesure, ligne.produit.typeCommande),
+            créeContenu,
+            compare: Compare.texte(créeContenu),
             enTeteDef: { titreDef: titre },
             nePasAfficherSi: this.utile.conditionTable.pasEdition
         };
@@ -185,13 +194,14 @@ export class CLFUtileColonneLigne {
     coût(coûtDef: CoûtDef<CLFLigne>): IKfVueTableColonneDef<CLFLigne> {
         return {
             nom: 'coût',
-            créeContenu: (ligne: CLFLigne) => {
-                return ({ texteDef: () => coûtDef.texte(ligne) });
-            },
+            créeContenu: (ligne: CLFLigne) => () => coûtDef.texte(ligne),
+            compare: Compare.enchaine(
+                Compare.nombre((ligne: CLFLigne) => coûtDef.iCoût(ligne).valeur),
+                Compare.booléenDesc((ligne: CLFLigne) => coûtDef.iCoût(ligne).complet)
+            ),
             classeDefs: ['prix'],
             enTeteDef: { titreDef: 'Coût' },
             bilanDef: {
-                valeurDef: '',
                 texteAgrégé: (lignes: CLFLigne[]) => coûtDef.texteAgrégé(lignes),
             }
         };
@@ -200,23 +210,20 @@ export class CLFUtileColonneLigne {
     // colonnes de commande
     choisit(): IKfVueTableColonneDef<CLFLigne> {
         return {
-            nom: 'choix',
-            créeContenu: (ligne: CLFLigne) => {
-                return { composant: this.lien.choisit(ligne) };
-            }
+            nom: this.utile.nom.choisit,
+            créeContenu: (ligne: CLFLigne) => this.lien.choisit(ligne)
         };
     }
 
     supprime(
-        quandLigneSupprimée: (ligne: CLFLigne) => void,
-        traiteErreur?: (apiResult: ApiResult) => boolean
+        quandLigneSupprimée: (ligne: CLFLigne) => ((stock: CLFDocs) => void),
     ): IKfVueTableColonneDef<CLFLigne> {
         return {
             nom: 'supprime',
             créeContenu: (ligne: CLFLigne) => {
-                const bouton = this.utile.bouton.supprime(ligne, quandLigneSupprimée, traiteErreur);
+                const bouton = this.utile.bouton.supprime(ligne, quandLigneSupprimée);
                 bouton.inactivitéFnc = () => ligne.client && ligne.parent.crééParLeClient && ligne.annulé;
-                return { composant: bouton };
+                return bouton;
             },
             nePasAfficherSi: this.utile.conditionTable.pasEdition
         };
@@ -250,7 +257,7 @@ export class CLFUtileColonneLigne {
         bouton = this.utile.bouton.copieLigne(ligne);
         bouton.inactivitéIO = KfInitialObservable.transforme(
             this.utile.service.clsBilanIO,
-                () => !ligne.copiable || ligne.préparé
+            () => !ligne.copiable || ligne.préparé
         );
         btnGroup.ajoute(bouton);
         bouton = boutonAnnuleOuSupprime(ligne);
@@ -258,7 +265,7 @@ export class CLFUtileColonneLigne {
         return btnGroup;
     }
 
-    action(clfDoc: CLFDoc, quandLigneSupprimée: (ligne: CLFLigne) => void): IKfVueTableColonneDef<CLFLigne> {
+    action(clfDoc: CLFDoc, quandLigneSupprimée: (ligne: CLFLigne) => ((stock: CLFDocs) => void)): IKfVueTableColonneDef<CLFLigne> {
         let boutonAnnuleOuSupprime: (ligne: CLFLigne) => KfBBtnGroupElement;
         if (clfDoc.type === 'livraison' || clfDoc.crééParLeClient) {
             boutonAnnuleOuSupprime = (ligne: CLFLigne) => {
@@ -278,12 +285,10 @@ export class CLFUtileColonneLigne {
         return {
             nom: 'action',
             enTeteDef: {
-                titreDef: { composant: this.btnGroupDoc(clfDoc) },
+                titreDef: this.btnGroupDoc(clfDoc),
                 classeDefs: ['colonne-btn-group-2'],
             },
-            créeContenu: (ligne: CLFLigne) => {
-                return { composant: this.btnGroupLigne(ligne, boutonAnnuleOuSupprime) };
-            },
+            créeContenu: (ligne: CLFLigne) => this.btnGroupLigne(ligne, boutonAnnuleOuSupprime),
             classeDefs: ['colonne-btn-group-2'],
             nePasAfficherSi: this.utile.conditionTable.pasEdition,
         };
@@ -300,8 +305,7 @@ export class CLFUtileColonneLigne {
     }
 
     defsClient(
-        quandLigneSupprimée: (ligne: CLFLigne) => void,
-        traiteErreur: (apiResult: ApiResult) => boolean
+        quandLigneSupprimée: (ligne: CLFLigne) => ((stock: CLFDocs) => void),
     ): IKfVueTableColonneDef<CLFLigne>[] {
         const champ = this.utile.texte.commande.champ;
         const defs: IKfVueTableColonneDef<CLFLigne>[] = [
@@ -320,13 +324,13 @@ export class CLFUtileColonneLigne {
         defs.push(this.coût(LigneDocumentCoût.quantité()));
         if (this.utile.conditionTable.edition.valeur) {
             defs.push(
-                this.supprime(quandLigneSupprimée, traiteErreur),
+                this.supprime(quandLigneSupprimée),
             );
         }
         return defs;
     }
 
-    defsFournisseur(doc: CLFDoc, quandLigneSupprimée: (ligne: CLFLigne) => void): IKfVueTableColonneDef<CLFLigne>[] {
+    defsFournisseur(doc: CLFDoc, quandLigneSupprimée: (ligne: CLFLigne) => ((stock: CLFDocs) => void)): IKfVueTableColonneDef<CLFLigne>[] {
         const champ = this.utile.texte.textes(doc.clfDocs.type).champ;
         const defs: IKfVueTableColonneDef<CLFLigne>[] = [];
         defs.push(
@@ -349,14 +353,13 @@ export class CLFUtileColonneLigne {
 
     defsDocument(doc: CLFDoc): IKfVueTableColonneDef<CLFLigne>[] {
         const champ = this.utile.texte.textes(doc.type).champ;
-        const coûtDef = LigneDocumentCoût.quantité();
         const defs: IKfVueTableColonneDef<CLFLigne>[] = [
             this.catégorie(),
             this.produit(),
             this.prix(),
             this.quantité(champ.fixé),
             this.typeMesure(champ.typeMesure),
-            this.coût(coûtDef),
+            this.coût(LigneDocumentCoût.quantité()),
         ];
         return defs;
     }

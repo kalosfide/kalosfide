@@ -1,11 +1,10 @@
 import { KfTypeDeComposant } from '../../kf-composants-types';
-import { KfEntrée, KfValeurEntrée } from '../../kf-composant/kf-entree';
+import { KfEntrée, KfValeurEntrée } from '../kf-entree/kf-entree';
 import { KfTexteDef } from '../../kf-partages/kf-texte-def';
-import { KfContenuPhrase, KfTypeContenuPhrasé } from '../../kf-partages/kf-contenu-phrase/kf-contenu-phrase';
 import { KfNgClasse } from '../../kf-partages/kf-gere-css-classe';
 import { KfGéreCss } from '../../kf-partages/kf-gere-css';
 import { KfComposant } from '../../kf-composant/kf-composant';
-import { KfTypeDHTMLEvents, KfTypeDEvenement } from '../../kf-partages/kf-evenements';
+import { KfTypeDHTMLEvents, KfTypeDEvenement, KfEvenement, KfStatutDEvenement } from '../../kf-partages/kf-evenements';
 
 export class KfCaseACocher extends KfEntrée {
 
@@ -14,44 +13,20 @@ export class KfCaseACocher extends KfEntrée {
      */
     private pgéreClasseDivVide: KfGéreCss;
 
-    /** si vrai, la case est après sa légende */
-    caseApres: boolean;
+    /**
+     * Composant à afficher à la place de l'input type checkbox rendu invisible
+     */
+    aspect: KfComposant;
+    /**
+     * Fonction de mise à jour de l'affichage du composant suivant la valeur
+     */
+    changeAspect: () => void;
 
-    aspect: {
-        composant: KfComposant;
-        fixe: (valeur: boolean) => void;
-    };
-
-    constructor(nom: string, texte?: KfTexteDef) {
-        super(nom, KfTypeDeComposant.caseacocher);
-        this.contenuPhrase = new KfContenuPhrase(this, texte);
+    constructor(nom: string, texteLabel?: KfTexteDef) {
+        super(nom, KfTypeDeComposant.caseacocher, texteLabel);
+        // position par défaut
+        this.positionLabel = 'après';
         this.gereValeur.valeur = false;
-
-        this.ajouteClasseDef(
-            'form-check-input',
-            { nom: 'position-static', active: () => !this.contenuPhrase },
-            { nom: 'is-invalid', active: () => this.erreurs.length > 0 },
-        );
-        this.géreClasseEntree.ajouteClasseDef(
-            { nom: 'is-invalid', active: () => this.erreurs.length > 0 },
-        );
-        const estDansVueTable = () => this.estDansVueTable;
-        this.géreClasseEntree.ajouteClasseDef(
-            'form-check',
-            { nom: 'form-group', active: estDansVueTable },
-        );
-        this.géreClasseLabel.ajouteClasseDef(
-            'form-check-label',
-        );
-        this.géreClasseLabel.invisibilitéFnc = estDansVueTable;
-    }
-
-    get avecLabelAvant(): boolean {
-        return this.avecLabel && this.caseApres;
-    }
-
-    get avecLabelApres(): boolean {
-        return this.avecLabel && !this.caseApres;
     }
 
     get valeur(): boolean {
@@ -59,10 +34,6 @@ export class KfCaseACocher extends KfEntrée {
     }
     set valeur(valeur: boolean) {
         this.fixeValeur(valeur);
-    }
-
-    get classeDiv(): KfNgClasse {
-        return this.géreClasseDiv.classe;
     }
 
     /**
@@ -92,26 +63,38 @@ export class KfCaseACocher extends KfEntrée {
         this.formControl.setValue(this.valeur);
     }
 
-    fixeAspect(composant: KfComposant, fixe: (valeur: boolean) => void) {
-        this.aspect = { composant, fixe };
-        composant.gereHtml.ajouteEvenementASuivre(KfTypeDHTMLEvents.click);
-        composant.gereHtml.ajouteTraiteur(KfTypeDEvenement.clic,
-            () => {
-                this.valeur = !this.valeur;
+    /**
+     * Définit le composant à afficher à la place de l'input type checkbox rendu invisible.
+     * @param aspect composant à afficher
+     * @param changeAspect fonction de mise à jour de l'affichage du composant suivant la valeur
+     * @param valeurSiIndéfiniEtClic valeur du controle après un clic s'il est indéfini; si présent, la case à cocher à trois états.
+     */
+    fixeAspect(aspect: KfComposant, changeAspect: () => void, valeurSiIndéfiniEtClic?: true | false) {
+        this.aspect = aspect;
+        this.changeAspect = changeAspect;
+        const quandAspectCliqué = valeurSiIndéfiniEtClic !== undefined
+            ? (événement: KfEvenement) => {
+                if (!this.inactif) {
+                    this.valeur = this.valeur === undefined ? valeurSiIndéfiniEtClic : !this.valeur;
+                }
+                événement.statut = KfStatutDEvenement.fini;
             }
-        );
-        this.gereHtml.suitLaValeur = true;
-        this.gereHtml.ajouteTraiteur(KfTypeDEvenement.valeurChange,
-            () => {
-                this.aspect.fixe(this.valeur);
+            : (événement: KfEvenement) => {
+                if (!this.inactif) {
+                    this.valeur = !this.valeur;
+                }
+                événement.statut = KfStatutDEvenement.fini;
             }
-        );
-        composant.suitClassesEtStyle(this);
+        aspect.gereHtml.ajouteEvenementASuivre(KfTypeDHTMLEvents.click);
+        aspect.gereHtml.ajouteTraiteur(KfTypeDEvenement.click, quandAspectCliqué);
+        aspect.suitClassesEtStyle(this);
+        aspect.fixeStyleDef('cursor', 'pointer', () => !this.inactif);
     }
+
     protected fixeValeur(valeur: KfValeurEntrée) {
         this.gereValeur.valeur = valeur;
         if (this.aspect) {
-            this.aspect.fixe(this.gereValeur.valeur);
+            this.changeAspect();
         }
     }
 }

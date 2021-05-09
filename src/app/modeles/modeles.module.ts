@@ -7,6 +7,8 @@ import { ClientService } from './client/client.service';
 import { ClientResolverService, ClientRésoluResolverService } from './client/client-resolver.service';
 import { ClientsResolverService, ClientsRésoluResolverService } from './client/clients-resolver.service';
 import { CatalogueModule } from './catalogue/catalogue.module';
+import { InvitationService } from './invitation/invitation.service';
+import { InvitationsResolverService } from './invitation/invitations-resolver.service';
 
 @NgModule({
     imports: [
@@ -19,11 +21,13 @@ import { CatalogueModule } from './catalogue/catalogue.module';
     ],
     providers: [
         SiteService,
-        ClientService,
+//        ClientService,
         ClientResolverService,
         ClientRésoluResolverService,
         ClientsResolverService,
         ClientsRésoluResolverService,
+        InvitationService,
+        InvitationsResolverService
     ],
     exports: [
         CatalogueModule

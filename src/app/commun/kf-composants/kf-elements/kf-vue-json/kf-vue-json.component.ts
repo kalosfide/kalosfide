@@ -1,7 +1,7 @@
-import { Component, Input, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
+import { Component, Input, ViewChild, AfterViewInit, ElementRef, OnInit } from '@angular/core';
 import { KfVueJson } from './kf-vue-json';
 import { KfComposantComponent } from '../../kf-composant/kf-composant.component';
-import { KFComposantService } from '../../kf-composant.service';
+import { TraiteKeydownService } from '../../../traite-keydown/traite-keydown.service';
 
 @Component({
     selector: 'app-kf-vue-json',
@@ -12,19 +12,15 @@ import { KFComposantService } from '../../kf-composant.service';
   `,
     styleUrls: ['../../kf-composants.scss']
 })
-export class KfVueJsonComponent extends KfComposantComponent implements AfterViewInit {
+export class KfVueJsonComponent extends KfComposantComponent implements OnInit, AfterViewInit {
     @ViewChild('preElement', {static: false}) preElement: ElementRef;
 
-    constructor(protected service: KFComposantService) {
+    constructor(protected service: TraiteKeydownService) {
         super(service);
     }
 
     ngAfterViewInit() {
-        this.composant.gereHtml.htmlElement = this.preElement.nativeElement;
-        this.composant.gereHtml.enfantsDeVue = {
-            preElement: this.preElement.nativeElement,
-        };
-        this.composant.gereHtml.initialiseHtml(this.output);
+        this.composant.initialiseHtml(this.preElement.nativeElement, this.output);
     }
 
 }

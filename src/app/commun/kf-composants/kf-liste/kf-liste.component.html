@@ -6,14 +6,14 @@
 <ng-template #avecUL_>
     <ul>
         <li *ngFor="let item of liste.items">
-            <app-kf-composant [composant]="selecteurs.selecteur(item)" (output)="transmet($event)"></app-kf-composant>
+            <app-kf-composant [composant]="selecteurs.selecteur(item)"></app-kf-composant>
         </li>
     </ul>
 </ng-template>
 
 <ng-template #sansUL_>
     <div *ngFor="let item of liste.items">
-        <app-kf-composant [composant]="selecteurs.selecteur(item)" (output)="transmet($event)"></app-kf-composant>
+        <app-kf-composant [composant]="selecteurs.selecteur(item)"></app-kf-composant>
     </div>
 </ng-template>
 
@@ -31,7 +31,7 @@
     <app-kf-composant *ngIf="editions.titreAvantEnTete" [composant]="editions.etiquetteTitre(item)"></app-kf-composant>
     <app-kf-composant *ngIf="editions.enTete" [composant]="editions.enTete" (output)="editions.quandEvenementEnTete(item, $event)"></app-kf-composant>
     <app-kf-composant *ngIf="editions.titreApresEnTete" [composant]="editions.etiquetteTitre(item)"></app-kf-composant>
-    <app-kf-composant [composant]="editions.edition(item)" (output)="transmet($event)"></app-kf-composant>
+    <app-kf-composant [composant]="editions.edition(item)"></app-kf-composant>
 </ng-template>
 
 <ng-template #avecSelecteurs_>
@@ -113,7 +113,7 @@
                         <app-kf-composant *ngIf="editions.dansTable.enTetesDesColonnes" [composant]="editions.dansTable.enTetesDesColonnes"></app-kf-composant>
                     </div>
                     <ng-container *ngFor="let item of liste.items">
-                        <app-kf-composant> [composant]="editions.edition(item)" (output)="transmet($event)"></app-kf-composant>
+                        <app-kf-composant> [composant]="editions.edition(item)"></app-kf-composant>
                     </ng-container>
                 </div>
             </div>

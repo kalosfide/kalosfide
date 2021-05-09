@@ -1,8 +1,43 @@
-<div class="form-group form-check">
-    <input #inputElement type='radio' [name]="radio.radios.nom" [formControl]="radio.radios.formControl"
-        [value]="radio.valeur" [class]="classe"  /><!--[appInactif]="radio.inactif" -->
-    <label *ngIf="radio.contenuPhrase" #labelElement [attr.for]="radio.nom" class="form-check-label text-dark">
-        <app-kf-contenu-phrase [contenuPhrase]="radio.contenuPhrase"></app-kf-contenu-phrase>
+<ng-template #labelTemplate let-avecLabel>
+    <label #labelElement [attr.for]="avecLabel.nom" [ngClass]="avecLabel.label.classe">
+        <app-kf-contenu-phrase [contenuPhrase]="avecLabel.label.contenuPhrase"></app-kf-contenu-phrase>
     </label>
-</div>
-<app-kf-etiquette *ngIf="radio.texteAide" [composant]="radio.texteAide"></app-kf-etiquette>
+</ng-template>
+
+<ng-template #infoTemplate>
+    <app-kf-etiquette *ngIf="radio.texteAide" [composant]="radio.texteAide"></app-kf-etiquette>
+</ng-template>
+
+<ng-container *ngIf="radio.classeDiv; else sansDivTemplate">
+    <div [ngClass]="radio.classeDiv" [id]="radio.nom + '_Div'">
+        <ng-container *ngTemplateOutlet="sansDivTemplate"></ng-container>
+    </div>
+</ng-container>
+
+<ng-template #sansDivTemplate>
+    <ng-container *ngIf="radio.classeEntree; else entreeTemplate">
+        <div [ngClass]="radio.classeEntree" [id]="radio.nom + '_Entrée'">
+            <ng-container *ngTemplateOutlet="entreeTemplate"></ng-container>
+        </div>
+    </ng-container>
+</ng-template>
+
+<ng-template #entreeTemplate>
+    <ng-container *ngIf="radio.avecLabelAvant">
+        <ng-container *ngTemplateOutlet="labelTemplate; context: { $implicit: radio }"></ng-container>
+    </ng-container>
+
+    <ng-container *ngIf="radio.radios; else sansRadiosTemplate">
+        <input #inputElement type='radio' [name]="radio.radios.nom" [formControl]="radio.radios.formControl"
+            [value]="radio.valeur" [ngClass]="radio.classe" [attr.disabled]="radio.inactif" />
+    </ng-container>
+
+    <ng-template #sansRadiosTemplate>
+        <input #inputElement type='radio' [ngClass]="radio.classe" [attr.disabled]="radio.inactif" />
+    </ng-template>
+
+    <ng-container *ngIf="radio.avecLabelApres">
+        <ng-container *ngTemplateOutlet="labelTemplate; context: { $implicit: radio }"></ng-container>
+    </ng-container>
+    <ng-container *ngTemplateOutlet="infoTemplate"></ng-container>
+</ng-template>

@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
 import { KfComposantComponent } from '../../kf-composant/kf-composant.component';
 import { KfLien } from './kf-lien';
-import { KFComposantService } from '../../kf-composant.service';
+import { TraiteKeydownService } from '../../../traite-keydown/traite-keydown.service';
 
 @Component({
     selector: 'app-kf-lien',
@@ -11,7 +11,7 @@ import { KFComposantService } from '../../kf-composant.service';
 export class KfLienComponent extends KfComposantComponent implements OnInit, AfterViewInit {
     @ViewChild('baliseElement', {static: false}) baliseElementRef: ElementRef;
 
-    constructor(protected service: KFComposantService) {
+    constructor(protected service: TraiteKeydownService) {
         super(service);
     }
 
@@ -23,8 +23,7 @@ export class KfLienComponent extends KfComposantComponent implements OnInit, Aft
     }
 
     ngAfterViewInit() {
-        this.composant.gereHtml.htmlElement = this.baliseElementRef.nativeElement;
-        this.composant.gereHtml.initialiseHtml(this.output);
+        this.composant.initialiseHtml(this.baliseElementRef.nativeElement, this.output);
     }
 
 }

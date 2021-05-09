@@ -1,4 +1,4 @@
-import { IEtatTableDef, EtatTable } from '../fabrique/etat-table';
+import { EtatTable } from '../fabrique/etat-table';
 import { KfVueTable } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table';
 import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
@@ -6,16 +6,14 @@ import { Fabrique } from '../fabrique/fabrique';
 import { IKfVueTableDef } from 'src/app/commun/kf-composants/kf-vue-table/i-kf-vue-table-def';
 
 export interface IGroupeTableDef<T> {
-    vueTableDef: IKfVueTableDef<T>;
     avantTable?: () => KfGroupe;
+    vueTableDef: IKfVueTableDef<T>;
     apresTable?: () => KfGroupe;
     etatTable?: EtatTable;
 }
 
 export class GroupeTable<T> {
     avantTable: KfGroupe;
-    groupeOutils: KfGroupe;
-    groupeTable: KfGroupe;
     vueTable: KfVueTable<T>;
     apresTable: KfGroupe;
 

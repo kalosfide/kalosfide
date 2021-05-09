@@ -23,10 +23,6 @@ export class DataKeyUtile<T extends IDataKey> extends DataUtile {
         super(service);
     }
 
-    urlSegmentDeKey(t: T): string {
-        return this.service.urlSegmentDeKey(t);
-    }
-
     get urlKey(): DataKeyUtileUrl<T> {
         return this.pUrlKey;
     }

@@ -6,9 +6,8 @@ import { KfComposant } from './kf-composant';
 import { KfDocumentContexte } from '../kf-constantes';
 import { KfBouton } from '../kf-elements/kf-bouton/kf-bouton';
 import { KfTypeDeBouton, KfTypeDeComposant } from '../kf-composants-types';
-import { KfGroupe } from '../kf-groupe/kf-groupe';
 import { EventEmitter } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 enum KfKeyboardKey {
     enter = 'Enter',
@@ -29,12 +28,10 @@ export class KfComposantGereHtml {
      * HTMLElement du composant qui emet ses évènements DOM
      */
     htmlElement: HTMLElement;
-    /**
-     * enfantsDeVue: { [key: string]: HTMLElement };
-     *  après AfterViewInit, certains ViewChild de l'Angular component sont enregistrés
-     *  en tant que champs de enfantsDeVue
-     */
-    enfantsDeVue: { [key: string]: HTMLElement };
+
+    enfants: KfComposantGereHtml[];
+
+    private pParent: KfComposantGereHtml;
 
     /**
      * liste des types d'évènements du DOM que le htmlElement du composant doit déclencher
@@ -49,62 +46,53 @@ export class KfComposantGereHtml {
     traiteurDEvenements: KFTraiteurDEvenement[];
 
     /**
+     * S'il n'y a pas de composant ou si le composant n'a pas de valeur, est sans effet. 
      * si suitLeStatut, le component emet un KfEvenenment statutChange en réponse à un événement statusChanges de l'abstractControl
      */
-    suitLeStatut: boolean;
-    /** permet de suspendre le suivi du statut et de la valeur */
-    suspendSuitLeStatut: boolean;
+    private pSuitLeStatut: boolean;
+    private pSubscriptionSuitLeStatut: Subscription;
 
     /**
-     * si suitLaValeur, le component emet un KfEvenenment valeurChange en réponse à un événement valueChanges de l'abstractControl
+     * S'il n'y a pas de composant ou si le composant n'a pas de valeur, est sans effet.
+     * Si défini et vrai avant initialiseHtml, le suivi de la valeur est activé: chaque émission de l'observable valueChanges de l'abstractControl 
+     * déclenche le traitement d'un KfEvenenment valeurChange.
+     * Aprés initialiseHtml, est indéfini si le suivi de la valeur n'a jamais été activé, est vrai si le suivi de la valeur est actif
+     * et est faux si le suivi de la valeur est suspendu
      */
-    suitLaValeur: boolean;
-    /** permet de suspendre le suivi du statut et de la valeur */
-    suspendSuitLaValeur: boolean;
+    private pSuitLaValeur: boolean;
+    private pSubscriptionSuitLaValeur: Subscription;
 
-    suitLeFocus: boolean;
-    private valeurAvantFocus: any;
+    private pSuitLeFocus: boolean;
 
     // ATTRIBUTS HTML
     private attributs: { nom: string, valeur: string }[];
 
-    constructor(composant: KfComposant) {
+    /**
+     * title de l'element html
+     */
+    private pTitleHtml: string;
+
+    private pOutput: EventEmitter<KfEvenement>;
+
+    constructor(composant?: KfComposant) {
         this.composant = composant;
     }
 
-    /**
-     * fixe les évènements concernant la valeur
-     */
-    prépareRacineV() {
-        if (this.composant.type !== KfTypeDeComposant.groupe || !this.composant.estRacineV) {
-            return;
+    get parent(): KfComposantGereHtml {
+        if (this.composant) {
+            if (this.composant.parent) {
+                return this.composant.parent.gereHtml;
+            } else {
+                if (this.composant.listeParent) {
+                    return this.composant.listeParent.gereHtml;
+                }
+            }
         }
-        const groupe = this.composant as KfGroupe;
-        if (groupe.sauveQuandChange) {
-            this.suitLaValeur = true;
-            this.ajouteTraiteur(KfTypeDEvenement.valeurChange,
-                (e: KfEvenement) => {
-                    this.suspendSuitLeStatut = true;
-                    this.suspendSuitLaValeur = true;
-                    groupe.gereValeur.depuisControl();
-                    this.suspendSuitLeStatut = false;
-                    this.suspendSuitLaValeur = false;
-                    e.statut = KfStatutDEvenement.fini;
-                }
-            );
-        } else {
-            this.ajouteTraiteur(KfTypeDEvenement.retablit,
-                (e: KfEvenement) => {
-                    groupe.rétablitFormulaire();
-                    e.statut = KfStatutDEvenement.fini;
-                }
-            );
-            this.ajouteTraiteur(KfTypeDEvenement.soumet,
-                (e: KfEvenement) => {
-                    groupe.soumetFormulaire();
-                    e.statut = KfStatutDEvenement.fini;
-                }
-            );
+        return this.pParent;
+    }
+    set parent(parent: KfComposantGereHtml) {
+        if (!this.composant) {
+            this.pParent = parent;
         }
     }
 
@@ -124,56 +112,150 @@ export class KfComposantGereHtml {
         return !!this.evenementsADéclencher && !!this.evenementsADéclencher.find(t => t === KfTypeDHTMLEvents.click);
     }
     get doitDéclencherFocusEtBlur(): boolean {
-        return this.suitLeFocus || !!this.composant.gereTabIndexParent;
+        return this.pSuitLeFocus || !!(this.composant && this.composant.gereTabIndexParent);
     }
 
     get estFocusable(): boolean {
-        return this.doitDéclencherFocusEtBlur || KfDocumentContexte.suitLeFocus || (KfDocumentContexte.suitLeFocusFormEtClic
-            && (this.composant.estFormulaire || this.composant.estEntree
-                || this.composant.type === KfTypeDeComposant.radio
-                || this.déclencheClick));
+        return this.doitDéclencherFocusEtBlur || KfDocumentContexte.suitLeFocus || (
+            KfDocumentContexte.suitLeFocusFormEtClic && (
+                this.déclencheClick || (
+                    this.composant && (
+                        this.composant.estFormulaire || this.composant.estEntree || this.composant.type === KfTypeDeComposant.radio
+                    )
+                )
+            )
+        );
     }
 
     // INITIALISATION DES HTMLELEMENTS
+    ajouteEnfant(enfant: KfComposantGereHtml) {
+        if (!this.enfants) {
+            this.enfants = [];
+        }
+        this.enfants.push(enfant);
+    }
+
+    suitLaValeur() {
+        this.pSuitLaValeur = true;
+    }
+
+    suitLeStatut() {
+        this.pSuitLeStatut = true;
+    }
+
+    actionSansSuiviValeur(action: () => void): () => void {
+        if (this.pSuitLaValeur !== true) {
+            return action;
+        }
+        return () => {
+            let suiviStatutDéjàSuspendu: boolean;
+            let suiviValeurDéjàSuspendu: boolean;
+            if (this.pSubscriptionSuitLaValeur) {
+                this.pSubscriptionSuitLaValeur.unsubscribe();
+                this.pSubscriptionSuitLaValeur = undefined;
+            } else {
+                suiviValeurDéjàSuspendu = true;
+                if (this.pSubscriptionSuitLeStatut) {
+                    this.pSubscriptionSuitLeStatut.unsubscribe();
+                    this.pSubscriptionSuitLeStatut = undefined;
+                } else {
+                    suiviStatutDéjàSuspendu = true;
+                }
+            }
+            action();
+            if (!suiviValeurDéjàSuspendu) {
+                this.souscritSuitLaValeur();
+                if (!suiviStatutDéjàSuspendu) {
+                    this.souscritSuitLeStatut();
+                }
+            }
+        }
+    }
+
+    actionSansSuiviDuStatut(action: () => void) {
+        if (this.pSuitLeStatut !== true) {
+            action();
+            return;
+        }
+        let suiviStatutDéjàSuspendu: boolean;
+        if (this.pSubscriptionSuitLeStatut) {
+            this.pSubscriptionSuitLeStatut.unsubscribe();
+            this.pSubscriptionSuitLeStatut = undefined;
+        } else {
+            suiviStatutDéjàSuspendu = true;
+        }
+        action();
+        if (!suiviStatutDéjàSuspendu) {
+            this.souscritSuitLeStatut();
+        }
+    }
+
+    souscritSuitLaValeur() {
+        this.pSubscriptionSuitLaValeur = this.composant.abstractControl.valueChanges.subscribe(
+            valeur => {
+                this.traite(new KfEvenement(this.composant, KfTypeDEvenement.valeurChange, valeur));
+            }
+        )
+    }
+
+    souscritSuitLeStatut() {
+        this.pSubscriptionSuitLeStatut = this.composant.abstractControl.statusChanges.subscribe(
+            statut => {
+                this.traite(new KfEvenement(this.composant, KfTypeDEvenement.statutChange, statut));
+            }
+        )
+    }
+    /** permet de suspendre le suivi du statut et de la valeur */
+    suspendSuitLeStatut: boolean;
+
     /**
      * Initialise les attributs, les évènements
      */
-    initialiseHtml(output: EventEmitter<KfEvenement>) {
+    initialiseHtml(output?: EventEmitter<KfEvenement>) {
         if (this.attributs) {
             this.attributs.forEach(a => {
                 this.htmlElement.setAttribute(a.nom, a.valeur);
             });
-            this.attributs = undefined; // devenu inutile
         }
-        if (this.composant.titleHtml) {
-            this.htmlElement.title = this.composant.titleHtml;
+        if (this.pTitleHtml) {
+            this.htmlElement.title = this.pTitleHtml;
         }
+        /*
         if (this.composant.gereTabIndex) {
             this.ajouteEvenementASuivre(KfTypeDHTMLEvents.keydown);
         }
         if (this.composant.gereTabIndexParent) {
             this.composant.gereTabIndexParent.initialise();
         }
+        */
         if (this.doitDéclencherFocusEtBlur) {
             this.ajouteEvenementASuivre(KfTypeDHTMLEvents.blur);
             this.ajouteEvenementASuivre(KfTypeDHTMLEvents.focus);
+        }
+        if (!this.parent) {
+            this.pOutput = output;
         }
         if (this.evenementsADéclencher) {
             this.evenementsADéclencher.forEach(
                 htmlEventType =>
                     this.htmlElement['on' + htmlEventType] =
-                    (event: Event): any => {
-                        const evenement = this.transformateur(htmlEventType)(event);
-                        output.emit(evenement);
-                        switch (evenement.statut) {
-                            case KfStatutDEvenement.fini:
-                                event.stopPropagation();
-                                break;
-                            default:
-                                break;
+                    ((event: Event): any => {
+                        const evenement = new KfEvenement(this.composant, htmlEventType, event);
+                        event.stopPropagation();
+                        this.traite(evenement);
+                        if (evenement.statut === KfStatutDEvenement.fini) {
+                            event.preventDefault();
                         }
-                    }
+                    }).bind(this)
             );
+        }
+        if (this.composant && this.composant.gereValeur) {
+            if (this.pSuitLeStatut) {
+                this.souscritSuitLeStatut();
+            }
+            if (this.pSuitLaValeur) {
+                this.souscritSuitLaValeur();
+            }
         }
     }
 
@@ -189,112 +271,40 @@ export class KfComposantGereHtml {
     // FOCUS
     prendLeFocus(): boolean {
         if (this.estFocusable) {
-            this.htmlElement.focus();
+            if (this.htmlElement) {
+                console.log('prendLeFocus', document.activeElement);
+                this.htmlElement.focus();
+            }
             return true;
         }
         return false;
     }
 
+    get aLeFocus(): boolean {
+        if (this.htmlElement) {
+            return document.activeElement === this.htmlElement;
+        }
+        return false;
+    }
+
     /**
-     * Sauve la valeur du control quand il reçoit le focus
-     * Quand le control perd le focus, si sa valeur a changé et si le formulaire parent est valide, déclenche une action async
-     * Si l'action échoue, restaure la valeur d'avant la prise de focus.
-     * @param quandChange retourne un observable qui emet faux si l'action a échoué
+     * Prépare le composant pour des événements soient émis quand son htmlElement prendra ou perdra le focus
+     * Fixe les fonctions à appeler quand le htmlElement prend ou perd le focus
+     * @param focusPris fonction à appeler quand le htmlElement prend le focus
+     * @param focusPerdu fonction à appeler quand le htmlElement perd le focus
      */
-    private traiteFocusChange(quandChange: () => Observable<boolean>): KfTraitementDEvenement {
-        return ((evenement: KfEvenement) => {
-            if (evenement.type === KfTypeDEvenement.focusPris) {
-                this.valeurAvantFocus = this.composant.abstractControl.value;
-                return;
-            }
-            if (evenement.type === KfTypeDEvenement.focusPerdu) {
-                if (this.composant.abstractControl.valid) {
-                    const valeur = this.composant.abstractControl.value;
-                    if ('' + this.valeurAvantFocus !== '' + valeur) {
-                        if (this.composant.formulaireParent.abstractControl.valid) {
-                            const subscription = quandChange().subscribe(
-                                ok => {
-                                    subscription.unsubscribe();
-                                    if (!ok) {
-                                        this.composant.gereValeur.valeur = this.valeurAvantFocus;
-                                    }
-                                }
-                            );
-                        }
-                    }
-                } else {
-                    this.composant.gereValeur.valeur = this.valeurAvantFocus;
-                }
-            }
-        }).bind(this);
-    }
-
-    suitValeurEtFocus(quandChange: () => Observable<boolean>) {
-        this.suitLeFocus = true;
-        this.ajouteTraiteur(KfTypeDEvenement.focusPris, this.traiteFocusChange(quandChange));
-        this.ajouteTraiteur(KfTypeDEvenement.focusPerdu, this.traiteFocusChange(quandChange));
-    }
-
-    // DECLENCHEURS
-    transformateur(htmlEventType: KfTypeDHTMLEvents): (event: Event) => KfEvenement {
-        switch (htmlEventType) {
-            case KfTypeDHTMLEvents.blur:
-                return this.transformeBlur;
-            case KfTypeDHTMLEvents.click:
-                return this.transformeClick;
-            case KfTypeDHTMLEvents.focus:
-                return this.transformeFocus;
-            case KfTypeDHTMLEvents.keydown:
-                return this.transformeKeyDown;
-            default:
-                return this.transforme;
-        }
-    }
-
-    transforme = (event: Event): KfEvenement => {
-        return new KfEvenement(this.composant, KfTypeDEvenement.html, event);
-    }
-    transformeClick = (): KfEvenement => {
-        let type: KfTypeDEvenement;
-        const typeDeBouton = (this.composant as KfBouton).typeDeBouton;
-        switch (typeDeBouton) {
-            case KfTypeDeBouton.annuler:
-            case KfTypeDeBouton.retablir:
-                type = KfTypeDEvenement.retablit;
-                break;
-            case KfTypeDeBouton.soumettre:
-                type = KfTypeDEvenement.soumet;
-                break;
-            default:
-                type = KfTypeDEvenement.clic;
-                break;
-        }
-        return new KfEvenement(this.composant, type);
-    }
-    transformeKeyDown = (event: Event): KfEvenement => {
-        const keyEvent = event as KeyboardEvent;
-        if (this.déclencheClick) {
-            // enter ou space déclenchent un clic
-            if (!keyEvent.altKey && !keyEvent.ctrlKey && !keyEvent.shiftKey
-                && (keyEvent.key === KfKeyboardKey.enter || keyEvent.key === KfKeyboardKey.space)) {
-                return this.transformeClick();
-            }
-        }
-        return new KfEvenement(this.composant, KfTypeDEvenement.toucheBaissee, event);
-    }
-    transformeBlur = (): KfEvenement => {
-        KfDocumentContexte.quandPerdFocus(this.composant);
-        return new KfEvenement(this.composant, KfTypeDEvenement.focusPerdu);
-    }
-    transformeFocus = (): KfEvenement => {
-        KfDocumentContexte.quandPrendFocus(this.composant);
-        return new KfEvenement(this.composant, KfTypeDEvenement.focusPris);
+    suitLeFocus(focusPris: () => void, focusPerdu: () => void) {
+        this.pSuitLeFocus = true;
+        this.ajouteTraiteur(KfTypeDEvenement.focus, focusPris);
+        this.ajouteTraiteur(KfTypeDEvenement.blur, focusPerdu);
     }
 
     // TRAITEMENT
     /**
-     * ajoute une procédure de traitement
-     * on peut ajouter autant de traitements qu'on veut pour le même type d'évènements
+     * Ajoute une procédure de traitement.
+     * On peut ajouter autant de traitements qu'on veut pour le même type d'évènements.
+     * Si une procédure de traitement fixe le statut de l'événement à 'fini', les procédures de traitement
+     * suivantes ne seront pas appelées et l'événément ne sera pas réémis par l'output du component
      * @param typeEvenement à traiter
      * @param traitement procédure qui traite ou non en fonction de son emetteur
      * @param info pour distinguer les traitements au déboguage
@@ -340,12 +350,23 @@ export class KfComposantGereHtml {
      *  à la sortie, evenement.fini est true si l'évènement a été traité
      */
     traite(evenement: KfEvenement) {
+        if (/*evenement.type === KfTypeDEvenement.focusPerdu || evenement.type === KfTypeDEvenement.focusPris
+            ||*/ evenement.type === KfTypeDEvenement.valeurChange) {
+            console.log('traite ' + evenement.type, this.composant.nom, evenement.emetteur.nom);
+        }
         if (this.traiteurDEvenements) {
             const traiteurs = this.traiteurDEvenements.filter(t => t.type === evenement.type);
-            for (const traiteur of traiteurs) {
-                traiteur.traitement(evenement);
-                if (evenement.statut !== KfStatutDEvenement.aTraiter) {
-                    return true;
+            for (let index = 0; index < traiteurs.length && evenement.statut !== KfStatutDEvenement.fini; index++) {
+                traiteurs[index].traitement(evenement);
+            }
+        }
+        if (evenement.statut !== KfStatutDEvenement.fini) {
+            if (this.parent) {
+                this.parent.traite(evenement);
+            } else {
+                if (this.pOutput) {
+                    evenement.emetteur = this.composant;
+                    this.pOutput.emit(evenement);
                 }
             }
         }
@@ -361,6 +382,27 @@ export class KfComposantGereHtml {
             this.attributs.push({ nom, valeur });
         } else {
             this.attributs[index].valeur = valeur;
+        }
+    }
+    attribut(nom: string): string {
+        if (this.attributs) {
+            const attribut = this.attributs.find(a => a.nom === nom);
+            if (attribut) {
+                return attribut.valeur;
+            }
+        }
+    }
+
+    /**
+     * title de l'element
+     */
+    get titleHtml(): string {
+        return this.pTitleHtml;
+    }
+    set titleHtml(titleHtml: string) {
+        this.pTitleHtml = titleHtml;
+        if (this.htmlElement) {
+            this.htmlElement.title = titleHtml;
         }
     }
 }

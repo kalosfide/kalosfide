@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Site } from '../modeles/site/site';
 import { NavigationService } from '../services/navigation.service';
 import { PageDef } from '../commun/page-def';
-import { FournisseurPages, FournisseurRoutes } from './fournisseur-pages';
+import { FournisseurPages, FournisseurRoutes, FournisseurSiteRoutes } from './fournisseur-pages';
 import { BarreTitre } from '../disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { Fabrique } from '../disposition/fabrique/fabrique';
 import { KfComposant } from '../commun/kf-composants/kf-composant/kf-composant';
@@ -10,24 +10,21 @@ import { KfEtiquette } from '../commun/kf-composants/kf-elements/kf-etiquette/kf
 import { KfTypeDeBaliseHTML } from '../commun/kf-composants/kf-composants-types';
 import { PageBaseComponent } from '../disposition/page-base/page-base.component';
 import { KfSuperGroupe } from '../commun/kf-composants/kf-groupe/kf-super-groupe';
-import { FabriqueBootstrap } from '../disposition/fabrique/fabrique-bootstrap';
+import { KfBootstrap } from '../commun/kf-composants/kf-partages/kf-bootstrap';
 import { KfTexte } from '../commun/kf-composants/kf-elements/kf-texte/kf-texte';
 import { IdEtatSite } from '../modeles/etat-site';
 import { KfBouton } from '../commun/kf-composants/kf-elements/kf-bouton/kf-bouton';
 import { KfLien } from '../commun/kf-composants/kf-elements/kf-lien/kf-lien';
 import { KfGroupe } from '../commun/kf-composants/kf-groupe/kf-groupe';
 
-
-
 @Component({
-    templateUrl: '../disposition/page-base/page-base.html', styleUrls: ['../commun/commun.scss']
+    templateUrl: '../disposition/page-base/page-base.html',
 })
 export class FAccueilComponent extends PageBaseComponent implements OnInit {
 
     pageDef: PageDef = FournisseurPages.accueil;
 
     site: Site;
-    barre: BarreTitre;
 
     grAlerteEtatSite: KfGroupe;
     texteEtat: KfTexte;
@@ -82,18 +79,18 @@ export class FAccueilComponent extends PageBaseComponent implements OnInit {
         if (this.site.etat !== IdEtatSite.ouvert) {
             const étatSite = Fabrique.etatSite.état(this.site.etat);
             const grAlerte = new KfGroupe('');
-            FabriqueBootstrap.ajouteClasse(grAlerte, 'alert', 'danger');
+            KfBootstrap.ajouteClasse(grAlerte, 'alert', 'danger');
             grAlerte.créeDivTable();
             const ligne = grAlerte.divTable.ajoute();
-            ligne.ajouteClasseDef('row');
+            ligne.ajouteClasse('row');
 
             etiquette = new KfEtiquette('');
             Fabrique.ajouteTexte(etiquette,
                 `Etat du site: `,
                 { texte: étatSite.nom, balise: KfTypeDeBaliseHTML.b }
             );
-            let col = ligne.ajoute(etiquette);
-            col.ajouteClasseDef('col');
+            let col = ligne.ajoute([etiquette]);
+            col.ajouteClasse('col');
 
             etiquette = new KfEtiquette('');
             Fabrique.ajouteTexte(etiquette,
@@ -102,13 +99,13 @@ export class FAccueilComponent extends PageBaseComponent implements OnInit {
             const lien = Fabrique.lien.lienEnLigne({
                 urlDef: {
                     pageDef: étatSite.pageDef,
-                    routes: FournisseurRoutes,
-                    nomSite: this.site.nomSite
+                    routes: FournisseurSiteRoutes,
+                    urlSite: this.site.url
                 }
             });
             etiquette.contenuPhrase.ajoute(lien);
-            col = ligne.ajoute(etiquette);
-            col.ajouteClasseDef('col');
+            col = ligne.ajoute([etiquette]);
+            col.ajouteClasse('col');
 
             groupe.ajoute(grAlerte);
         }
@@ -118,7 +115,7 @@ export class FAccueilComponent extends PageBaseComponent implements OnInit {
         etiquette.fixeTexte(Fabrique.etatSite.intro);
         groupe.ajoute(etiquette);
 
-        const vueTable = Fabrique.vueTable.vueTable('etats', Fabrique.etatSite.vueTableDef, null);
+        const vueTable = Fabrique.vueTable.vueTable('etats', Fabrique.etatSite.vueTableDef);
         vueTable.initialise(Fabrique.etatSite.états);
         groupe.ajoute(vueTable);
         return groupe;

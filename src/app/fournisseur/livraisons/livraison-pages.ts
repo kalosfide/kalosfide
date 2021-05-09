@@ -99,17 +99,6 @@ export class LivraisonPages {
     };
 
     /**
-     * Route: livraison/client/:[nomParamKeyClient]/bon/:[nomParamNoDoc]/supprime/:[nomParamNoLigne]
-     * Page de visualisation d'une ligne avec bouton supprime
-     * Param nomParamNoLigne: no du produit de la ligne
-     */
-    static supprime: PageDef = {
-        urlSegment: CLFPages.supprime.urlSegment,
-        title: CLFPages.supprime.title,
-        titre: CLFPages.supprime.titre,
-    };
-
-    /**
      * Route: livraison/client/:[nomParamKeyClient]/envoi.
      * Page de visualisation de la synthèse.
      * Bouton: avant envoi, Enregistrer.

@@ -3,7 +3,7 @@ import { Produit } from '../catalogue/produit';
 import { CLFDoc } from './c-l-f-doc';
 import { ApiLigneData, ApiLigne } from './api-ligne';
 import { CLFLigneEditeur } from './c-l-f-ligne-editeur';
-import { IDataKeyComponent } from 'src/app/commun/data-par-key/i-data-key-component';
+import { IDataComponent } from 'src/app/commun/data-par-key/i-data-component';
 import { KeyUidRnoNo2 } from 'src/app/commun/data-par-key/key-uid-rno-no-2/key-uid-rno-no-2';
 import { TypeMesure } from '../type-mesure';
 import { Client } from '../client/client';
@@ -78,7 +78,7 @@ export class CLFLigne implements IKeyUidRnoNo2 {
         }
     }
 
-    créeEditeur(component: IDataKeyComponent) {
+    créeEditeur(component: IDataComponent) {
         this.pEditeur = new CLFLigneEditeur(this, component);
     }
     get éditeur(): CLFLigneEditeur { return this.pEditeur; }

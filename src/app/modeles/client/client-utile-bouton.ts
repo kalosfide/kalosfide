@@ -9,7 +9,7 @@ export class ClientUtileBouton extends DataUtileBouton {
     }
 
     get utile(): ClientUtile {
-        return this._dataUtile as ClientUtile;
+        return this.dataUtile as ClientUtile;
     }
 
     get url(): ClientUtileUrl {

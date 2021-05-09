@@ -11,14 +11,25 @@ export class ItemMonCompte extends NavItemDropDownGroup {
         super('monCompte', parent);
 
         this.rafraichit = () => {
+            const contenus: NavItemLien[] = [];
             if (this.identifiant) {
+                const changeMotDePasse = new NavItemLien(ComptePages.changeMotDePasse.urlSegment, this);
+                changeMotDePasse.texte = ComptePages.changeMotDePasse.lien;
+                changeMotDePasse.url = AppSiteRoutes.url(CompteRoutes.route([ComptePages.changeMotDePasse.urlSegment]));
+                contenus.push(changeMotDePasse);
+                const changeEmail = new NavItemLien(ComptePages.changeEmail.urlSegment, this);
+                changeEmail.texte = ComptePages.changeEmail.lien;
+                changeEmail.url = AppSiteRoutes.url(CompteRoutes.route([ComptePages.changeEmail.urlSegment]));
+                contenus.push(changeEmail);
+
                 const itemMonCompte = new NavItemLien(ComptePages.gestion.urlSegment, this);
                 itemMonCompte.texte = ComptePages.gestion.lien;
                 itemMonCompte.url = this.site
-                    ? SiteRoutes.urlSite(this.site.nomSite, this.identifiant, CompteRoutes.route([ComptePages.gestion.urlSegment]))
+                    ? SiteRoutes.urlDIdentifiant(this.site.url, this.identifiant, CompteRoutes.route([ComptePages.gestion.urlSegment]))
                     : AppSiteRoutes.url(CompteRoutes.route([ComptePages.gestion.urlSegment]));
-                this.ajoute(itemMonCompte);
+                contenus.push(itemMonCompte);
             }
+            this.fixeContenus(contenus);
         };
     }
 }

@@ -1,20 +1,17 @@
-import { Observable, of, EMPTY } from 'rxjs';
-import { take, mergeMap, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { IdentificationService } from '../securite/identification.service';
-import { ApiResult } from '../commun/api-results/api-result';
-import { ApiResult200Ok } from '../commun/api-results/api-result-200-ok';
+import { ApiResult } from '../api/api-results/api-result';
 import { RouteurService } from './routeur.service';
-import { ApiRequêteService } from './api-requete.service';
-import { ApiRequêteAction } from './api-requete-action';
 import { NavigationService } from './navigation.service';
 import { AttenteService } from './attente.service';
 import { IKeyUidRno } from '../commun/data-par-key/key-uid-rno/i-key-uid-rno';
 import { KfNgbModalService } from '../commun/kf-composants/kf-ngb-modal/kf-ngb-modal.service';
-import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
-import { ApiResult423Locked } from '../commun/api-results/api-result-423-locked-content';
-import { ApiResult409Conflict } from '../commun/api-results/api-result-409-conflict';
+import { ApiRequêteAction } from '../api/api-requete-action';
+import { ApiRequêteLecture } from '../api/api-requete-lecture';
+import { ApiRequêteService } from '../api/api-requete.service';
+import { IAvecServices } from './i-avec-services';
 
-export abstract class DataService {
+export abstract class DataService implements IAvecServices {
 
     abstract controllerUrl: string;
 
@@ -32,11 +29,8 @@ export abstract class DataService {
     public get keyIdentifiant(): IKeyUidRno {
         const identifiant = this.identification.litIdentifiant();
         if (identifiant) {
-            const nomSite = this.navigation.litSiteEnCours().nomSite;
-            return {
-                uid: identifiant.uid,
-                rno: identifiant.roles.find(r => r.nomSite === nomSite).rno
-            };
+            const urlSite = this.navigation.litSiteEnCours().url;
+            return identifiant.roleParUrl(urlSite);
         }
     }
 
@@ -65,7 +59,7 @@ export abstract class DataService {
         return this.apiRequeteService.getSansParamsSansIdentification(controller, action);
     }
 
-    protected get<T>(controller: string, action: string, params: string | { [param: string]: string }): Observable<ApiResult> {
+    protected get<T>(controller: string, action: string, params?: string | { [param: string]: string }): Observable<ApiResult> {
         return this.apiRequeteService.get<T>(controller, action, params);
     }
 
@@ -73,40 +67,12 @@ export abstract class DataService {
         return this.apiRequeteService.getAll<T>(controller, action, params);
     }
 
-    public objet<T>(apiResult$: Observable<ApiResult>, traiteErreur?: (apiResult: ApiResult) => boolean): Observable<T> {
-        return apiResult$.pipe(
-            take(1),
-            mergeMap(apiResult => {
-                switch (apiResult.statusCode) {
-                    case ApiResult200Ok.code:
-                        const objet = (apiResult as ApiResult200Ok<T>).lecture;
-                        return of(objet);
-                    default:
-                        if (!traiteErreur || !traiteErreur(apiResult)) {
-                            this.routeur.navigueVersErreur(apiResult);
-                        }
-                        return EMPTY;
-                }
-            })
-        );
+    public actionObs(requêteActionDef: ApiRequêteAction): Observable<boolean> {
+        return this.apiRequeteService.actionObs(requêteActionDef);
     }
 
-    public action(requêteActionDef: ApiRequêteAction) {
-        this.apiRequeteService.action(requêteActionDef);
-    }
-
-    public actionOkObs(requêteActionDef: ApiRequêteAction): Observable<boolean> {
-        return this.apiRequeteService.actionOkObs(requêteActionDef);
-    }
-
-    avecAttente<T>(resolve: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => Observable<T>):
-        (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => Observable<T> {
-        return ((route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-            const attente = this.attenteService.commence();
-            return resolve(route, state).pipe(
-                tap(() => this.attenteService.finit(attente))
-            );
-        }).bind(this);
+    public lectureObs<T>(requêteLectureDef: ApiRequêteLecture): Observable<T> {
+        return this.apiRequeteService.lectureObs<T>(requêteLectureDef);
     }
 
 }

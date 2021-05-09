@@ -5,15 +5,17 @@ import { take, tap, map } from 'rxjs/operators';
 import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
 import { Client } from 'src/app/modeles/client/client';
 import { KeyUidRnoService } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno.service';
-import { ApiController, ApiAction } from '../../commun/api-route';
+import { ApiController, ApiAction } from '../../api/api-route';
 import { EtatClient } from './etat-client';
-import { ApiResult } from '../../commun/api-results/api-result';
-import { ApiRequêteService } from '../../services/api-requete.service';
+import { ApiResult } from '../../api/api-results/api-result';
+import { ApiRequêteService } from '../../api/api-requete.service';
 import { ClientUtile } from './client-utile';
 import { Stockage } from 'src/app/services/stockage/stockage';
 import { StockageService } from 'src/app/services/stockage/stockage.service';
-import { ApiResult200Ok } from 'src/app/commun/api-results/api-result-200-ok';
+import { ApiResult200Ok } from 'src/app/api/api-results/api-result-200-ok';
 import { IKeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/i-key-uid-rno';
+import { Compare } from '../../commun/outils/tri';
+import { ApiResult201Created } from 'src/app/api/api-results/api-result-201-created';
 
 class ApiClients {
     clients: Client[];
@@ -50,7 +52,10 @@ export class ClientService extends KeyUidRnoService<Client> {
         protected apiRequeteService: ApiRequêteService
     ) {
         super(apiRequeteService);
-        this.stockage = stockageService.nouveau<Stock>('Clients', { rafraichit: 'rafraichi', avecDate: true });
+        this.stockage = stockageService.nouveau<Stock>('Clients', {
+            // Le stockage sera réinitialisé à chaque changement de site ou d'identifiant
+            rafraichi: true
+        });
         this.créeUtile();
     }
 
@@ -121,12 +126,13 @@ export class ClientService extends KeyUidRnoService<Client> {
         const params: { [param: string]: string } = KeyUidRno.créeParams(site);
         params.nom = objet.nom;
         params.adresse = objet.adresse;
-        return this.get<Client>(this.controllerUrl, ApiAction.data.ajoute, params).pipe(
+        return this.post(this.controllerUrl, ApiAction.data.ajoute, params).pipe(
             tap((apiResult: ApiResult) => {
-                if (apiResult.statusCode === ApiResult200Ok.code) {
-                    const client = (apiResult as ApiResult200Ok<Client>).lecture;
-                    objet.uid = client.uid;
-                    objet.rno = client.rno;
+                if (apiResult.statusCode === ApiResult201Created.code) {
+                    // l'api retourne la clé du client créé
+                    const keyClient = (apiResult as ApiResult201Created).entity;
+                    objet.uid = keyClient.uid;
+                    objet.rno = keyClient.rno;
                 }
             })
         );
@@ -169,11 +175,24 @@ export class ClientService extends KeyUidRnoService<Client> {
         this.stockage.fixeStock(stock);
     }
 
+    quandInvitation(client: Client, invité: boolean) {
+        const stock = this.stockage.litStock();
+        if (!stock) {
+            throw new Error('Clients: Pas de stock');
+        }
+        const index = stock.clients.findIndex(c => KeyUidRno.compareKey(c, client));
+        if (index === -1) {
+            throw new Error('Clients: invité absent du stock');
+        }
+        stock.clients[index].compte = invité ? 'I' : 'N';
+        this.stockage.fixeStock(stock);
+    }
+
     private _clients$(siteUid: string, siteRno: number, identifiantUid: string): Observable<Client[]> {
         // c'est le fournisseur
         const keySite: IKeyUidRno = { uid: siteUid, rno: siteRno };
-        const apiResult$ = this.get<ApiClients>(ApiController.client, ApiAction.client.liste, KeyUidRno.créeParams(keySite));
-        return this.objet<ApiClients>(apiResult$).pipe(
+        const demandeApi = () => this.get<ApiClients>(ApiController.client, ApiAction.client.liste, KeyUidRno.créeParams(keySite));
+        return this.lectureObs<ApiClients>({ demandeApi }).pipe(
             take(1),
             map(apiClients => {
                 const stock = new Stock();
@@ -195,16 +214,10 @@ export class ClientService extends KeyUidRnoService<Client> {
         const stock = this.stockage.litStock();
         const site = this.navigation.litSiteEnCours();
         const identifiant = this.identification.litIdentifiant();
-        if (!stock || stock.siteUid !== site.uid || stock.siteRno !== site.rno || stock.identifiantUid !== identifiant.uid) {
+        if (!stock) {
             return this._clients$(site.uid, site.rno, identifiant.uid);
         }
         return of(stock.clients);
-    }
-
-    rechargeClients(): Observable<Client[]> {
-        const site = this.navigation.litSiteEnCours();
-        const identifiant = this.identification.litIdentifiant();
-        return this._clients$(site.uid, site.rno, identifiant.uid);
     }
 
     /**
@@ -219,11 +232,14 @@ export class ClientService extends KeyUidRnoService<Client> {
             rno: '' + site.rno,
             date: (new Date(stock.date)).toDateString()
         };
-        const apiResult$ = this.get<ApiClients>(ApiController.client, ApiAction.client.rafraichit, params);
-        return this.objet<ApiClients>(apiResult$).pipe(
+        // charge la liste des clients qui ont ouvert un compte depuis la date du stock
+        const demandeApi = () => this.get<ApiClients>(ApiController.client, ApiAction.client.rafraichit, params);
+        return this.lectureObs<ApiClients>({ demandeApi }).pipe(
             map((apiClients: ApiClients) => {
                 stock.date = new Date(apiClients.date);
-                stock.clients = stock.clients.concat(apiClients.clients);
+                stock.clients = stock.clients
+                    .filter(c => c.etat !== EtatClient.nouveau)
+                    .concat(apiClients.clients);
                 this.stockage.fixeStock(stock);
                 return stock.clients;
             })
@@ -232,24 +248,15 @@ export class ClientService extends KeyUidRnoService<Client> {
 
     /**
      * retourne un Observable du Client
-     *  - défini par la key si présente (l'utilisateur est le fournisseur du site encours)
-     *  - de l'utilisateur si la key est absente (l'utilisateur est un client du site encours)
      * @param key key du client
      */
-    client$(key: KeyUidRno, estClient: boolean): Observable<Client> {
-        if (estClient) {
-            return this.objet<Client>(this.lit({
-                uid: key.uid,
-                rno: key.rno
-            }));
-        } else {
-            return this.clients$().pipe(
-                map(clients => {
-                    const client = clients.find(c => c.uid === key.uid && c.rno === key.rno);
-                    return client;
-                })
-            );
-        }
+    client$(key: KeyUidRno): Observable<Client> {
+        return this.clients$().pipe(
+            map(clients => {
+                const client = clients.find(c => c.uid === key.uid && c.rno === key.rno);
+                return client;
+            })
+        );
     }
 
 }

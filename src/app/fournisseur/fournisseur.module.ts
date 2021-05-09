@@ -5,9 +5,8 @@ import { CommunModule } from '../commun/commun.module';
 import { DispositionModule } from '../disposition/disposition.module';
 
 import { FournisseurRoutingModule } from './fournisseur-routing.module';
-import { FournisseurService } from './fournisseur.service';
 import { FAccueilComponent } from './f-accueil.component';
-import { MessagesModule } from '../messages/messages.module';
+import { ErreursModule } from '../erreurs/erreurs.module';
 import { FSiteModule } from './f-site/f-site.module';
 import { FournisseurCLFService } from './fournisseur-c-l-f-.service';
 
@@ -16,7 +15,7 @@ import { FournisseurCLFService } from './fournisseur-c-l-f-.service';
         CommonModule,
         CommunModule,
         DispositionModule,
-        MessagesModule,
+        ErreursModule,
         FSiteModule,
         FournisseurRoutingModule
     ],
@@ -24,7 +23,6 @@ import { FournisseurCLFService } from './fournisseur-c-l-f-.service';
         FAccueilComponent,
     ],
     providers: [
-        FournisseurService,
         FournisseurCLFService,
     ],
 })

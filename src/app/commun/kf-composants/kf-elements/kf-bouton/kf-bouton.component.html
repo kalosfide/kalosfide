@@ -1,9 +1,8 @@
 <ng-container *ngIf="bouton.ngbPopover; then ngbPopoverTemplate; else normalTemplate"></ng-container>
 <ng-template #normalTemplate>
-    <button #htmlElement [type]="buttonType" [name]="bouton.nom" [disabled]="inactif" [ngClass]="bouton.classe"
+    <button #htmlElement [type]="bouton.typeDeBouton" [name]="bouton.nom" [disabled]="inactif" [ngClass]="bouton.classe"
         [ngStyle]="bouton.style">
-        <app-kf-contenu-phrase [contenuPhrase]="bouton.contenuPhrase">
-        </app-kf-contenu-phrase>
+        <app-kf-contenu-phrase [contenuPhrase]="bouton.contenuAAfficher"></app-kf-contenu-phrase>
     </button>
 </ng-template>
 <ng-template #ngbPopoverTemplate>
@@ -22,6 +21,7 @@
             <ng-container *ngTemplateOutlet="boutonPopoverTemplate"></ng-container>
         </div>
     </ng-container>
+
     <ng-template #boutonPopoverTemplate>
         <button #htmlElement type="button" [name]="bouton.nom" [ngClass]="bouton.classe" [ngStyle]="bouton.style"
             [disabled]="bouton.inactif" [ngbPopover]="popContent" [popoverTitle]="popTitle"

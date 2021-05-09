@@ -1,36 +1,44 @@
 import { AppSite } from './app-site';
 import { AppPages, AppRoutes } from '../app-pages';
+import { PageDef } from '../commun/page-def';
 
-export const AppSitePages = {
-    index: {
+export class AppSitePages {
+    static accueil: PageDef = {
         urlSegment: AppSite.urlSegment,
         lien: AppSite.texte,
         titre: AppSite.titre,
         title: AppSite.titre,
-    },
-    sites: {
-        urlSegment: 'sites',
-        lien: 'Tous les sites des fournisseurs',
-        title: 'Sites des fournisseurs',
-        titre: 'Tous les sites des fournisseurs',
-    },
-    devenirFournisseur: {
+    };
+    static peuple: PageDef = {
+        urlSegment: 'peuple',
+        lien: 'Peuplement',
+        titre: 'Peuplement de la BDD',
+        title: 'Peuplement',
+    };
+    static devenirFournisseur: PageDef = {
         urlSegment: 'devenirFournisseur',
         lien: 'Devenir fournisseur',
         title: 'Devenir fournisseur',
-        titre: 'Enregistrement d\'un nouveau fournisseur'
-    },
-    contact: {
+        titre: `Enregistrement d'un nouveau fournisseur`
+    };
+
+    static devenirClient: PageDef = {
+        urlSegment: 'devenirClient',
+        lien: 'Devenir client',
+        title: 'Devenir client',
+        titre: `Enregistrement d'un nouveau client`,
+    };
+    static contact: PageDef = {
         urlSegment: 'contact',
         lien: 'Contact',
         title: 'Contact',
-    },
-    apropos: {
+    };
+    static apropos: PageDef = {
         urlSegment: 'apropos',
         lien: 'A propos',
         title: 'A propos',
-    },
-};
+    };
+}
 
 export interface IAppSiteRoutes {
     url: (segments?: string[]) => string;

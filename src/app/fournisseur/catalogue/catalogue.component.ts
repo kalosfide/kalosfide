@@ -5,7 +5,7 @@ import { PageDef } from 'src/app/commun/page-def';
 import { Site } from 'src/app/modeles/site/site';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { Observable } from 'rxjs';
-import { ApiResult } from 'src/app/commun/api-results/api-result';
+import { ApiResult } from 'src/app/api/api-results/api-result';
 import { IdEtatSite } from 'src/app/modeles/etat-site';
 import { FournisseurPages, FournisseurRoutes } from '../fournisseur-pages';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
@@ -13,8 +13,8 @@ import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-t
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
 import { PageBaseComponent } from 'src/app/disposition/page-base/page-base.component';
 import { BarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
-import { ApiRequêteAction } from 'src/app/services/api-requete-action';
-import { BootstrapType } from 'src/app/disposition/fabrique/fabrique-bootstrap';
+import { ApiRequêteAction } from 'src/app/api/api-requete-action';
+import { BootstrapType, KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
 import { Couleur } from 'src/app/disposition/fabrique/fabrique-couleurs';
 import { CatalogueService } from 'src/app/modeles/catalogue/catalogue.service';
 
@@ -23,21 +23,26 @@ interface IActionDef {
     alerte: BootstrapType;
     inactif: boolean;
     titre: string;
-    action: () => void;
+    apiAction: ApiRequêteAction;
 }
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
-    styleUrls: ['../../commun/commun.scss']
 })
 export class CatalogueComponent extends PageBaseComponent implements OnInit, OnDestroy {
 
     pageDef: PageDef = FournisseurPages.catalogue;
 
     site: Site;
-    barre: BarreTitre;
 
     actionDef: IActionDef;
+
+    titreAction = 'Modification';
+    titreCommencer = 'Commencer';
+    titreTerminer = 'Arrêter';
+
+    private apiRequêteCommencer: ApiRequêteAction;
+    private apiRequêteTerminer: ApiRequêteAction;
 
     constructor(
         protected route: ActivatedRoute,
@@ -46,40 +51,56 @@ export class CatalogueComponent extends PageBaseComponent implements OnInit, OnD
         super();
     }
 
-    titreAction = 'Modification';
-    titreCommencer = 'Commencer';
-    titreTerminer = 'Arrêter';
-
     créeBarreTitre = (): BarreTitre => {
+        const créeBouton = (nom: string, texte: string, demandeApi: () => Observable<ApiResult>, actionSiOk: () => void, active: () => boolean) => {
+            const apiRequêteAction: ApiRequêteAction = {
+                demandeApi,
+                actionSiOk,
+            }
+            const bouton = Fabrique.bouton.bouton({
+                nom,
+                contenu: {
+                    texte
+                },
+                action: () => {
+                    if (!active()) {
+                        const subscription = this.service.actionObs(apiRequêteAction).subscribe(
+                            () => {
+                                subscription.unsubscribe();
+                            }
+                        )
+                    }
+                }
+            });
+            KfBootstrap.ajouteClasse(bouton, 'btn', 'light');
+            bouton.ajouteClasse({ nom: 'active', active });
+            return bouton;
+        }
+        const groupe = Fabrique.titrePage.bbtnGroup('action');
+        groupe.ajoute(créeBouton('consulter', 'Consultation',
+            () => {
+                return this.service.termineModification(this.site);
+            },
+            () => {
+                this.service.termineModificationOk(this.site);
+            },
+            (() => this.site.etat !== IdEtatSite.catalogue).bind(this)
+        ));
+        groupe.ajoute(créeBouton('modifier', 'Modification',
+            () => {
+                return this.service.commenceModification(this.site);
+            },
+            () => {
+                this.service.commenceModificationOk(this.site);
+            },
+            (() => this.site.etat === IdEtatSite.catalogue).bind(this)
+        ));
+
         const barre = Fabrique.titrePage.barreTitre({
             pageDef: this.pageDef,
             contenuAidePage: this.contenuAidePage(),
         });
-
-        const info = Fabrique.titrePage.boutonInfo('', 'Etat');
-        const action = Fabrique.titrePage.boutonAction('action');
-        const groupe = Fabrique.titrePage.bbtnGroup('action');
-        groupe.ajoute(info);
-        groupe.ajoute(action);
-
-        const rafraichit = () => {
-            const couleur = this.actionDef.alerte === 'danger'
-                ? Couleur.red
-                : this.actionDef.alerte === 'warning'
-                    ? Couleur.warning
-                    : Couleur.green;
-            Fabrique.contenu.fixeDef(info, {
-                nomIcone: Fabrique.icone.nomIcone.info,
-                couleurIcone: couleur,
-                texte: this.titreAction,
-            });
-            Fabrique.titrePage.fixePopover(info, this.actionDef.titre, this.actionDef.infos);
-            Fabrique.contenu.fixeDef(action, { texte: this.actionDef.titre });
-            Fabrique.bouton.fixeActionBouton(action, this.actionDef.action);
-            action.inactivité = this.actionDef.inactif;
-        };
-
-        barre.ajoute({ groupe, rafraichit });
+        barre.ajoute({ groupe });
 
         barre.ajoute(Fabrique.titrePage.groupeDefAccès());
 
@@ -120,40 +141,12 @@ export class CatalogueComponent extends PageBaseComponent implements OnInit, OnD
         return infos;
     }
 
-    get apiRequêteCommencer(): ApiRequêteAction {
-        const apiRequêteAction: ApiRequêteAction = {
-            formulaire: this.superGroupe,
-            demandeApi: (): Observable<ApiResult> => {
-                return this.service.commenceModification(this.site);
-            },
-            actionSiOk: (): void => {
-                this.service.commenceModificationOk(this.site);
-                this.service.routeur.naviguePageDef(FournisseurPages.catalogue, FournisseurRoutes, this.site.nomSite);
-            },
-        };
-        return apiRequêteAction;
-    }
-
-    get apiRequêteTerminer(): ApiRequêteAction {
-        const apiRequêteAction: ApiRequêteAction = {
-            formulaire: this.superGroupe,
-            demandeApi: (): Observable<ApiResult> => {
-                return this.service.termineModification(this.site);
-            },
-            actionSiOk: (): void => {
-                this.service.termineModificationOk(this.site);
-                this.service.routeur.naviguePageDef(FournisseurPages.catalogue, FournisseurRoutes, this.site.nomSite);
-            },
-        };
-        return apiRequêteAction;
-    }
-
-    créeActionDef(): IActionDef {
+    private rafraichit() {
         const infos: KfComposant[] = [];
         let alerte: BootstrapType;
         let inactif = false;
         let titre: string;
-        let apiRequête: ApiRequêteAction;
+        let apiAction: ApiRequêteAction;
 
         let etiquette: KfEtiquette;
 
@@ -170,35 +163,24 @@ export class CatalogueComponent extends PageBaseComponent implements OnInit, OnD
                     inactif = true;
                 } else {
                     etiquette = Fabrique.ajouteEtiquetteP(infos);
-                    etiquette.ajouteClasseDef('alert-warning');
+                    etiquette.ajouteClasse('alert-warning');
                     Fabrique.ajouteTexte(etiquette, `Attention! un client connecté ne peut pas commander pendant le traitement.`);
                 }
                 titre = this.titreTerminer;
-                apiRequête = this.apiRequêteTerminer;
+                apiAction = this.apiRequêteTerminer;
                 break;
             case IdEtatSite.ouvert:
                 titre = this.titreCommencer;
-                apiRequête = this.apiRequêteCommencer;
+                apiAction = this.apiRequêteCommencer;
                 break;
         }
-
-        const def: IActionDef = {
+        this.actionDef = {
             infos,
             alerte,
             inactif,
-            action: () => {
-                const subscription = this.service.actionOkObs(apiRequête).subscribe(() => {
-                    subscription.unsubscribe();
-                });
-                    },
+            apiAction,
             titre
         };
-
-        return def;
-    }
-
-    private rafraichit() {
-        this.actionDef = this.créeActionDef();
         this.barre.site = this.service.navigation.litSiteEnCours();
         this.barre.rafraichit();
     }

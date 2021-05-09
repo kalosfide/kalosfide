@@ -2,43 +2,43 @@ import { Arbre } from './arbre';
 
 export class Noeud {
     objet: object;
-    private _id: string;
-    private _parent: Noeud;
-    private _enfant: Noeud;
-    private _suivant: Noeud;
+    private pId: string;
+    private pParent: Noeud;
+    private pEnfant: Noeud;
+    private pSuivant: Noeud;
 
-    get id(): string { return this._id; }
-    get parent(): Noeud { return this._parent; }
-    get enfant(): Noeud { return this._enfant; }
-    get suivant(): Noeud { return this._suivant; }
+    get id(): string { return this.pId; }
+    get parent(): Noeud { return this.pParent; }
+    get enfant(): Noeud { return this.pEnfant; }
+    get suivant(): Noeud { return this.pSuivant; }
     get racine(): Noeud {
-        if (this._parent) {
-            return this._parent.racine;
+        if (this.pParent) {
+            return this.pParent.racine;
         } else {
             return this;
         }
     }
 
     enregistreEnfants(arbre: Arbre) {
-        this._id = '' + arbre.enregistre(this);
-        let e = this._enfant;
+        this.pId = '' + arbre.enregistre(this);
+        let e = this.pEnfant;
         while (e !== undefined) {
             e.enregistreEnfants(arbre);
-            e = e._suivant;
+            e = e.pSuivant;
         }
     }
-    get estFeuille(): boolean { return this._enfant === undefined; }
+    get estFeuille(): boolean { return this.pEnfant === undefined; }
     Enfant(index: number): Noeud {
-        let e = this._enfant;
+        let e = this.pEnfant;
         let i = index;
         while (e !== undefined && i !== 0) {
             i--;
-            e = e._suivant;
+            e = e.pSuivant;
         }
         return e;
     }
     IndexDe(noeud: Noeud): number {
-        let e = this._enfant;
+        let e = this.pEnfant;
         let i = -1;
         let j = 0;
         while (e !== undefined) {
@@ -47,31 +47,31 @@ export class Noeud {
                 break;
             }
             j++;
-            e = e._suivant;
+            e = e.pSuivant;
         }
         return i;
     }
     get IndexDesAncêtres(): number[] {
-        if (this._parent === undefined) { return []; }
-        const ids = Array.from(this._parent.IndexDesAncêtres);
-        ids.push(this._parent.IndexDe(this));
+        if (this.pParent === undefined) { return []; }
+        const ids = Array.from(this.pParent.IndexDesAncêtres);
+        ids.push(this.pParent.IndexDe(this));
         return ids;
     }
     ObjetsEnfants(): object[] {
         const o: object[] = [];
-        let e = this._enfant;
+        let e = this.pEnfant;
         while (e !== undefined) {
             o.push(e.objet);
-            e = e._suivant;
+            e = e.pSuivant;
         }
         return o;
     }
     get Enfants(): Noeud[] {
         const n: Noeud[] = [];
-        let e = this._enfant;
+        let e = this.pEnfant;
         while (e !== undefined) {
             n.push(e);
-            e = e._suivant;
+            e = e.pSuivant;
         }
         return n;
     }
@@ -97,21 +97,21 @@ export class Noeud {
         if (!nouveauParamètres) {
             nouveauParamètres = parametres;
         }
-        let e = this._enfant;
+        let e = this.pEnfant;
         while (e) {
             e.Applique(methode, nouveauParamètres);
-            e = e._suivant;
+            e = e.pSuivant;
         }
         return nouveauParamètres;
     }
 
     Transforme(transformeObjet: (objet: any) => any): Noeud {
-        const nouveau = new Noeud;
+        const nouveau = new Noeud();
         nouveau.objet = transformeObjet(this.objet);
-        let e = this._enfant;
+        let e = this.pEnfant;
         while (e) {
             nouveau.Ajoute(e.Transforme(transformeObjet));
-            e = e._suivant;
+            e = e.pSuivant;
         }
         return nouveau;
     }
@@ -139,61 +139,61 @@ export class Noeud {
     }
 
     get DernierEnfant(): Noeud {
-        let d = this._enfant;
+        let d = this.pEnfant;
         if (d !== undefined) {
-            while (d._suivant !== undefined) {
-                d = d._suivant;
+            while (d.pSuivant !== undefined) {
+                d = d.pSuivant;
             }
         }
         return d;
     }
     get Précédent(): Noeud {
-        let p = this._parent;
+        let p = this.pParent;
         if (p === undefined) { return undefined; }
-        p = p._enfant;
+        p = p.pEnfant;
         if (p === this) { return undefined; }
-        while (p._suivant !== undefined) {
-            if (p._suivant === this) { return p; }
-            p = p._suivant;
+        while (p.pSuivant !== undefined) {
+            if (p.pSuivant === this) { return p; }
+            p = p.pSuivant;
         }
         return undefined;
     }
     private fixeParent(parent: Noeud) {
-        const ancienParent = this._parent;
+        const ancienParent = this.pParent;
         if (ancienParent === parent) { return; }
         if (ancienParent !== undefined) {
             const précédent = this.Précédent;
             if (précédent === undefined) {
-                ancienParent._enfant = this._suivant;
+                ancienParent.pEnfant = this.pSuivant;
             } else {
-                précédent._suivant = this._suivant;
+                précédent.pSuivant = this.pSuivant;
             }
         }
-        this._parent = parent;
+        this.pParent = parent;
     }
     Ajoute(noeud: Noeud) {
         const dernier = this.DernierEnfant;
         if (dernier === undefined) {
-            this._enfant = noeud;
+            this.pEnfant = noeud;
         } else {
-            dernier._suivant = noeud;
+            dernier.pSuivant = noeud;
         }
         noeud.fixeParent(this);
     }
     AdopteEnfants(noeud: Noeud) {
         const dernier = this.DernierEnfant;
-        let enfant = noeud._enfant;
+        let enfant = noeud.pEnfant;
         if (!enfant) {
             return;
         }
         if (dernier === undefined) {
-            this._enfant = noeud;
+            this.pEnfant = noeud;
         } else {
-            dernier._suivant = noeud;
+            dernier.pSuivant = noeud;
         }
         while (enfant) {
-            enfant._parent = this;
-            enfant = enfant._suivant;
+            enfant.pParent = this;
+            enfant = enfant.pSuivant;
         }
     }
     /**
@@ -201,60 +201,60 @@ export class Noeud {
      * @param nouveauParent nouveau parent de ce noeud
      */
     InséreParent(nouveauParent: Noeud) {
-        if (this._parent !== undefined) {
-            if (this._parent._enfant === this) {
-                this._parent._enfant = nouveauParent;
+        if (this.pParent !== undefined) {
+            if (this.pParent.pEnfant === this) {
+                this.pParent.pEnfant = nouveauParent;
             } else {
-                this.Précédent._suivant = nouveauParent;
+                this.Précédent.pSuivant = nouveauParent;
             }
-            nouveauParent._parent = this._parent;
-            nouveauParent._suivant = this._suivant;
-            this._suivant = undefined;
+            nouveauParent.pParent = this.pParent;
+            nouveauParent.pSuivant = this.pSuivant;
+            this.pSuivant = undefined;
         }
-        nouveauParent._enfant = this;
-        this._parent = nouveauParent;
+        nouveauParent.pEnfant = this;
+        this.pParent = nouveauParent;
     }
     Insére(noeud: Noeud, après?: boolean) {
-        if (this._parent === undefined) { return; }
+        if (this.pParent === undefined) { return; }
         let suivant: Noeud;
         if (après === true) {
-            suivant = this._suivant;
-            this._suivant = noeud;
-            noeud._suivant = suivant;
+            suivant = this.pSuivant;
+            this.pSuivant = noeud;
+            noeud.pSuivant = suivant;
         } else {
-            if (this._parent._enfant === this) {
-                this._parent._enfant = noeud;
+            if (this.pParent.pEnfant === this) {
+                this.pParent.pEnfant = noeud;
             } else {
-                this.Précédent._suivant = noeud;
+                this.Précédent.pSuivant = noeud;
             }
             suivant = this;
         }
-        noeud._suivant = suivant;
-        noeud.fixeParent(this._parent);
+        noeud.pSuivant = suivant;
+        noeud.fixeParent(this.pParent);
     }
     Supprime() {
-        if (this._parent === undefined) { return; }
+        if (this.pParent === undefined) { return; }
         const précédent = this.Précédent;
         if (précédent === undefined) {
-            this._parent._enfant = this._suivant;
+            this.pParent.pEnfant = this.pSuivant;
         } else {
-            précédent._suivant = this._suivant;
+            précédent.pSuivant = this.pSuivant;
         }
-        this._parent = undefined;
+        this.pParent = undefined;
     }
 
     get bas(): Noeud {
-        return this._suivant ? this._suivant : this._parent ? this.parent.enfant : undefined;
+        return this.pSuivant ? this.pSuivant : this.pParent ? this.parent.enfant : undefined;
     }
 
     get haut(): Noeud {
-        if (this._parent) {
-            let enfant = this._parent._enfant;
+        if (this.pParent) {
+            let enfant = this.pParent.pEnfant;
             while (enfant) {
-                if (this === enfant._suivant) {
+                if (this === enfant.pSuivant) {
                     break;
                 }
-                enfant = enfant._suivant;
+                enfant = enfant.pSuivant;
             }
             return enfant;
         }

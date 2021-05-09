@@ -1,16 +1,16 @@
 
 import { Observable } from 'rxjs';
 
-import { ApiResult } from '../api-results/api-result';
 import { DataService } from '../../services/data.service';
 import { IDataKey } from './data-key';
-import { ApiAction } from '../api-route';
+import { ApiAction } from '../../api/api-route';
 import { tap } from 'rxjs/operators';
-import { ApiResult201Created } from '../api-results/api-result-201-created';
 import { DataUtile } from 'src/app/commun/data-par-key/data-utile';
 import { KfInitialObservable } from '../kf-composants/kf-partages/kf-initial-observable';
 import { ModeTable } from './condition-table';
 import { DataKeyUtile } from './data-key-utile';
+import { ApiResult } from 'src/app/api/api-results/api-result';
+import { ApiResult201Created } from 'src/app/api/api-results/api-result-201-created';
 
 export abstract class DataKeyService<T extends IDataKey> extends DataService {
 
@@ -21,6 +21,9 @@ export abstract class DataKeyService<T extends IDataKey> extends DataService {
     protected pModeTableIO: KfInitialObservable<ModeTable>;
 
     abstract urlSegmentDeKey(key: T): string;
+    fragment(t: T): string {
+        return this.pUtile.url.id(this.urlSegmentDeKey(t));
+    }
     abstract get keyDeAjoute(): IDataKey;
     abstract fixeKeyDeAjoute(envoyé: T, reçu: T): void;
 
@@ -44,6 +47,18 @@ export abstract class DataKeyService<T extends IDataKey> extends DataService {
 
     changeModeTable(mode: ModeTable) {
         this.pModeTableIO.changeValeur(mode);
+    }
+
+    basculeModeTable(...modes: ModeTable[]) {
+        const nb = modes.length;
+        if (nb > 0) {
+            const actuel = modes.indexOf(this.pModeTableIO.valeur);
+            let nouveau = actuel + 1;
+            if (nouveau === nb) {
+                nouveau = 0;
+            }
+            this.pModeTableIO.changeValeur(modes[nouveau]);
+        }
     }
 
     get modeTable(): ModeTable {

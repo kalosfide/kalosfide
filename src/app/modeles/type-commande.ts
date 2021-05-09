@@ -9,11 +9,11 @@ export class TypeCommande {
     static pourListe(id: string): string {
         switch (id) {
             case TypeCommande.id.ALUnité:
-                return 'à l\'unité';
+                return `à l'unité`;
             case TypeCommande.id.EnVrac:
                 return 'en vrac';
             case TypeCommande.id.ALUnitéOuEnVrac:
-                return 'à l\'unité ou en vrac';
+                return `à l'unité ou en vrac`;
             default:
                 throw new Error(`TypeCommande: la valeur ${id} n'appartient pas au type`);
         }

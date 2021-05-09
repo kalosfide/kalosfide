@@ -5,6 +5,8 @@ import { CatalogueResolverService } from 'src/app/modeles/catalogue/catalogue-re
 import { CatalogueComponent } from './catalogue.component';
 import { FournisseurPages } from '../fournisseur-pages';
 import { CataloguePages } from './catalogue-pages';
+import { CatalogueFinitService } from './catalogue-finit.service';
+import { CatalogueCommenceService } from './catalogue-commence.service';
 
 const routes: Routes = [
     {
@@ -16,6 +18,7 @@ const routes: Routes = [
         resolve: {
             catalogue: CatalogueResolverService,
         },
+        canDeactivate: [CatalogueFinitService],
         children: [
             {
                 path: '',

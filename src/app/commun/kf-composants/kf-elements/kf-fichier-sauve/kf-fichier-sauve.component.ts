@@ -3,13 +3,13 @@ import { KfComposantComponent } from '../../kf-composant/kf-composant.component'
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { KfFichierSauve } from './kf-fichier-sauve';
 import { KfEvenement, KfTypeDEvenement, KfStatutDEvenement } from '../../kf-partages/kf-evenements';
-import { KFComposantService } from '../../kf-composant.service';
+import { TraiteKeydownService } from '../../../traite-keydown/traite-keydown.service';
 
 @Component({
     selector: 'app-kf-fichier-sauve',
     template: `
         <a #baliseElement [download]="fichier.nomFichier" [href]="dataUrl" [ngClass]="fichier.classe"
-            [ngStyle]="fichier.style"> (click)="quandClic()">
+            [ngStyle]="fichier.style">
             <app-kf-contenu-phrase  [contenuPhrase]="fichier.contenuPhrase"></app-kf-contenu-phrase>
         </a>
 `,
@@ -19,7 +19,7 @@ export class KfFichierSauveComponent extends KfComposantComponent implements OnI
     @ViewChild('baliseElement', {static: false}) baliseElementRef: ElementRef;
 
     constructor(private sanitizer: DomSanitizer,
-                protected service: KFComposantService) {
+                protected service: TraiteKeydownService) {
             super(service);
         }
 
@@ -29,17 +29,11 @@ export class KfFichierSauveComponent extends KfComposantComponent implements OnI
     }
 
     ngAfterViewInit() {
-        this.composant.gereHtml.htmlElement = this.baliseElementRef.nativeElement;
-        this.composant.gereHtml.initialiseHtml(this.output);
+        this.composant.initialiseHtml(this.baliseElementRef.nativeElement, this.output);
     }
 
     get dataUrl(): SafeUrl {
         return this.sanitizer.bypassSecurityTrustUrl(this.fichier.dataUrl);
-    }
-
-    quandClic() {
-        const evenement = new KfEvenement(this.composant, KfTypeDEvenement.fichierSauve);
-        this.traiteOuTransmet(evenement);
     }
 
 }

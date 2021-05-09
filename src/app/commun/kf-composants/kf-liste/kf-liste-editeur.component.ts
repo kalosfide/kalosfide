@@ -7,7 +7,7 @@ import { KfEvenement } from '../kf-partages/kf-evenements';
 import { KfListeEditions } from './kf-liste-editions';
 import { KfListeEditeur } from './kf-liste-editeur';
 import { Router, ActivatedRoute } from '@angular/router';
-import { KFComposantService } from '../kf-composant.service';
+import { TraiteKeydownService } from '../../traite-keydown/traite-keydown.service';
 
 @Component({
     selector: 'app-kf-liste-editeur',
@@ -24,7 +24,7 @@ export class KfListeEditeurComponent extends KfComposantComponent implements OnI
     constructor(
         private router: Router,
         private route: ActivatedRoute,
-        protected service: KFComposantService) {
+        protected service: TraiteKeydownService) {
         super(service);
     }
 
@@ -49,8 +49,7 @@ export class KfListeEditeurComponent extends KfComposantComponent implements OnI
     }
 
     ngAfterViewInit() {
-        this.composant.gereHtml.htmlElement = this.htmlElement.nativeElement;
-        this.composant.gereHtml.initialiseHtml(this.output);
+        this.composant.initialiseHtml(this.htmlElement.nativeElement, this.output);
     }
 
     traiteOkAnnuler(evenement: KfEvenement) {

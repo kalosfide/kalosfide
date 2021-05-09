@@ -8,16 +8,16 @@ export class ItemMesSites extends NavItemDropDownGroup {
     constructor(parent: ItemCompte) {
         super('mesSites', parent);
         this.rafraichit = () => {
-            let roles = this.identifiant ? this.identifiant.roles : [];
+            let sites = this.identifiant ? this.identifiant.sites : [];
             if (this.site) {
-                roles = roles.filter(r => r.nomSite !== this.site.nomSite);
+                sites = sites.filter(s => s.url !== this.site.url);
             }
-            roles.forEach(r => {
-                const item = new NavItemLien(r.nomSite, this);
-                item.texte = r.nomSite + '@' + AppSite.nom;
-                item.url = SiteRoutes.urlSite(r.nomSite, this.identifiant);
-               this.ajoute(item);
-            });
+            this.fixeContenus(sites.map(s => {
+                const item = new NavItemLien(s.url, this);
+                item.texte = s.url + '@' + AppSite.nom;
+                item.url = SiteRoutes.urlDIdentifiant(s.url, this.identifiant);
+                return item;
+            }));
         };
     }
 }

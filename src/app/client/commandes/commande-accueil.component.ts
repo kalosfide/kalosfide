@@ -11,8 +11,8 @@ import { CLFTitreComponent } from 'src/app/modeles/c-l-f/c-l-f-titre.component';
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
-    styleUrls: ['../../commun/commun.scss']
 })
+// Page titre de la section commande
 export class CommandeAccueilComponent extends CLFTitreComponent implements OnInit {
 
     pageDef: PageDef = ClientPages.commandes;

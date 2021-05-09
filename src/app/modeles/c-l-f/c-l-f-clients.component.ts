@@ -10,7 +10,6 @@ import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 import { KfSuperGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-super-groupe';
 import { RouteurService } from 'src/app/services/routeur.service';
-import { SiteService } from 'src/app/modeles/site/site.service';
 import { PageTableComponent } from 'src/app/disposition/page-table/page-table.component';
 import { IGroupeTableDef, GroupeTable } from 'src/app/disposition/page-table/groupe-table';
 import { BarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
@@ -20,16 +19,14 @@ import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
 import { CLFUtile } from './c-l-f-utile';
 import { CLFDocs } from './c-l-f-docs';
 import { ModeAction } from './condition-action';
-import { EtatTable } from 'src/app/disposition/fabrique/etat-table';
-import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
 import { ILienDef } from 'src/app/disposition/fabrique/fabrique-lien';
 import { FournisseurRoutes, FournisseurPages } from 'src/app/fournisseur/fournisseur-pages';
+import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
 
 export abstract class CLFClientsComponent extends PageTableComponent<CLFDocs> implements OnInit, OnDestroy {
 
     site: Site;
     identifiant: Identifiant;
-    barre: BarreTitre;
     niveauTitre = 1;
 
     date: Date;
@@ -40,7 +37,6 @@ export abstract class CLFClientsComponent extends PageTableComponent<CLFDocs> im
     constructor(
         protected route: ActivatedRoute,
         protected service: CLFService,
-        protected siteService: SiteService,
     ) {
         super(route, service);
     }
@@ -79,7 +75,7 @@ export abstract class CLFClientsComponent extends PageTableComponent<CLFDocs> im
     }
 
     créeGroupeTableDef(): IGroupeTableDef<CLFDocs> {
-        const outils = Fabrique.vueTable.outils<CLFDocs>(this.nom);
+        const outils = Fabrique.vueTable.outils<CLFDocs>();
         outils.ajoute(this.utile.outils.clientDeDocsClient());
 
         const vueTableDef: IKfVueTableDef<CLFDocs> = {
@@ -88,26 +84,13 @@ export abstract class CLFClientsComponent extends PageTableComponent<CLFDocs> im
             id: (t: CLFDocs) => {
                 return this.utile.url.id(KeyUidRno.texteDeKey(t.client));
             },
-            quandClic: (docsClient: CLFDocs) => (() => this.routeur.navigueUrlDef(this.utile.url.client(docsClient))).bind(this),
-            optionsDeTrieur: Fabrique.vueTable.optionsDeTrieur([
-                { nomTri: 'client' },
-                { nomTri: 'nbDocuments', desc: true },
-                { nomTri: 'nbPrêts', desc: true }
-            ])
+            quandClic: { colonneDuClic: this.utile.nom.choisit }, // (docsClient: CLFDocs) => (() => this.routeur.navigueUrlDef(this.utile.url.client(docsClient))).bind(this),
+            triInitial: { colonne: 'nbDocuments', direction: 'desc' },
+            pagination: Fabrique.vueTable.pagination<CLFDocs>(),
+            navigationAuClavier: { type: 'lignes', controlePagination: true }
         };
-        const etatTable = Fabrique.vueTable.etatTable({
-            nePasAfficherSiPasVide: true,
-            nbMessages: 1,
-            avecSolution: true,
-            charge: ((etat: EtatTable) => {
-                etat.grBtnsMsgs.messages[0].fixeTexte(`Il n\'a pas de ${this.texteUtile.def.bon} envoyé par ${this.clfDocs.client.nom}.`);
-                Fabrique.lien.fixeDef(etat.grBtnsMsgs.boutons[0] as KfLien, this.utile.lien.bonVirtuelDef(this.clfDocs));
-                etat.grBtnsMsgs.alerte('info');
-            }).bind(this)
-        });
         return {
             vueTableDef,
-            etatTable
         };
     }
 
@@ -142,7 +125,7 @@ export abstract class CLFClientsComponent extends PageTableComponent<CLFDocs> im
     créeSuperGroupe() {
         this.superGroupe = new KfSuperGroupe(this.nom);
         this.superGroupe.créeGereValeur();
-        this.superGroupe.sauveQuandChange = true;
+        this.superGroupe.comportementFormulaire = { sauveQuandChange: true };
 
         if (this.clfDocs.clients.length === 0) {
             const message = `Il n'y a pas de client enregistré.`;
@@ -150,7 +133,7 @@ export abstract class CLFClientsComponent extends PageTableComponent<CLFDocs> im
                 urlDef: {
                     routes: FournisseurRoutes,
                     pageDef: FournisseurPages.clients,
-                    nomSite: this.site.nomSite
+                    urlSite: this.site.url
                 }
             };
             this.superGroupe.ajoute(this.utile.groupeCréationImpossible(this.clfDocs.type, message, lienDef));
@@ -169,8 +152,8 @@ export abstract class CLFClientsComponent extends PageTableComponent<CLFDocs> im
         this.rafraichit();
     }
 
-    créePageTableDef() {
-        this.pageTableDef = {
+    créePageTableDef(): IPageTableDef {
+        return {
             avantChargeData: () => this.avantChargeData(),
             chargeData: (data: Data) => this.chargeData(data),
             créeSuperGroupe: () => this.créeSuperGroupe(),

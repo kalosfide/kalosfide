@@ -79,7 +79,7 @@ export class SiteOuvertGarde extends EtatSiteChange implements CanActivate, CanA
             return this.etatSiteChange(site).pipe(
                 map(état => {
                     if (état !== IdEtatSite.ouvert) {
-                        this.routeur.naviguePageDef(SitePages.pasOuvert, ClientRoutes, site.nomSite);
+                        this.routeur.naviguePageDef(SitePages.pasOuvert, ClientRoutes, site.url);
                         return false;
                     }
                     return true;

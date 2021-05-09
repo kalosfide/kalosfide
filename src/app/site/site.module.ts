@@ -6,31 +6,31 @@ import { CommunModule } from '../commun/commun.module';
 import { DispositionModule } from '../disposition/disposition.module';
 import { SiteRoutingModule } from './site-routing.module';
 import { CompteModule } from '../compte/compte.module';
-import { MessagesModule } from '../messages/messages.module';
-import { VisiteurRacineComponent } from './visiteur-racine-component';
+import { ErreursModule } from '../erreurs/erreurs.module';
 import { FournisseurRacineComponent } from './fournisseur-racine.component';
 import { ClientRacineComponent } from './client-racine.component';
 import { FournisseurGarde } from './fournisseur-garde';
 import { ClientGarde } from './client-garde';
+import { UsagerGarde } from './usager-garde';
 
 @NgModule({
     imports: [
         CommonModule,
         CommunModule,
         DispositionModule,
-        MessagesModule,
+        ErreursModule,
         CompteModule,
         SiteRoutingModule,
     ],
     declarations: [
-        VisiteurRacineComponent,
         FournisseurRacineComponent,
         ClientRacineComponent,
     ],
     providers: [
         SiteResolverService,
+        UsagerGarde,
         FournisseurGarde,
-        ClientGarde
+        ClientGarde,
     ],
 })
 export class SiteModule { }

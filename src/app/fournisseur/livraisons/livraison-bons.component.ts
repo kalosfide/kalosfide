@@ -12,7 +12,6 @@ import { CLFBonsComponent } from 'src/app/modeles/c-l-f/c-l-f-bons.component';
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
-    styleUrls: ['../../commun/commun.scss']
 })
 export class LivraisonBonsComponent extends CLFBonsComponent implements OnInit, OnDestroy {
 

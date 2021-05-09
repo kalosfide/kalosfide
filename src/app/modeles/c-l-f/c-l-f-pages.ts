@@ -25,7 +25,7 @@ export class CLFPages {
     static sansBons: PageDef = {
         urlSegment: 'sansBons',
         title: 'Clients',
-        titre: 'Ajout d\'un client',
+        titre: `Ajout d'un client`,
     };
 
     /**
