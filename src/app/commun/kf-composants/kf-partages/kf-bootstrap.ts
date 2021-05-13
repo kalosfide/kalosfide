@@ -23,28 +23,22 @@ export enum BootstrapNom {
     link = 'link',
 }
 
-export type KfBootstrapLabelOptions = 'nePasAfficherLabel' | 'labelFlottant' | {
+export type KfBootstrapColOptions = {
     breakpoint?: 'sm' | 'md' | 'sg' | 'sm'
     width?: number
 };
 
-export interface IKfBootstrapLabelOptions {
-    /**
-     * Si présent et vrai, le label n'est pas dans le template et les autres options du label sont ignorées.
-     */
-    nePasAfficherLabel?: boolean,
-    /**
-     * Si présent, le label (ou une div vide) et l'entrée sont chacun dans une colonne.
-     * A un effet sur KfInput, KfListeDéroulante, KfRadios, KfCaseACocher.
-     */
-    colonneLabel?: {
-        breakpoint?: 'sm' | 'md' | 'sg' | 'sm'
-        width?: number
-    },
-}
+export type KfBootstrapLabelOptions = 'nePasAfficherLabel' | 'labelFlottant' | KfBootstrapColOptions;
 
 export interface IKfBootstrapOptions {
-    label: KfBootstrapLabelOptions;
+    taille?: 'sm' | 'lg';
+    /**
+     * Si présent et égal à 'nePasAfficherLabel', le label n'est pas dans le template.
+     * Si présent et égal à 'labelFlottant', le label est flottant.
+     * Si présent et égal à un objet colonneLabel, le label (ou une div vide dans le cas KfCaseACocher)
+     * et le KfInput, KfListeDéroulante, KfRadios, KfCaseACocher sont chacun dans une colonne.
+     */
+    label?: KfBootstrapLabelOptions;
     /**
      * Si présent et vrai, la valeur est affichée comme du texte brut quand l'entrée est en lecture seule.
      * Par défaut, une entrée en lecture seule est affichée comme si elle était inactive.

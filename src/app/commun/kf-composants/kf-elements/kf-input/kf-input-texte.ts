@@ -112,6 +112,9 @@ export class KfInputTexte extends KfInput {
      */
     ajouteMontreMotDePasse(iconeMontre: FANomIcone, iconeCache?: FANomIcone) {
         const iconeBouton = new IconeBouton('montreMotDePasse', iconeMontre);
+        iconeBouton.icone.ajouteClasse(
+            { nom: 'kf-invisible', active: (() => this.estVide).bind(this) }
+        );
         iconeBouton.quandEnfonce = () => {
             this.typeDInput = KfTypeDInput.texte;
             if (iconeCache) {

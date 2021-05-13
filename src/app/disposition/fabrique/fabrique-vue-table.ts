@@ -15,7 +15,6 @@ import { EtatTable, IEtatTableDef } from './etat-table';
 import { GroupeBoutonsMessages } from './fabrique-formulaire';
 import { KfBouton } from 'src/app/commun/kf-composants/kf-elements/kf-bouton/kf-bouton';
 import { IKfVueTablePaginationDef, KfVueTablePagination } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-pagination';
-import { KfGéreCss } from 'src/app/commun/kf-composants/kf-partages/kf-gere-css';
 
 export class FabriqueVueTable extends FabriqueMembre {
 
@@ -79,13 +78,13 @@ export class FabriqueVueTable extends FabriqueMembre {
 
     private _prépareFiltre<T>(filtre: KfVueTableFiltreTexte<T> | KfVueTableFiltreNombre<T>, titre: string, placeholder?: string) {
         this._prépareFiltreOuCherche<T>(filtre);
-        filtre.composant.ajouteClasse('form-control-sm');
+        filtre.composant.ajouteClasse('form-control');
         const fauxBouton = this.fabrique.bouton.bouton({
             nom: '',
             contenu: { nomIcone: this.fabrique.icone.nomIcone.filtre }
         });
         fauxBouton.inactivité = true;
-        filtre.liste.fixeComposantAvant(fauxBouton, 'input-group-prepend');
+        filtre.liste.fixeComposantAvant(fauxBouton, 'input-group-text');
         if (placeholder) {
             const option0 = filtre.liste.créeOption0();
             option0.contenuPhrase.fixeTexte(placeholder);
