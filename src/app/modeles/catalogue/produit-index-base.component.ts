@@ -1,4 +1,4 @@
-import { OnDestroy } from '@angular/core';
+import { OnDestroy, Directive } from '@angular/core';
 
 import { ActivatedRoute, Data } from '@angular/router';
 import { ProduitService } from 'src/app/modeles/catalogue/produit.service';
@@ -23,6 +23,7 @@ import { Site } from '../site/site';
 import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
 
 
+@Directive()
 export abstract class ProduitIndexBaseComponent extends KeyUidRnoNoIndexComponent<Produit> implements OnDestroy {
 
     site: Site;

@@ -8,7 +8,9 @@ import { ILienDef } from 'src/app/disposition/fabrique/fabrique-lien';
 import { BarreTitre, IBarreDef } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { KfComposant } from '../kf-composants/kf-composant/kf-composant';
+import { Directive } from "@angular/core";
 
+@Directive()
 export abstract class DataKeyIndexComponent<T extends IDataKey> extends PageTableComponent<T>  {
 
     abstract site: Site;

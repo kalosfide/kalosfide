@@ -4,11 +4,12 @@ import { PageBaseComponent } from '../page-base/page-base.component';
 import { KfSuperGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-super-groupe';
 import { Data, ActivatedRoute } from '@angular/router';
 import { DataService } from 'src/app/services/data.service';
-import { OnInit, OnDestroy, AfterViewInit } from '@angular/core';
+import { OnInit, OnDestroy, AfterViewInit, Directive } from '@angular/core';
 import { GroupeTable, IGroupeTableDef } from './groupe-table';
 import { IPageTableDef } from './i-page-table-def';
 import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 
+@Directive()
 export abstract class PageTableComponent<T> extends PageBaseComponent implements OnInit, OnDestroy, AfterViewInit {
 
     liste: T[] = [];

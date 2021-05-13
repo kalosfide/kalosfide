@@ -1,4 +1,4 @@
-import { OnInit, OnDestroy } from '@angular/core';
+import { OnInit, OnDestroy, Directive } from '@angular/core';
 
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { Site } from 'src/app/modeles/site/site';
@@ -23,6 +23,7 @@ import { ILienDef } from 'src/app/disposition/fabrique/fabrique-lien';
 import { FournisseurRoutes, FournisseurPages } from 'src/app/fournisseur/fournisseur-pages';
 import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
 
+@Directive()
 export abstract class CLFClientsComponent extends PageTableComponent<CLFDocs> implements OnInit, OnDestroy {
 
     site: Site;

@@ -1,4 +1,4 @@
-import { OnInit, OnDestroy } from '@angular/core';
+import { OnInit, OnDestroy, Directive } from '@angular/core';
 
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { ActivatedRoute } from '@angular/router';
@@ -12,6 +12,7 @@ import { IKfVueTableColonneDef } from 'src/app/commun/kf-composants/kf-vue-table
 import { CLFLigne } from 'src/app/modeles/c-l-f/c-l-f-ligne';
 import { ClientCLFService } from '../client-c-l-f.service';
 
+@Directive()
 export abstract class CDocumentDocComponent extends CLFDocComponent implements OnInit, OnDestroy {
 
     constructor(

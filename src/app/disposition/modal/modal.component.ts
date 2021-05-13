@@ -2,7 +2,7 @@
 import { PageBaseComponent } from '../page-base/page-base.component';
 import { Data, ActivatedRoute } from '@angular/router';
 import { DataService } from 'src/app/services/data.service';
-import { OnInit, OnDestroy } from '@angular/core';
+import { OnInit, OnDestroy, Directive } from '@angular/core';
 import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 import { IKfNgbModalDef, KfNgbModal } from 'src/app/commun/kf-composants/kf-ngb-modal/kf-ngb-modal';
 import { IBoutonDef } from '../fabrique/fabrique-bouton';
@@ -23,6 +23,7 @@ export interface IModalComponentDef {
     urlSiPasAction: string | IUrlDef;
 }
 
+@Directive()
 export abstract class ModalComponent extends PageBaseComponent implements OnInit, OnDestroy {
 
 

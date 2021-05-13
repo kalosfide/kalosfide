@@ -1,4 +1,4 @@
-import { OnInit } from '@angular/core';
+import { OnInit, Directive } from '@angular/core';
 
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
@@ -6,6 +6,7 @@ import { PageBaseComponent } from 'src/app/disposition/page-base/page-base.compo
 import { BarreTitre, IBarreDef } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { CLFService } from './c-l-f.service';
 
+@Directive()
 export abstract class CLFTitreComponent extends PageBaseComponent implements OnInit {
     estClient: 'client';
 

@@ -1,5 +1,5 @@
 import { ComptePages, CompteRoutes } from '../compte-pages';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Directive } from '@angular/core';
 import { PageBaseComponent } from 'src/app/disposition/page-base/page-base.component';
 import { PageDef } from 'src/app/commun/page-def';
 import { BarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
@@ -20,6 +20,7 @@ import { KfTexte } from 'src/app/commun/kf-composants/kf-elements/kf-texte/kf-te
 import { DefTexte } from 'src/app/disposition/fabrique/fabrique-texte';
 import { ApiResult } from 'src/app/api/api-results/api-result';
 
+@Directive()
 export abstract class ConfirmeEmailBaseComponent extends PageBaseComponent implements OnInit {
 
 

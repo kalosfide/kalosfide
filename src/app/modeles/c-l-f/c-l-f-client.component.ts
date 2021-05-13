@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Directive } from '@angular/core';
 
 import { ActivatedRoute, Data } from '@angular/router';
 import { Site } from '../site/site';
@@ -16,6 +16,7 @@ import { CLFUtile } from './c-l-f-utile';
 import { ModeAction } from './condition-action';
 
 /** page titre */
+@Directive()
 export abstract class CLFClientComponent extends PageBaseComponent implements OnInit, OnDestroy {
     site: Site;
 

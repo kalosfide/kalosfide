@@ -1,4 +1,4 @@
-import { OnInit, OnDestroy } from '@angular/core';
+import { OnInit, OnDestroy, Directive } from '@angular/core';
 
 import { Observable } from 'rxjs';
 
@@ -18,6 +18,7 @@ import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien
 import { GroupeBoutonsMessages, IFormulaireComponent } from '../fabrique/fabrique-formulaire';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 
+@Directive()
 export abstract class FormulaireComponent extends FormulaireBaseComponent implements IFormulaireComponent, OnInit, OnDestroy {
 
     abstract créeEdition: () => KfGroupe;

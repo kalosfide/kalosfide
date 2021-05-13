@@ -1,4 +1,4 @@
-import { OnInit, OnDestroy } from '@angular/core';
+import { OnInit, OnDestroy, Directive } from '@angular/core';
 
 import { ActivatedRoute } from '@angular/router';
 import { ClientCLFService } from '../client-c-l-f.service';
@@ -12,6 +12,7 @@ import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquet
 import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
 
 
+@Directive()
 export abstract class CommandeComponent extends CLFDocComponent implements OnInit, OnDestroy {
 
     constructor(

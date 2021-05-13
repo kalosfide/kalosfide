@@ -1,4 +1,4 @@
-import { OnInit, OnDestroy } from '@angular/core';
+import { OnInit, OnDestroy, Directive } from '@angular/core';
 
 import { ActivatedRoute, Data } from '@angular/router';
 import { IKfVueTableColonneDef } from 'src/app/commun/kf-composants/kf-vue-table/i-kf-vue-table-colonne-def';
@@ -39,6 +39,7 @@ import { Role } from '../role/role';
 import { CLFDocs } from './c-l-f-docs';
 import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
 
+@Directive()
 export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> implements OnInit, OnDestroy, IDataComponent {
 
     /**

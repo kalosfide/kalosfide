@@ -27,6 +27,7 @@ export interface IFormulaireAEtapes {
     fixeIndex: (index: number) => void;
 }
 
+// TODO: Add Angular decorator.
 export abstract class FormulaireAEtapesComponent extends FormulaireBaseComponent implements IFormulaireAEtapes, OnDestroy {
     titrePage: KfGroupe;
 

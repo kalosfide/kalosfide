@@ -9,6 +9,7 @@ import { BarreTitre } from '../fabrique/fabrique-titre-page/fabrique-titre-page'
 import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 import { Fabrique } from '../fabrique/fabrique';
 
+// TODO: Add Angular decorator.
 export abstract class PageBaseComponent implements OnDestroy {
 
     subscriptions: Subscription[] = [];

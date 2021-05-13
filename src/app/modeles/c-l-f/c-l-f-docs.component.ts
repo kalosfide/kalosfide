@@ -1,4 +1,4 @@
-import { OnInit, OnDestroy } from '@angular/core';
+import { OnInit, OnDestroy, Directive } from '@angular/core';
 
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { Site } from 'src/app/modeles/site/site';
@@ -24,6 +24,7 @@ import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
  * Page de choix du document terminé à afficher
  * Table des documents terminés avec lien vers document/type/:key.
  */
+@Directive()
 export abstract class CLFDocsComponent extends PageTableComponent<CLFDoc> implements OnInit, OnDestroy {
 
     site: Site;

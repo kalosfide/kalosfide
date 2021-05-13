@@ -13,7 +13,7 @@ import { Site } from 'src/app/modeles/site/site';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { KfTexteDef } from '../kf-composants/kf-partages/kf-texte-def';
 import { KfSuperGroupe } from '../kf-composants/kf-groupe/kf-super-groupe';
-import { OnInit } from '@angular/core';
+import { OnInit, Directive } from '@angular/core';
 import { KfLien } from '../kf-composants/kf-elements/kf-lien/kf-lien';
 import { KfBouton } from '../kf-composants/kf-elements/kf-bouton/kf-bouton';
 import { BarreTitre, IBarreDef } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
@@ -28,6 +28,7 @@ export class ActionAles {
     actionSiOk?: () => void;
 }
 
+@Directive()
 export abstract class DataKeyALESComponent<T extends IDataKey> extends FormulaireComponent implements OnInit, IDataComponent {
 
     abstract site: Site;

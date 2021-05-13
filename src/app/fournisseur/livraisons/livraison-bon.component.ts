@@ -1,4 +1,4 @@
-import { OnInit, OnDestroy } from '@angular/core';
+import { OnInit, OnDestroy, Directive } from '@angular/core';
 
 import { ActivatedRoute } from '@angular/router';
 import { FournisseurCLFService } from '../fournisseur-c-l-f-.service';
@@ -11,6 +11,7 @@ import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-t
 import { CLFDocComponent } from 'src/app/modeles/c-l-f/c-l-f-doc.component';
 import { CLFLigne } from 'src/app/modeles/c-l-f/c-l-f-ligne';
 
+@Directive()
 export abstract class LivraisonBonComponent extends CLFDocComponent implements OnInit, OnDestroy {
 
     get titre(): string {

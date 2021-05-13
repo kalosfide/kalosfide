@@ -1,4 +1,4 @@
-import { OnInit, OnDestroy } from '@angular/core';
+import { OnInit, OnDestroy, Directive } from '@angular/core';
 
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { Site } from 'src/app/modeles/site/site';
@@ -38,6 +38,7 @@ import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
  * Table des bons du client avec leur état de préparation, lien vers ./client/:key/doc/:no et case de sélection.
  * Bouton: Vérifier.
  */
+@Directive()
 export abstract class CLFBonsComponent extends PageTableComponent<CLFDoc> implements OnInit, OnDestroy {
 
     site: Site;

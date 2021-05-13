@@ -1,4 +1,4 @@
-import { OnDestroy, OnInit, AfterViewInit } from '@angular/core';
+import { OnDestroy, OnInit, AfterViewInit, Directive } from '@angular/core';
 
 import { ActivatedRoute, Data, RouterStateSnapshot } from '@angular/router';
 import { Site } from '../site/site';
@@ -27,6 +27,7 @@ import { IDataComponent } from 'src/app/commun/data-par-key/i-data-component';
 import { DataService } from 'src/app/services/data.service';
 import { CLFDoc } from './c-l-f-doc';
 
+@Directive()
 export abstract class CLFLigneAjouteComponent extends PageBaseComponent implements OnInit, OnDestroy, IDataComponent {
 
     site: Site;

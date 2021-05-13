@@ -19,6 +19,7 @@ import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-compos
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
 
+// TODO: Add Angular decorator.
 export abstract class RacineComponent implements OnDestroy {
 
     subscriptions: Subscription[] = [];

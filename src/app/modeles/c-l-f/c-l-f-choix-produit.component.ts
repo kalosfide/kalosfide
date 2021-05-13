@@ -1,4 +1,4 @@
-import { OnInit, OnDestroy } from '@angular/core';
+import { OnInit, OnDestroy, Directive } from '@angular/core';
 import { ActivatedRoute, Data } from '@angular/router';
 
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
@@ -14,6 +14,7 @@ import { RouteurService } from 'src/app/services/routeur.service';
 import { CLFDoc } from './c-l-f-doc';
 import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
 
+@Directive()
 export abstract class CLFChoixProduitComponent extends PageTableComponent<CLFLigne> implements OnInit, OnDestroy {
 
     clfDoc: CLFDoc;
