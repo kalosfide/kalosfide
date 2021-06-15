@@ -56,14 +56,8 @@
     <ng-container *ngIf="!groupe.divTable; else divTable">
         <ng-container *ngIf="!groupe.divLigne; else divLigne">
             <ng-container *ngFor="let contenu of groupe.contenus">
-                <ng-container *ngIf="contenu.div; else divTemplate">
-                    <app-kf-div *ngIf="!contenu.nePasAfficher" [div]="contenu.div"></app-kf-div>
-                </ng-container>
-                <ng-template #divTemplate>
-                    <app-kf-composant [attr.nom]="contenu.nom" [composant]="contenu">
+                    <app-kf-composant *ngIf="!contenu.nePasAfficher" [attr.nom]="contenu.nom" [composant]="contenu">
                     </app-kf-composant>
-                </ng-template>
-
             </ng-container>
         </ng-container>
     </ng-container>
@@ -96,7 +90,7 @@
         </ng-container>
         <ng-template #composantsTemplate>
             <ng-container *ngFor="let composant of colonne.composants">
-                <app-kf-composant [attr.nom]="composant.nom" [composant]="composant">
+                <app-kf-composant *ngIf="!composant.nePasAfficher" [attr.nom]="composant.nom" [composant]="composant">
                 </app-kf-composant>
             </ng-container>
         </ng-template>

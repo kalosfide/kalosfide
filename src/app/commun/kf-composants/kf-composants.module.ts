@@ -35,11 +35,12 @@ import { KfBaliseComponent } from './kf-partages/kf-balise/kf-balise.component';
 import { KfNavbarComponent } from './kf-navbar/kf-navbar.component';
 import { KfUlComponent } from './kf-ul/kf-ul.component';
 import { KfBBtnGroupComponent } from './kf-b-btn-group/kf-b-btn-group.component';
-import { KfBBtnToolbarComponent } from './kf-b-btn-toolbar/kf-b-btn-toolbar.component';
 import { KfTableComponent } from './kf-table/kf-table.component';
 import { KfNgbModalComponent } from './kf-ngb-modal/kf-ngb-modal.component';
 import { KfNgbModalService } from './kf-ngb-modal/kf-ngb-modal.service';
 import { KfDivComponent } from './kf-partages/kf-div/kf-div.component';
+import { KfBootstrapSpinnerComponent } from './kf-elements/kf-bootstrap-spinner/kf-bootstrap-spinner.component';
+import { KfSurvolComponent } from './kf-partages/kf-survol/kf-survol.component';
 
 @NgModule({
   imports: [
@@ -80,10 +81,11 @@ import { KfDivComponent } from './kf-partages/kf-div/kf-div.component';
       KfNgbDropdownComponent,
       KfNavbarComponent,
       KfBBtnGroupComponent,
-      KfBBtnToolbarComponent,
       KfTableComponent,
       KfDivComponent,
 
+      KfBootstrapSpinnerComponent,
+      KfSurvolComponent,
       KfNgbModalComponent,
 
       KfUlComponent,
@@ -101,6 +103,7 @@ import { KfDivComponent } from './kf-partages/kf-div/kf-div.component';
       KfBoutonComponent,
       KfEtiquetteComponent,
       KfLienComponent,
+      KfUlComponent,
   ]
 })
 export class KfComposantsModule {

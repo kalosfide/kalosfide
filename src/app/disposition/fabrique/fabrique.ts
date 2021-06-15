@@ -21,11 +21,11 @@ import { FabriqueEtatSite } from './fabrique-etat-site';
 import { FabriqueFormulaire } from './fabrique-formulaire';
 import { FabriqueInput, FabriqueListeDéroulante } from './fabrique-input';
 import { IKfNgbModalDef, KfNgbModal } from 'src/app/commun/kf-composants/kf-ngb-modal/kf-ngb-modal';
-import { KfTypeDEvenement } from 'src/app/commun/kf-composants/kf-partages/kf-evenements';
+import { KfTypeDEvenement, KfTypeDHTMLEvents } from 'src/app/commun/kf-composants/kf-partages/kf-evenements';
 import { KfEntrée } from 'src/app/commun/kf-composants/kf-elements/kf-entree/kf-entree';
 import { KfTypeContenuPhrasé } from 'src/app/commun/kf-composants/kf-partages/kf-contenu-phrase/kf-contenu-phrase';
 import { ApiResultErreur } from 'src/app/api/api-results/api-result-erreur';
-import { FANomIcone } from 'src/app/commun/kf-composants/kf-partages/kf-icone-def';
+import { IKfIconeDef } from 'src/app/commun/kf-composants/kf-partages/kf-icone-def';
 
 export interface IFormulaireGroupeDesBoutons {
     avantBoutons?: KfComposant[];
@@ -99,6 +99,7 @@ export class FabriqueClasse {
     } {
         return {
             formulaire: {
+                classeDiv: 'mb-3',
                 label: 'labelFlottant' // { breakpoint: 'sm', width: 2 }
             },
             dansVueTable: { label: 'nePasAfficherLabel' },
@@ -115,9 +116,9 @@ export class FabriqueClasse {
      */
     caseACocherAspect(caseACocher: KfCaseACocher, tristate?: boolean): KfCaseACocher {
         caseACocher.ajouteClasse({ nom: 'disabled', active: () => caseACocher.inactif });
-        const nomIconeCochée = this.icone.nomIcone.case_cochée;
-        const nomIconeVide = this.icone.nomIcone.case_vide;
-        const icone = this.icone.icone({ nom: nomIconeVide, regular: true });
+        const nomIconeCochée = this.icone.def.case_cochée;
+        const nomIconeVide = this.icone.def.case_vide;
+        const icone = this.icone.icone(nomIconeVide);
         let valeurSiIndéfiniEtClic: boolean;
         if (tristate) {
             caseACocher.ajouteClasse({
@@ -127,11 +128,8 @@ export class FabriqueClasse {
             valeurSiIndéfiniEtClic = true;
         }
         const changeAspect: () => void = () => {
-                icone.nomIcone = {
-                    nom: caseACocher.valeur === true ? nomIconeCochée : nomIconeVide,
-                    regular: true
-                };
-            };
+            icone.iconeDef = caseACocher.valeur === true ? nomIconeCochée : nomIconeVide;
+        };
         caseACocher.fixeAspect(icone, changeAspect, valeurSiIndéfiniEtClic);
         return caseACocher;
     }
@@ -277,7 +275,7 @@ export class FabriqueClasse {
         this.ajouteDefTexte(étiquette, defContenu as IDefTexte);
     }
 
-    confirmeModal(titre: string, contenus: string | KfComposant[], annulation?: string): KfNgbModal {
+    confirmeModal(titre: string, contenus: string | KfComposant[], focus?: 'surCroix' | 'surAnnuler' | 'surOk'): KfNgbModal {
         const corps = new KfGroupe('');
         let etiquette: KfEtiquette;
         if (typeof (contenus) === 'string') {
@@ -287,23 +285,35 @@ export class FabriqueClasse {
         } else {
             contenus.forEach(c => corps.ajoute(c));
         }
-        if (annulation) {
-            etiquette = new KfEtiquette('', annulation);
-            etiquette.baliseHtml = KfTypeDeBaliseHTML.p;
-            corps.ajoute(etiquette);
+        const boutonAvant = this.bouton.bouton({ nom: 'Annuler', contenu: { texte: 'Annuler' }, bootstrap: { type: 'secondary' } });
+        boutonAvant.gereHtml.ajouteEvenementASuivre(KfTypeDHTMLEvents.click);
+        const boutonOk = this.bouton.bouton({ nom: 'Ok', contenu: { texte: 'Confirmer' }, bootstrap: { type: 'primary' } });
+        boutonOk.gereHtml.ajouteEvenementASuivre(KfTypeDHTMLEvents.click);
+        let autoFocus: 'sans' | KfComposant;
+        switch (focus) {
+            case 'surCroix':
+                break;
+            case 'surAnnuler':
+                autoFocus = boutonAvant;
+                break;
+            case 'surOk':
+                autoFocus = boutonOk;
+                break;
+            default:
+                autoFocus = 'sans';
+                break;
         }
-        const boutonAvant = this.bouton.bouton({ nom: 'Annuler', contenu: { texte: 'Annuler' }, bootstrapType: 'secondary' });
-        const boutonOk = this.bouton.bouton({ nom: 'Ok', contenu: { texte: 'Confirmer' }, bootstrapType: 'primary' });
         const def: IKfNgbModalDef = {
             titre,
             corps,
             boutonOk,
-            boutonsDontOk: [boutonAvant, boutonOk]
+            boutonsDontOk: [boutonAvant, boutonOk],
+            autoFocus
         };
         const modal = new KfNgbModal(def);
         modal.avecFond = 'static';
         modal.ferméSiEchap = true;
-        modal.windowClass = 'modal-confirme';
+        modal.ajouteClasseTitre('h5');
         return modal;
     }
 
@@ -313,7 +323,7 @@ export class FabriqueClasse {
         corps.divTable.ajouteClasse('container-fluid');
         const ligne = corps.divTable.ajoute();
         ligne.ajouteClasse('row');
-        const icone = this.pIcone.icone(this.pIcone.nomIcone.danger);
+        const icone = this.pIcone.icone(this.pIcone.def.danger);
         icone.taille(5);
         let colonne = ligne.ajoute([icone]);
         colonne.ajouteClasse('col-md-4');
@@ -324,16 +334,18 @@ export class FabriqueClasse {
         });
         colonne = ligne.ajoute(messages);
         colonne.ajouteClasse('col');
+        const boutonOk = this.bouton.bouton({ nom: 'Ok', contenu: { texte: 'Fermer' }, bootstrap: { type: 'primary' } });
+        boutonOk.gereHtml.ajouteEvenementASuivre(KfTypeDHTMLEvents.click);
         const def: IKfNgbModalDef = {
             titre: apiErreur.titre,
             corps,
-            boutonOk: this.bouton.bouton({ nom: 'Ok', contenu: { texte: 'Fermer' }, bootstrapType: 'primary' }),
+            boutonOk,
+            autoFocus: boutonOk
         };
         const modal = new KfNgbModal(def);
         modal.ferméSiEchap = true;
         modal.windowClass = 'modal-info';
         modal.ajouteClasseEnTête(this.couleur.classeCouleurFond(Couleur.red), this.couleur.classeCouleur(Couleur.white));
-        modal.ajouteClasseCroix('kf-invisible');
         return modal;
     }
 
@@ -343,7 +355,7 @@ export class FabriqueClasse {
         const def: IKfNgbModalDef = {
             titre,
             corps,
-            boutonOk: this.bouton.bouton({ nom: 'Ok', contenu: { texte: 'Fermer' }, bootstrapType: 'primary' }),
+            boutonOk: this.bouton.bouton({ nom: 'Ok', contenu: { texte: 'Fermer' }, bootstrap: { type: 'primary' } }),
         };
         const modal = new KfNgbModal(def);
         modal.ferméSiEchap = true;

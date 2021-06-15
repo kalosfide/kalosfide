@@ -32,11 +32,13 @@ export class AppSitePages {
         urlSegment: 'contact',
         lien: 'Contact',
         title: 'Contact',
+        titre: 'Contact',
     };
     static apropos: PageDef = {
         urlSegment: 'apropos',
         lien: 'A propos',
         title: 'A propos',
+        titre: 'A propos',
     };
 }
 

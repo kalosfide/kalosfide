@@ -122,7 +122,8 @@ const routes: Routes = [
                         path: LivraisonPages.bon.urlSegment + '/:' + CLFPages.nomParamNoDoc,
                         data: {
                             pageDef: LivraisonPages.bon,
-                            pageDefDescendantParDéfaut: LivraisonPages.lignes
+                            pageDefDescendantParDéfaut: LivraisonPages.lignes,
+                            cheminDeKey: ['clfDoc', 'no']
                         },
                         canActivateChild: [
                             // Si le stock n'existe pas ou si keyClient ou no a changé, charge et stocke le cflDocs
@@ -187,7 +188,10 @@ const routes: Routes = [
                             },
                             {
                                 path: LivraisonPages.choixProduit.urlSegment,
-                                data: { pageDef: LivraisonPages.choixProduit },
+                                data: {
+                                    pageDef: LivraisonPages.choixProduit,
+                                    cheminDeKey: undefined
+                                },
                                 component: LivraisonChoixProduitComponent,
                                 canActivate: [
                                     LivraisonBonVirtuelGardeService

@@ -34,7 +34,7 @@ export abstract class KfAvecLabel extends KfComposant {
     }
 
     /**
-     * gére la classe css de la div englobant le template
+     * Gére la classe css de la div englobant le template
      */
      get géreClasseDiv(): KfGéreCss {
         if (!this.pGéreClasseDiv) {

@@ -49,28 +49,12 @@ export abstract class DataKeyService<T extends IDataKey> extends DataService {
         this.pModeTableIO.changeValeur(mode);
     }
 
-    basculeModeTable(...modes: ModeTable[]) {
-        const nb = modes.length;
-        if (nb > 0) {
-            const actuel = modes.indexOf(this.pModeTableIO.valeur);
-            let nouveau = actuel + 1;
-            if (nouveau === nb) {
-                nouveau = 0;
-            }
-            this.pModeTableIO.changeValeur(modes[nouveau]);
-        }
-    }
-
     get modeTable(): ModeTable {
         return this.pModeTableIO.valeur;
     }
 
     get modeTableIO(): KfInitialObservable<ModeTable> {
         return this.pModeTableIO;
-    }
-
-    protected _créeConditionsTable() {
-        this.pUtile.observeModeTable(this.pModeTableIO);
     }
 
     protected créeParams(key: any): { [param: string]: string } {

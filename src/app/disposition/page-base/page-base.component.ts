@@ -32,7 +32,7 @@ export abstract class PageBaseComponent implements OnDestroy {
         return this.pageDef.titre;
     }
 
-    titrePage: KfGroupe;
+    titrePage: KfSuperGroupe;
     barre: BarreTitre;
 
     niveauTitre: number;

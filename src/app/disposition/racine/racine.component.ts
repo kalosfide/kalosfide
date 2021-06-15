@@ -27,8 +27,7 @@ export abstract class RacineComponent implements OnDestroy {
     animeAttente: KfGroupe;
 
     menu: Menu;
-    breadcrumb: KfGroupe;
-    breadcrumbUl: KfUlComposant;
+    breadcrumb: KfUlComposant;
 
     constructor(
         protected titleService: Title,
@@ -37,10 +36,10 @@ export abstract class RacineComponent implements OnDestroy {
         protected navigation: NavigationService,
         protected alerteService: AlerteService,
     ) {
-        this.breadcrumb = new KfGroupe('breadcrumb');
+        this.breadcrumb = new KfUlComposant('breadcrumb');
         this.breadcrumb.ajouteClasse('breadcrumb');
-        this.breadcrumbUl = new KfUlComposant('');
-        this.breadcrumb.ajoute(this.breadcrumbUl);
+        this.breadcrumb.géreCssNav.fixeStyleDef('--bs-breadcrumb-divider', `'-'`);
+        this.breadcrumb.fixeAttributNav('aria-label', 'breadcrumb')
     }
 
     abstract créeMenu(): Menu;
@@ -82,18 +81,27 @@ export abstract class RacineComponent implements OnDestroy {
         this.navigation.navigation.forEach((segment: NavigationSegment) => {
             titles.push(segment.title);
             if (segment.path === '') {
-                const étiquette = new KfEtiquette('', segment.titre);
+                const étiquette = new KfEtiquette(segment.pageDef.urlSegment, segment.titre);
                 étiquette.baliseHtml = KfTypeDeBaliseHTML.span;
                 breadcrumbs.push(étiquette);
             } else {
                 url = `${url}/${segment.path}`;
-                const lien = new KfLien('', url, segment.titre);
+                const lien = new KfLien(segment.pageDef.urlSegment, url, segment.titre);
                 breadcrumbs.push(lien);
             }
         });
         const title = titles.join(' - ');
         this.titleService.setTitle(title);
-        this.breadcrumbUl.contenus = breadcrumbs;
+        this.breadcrumb.contenus = breadcrumbs;
+        const lis = this.breadcrumb.lis
+        lis.forEach(li => {
+            li.ajouteClasse('breadcrumb-item');
+//            li.item.ajouteClasse('breadcrumb-item');
+        });
+        const dernièreMiette = lis[lis.length - 1]
+        dernièreMiette.ajouteClasse('active');
+//        dernièreMiette.item.ajouteClasse('active');
+        dernièreMiette.gereHtml.fixeAttribut('aria-current', 'page');
     }
 
     ngOnDestroy() {

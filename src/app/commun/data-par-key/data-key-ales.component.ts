@@ -62,7 +62,9 @@ export abstract class DataKeyALESComponent<T extends IDataKey> extends Formulair
             pageDef: this.pageDef,
         };
         if (this.lienIndex) {
-            def.boutonsPourBtnGroup = [[this.lienIndex]];
+            const groupe = Fabrique.titrePage.bbtnGroup('boutons');
+            groupe.ajoute(this.lienIndex);
+            def.groupesDeBoutons = [groupe];
         }
         if (this.contenuAidePage) {
             def.contenuAidePage = this.contenuAidePage();
@@ -129,12 +131,12 @@ export abstract class DataKeyALESComponent<T extends IDataKey> extends Formulair
                         };
                     }
                 } else {
-                        this.créeBoutonsDeFormulaire = (formulaire: KfGroupe) => {
-                            this.boutonSoumettre = Fabrique.bouton.soumettre(formulaire, this.action.texteSoumettre);
-                            return [
-                                this.boutonSoumettre
-                            ];
-                        };
+                    this.créeBoutonsDeFormulaire = (formulaire: KfGroupe) => {
+                        this.boutonSoumettre = Fabrique.bouton.soumettre(formulaire, this.action.texteSoumettre);
+                        return [
+                            this.boutonSoumettre
+                        ];
+                    };
                 }
                 this.superGroupe = Fabrique.formulaire.superGroupe(this);
                 if (this.chargeData) {

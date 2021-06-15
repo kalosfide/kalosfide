@@ -10,6 +10,7 @@ import { StockageService } from './stockage/stockage.service';
 import { Stockage } from './stockage/stockage';
 import { KeyUidRno } from '../commun/data-par-key/key-uid-rno/key-uid-rno';
 import { NavigationSegment } from './navigation-segment';
+import { ConditionEtatSite } from '../commun/data-par-key/condition-etat-site';
 
 /**
  * Rassemble les membres statiques à ajouter à la propriété data d'une Route pour définir
@@ -53,6 +54,8 @@ export class NavigationService implements OnDestroy {
 
     private keySiteSubject = new Subject<Site>();
 
+    private pConditionSite: ConditionEtatSite;
+
     private actionsAprèsNavigation: (() => void)[] = [];
     private actionsAprèsNavigationCommencées: boolean;
 
@@ -80,6 +83,7 @@ export class NavigationService implements OnDestroy {
             // tous les stockages dépendant du site sont vidés quand le site change
             déclencheVidage: this.keySiteSubject.asObservable()
         });
+        this.pConditionSite = new ConditionEtatSite(this);
         this.initialise();
     }
 
@@ -172,6 +176,7 @@ export class NavigationService implements OnDestroy {
             let routeData: IRouteData = snapshot.data;
             const pageDef = routeData.pageDef;
             const segment: NavigationSegment = {
+                pageDef,
                 title: pageDef.title,
                 titre: pageDef.titre,
                 path: paths.join('/')
@@ -195,7 +200,7 @@ export class NavigationService implements OnDestroy {
                     let objet: any = routeData;
                     for (const propriété of (routeData.cheminDeKey as string[])) {
                         objet = objet[propriété];
-                        if (!objet) {
+                        if (objet === undefined) {
                             throw new Error(`Propriété ${propriété} de cheminDeKey manquante.`);
                         }
                     }
@@ -219,6 +224,8 @@ export class NavigationService implements OnDestroy {
             dernierSnapshot = snapshot;
             snapshot = snapshot.firstChild;
         }
+        console.log(segments);
+        segments[segments.length - 1].path = '';
         return segments;
     }
 
@@ -256,6 +263,10 @@ export class NavigationService implements OnDestroy {
 
     public keySiteObs(): Observable<KeyUidRno> {
         return this.keySiteSubject.asObservable();
+    }
+
+    get conditionSite(): ConditionEtatSite {
+        return this.pConditionSite;
     }
 
     /**

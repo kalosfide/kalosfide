@@ -1,8 +1,16 @@
-<ul #htmlElement [ngClass]="ul.classe" [ngStyle]="ul.style">
-    <ng-container *ngFor="let contenu of ul.contenusAAfficher">
-        <li [ngClass]="ul.classeLi" [ngStyle]="ul.styleLi">
-            <app-kf-composant [attr.nom]="contenu.nom" [composant]="contenu">
-            </app-kf-composant>
-        </li>
-    </ng-container>
-</ul>
+<ng-template #ulTemplate>
+    <ul #htmlElement [ngClass]="ul.classe" [ngStyle]="ul.style">
+        <ng-container *ngFor="let li of ul.lis">
+            <li *ngIf="!li.item.nePasAfficher" [ngClass]="li.classe" [ngStyle]="li.style">
+                <app-kf-composant [attr.nom]="li.item.nom" [composant]="li.item">
+                </app-kf-composant>
+            </li>
+        </ng-container>
+    </ul>
+</ng-template>
+
+<ng-container *ngIf="ul.dansNav; else ulTemplate">
+    <nav #navElement [ngClass]="ul.classeNav" [ngStyle]="ul.styleNav">
+        <ng-container *ngTemplateOutlet="ulTemplate"></ng-container>
+    </nav>
+</ng-container>

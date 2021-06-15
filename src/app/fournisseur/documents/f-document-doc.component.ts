@@ -27,12 +27,13 @@ export abstract class FDocumentDocComponent extends CLFDocComponent implements O
     }
 
     créeBarreTitre = (): BarreTitre => {
+        const groupe = Fabrique.titrePage.bbtnGroup('boutons');
+        groupe.ajoute(this.utile.lien.retourDeDocument(this.clfDoc));
         const barre = Fabrique.titrePage.barreTitre({
             pageDef: this.pageDef,
             contenuAidePage: this.contenuAidePage(),
-            boutonsPourBtnGroup: [[this.utile.lien.retourDeDocument(this.clfDoc)]]
+            groupesDeBoutons: [groupe]
         });
-
         return barre;
     }
 

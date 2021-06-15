@@ -21,11 +21,5 @@ export class ConditionTable extends Conditions<ModeTable> {
     get aperçu(): KfInitialObservable<boolean> {
         return this.conditionIO(ModeTable.aperçu);
     }
-    get pasEdition(): KfInitialObservable<boolean> {
-        return this.pas_conditionIO(ModeTable.edite);
-    }
-    get pasAperçu(): KfInitialObservable<boolean> {
-        return this.pas_conditionIO(ModeTable.aperçu);
-    }
 
 }

@@ -71,7 +71,7 @@ export abstract class CLFDocsComponent extends PageTableComponent<CLFDoc> implem
         };
         if (this.identifiant.estFournisseur(this.site)) {
             vueTableDef.triInitial = { colonne: this.utile.nom.client, direction: 'asc' };
-            vueTableDef.pagination = Fabrique.vueTable.pagination<CLFDoc>();
+            vueTableDef.pagination = Fabrique.vueTable.pagination<CLFDoc>('bon');
         }
         const etatTable = Fabrique.vueTable.etatTable({
             nePasAfficherSiPasVide: true,

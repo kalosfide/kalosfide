@@ -1,0 +1,10 @@
+<ng-container *ngIf="spinner.fond; else normalTemplate">
+    <div #fondHtmlElement [ngClass]="spinner.fond.classe" [ngStyle]="spinner.fond.style" [id]="spinner.fond.nom">
+        <ng-container *ngTemplateOutlet="normalTemplate"></ng-container>
+    </div>
+</ng-container>
+<ng-template #normalTemplate>
+    <div #htmlElement [class]="spinner.classeSpinner" [ngClass]="spinner.classe" [ngStyle]="spinner.style" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</ng-template>

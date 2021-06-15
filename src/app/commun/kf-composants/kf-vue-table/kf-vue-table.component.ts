@@ -24,7 +24,7 @@ export class KfVueTableComponent extends KfComposantComponent implements OnInit,
     }
 
     get avecPagination(): boolean {
-        return !!this.vueTable.pagination && !this.vueTable.pagination.btnToolbar.nePasAfficher;
+        return !!this.vueTable.pagination && !this.vueTable.pagination.groupe.nePasAfficher;
     }
 
     ngAfterViewInit() {

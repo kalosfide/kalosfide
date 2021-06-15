@@ -4,7 +4,6 @@ import { KfBouton } from '../kf-elements/kf-bouton/kf-bouton';
 import { KfCaseACocher } from '../kf-elements/kf-case-a-cocher/kf-case-a-cocher';
 import { KfLien } from '../kf-elements/kf-lien/kf-lien';
 import { KfEtiquette } from '../kf-elements/kf-etiquette/kf-etiquette';
-import { KfEvenement, KfTypeDEvenement } from '../kf-partages/kf-evenements';
 
 export type KfBBtnGroupElement = KfBouton | KfCaseACocher | KfLien | KfEtiquette;
 
@@ -34,22 +33,7 @@ export class KfBBtnGroup extends KfComposant {
             throw new Error(`On ne peut ajouter que des composants de type ${types.join(' ou ')} à ${this.nom}`);
         }
         */
-        if (composant.type === KfTypeDeComposant.bouton) {
-            (composant as KfBouton).btnGroupe = this;
-        }
         this.noeud.Ajoute(composant.noeud);
-    }
-
-    estBouton(composant: KfComposant): boolean {
-        return composant.type === KfTypeDeComposant.bouton;
-    }
-
-    estLien(composant: KfComposant): boolean {
-        return composant.type === KfTypeDeComposant.lien;
-    }
-
-    estEtiquette(composant: KfComposant): boolean {
-        return composant.type === KfTypeDeComposant.etiquette;
     }
 
     taille(taille: 'lg' | 'sm') {
@@ -77,5 +61,33 @@ export class KfBBtnGroup extends KfComposant {
         return classe;
     }
 
-    initialiseHtmlContenus() {}
+    get estNonVide(): boolean {
+        const premierAAfficher = this.contenus.find(c => !c.nePasAfficher)
+        return premierAAfficher !== undefined;
+    }
+
+    initialiseHtmlContenus(divElement: HTMLElement) {
+        for (let index = 0; index < this.contenus.length; index++) {
+            const composant = this.contenus[index];
+            let htmlElement = divElement.children[index] as HTMLElement;
+            switch (composant.type) {
+                case KfTypeDeComposant.bouton:
+                    const bouton = composant as KfBouton;
+                    if (bouton.ngbPopover) {
+                        htmlElement = htmlElement.children[0] as HTMLElement;
+                    }
+                    break;
+                case KfTypeDeComposant.caseacocher:
+                    const caseACocher = composant as KfCaseACocher;
+                    if (caseACocher.classeEntree) {
+                        htmlElement = htmlElement.children[0] as HTMLElement;
+                    }
+                    break;
+                default:
+                    break;
+
+            }
+            composant.initialiseHtml(htmlElement, null);
+        }
+    }
 }

@@ -4,6 +4,16 @@
     </label>
 </ng-template>
 
+<ng-template #sousComposantTemplate let-composant>
+    <ng-container [ngSwitch]="composant.type">
+        <ng-container *ngSwitchCase="type.etiquette">
+            <span [ngClass]="composant.classe" [ngStyle]="composant.style">
+                <app-kf-contenu-phrase [contenuPhrase]="composant.contenuPhrase"></app-kf-contenu-phrase>
+            </span>
+        </ng-container>
+    </ng-container>
+</ng-template>
+
 <ng-template #infoTemplate>
     <app-kf-etiquette *ngIf="liste.texteAide" [composant]="liste.texteAide"></app-kf-etiquette>
     <div *ngIf="liste.avecInvalidFeedback" class="invalid-feedback">
@@ -32,8 +42,8 @@
     <ng-template #entreeAvecDivTemplate>
         <div [ngClass]="liste.classeEntree">
             <ng-container *ngTemplateOutlet="entreeTemplate"></ng-container>
-            <ng-container *ngIf="liste.iconeSurvol">
-                <app-kf-icone [composant]="liste.iconeSurvol"></app-kf-icone>
+            <ng-container *ngIf="liste.survol">
+                <app-kf-survol [composant]="liste.survol"></app-kf-survol>
             </ng-container>
         </div>
     </ng-template>
@@ -41,16 +51,18 @@
 
 <ng-template #entreeTemplate>
 
-    <div *ngIf="liste.composantAvant" [ngClass]="liste.classeComposantAvant">
-        <app-kf-composant [composant]="liste.composantAvant"></app-kf-composant>
-    </div>
+    <ng-container *ngIf="liste.composantAvant">
+        <ng-container *ngTemplateOutlet="sousComposantTemplate; context: { $implicit: liste.composantAvant }">
+        </ng-container>
+    </ng-container>
+
     <ng-container *ngIf="liste.valeurObjet; then valeurObjetTemplate; else pasValeurObjetTemplate"></ng-container>
     <ng-container *ngTemplateOutlet="infoTemplate"></ng-container>
 
     <!-- utilise ngValue -->
     <ng-template #valeurObjetTemplate>
 
-        <select #selectElement [name]="liste.nom" [compareWith]="liste.compareOptions"
+        <select #selectElement [name]="liste.nom" [compareWith]="liste.compareOptions" [attr.disabled]="liste.inactif"
             [formControl]="liste.formControl" [ngClass]="liste.classe" [ngStyle]="liste.style">
 
             <option *ngIf="liste.option0" [ngValue]="undefined" [ngClass]="liste.option0.classe" [ngStyle]="liste.option0.style" selected>

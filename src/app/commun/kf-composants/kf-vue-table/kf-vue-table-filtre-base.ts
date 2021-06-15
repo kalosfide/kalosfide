@@ -1,7 +1,6 @@
-import { KfTypeDEvenement } from '../kf-partages/kf-evenements';
+import { KfComposant } from '../kf-composant/kf-composant';
 import { KfVueTableOutils } from './kf-vue-table-outils';
 import { IKfVueTableOutil } from './kf-vue-table-outil';
-import { KfBBtnToolbarInputGroup } from '../kf-b-btn-toolbar/kf-b-btn-toolbar';
 import { KfVueTableLigne } from './kf-vue-table-ligne';
 
 export abstract class KfVueTableFiltreBase<T> implements IKfVueTableOutil<T> {
@@ -17,7 +16,7 @@ export abstract class KfVueTableFiltreBase<T> implements IKfVueTableOutil<T> {
         return this.pNom;
     }
 
-    abstract get composant(): KfBBtnToolbarInputGroup;
+    abstract get composant(): KfComposant;
 
     get filtreActif(): boolean {
         const valeur = this.composant.gereValeur.valeur;

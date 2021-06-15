@@ -13,7 +13,7 @@ import { PageBaseComponent } from 'src/app/disposition/page-base/page-base.compo
 import { BarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { ClientService } from 'src/app/modeles/client/client.service';
 import { FournisseurClientRoutes, FournisseurClientPages } from './client-pages';
-import { FANomIcone } from 'src/app/commun/kf-composants/kf-partages/kf-icone-def';
+import { IKfIconeDef } from 'src/app/commun/kf-composants/kf-partages/kf-icone-def';
 import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
 import { BootstrapNom } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
 
@@ -34,7 +34,7 @@ export class ClientComponent extends PageBaseComponent implements OnInit, OnDest
         super();
     }
 
-    barrelien(nom: string, pageDef: PageDef, nomIcone: FANomIcone, texte?: string): KfLien {
+    barrelien(nom: string, pageDef: PageDef, iconeDef: IKfIconeDef, texte?: string): KfLien {
         return Fabrique.lien.lienBouton({
             nom,
             urlDef: {
@@ -43,24 +43,22 @@ export class ClientComponent extends PageBaseComponent implements OnInit, OnDest
                 urlSite: this.site.url
             },
             contenu: {
-                nomIcone,
+                iconeDef: iconeDef,
                 texte: texte ? texte : pageDef.lien,
                 positionTexte: 'droite',
             }
         },
-        BootstrapNom.light);
+            BootstrapNom.light);
     }
 
     créeBarreTitre = (): BarreTitre => {
+        const groupe = Fabrique.titrePage.bbtnGroup('boutons');
+        groupe.ajoute(this.service.utile.lien.accueil());
+        groupe.ajoute(this.service.utile.lien.clients());
+        groupe.ajoute(this.service.utile.lien.invitations());
         const barre = Fabrique.titrePage.barreTitre({
             pageDef: this.pageDef,
-            boutonsPourBtnGroup: [
-                [
-                    this.service.utile.lien.accueil(),
-                    this.service.utile.lien.clients(),
-                    this.service.utile.lien.invitations()
-                ]
-            ]
+            groupesDeBoutons: [groupe]
         });
 
         barre.ajoute(Fabrique.titrePage.groupeDefAccès());

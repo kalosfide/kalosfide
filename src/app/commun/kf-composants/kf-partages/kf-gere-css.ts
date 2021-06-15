@@ -6,7 +6,7 @@ import { KfInitialObservable } from './kf-initial-observable';
 
 export class KfGéreCss {
     /**
-     * valeur initiale et Observable définissant si les filtres sont affichés
+     * valeur initiale et Observable définissant si l'objet est affiché.
      */
     private pNePasAfficher: boolean;
     private pSubscriptionAfficher: Subscription;

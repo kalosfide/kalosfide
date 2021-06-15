@@ -27,6 +27,7 @@ export class ConditionAction extends Conditions<ModeAction> {
         this.nom = 'action';
     }
 
+/*
     get aperçu(): KfInitialObservable<boolean> {
         return this.conditionIO(ModeAction.aperçu);
     }
@@ -40,30 +41,17 @@ export class ConditionAction extends Conditions<ModeAction> {
     get pas_aucun(): KfInitialObservable<boolean> {
         return this.pas_conditionIO(ModeAction.aucun);
     }
-
     get doitCréer(): KfInitialObservable<boolean> {
         return this.conditionIO(ModeAction.doitCréer);
     }
     get pas_doitCréer(): KfInitialObservable<boolean> {
         return this.pas_conditionIO(ModeAction.doitCréer);
     }
-
-    get edite(): KfInitialObservable<boolean> {
-        return this.conditionIO(ModeAction.edite);
-    }
     get pas_edite(): KfInitialObservable<boolean> {
         return this.pas_conditionIO(ModeAction.edite);
     }
-
-    get envoi(): KfInitialObservable<boolean> {
-        return this.conditionIO(ModeAction.envoi);
-    }
     get pas_envoi(): KfInitialObservable<boolean> {
         return this.pas_conditionIO(ModeAction.envoi);
-    }
-
-    get envoyé(): KfInitialObservable<boolean> {
-        return this.conditionIO(ModeAction.envoyé);
     }
     get pas_envoyé(): KfInitialObservable<boolean> {
         return this.pas_conditionIO(ModeAction.envoyé);
@@ -74,6 +62,18 @@ export class ConditionAction extends Conditions<ModeAction> {
     }
     get pas_supprime(): KfInitialObservable<boolean> {
         return this.pas_conditionIO(ModeAction.supprime);
+    }
+*/
+    get edite(): KfInitialObservable<boolean> {
+        return this.conditionIO(ModeAction.edite);
+    }
+
+    get envoi(): KfInitialObservable<boolean> {
+        return this.conditionIO(ModeAction.envoi);
+    }
+
+    get envoyé(): KfInitialObservable<boolean> {
+        return this.conditionIO(ModeAction.envoyé);
     }
 
 }

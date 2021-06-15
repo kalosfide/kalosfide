@@ -75,7 +75,7 @@ export class ClientIndexComponent extends KeyUidRnoIndexComponent<Client> implem
                     });
                     return gereCss;
                 },
-                pagination: Fabrique.vueTable.pagination<Client>()
+                pagination: Fabrique.vueTable.pagination<Client>('client')
             },
             etatTable
         };

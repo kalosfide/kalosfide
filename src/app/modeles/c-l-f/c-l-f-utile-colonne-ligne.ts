@@ -176,7 +176,7 @@ export class CLFUtileColonneLigne {
             nom: 'aFixer',
             créeContenu: (ligne: CLFLigne) => ligne.éditeur.kfAFixer,
             enTeteDef: { titreDef: titre },
-            nePasAfficherSi: this.utile.conditionTable.pasEdition
+            afficherSi: this.utile.conditionTable.edition
         };
     }
 
@@ -187,7 +187,7 @@ export class CLFUtileColonneLigne {
             créeContenu,
             compare: Compare.texte(créeContenu),
             enTeteDef: { titreDef: titre },
-            nePasAfficherSi: this.utile.conditionTable.pasEdition
+            afficherSi: this.utile.conditionTable.edition
         };
     }
 
@@ -225,7 +225,7 @@ export class CLFUtileColonneLigne {
                 bouton.inactivitéFnc = () => ligne.client && ligne.parent.crééParLeClient && ligne.annulé;
                 return bouton;
             },
-            nePasAfficherSi: this.utile.conditionTable.pasEdition
+            afficherSi: this.utile.conditionTable.edition
         };
     }
 
@@ -290,7 +290,7 @@ export class CLFUtileColonneLigne {
             },
             créeContenu: (ligne: CLFLigne) => this.btnGroupLigne(ligne, boutonAnnuleOuSupprime),
             classeDefs: ['colonne-btn-group-2'],
-            nePasAfficherSi: this.utile.conditionTable.pasEdition,
+            afficherSi: this.utile.conditionTable.edition,
         };
     }
 

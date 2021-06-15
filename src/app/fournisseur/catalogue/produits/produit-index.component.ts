@@ -52,10 +52,11 @@ export class ProduitIndexComponent extends ProduitIndexBaseComponent implements 
             routes: CatalogueRoutes,
             urlSite: this.site.url
         };
-        const lien = Fabrique.lien.retour(urlDef);
-        lien.afficherSi(this.service.utile.conditionSite.catalogue);
         const def = this._barreTitreDef;
-        def.boutonsPourBtnGroup = [[lien]];
+        const groupe = Fabrique.titrePage.bbtnGroup('boutons');
+        groupe.ajoute(Fabrique.lien.retour(urlDef));
+        groupe.afficherSi(this.service.navigation.conditionSite.catalogue);
+        def.groupesDeBoutons = [groupe];
         return def;
     }
 
@@ -87,7 +88,7 @@ export class ProduitIndexComponent extends ProduitIndexBaseComponent implements 
         };
         vueTableDef.outils.ajoute(this.service.utile.outils.état());
         const outilAjoute = this.service.utile.outils.ajoute();
-        outilAjoute.bbtnGroup.nePasAfficherSi(this.service.utile.conditionSite.pas_catalogue);
+        outilAjoute.bbtnGroup.afficherSi(this.service.navigation.conditionSite.catalogue);
         vueTableDef.outils.ajoute(outilAjoute);
         vueTableDef.superGroupe = (produit: Produit) => {
             const editeur = new ProduitEditeur(this);

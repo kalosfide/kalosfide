@@ -125,9 +125,11 @@ export class ClientInviteComponent extends FormulaireComponent implements OnInit
         const lienIndex = this.client
             ? this.service.utile.lienKey.retourIndex(this.client)
             : this.service.utile.lienKey.index();
+        const groupe = Fabrique.titrePage.bbtnGroup('boutons');
+        groupe.ajoute(lienIndex);
         const barre = Fabrique.titrePage.barreTitre({
             pageDef: this.pageDef,
-            boutonsPourBtnGroup: [[lienIndex]]
+            groupesDeBoutons: [groupe]
         });
 
         this.barre = barre;

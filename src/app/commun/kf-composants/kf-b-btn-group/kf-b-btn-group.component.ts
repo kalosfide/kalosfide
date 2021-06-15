@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angula
 import { KfComposantComponent } from '../kf-composant/kf-composant.component';
 import { TraiteKeydownService } from '../../traite-keydown/traite-keydown.service';
 import { KfBBtnGroup } from './kf-b-btn-group';
+import { KfTypeDeComposant } from '../kf-composants-types';
 
 @Component({
     selector: 'app-kf-b-btn-group',
@@ -10,6 +11,8 @@ import { KfBBtnGroup } from './kf-b-btn-group';
 })
 export class KfBBtnGroupComponent extends KfComposantComponent implements OnInit, AfterViewInit {
     @ViewChild('htmlElement', {static: false}) domElementRef: ElementRef;
+
+    type = KfTypeDeComposant;
 
     constructor(protected service: TraiteKeydownService) {
         super(service);
@@ -29,10 +32,8 @@ export class KfBBtnGroupComponent extends KfComposantComponent implements OnInit
     ngAfterViewInit() {
         const divElement = this.domElementRef.nativeElement as HTMLDivElement;
         this.composant.initialiseHtml(divElement, this.output);
-        for (let index = 0; index < this.bbtnGroup.contenus.length; index++) {
-            const composant = this.bbtnGroup.contenus[index];
-            const htmlElement = divElement.children[index] as HTMLElement;
-            composant.initialiseHtml(htmlElement, null);
+        if (this.bbtnGroup.estNonVide) {
+            this.bbtnGroup.initialiseHtmlContenus(divElement);
         }
     }
 

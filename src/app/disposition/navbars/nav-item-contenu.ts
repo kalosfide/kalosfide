@@ -2,7 +2,7 @@ import { KfTexteDef } from 'src/app/commun/kf-composants/kf-partages/kf-texte-de
 import { KfContenuPhrase } from 'src/app/commun/kf-composants/kf-partages/kf-contenu-phrase/kf-contenu-phrase';
 import { KfImageDef } from 'src/app/commun/kf-composants/kf-partages/kf-image-def';
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
-import { FANomIcone } from 'src/app/commun/kf-composants/kf-partages/kf-icone-def';
+import { IKfIconeDef } from 'src/app/commun/kf-composants/kf-partages/kf-icone-def';
 import { NavBar } from './navbar';
 import { NavItem } from './nav-item';
 import { NavItemDropdown } from './nav-item-dropdown';
@@ -39,7 +39,7 @@ export class NavItemContenu extends NavItem {
         this.pComposant.fixeImage(image);
     }
 
-    set icone(icone: FANomIcone) {
+    set icone(icone: IKfIconeDef) {
         this.pComposant.fixeIcone(icone);
     }
 

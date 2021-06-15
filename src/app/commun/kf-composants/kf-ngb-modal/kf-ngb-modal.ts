@@ -4,6 +4,7 @@ import { NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { KfGéreCss } from '../kf-partages/kf-gere-css';
 import { KfTexteDef } from '../kf-partages/kf-texte-def';
 import { KfNgClasseDef, KfNgClasse } from '../kf-partages/kf-gere-css-classe';
+import { KfComposant } from '../kf-composant/kf-composant';
 
 export interface IKfNgbModalDef {
     titre: string;
@@ -14,12 +15,18 @@ export interface IKfNgbModalDef {
      */
     boutonsDontOk?: KfBouton[];
     options?: NgbModalOptions;
+    /**
+     * Si absent, le comportement par défaut des NgbModal met le focus sur la croix de fermeture.
+     * Si présent et égal à 'sans', aucun élément n'aura le focus à l'ouverture.
+     * Si présent et égal à un Kfcomposant, ce composant aura le focus à l'ouverture
+     */
+    autoFocus?: 'sans' | KfComposant
 }
 
 export class KfNgbModal {
     private pDef: IKfNgbModalDef;
     private pGéreCssEnTête: KfGéreCss;
-    private pGéreCssCroix: KfGéreCss;
+    private pGéreCssTitre: KfGéreCss;
     private pGéreCssCorps: KfGéreCss;
     private pGéreCssPied: KfGéreCss;
 
@@ -27,6 +34,9 @@ export class KfNgbModal {
 
     constructor(def: IKfNgbModalDef) {
         this.pDef = def;
+        if (def.autoFocus && def.autoFocus !== 'sans') {
+            def.autoFocus.gereHtml.fixeAttribut('ngbAutofocus');
+        }
         this.pOptions = {};
     }
 
@@ -35,6 +45,9 @@ export class KfNgbModal {
     get boutonOk(): KfBouton { return this.pDef.boutonOk; }
     get boutons(): KfBouton[] {
         return this.pDef.boutonsDontOk ? this.pDef.boutonsDontOk : this.pDef.boutonOk ? [this.pDef.boutonOk] : undefined;
+    }
+    get sansAutoFocus(): boolean {
+        return this.pDef.autoFocus === 'sans';
     }
     get options(): NgbModalOptions { return this.pOptions; }
 
@@ -51,16 +64,16 @@ export class KfNgbModal {
         }
     }
 
-    ajouteClasseCroix(...classeDefs: (KfTexteDef | KfNgClasseDef)[]) {
-        if (!this.pGéreCssCroix) {
-            this.pGéreCssCroix = new KfGéreCss();
+    ajouteClasseTitre(...classeDefs: (KfTexteDef | KfNgClasseDef)[]) {
+        if (!this.pGéreCssTitre) {
+            this.pGéreCssTitre = new KfGéreCss();
         }
-        this.pGéreCssCroix.ajouteClasse(...classeDefs);
+        this.pGéreCssTitre.ajouteClasse(...classeDefs);
     }
 
-    get classeCroix(): KfNgClasse {
-        if (this.pGéreCssCroix) {
-            return this.pGéreCssCroix.classe;
+    get classeTitre(): KfNgClasse {
+        if (this.pGéreCssTitre) {
+            return this.pGéreCssTitre.classe;
         }
     }
 

@@ -1,36 +1,18 @@
 import { KfComposant } from '../../kf-composant/kf-composant';
 import { KfTypeDeComposant, KfTypeDeBaliseHTML } from '../../kf-composants-types';
 import { KfTexteDef, ValeurTexteDef } from '../../kf-partages/kf-texte-def';
-import { FANomIcone } from '../../kf-partages/kf-icone-def';
+import { IKfIconeDef } from '../../kf-partages/kf-icone-def';
 import { KfGéreCss } from '../../kf-partages/kf-gere-css';
 import { KfNgClasse } from '../../kf-partages/kf-gere-css-classe';
 import { KfNgStyle } from '../../kf-partages/kf-gere-css-style';
 import { KfIconeTaille, KfIconeAnimation, KfIconeRotation, KfIconeSymétrie, KfIconePositionTexte } from './kf-icone-types';
-
-export interface IKfAvecIconeSurvol {
-    /**
-     * Icone que l'on peut montrer ou cacher à afficher par dessus le composant.
-     */
-    iconeSurvol: KfIcone;
-    /**
-     * KfGéreCss de l'élément html qui contient l'icone que l'on peut montrer ou cacher à afficher par dessus le composant.
-     */
-    conteneurSurvolé: KfGéreCss;
-    /**
-     * Array des KfGéreCss des contenus (autre que l'icone) de l'élément html qui contient
-     * l'icone que l'on peut montrer ou cacher à afficher par dessus le composant.
-     */
-    contenusSurvolés: KfGéreCss[];
-    /**
-     * Ajoute une icone que l'on peut montrer ou cacher à afficher par dessus le composant.
-     */
-    ajouteIconeSurvol(icone: KfIcone): void;
-}
+import { IKfSurvole } from '../../kf-partages/kf-survol/i-kf-survole';
+import { KfTexte } from '../kf-texte/kf-texte';
 
 export interface IKfIcone {
     géreCss: KfGéreCss;
     nom: string;
-    nomIcone: FANomIcone;
+    iconeDef: IKfIconeDef;
     texteCouche: string;
     largeurFixe: boolean;
     inverse: boolean;
@@ -41,7 +23,7 @@ export interface IKfIcone {
 }
 
 class KfIconeBase extends KfComposant implements IKfIcone {
-    nomIcone: FANomIcone;
+    iconeDef: IKfIconeDef;
     texteCouche: string;
     private pTaille: string;
     private pAnimation: string;
@@ -52,11 +34,9 @@ class KfIconeBase extends KfComposant implements IKfIcone {
 
     tailleCouche: 1 | 2;
 
-    taillePolicePourCent: number;
-
-    constructor(nom: string, nomIcone?: FANomIcone) {
+    constructor(nom: string, iconeDef?: IKfIconeDef) {
         super(nom, KfTypeDeComposant.icone);
-        this.nomIcone = nomIcone;
+        this.iconeDef = iconeDef;
     }
 
     get géreCss(): KfGéreCss {
@@ -65,12 +45,16 @@ class KfIconeBase extends KfComposant implements IKfIcone {
     /**
      * retourne l'icone de l'element ou de son label si l'élément est équivalent à un label ou a un label
      */
-    get icone(): FANomIcone {
-        return this.nomIcone;
+    get icone(): IKfIconeDef {
+        return this.iconeDef;
     }
 
     taille(valeur: KfIconeTaille) {
-        this.pTaille = typeof (valeur) === 'string' ? valeur : '' + valeur + 'x';
+        if (valeur === 'sm') {
+            // 'sm' est pour les BootstrapSpinners
+            return;
+        }
+        this.pTaille = valeur === 'lg' ? valeur : '' + valeur + 'x';
     }
 
     animation(type: KfIconeAnimation) {
@@ -87,16 +71,8 @@ class KfIconeBase extends KfComposant implements IKfIcone {
 
     get faClasse(): string {
         const faClasse: string[] = [''];
-        if (this.nomIcone) {
-            let faNom: string;
-            let faStyle = 'fas';
-            if (typeof(this.nomIcone) === 'string') {
-                faNom = this.nomIcone;
-            } else {
-                faNom = this.nomIcone.nom;
-                faStyle = 'far';
-            }
-            faClasse.push(faStyle, 'fa-' + faNom);
+        if (this.iconeDef) {
+            faClasse.push(this.iconeDef.collection.classe, `${this.iconeDef.collection.préfixe}-${this.iconeDef.nom}`)
         }
         if (this.pTaille) {
             faClasse.push('fa-' + this.pTaille);
@@ -124,7 +100,7 @@ class KfIconeBase extends KfComposant implements IKfIcone {
 
 }
 
-export class KfIcone extends KfIconeBase {
+export class KfIcone extends KfIconeBase implements IKfSurvole {
     private pTexteDef: KfTexteDef;
     private pGéreCssTexte: KfGéreCss;
     private pPositionTexte: KfIconePositionTexte;
@@ -132,20 +108,21 @@ export class KfIcone extends KfIconeBase {
     private pCouches: IKfIcone[];
     private pTaillePile: string;
 
-    private pGéreCssFond: KfGéreCss;
+    /**
+     * Composant de n'importe quel type pour accéder aux propriétés css et à l'élément html du fond
+     */
+     private pFond: KfComposant;
 
-    private pAvecSurvol: IKfAvecIconeSurvol;
-
-    constructor(nom: string, nomIcone?: FANomIcone) {
-        super(nom, nomIcone);
+    constructor(nom: string, iconeDef?: IKfIconeDef) {
+        super(nom, iconeDef);
     }
 
     ajouteTexte(texteDef: KfTexteDef, position?: KfIconePositionTexte) {
         this.pPositionTexte = position ? position : 'droite';
         this.pTexteDef = texteDef;
         if (this.pPositionTexte === 'haut' || this.pPositionTexte === 'bas' || this.pPositionTexte === 'dessus') {
-            this.créegéreCssFond();
-            this.géreCssFond.ajouteClasse('kf-texte-dans-icone-fond', 'kf-texte-dans-icone-' + this.pPositionTexte);
+            this.créeFond();
+            this.fond.ajouteClasse('kf-texte-dans-icone-fond', 'kf-texte-dans-icone-' + this.pPositionTexte);
             this.créegéreCssTexte();
             this.géreCssTexte.ajouteClasse('kf-texte-dans-icone');
         }
@@ -192,10 +169,11 @@ export class KfIcone extends KfIconeBase {
         }
     }
 
-    empile(nomBas: FANomIcone, tailleBas?: 1 | 2, nomHaut?: FANomIcone, tailleHaut?: 1 | 2): IKfIcone {
-        this.nomIcone = nomBas;
+    empile(nomBas: IKfIconeDef, tailleBas?: 1 | 2, nomHaut?: IKfIconeDef, tailleHaut?: 1 | 2): IKfIcone {
+        this.iconeDef = nomBas;
         this.tailleCouche = tailleBas ? tailleBas : 1;
         this.pCouches = [this];
+        this.créeFond();
         let icone: KfIconeBase;
         if (nomHaut) {
             icone = new KfIconeBase('', nomHaut);
@@ -207,11 +185,12 @@ export class KfIcone extends KfIconeBase {
 
     empileTexte(texte: string): IKfIcone {
         if (!this.pCouches) {
-            if (this.nomIcone) {
+            if (this.iconeDef) {
                 this.pCouches = [this];
             } else {
                 this.pCouches = [];
             }
+            this.créeFond();
         }
         const icone = new KfIconeBase('');
         icone.texteCouche = texte;
@@ -240,79 +219,31 @@ export class KfIcone extends KfIconeBase {
     /**
      * Inclut l'élément i dans un élément span.
      */
-    créegéreCssFond() {
-        this.pGéreCssFond = new KfGéreCss();
+    créeFond() {
+        this.pFond = new KfTexte(`${this.nom}_fond`, '');
     }
 
     /**
      * Gére classes et styles de l'élément span contenant l'élément i.
      */
-    get géreCssFond(): KfGéreCss {
-        return this.pGéreCssFond;
-    }
-
-    /**
-     * Vrai si l'élément i est inclus dans un élément span.
-     */
-    get avecFond(): boolean {
-        return !!this.pGéreCssFond;
-    }
-
-    /**
-     * ngClass dans le template de l'élément span contenant l'élément i.
-     */
-    get classeFond(): KfNgClasse {
-        if (this.pGéreCssFond) {
-            return this.pGéreCssFond.classe;
-        }
-    }
-
-    /**
-     * ngStyle dans le template de l'élément span contenant l'élément i.
-     */
-    get styleFond(): KfNgStyle {
-        if (this.pGéreCssFond) {
-            return this.pGéreCssFond.style;
-        }
-    }
-
-    survole(avecSurvol: IKfAvecIconeSurvol) {
-        avecSurvol.ajouteIconeSurvol(this);
-        avecSurvol.conteneurSurvolé.ajouteClasse('avec-survol');
-        this.créegéreCssFond();
-        this.géreCssFond.ajouteClasse('survol-centre', 'kf-invisible');
-        this.pAvecSurvol = avecSurvol;
-    }
-    get attenteSurvol(): {
-        commence: () => void,
-        finit: () => void
-    } {
-        return  {
-            commence: () => {
-                this.pAvecSurvol.contenusSurvolés.forEach(s => s.ajouteClasse('avec-survol-actif'));
-                this.géreCssFond.supprimeClasse('kf-invisible');
-            },
-            finit: () => {
-                this.pAvecSurvol.contenusSurvolés.forEach(s => s.supprimeClasse('avec-survol-actif'));
-                this.géreCssFond.ajouteClasse('kf-invisible');
-            }
-        };
+    get fond(): KfComposant {
+        return this.pFond;
     }
 
     /**
      * Visibilité de l'élément span contenant l'élément i.
      */
     get fondVisible(): boolean {
-        if (this.pGéreCssFond) {
-            return this.pGéreCssFond.visible;
+        if (this.pFond) {
+            return this.pFond.visible;
         }
     }
     /**
      * Fixe la visibilité de l'élément span contenant l'élément i.
      */
     set fondVisible(visible: boolean) {
-        if (this.pGéreCssFond) {
-            this.pGéreCssFond.visible = visible;
+        if (this.pFond) {
+            this.pFond.visible = visible;
         }
     }
 

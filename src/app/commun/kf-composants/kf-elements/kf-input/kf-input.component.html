@@ -4,6 +4,16 @@
     </label>
 </ng-template>
 
+<ng-template #sousComposantTemplate let-composant>
+    <ng-container [ngSwitch]="composant.type">
+        <ng-container *ngSwitchCase="type.etiquette">
+            <span [ngClass]="composant.classe" [ngStyle]="composant.style">
+                <app-kf-contenu-phrase [contenuPhrase]="composant.contenuPhrase"></app-kf-contenu-phrase>
+            </span>
+        </ng-container>
+    </ng-container>
+</ng-template>
+
 <ng-template #infoTemplate>
     <app-kf-etiquette *ngIf="input.texteAide" [composant]="input.texteAide"></app-kf-etiquette>
     <div *ngIf="input.avecInvalidFeedback" class="invalid-feedback">
@@ -28,17 +38,19 @@
     <ng-template #entreeAvecDivTemplate>
         <div nom="classeEntree" [ngClass]="input.classeEntree">
             <ng-container *ngTemplateOutlet="entreeTemplate"></ng-container>
-            <ng-container *ngIf="input.iconeSurvol">
-                <app-kf-icone [composant]="input.iconeSurvol"></app-kf-icone>
+            <ng-container *ngIf="input.survol">
+                <app-kf-survol [composant]="input.survol"></app-kf-survol>
             </ng-container>
         </div>
     </ng-template>
 </ng-template>
 
 <ng-template #entreeTemplate>
-    <div *ngIf="input.composantAvant" [ngClass]="input.classeComposantAvant">
-        <app-kf-composant [composant]="input.composantAvant"></app-kf-composant>
-    </div>
+    <ng-container *ngIf="input.composantAvant">
+        <ng-container *ngTemplateOutlet="sousComposantTemplate; context: { $implicit: input.composantAvant }">
+        </ng-container>
+    </ng-container>
+
     <ng-container *ngIf="!estNombre; else nombreTemplate">
         <ng-container *ngIf="estTexte; then texteTemplate; else dateTempsTemplate">
 
@@ -61,13 +73,13 @@
 <ng-template #dateTempsTemplate>
     <div [ngClass]="input.classe">
         <input #inputElement [name]="input.nom" [type]="dateTemps.inputDate.typeDInput"
-            [formControl]="dateTemps.inputDate.formControl" [ngClass]="dateTemps.inputDate.classe" [readonly]="input.lectureSeule"
-            [attr.disabled]="input.inactif" [attr.placeholder]="dateTemps.inputDate.placeholder"
-            (change)="dateTemps.quandValeurChange()" />
+            [formControl]="dateTemps.inputDate.formControl" [ngClass]="dateTemps.inputDate.classe"
+            [readonly]="input.lectureSeule" [attr.disabled]="input.inactif"
+            [attr.placeholder]="dateTemps.inputDate.placeholder" (change)="dateTemps.quandValeurChange()" />
         <input [name]="dateTemps.inputTemps.nom" [type]="dateTemps.inputTemps.typeDInput"
-            [formControl]="dateTemps.inputTemps.formControl" [ngClass]="dateTemps.inputTemps.classe" [readonly]="input.lectureSeule"
-            [attr.disabled]="input.inactif" [attr.placeholder]="dateTemps.inputTemps.placeholder"
-            (change)="dateTemps.quandValeurChange()" />
+            [formControl]="dateTemps.inputTemps.formControl" [ngClass]="dateTemps.inputTemps.classe"
+            [readonly]="input.lectureSeule" [attr.disabled]="input.inactif"
+            [attr.placeholder]="dateTemps.inputTemps.placeholder" (change)="dateTemps.quandValeurChange()" />
     </div>
 </ng-template>
 
@@ -83,7 +95,7 @@
 
 <ng-template #avecIconeBouton>
     <ng-container *ngIf="texte.cssDivBouton; else sansCssBouton">
-        <div [ngClass]="texte.cssDivBouton.classe">
+        <div nom="inputboutons" [ngClass]="texte.cssDivBouton.classe" [ngStyle]="texte.cssDivBouton.style">
             <ng-container *ngTemplateOutlet="sansCssBouton"></ng-container>
         </div>
     </ng-container>

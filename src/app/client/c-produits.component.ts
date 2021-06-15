@@ -40,7 +40,6 @@ export class CProduitsComponent extends ProduitIndexBaseComponent implements OnI
 
     protected get barreTitreDef(): IBarreDef {
         const def = this._barreTitreDef;
-        def.boutonsPourBtnGroup = [[]];
         return def;
     }
 

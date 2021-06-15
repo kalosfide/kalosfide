@@ -1,7 +1,6 @@
 import { KfTypeDeComposant } from '../../kf-composants-types';
 import { KfEntrée } from '../kf-entree/kf-entree';
 import { KfTexteDef } from '../../kf-partages/kf-texte-def';
-import { KfContenuPhrase } from '../../kf-partages/kf-contenu-phrase/kf-contenu-phrase';
 import { KfComposant } from '../../kf-composant/kf-composant';
 import { KfNgClasse, KfNgClasseDef } from '../../kf-partages/kf-gere-css-classe';
 import { KfGéreCss } from '../../kf-partages/kf-gere-css';

@@ -5,12 +5,13 @@ import { NavItemDropdown } from './nav-item-dropdown';
 import { NavItemDropDownGroup } from './nav-item-dropdown-group';
 import { NavItemUlLi } from './nav-item-ul-li';
 import { NavItemContenu } from './nav-item-contenu';
+import { KfCssClasse } from 'src/app/commun/kf-composants/kf-partages/kf-css-classe';
 
 export class NavItemLien extends NavItemContenu {
 
     constructor(nom: string, parent: NavBar | NavItemDropdown | NavItemDropDownGroup | NavItemUlLi) {
         super(nom, parent, new KfLien(nom));
-        this.lien.routerLinkActive = true;
+        this.lien.avecRouterLinkActive(KfCssClasse.actif, true);
         this.lien.ajouteClasse(
             'nav-link',
             { nom: 'disabled', active: () => this.inactif },

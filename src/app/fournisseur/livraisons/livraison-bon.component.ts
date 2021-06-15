@@ -28,12 +28,13 @@ export abstract class LivraisonBonComponent extends CLFDocComponent implements O
     }
 
     créeBarreTitre = (): BarreTitre => {
+        const groupe = Fabrique.titrePage.bbtnGroup('boutons');
+        groupe.ajoute(this.utile.lien.retourDeBon(this.clfDoc));
         const barre = Fabrique.titrePage.barreTitre({
             pageDef: this.pageDef,
             contenuAidePage: this.contenuAidePage(),
-            boutonsPourBtnGroup: [[this.utile.lien.retourDeBon(this.clfDoc)]]
+            groupesDeBoutons: [groupe]
         });
-
         return barre;
     }
 

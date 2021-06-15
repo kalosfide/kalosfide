@@ -1,16 +1,16 @@
 import { KfTypeDeComposant, KfTypeDeValeur } from '../../kf-composants-types';
-import { KfComposant } from '../../kf-composant/kf-composant';
 import { FormControl } from '@angular/forms';
 import { KfComposantGereValeur } from '../../kf-composant/kf-composant-gere-valeur';
-import { KfEtiquette } from '../kf-etiquette/kf-etiquette';
-import { KfNgClasse } from '../../kf-partages/kf-gere-css-classe';
 import { KfGéreCss } from '../../kf-partages/kf-gere-css';
-import { IKfAvecIconeSurvol, KfIcone } from '../kf-icone/kf-icone';
+import { KfIcone } from '../kf-icone/kf-icone';
 import { KfClavierToucheEnfoncée } from '../../kf-partages/kf-clavier/kf-clavier-touche-enfoncee';
 import { KfTypeDHTMLEvents, KfTypeDEvenement, KfEvenement, KfStatutDEvenement } from '../../kf-partages/kf-evenements';
 import { IKfEntreeFocusClavier } from './i-kf-entree-focus-clavier';
 import { KfTexteDef } from '../../kf-partages/kf-texte-def';
 import { KfAvecLabel } from '../../kf-composant/kf-avecLabel';
+import { IKfAvecSurvol } from '../../kf-partages/kf-survol/i-kf-avec-survol';
+import { KfSurvol } from '../../kf-partages/kf-survol/kf-survol';
+import { IKfSurvole } from '../../kf-partages/kf-survol/i-kf-survole';
 
 export type KfValeurEntrée = boolean | string | number | Date | null;
 
@@ -18,15 +18,15 @@ export type KfValeurEntrée = boolean | string | number | Date | null;
  * KfEntrée
  * composant avec valeur, sans contenus avec valeur
  */
-export abstract class KfEntrée extends KfAvecLabel implements IKfAvecIconeSurvol {
+export abstract class KfEntrée extends KfAvecLabel implements IKfAvecSurvol {
 
     private pLectureSeule: boolean;
     private pLectureSeuleFnc: () => boolean;
 
     /**
-     * Icone affichée par dessus le composant que l'on peut montrer ou cacher.
+     * Composant affichant une icone ou un BootstrapSpinner centré au dessus de l'entrée que l'on peut montrer ou cacher.
      */
-    private pIconeSurvol: KfIcone;
+    private pSurvol: KfSurvol;
 
     constructor(nom: string, type: KfTypeDeComposant, texteLabel?: KfTexteDef) {
         super(nom, type, texteLabel);
@@ -82,17 +82,18 @@ export abstract class KfEntrée extends KfAvecLabel implements IKfAvecIconeSurvo
     }
 
     /// Interface IKfAvecIconeSurvol ///
+
     /**
-     * Icone que l'on peut montrer ou cacher à afficher par dessus le composant.
+     * Composant affichant une icone ou un BootstrapSpinner centré au dessus de l'entrée que l'on peut montrer ou cacher.
      */
-    get iconeSurvol(): KfIcone {
-        return this.pIconeSurvol;
+     get survol(): KfSurvol {
+        return this.pSurvol;
     }
     /**
-     * Ajoute une icone que l'on peut montrer ou cacher à afficher par dessus le composant.
+     * Crée le composant affichant une icone ou un BootstrapSpinner centré au dessus de l'entrée que l'on peut montrer ou cacher.
      */
-    ajouteIconeSurvol(icone: KfIcone) {
-        this.pIconeSurvol = icone;
+    créeSurvol(survole: IKfSurvole) {
+        this.pSurvol = new KfSurvol(this, survole);
     }
     /**
      * KfGéreCss de l'élément html qui contient l'icone que l'on peut montrer ou cacher à afficher par dessus le composant.
@@ -114,66 +115,48 @@ export abstract class KfEntrée extends KfAvecLabel implements IKfAvecIconeSurvo
      */
     prépareFocusClavier(def: IKfEntreeFocusClavier) {
         let valeurAvantFocus: any;
-        if (def.toucheDébutEdition || def.lectureSeuleSiPasFocus) {
-            this.lectureSeule = true;
-        }
         const focusPris = () => {
             console.log('entrée focus pris', this);
             valeurAvantFocus = this.gereValeur.valeur;
-            if (!def.toucheDébutEdition || def.lectureSeuleSiPasFocus) {
-                this.lectureSeule = false;
-            }
         };
-        const sauvegarde = () => {
-            if (!this.formulaireParent.gereValeur.invalide && this.gereValeur.valeur !== valeurAvantFocus) {
+        const sauvegarde = (rétablirSiEchoue?: 'rétablirSiEchoue') => {
                 const subscription = def.sauvegarde().subscribe(
                     ok => {
                         subscription.unsubscribe();
-                        if (!ok) {
-                            this.gereValeur.valeur = valeurAvantFocus;
-                            valeurAvantFocus = undefined;
+                        if (ok) {
+                            valeurAvantFocus = this.gereValeur.valeur;
+                        } else {
+                            if (rétablirSiEchoue) {
+                                this.gereValeur.valeur = valeurAvantFocus;
+                            }
                         }
                     }
                 );
-            } else {
-                this.gereValeur.valeur = valeurAvantFocus;
-                valeurAvantFocus = undefined;
-            }
-
         };
         const focusPerdu = () => {
             console.log('entrée focus perdu', this);
-            if (!this.gereValeur.invalide) {
+            if (this.gereValeur.valeur !== valeurAvantFocus) {
                 if (def.sauveQuandPerdFocus) {
-                    sauvegarde();
+                    if (!this.formulaireParent.gereValeur.invalide) {
+                        sauvegarde('rétablirSiEchoue');
+                    }
+                } else {
+                    this.gereValeur.valeur = valeurAvantFocus;
                 }
-            } else {
-                this.gereValeur.valeur = valeurAvantFocus;
-                valeurAvantFocus = undefined;
             }
-            if (def.toucheDébutEdition || def.lectureSeuleSiPasFocus) {
-                this.lectureSeule = true;
-            }
+            valeurAvantFocus = undefined;
         };
         this.gereHtml.suitLeFocus(focusPris, focusPerdu);
 
-        if (def.toucheDébutEdition || def.toucheRétablit || def.toucheSauvegarde) {
+        if (def.toucheRétablit || def.toucheSauvegarde) {
             const toucheEnfoncée = (event: KeyboardEvent): boolean => {
-                if (KfClavierToucheEnfoncée.sontIdentiques(def.toucheDébutEdition, event)) {
-                    this.lectureSeule = false;
-                    return true;
-                }
                 if (KfClavierToucheEnfoncée.sontIdentiques(def.toucheRétablit, event)) {
                     this.gereValeur.valeur = valeurAvantFocus;
-                    if (def.toucheDébutEdition) {
-                        this.lectureSeule = true;
-                    }
                     return true;
                 }
                 if (KfClavierToucheEnfoncée.sontIdentiques(def.toucheSauvegarde, event)) {
-                    sauvegarde();
-                    if (def.toucheDébutEdition) {
-                        this.lectureSeule = true;
+                    if (!this.formulaireParent.gereValeur.invalide && this.gereValeur.valeur !== valeurAvantFocus) {
+                        sauvegarde();
                     }
                     return true;
                 }

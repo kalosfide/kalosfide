@@ -44,9 +44,9 @@ const routes: Routes = [
         RouterModule.forRoot(
             routes,
             {
-                preloadingStrategy: QuicklinkStrategy,
-//                enableTracing: true // <-- debugging purposes only
-            }
+    preloadingStrategy: QuicklinkStrategy,
+    relativeLinkResolution: 'legacy'
+}
         )
     ],
 

@@ -56,8 +56,10 @@ export class CategorieIndexComponent extends KeyUidRnoNoIndexComponent<Categorie
         };
         const lien = Fabrique.lien.retour(urlDef);
         const def = this._barreTitreDef;
-        def.boutonsPourBtnGroup = [[lien]];
-        return def;
+        const groupe = Fabrique.titrePage.bbtnGroup('boutons');
+        groupe.ajoute(lien);
+        def.groupesDeBoutons = [groupe];
+    return def;
     }
 
     protected contenuAidePage = (): KfComposant[] => {

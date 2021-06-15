@@ -41,7 +41,7 @@ export class ApiResult400BadRequest extends ApiResultErreur {
                 const édition = formulaire.contenus.find(c => c.nom === FabriqueFormulaire.nomEdition);
                 const champs = édition.gereValeur.contenus;
                 champs.forEach(c => {
-                    validateurs = c.gereValeur.Validateurs;
+                    validateurs = c.gereValeur.validateurs;
                     if (!validateurs) {
                         return;
                     }
@@ -59,7 +59,7 @@ export class ApiResult400BadRequest extends ApiResultErreur {
                 // erreurs du formulaire
                 const erreursDuFormulaire = apiErreurs.filter(e => e.champ === '2');
                 if (erreursDuFormulaire.length > 0) {
-                    validateurs = formulaire.gereValeur.Validateurs;
+                    validateurs = formulaire.gereValeur.validateurs;
                     if (validateurs) {
                         validateur = validateurs.find(v => v.marqueErreur);
                         if (validateur) {

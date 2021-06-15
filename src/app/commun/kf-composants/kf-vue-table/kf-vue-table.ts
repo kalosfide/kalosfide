@@ -299,10 +299,10 @@ export class KfVueTable<T> extends KfComposant implements IKfVueTable {
     get groupesAvecControls(): KfGroupe[] {
         const groupes: KfGroupe[] = [];
         if (this.pOutils) {
-            groupes.push(this.pOutils.btnToolbar);
+            groupes.push(this.pOutils.groupe);
         }
         if (this.pPagination) {
-            groupes.push(this.pPagination.btnToolbar);
+            groupes.push(this.pPagination.groupe);
         }
         return groupes;
     }

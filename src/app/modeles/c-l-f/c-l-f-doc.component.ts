@@ -226,6 +226,7 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
                 etat.grBtnsMsgs.alerte('warning');
             }).bind(this)
         });
+        vueTableDef.navigationAuClavier = { type: 'cellules', controlePagination: true, entréesEtActionsSeulement: true };
 
         const groupeTableDef: IGroupeTableDef<CLFLigne> = {
             vueTableDef,
@@ -361,7 +362,7 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
             nom: 'btDownload',
             contenu: { texte: 'Télécharger le pdf' },
             action: (() => this.télécharge(kfNom.valeur)).bind(this),
-            bootstrapType: BootstrapNom.primary
+            bootstrap: { type: BootstrapNom.primary }
         };
         groupe.ajoute(Fabrique.bouton.bouton(def));
         this.superGroupe.ajoute(groupe);
@@ -470,7 +471,7 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
         const def: IBoutonDef = {
             nom: '',
             contenu: { texte: 'Annuler' },
-            bootstrapType: BootstrapNom.dark,
+            bootstrap: { type: BootstrapNom.dark },
             action: () => {
                 this.service.routeur.navigueUrlDef(this.utile.url.bon());
             }

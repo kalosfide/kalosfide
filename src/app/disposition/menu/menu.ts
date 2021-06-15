@@ -61,7 +61,7 @@ export abstract class Menu extends NavBar {
         this.itemsAction.fermeQuandClick();
         this.compte = this.créeItemCompte();
         const groupeCompte = new NavItemUlLi('compte', this);
-        groupeCompte.géreCss.ajouteClasse('ml-auto');
+        groupeCompte.géreCss.ajouteClasse('ms-auto');
         groupeCompte.ajoute(this.compte);
         this.contenus = [this.itemsAction, groupeCompte];
     }

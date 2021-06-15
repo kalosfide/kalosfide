@@ -87,7 +87,7 @@ export abstract class CLFClientsComponent extends PageTableComponent<CLFDocs> im
             },
             quandClic: { colonneDuClic: this.utile.nom.choisit }, // (docsClient: CLFDocs) => (() => this.routeur.navigueUrlDef(this.utile.url.client(docsClient))).bind(this),
             triInitial: { colonne: 'nbDocuments', direction: 'desc' },
-            pagination: Fabrique.vueTable.pagination<CLFDocs>(),
+            pagination: Fabrique.vueTable.pagination<CLFDocs>('client'),
             navigationAuClavier: { type: 'lignes', controlePagination: true }
         };
         return {

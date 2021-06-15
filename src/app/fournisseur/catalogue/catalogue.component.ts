@@ -15,16 +15,10 @@ import { PageBaseComponent } from 'src/app/disposition/page-base/page-base.compo
 import { BarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { ApiRequêteAction } from 'src/app/api/api-requete-action';
 import { BootstrapType, KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
-import { Couleur } from 'src/app/disposition/fabrique/fabrique-couleurs';
 import { CatalogueService } from 'src/app/modeles/catalogue/catalogue.service';
-
-interface IActionDef {
-    infos: KfComposant[];
-    alerte: BootstrapType;
-    inactif: boolean;
-    titre: string;
-    apiAction: ApiRequêteAction;
-}
+import { KfCaseACocher } from 'src/app/commun/kf-composants/kf-elements/kf-case-a-cocher/kf-case-a-cocher';
+import { KfEvenement, KfStatutDEvenement, KfTypeDEvenement } from 'src/app/commun/kf-composants/kf-partages/kf-evenements';
+import { concatMap } from 'rxjs/operators';
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
@@ -34,8 +28,6 @@ export class CatalogueComponent extends PageBaseComponent implements OnInit, OnD
     pageDef: PageDef = FournisseurPages.catalogue;
 
     site: Site;
-
-    actionDef: IActionDef;
 
     titreAction = 'Modification';
     titreCommencer = 'Commencer';
@@ -52,7 +44,20 @@ export class CatalogueComponent extends PageBaseComponent implements OnInit, OnD
     }
 
     créeBarreTitre = (): BarreTitre => {
-        const créeBouton = (nom: string, texte: string, demandeApi: () => Observable<ApiResult>, actionSiOk: () => void, active: () => boolean) => {
+        const barre = Fabrique.titrePage.barreTitre({
+            pageDef: this.pageDef,
+            contenuAidePage: this.contenuAidePage(),
+        });
+
+        const créeBouton = (
+            nom: string,
+            texte: string,
+            demandeApi: () => Observable<ApiResult>,
+            actionSiOk: () => void,
+            active: () => boolean,
+            titreModal: string,
+            contenusModal: KfComposant[]
+        ) => {
             const apiRequêteAction: ApiRequêteAction = {
                 demandeApi,
                 actionSiOk,
@@ -63,20 +68,35 @@ export class CatalogueComponent extends PageBaseComponent implements OnInit, OnD
                     texte
                 },
                 action: () => {
-                    if (!active()) {
-                        const subscription = this.service.actionObs(apiRequêteAction).subscribe(
-                            () => {
-                                subscription.unsubscribe();
-                            }
-                        )
+                    if (active()) {
+                        return;
                     }
+                    const modal = Fabrique.infoModal(titreModal, contenusModal);
+                    const subscription = this.service.actionObs(apiRequêteAction).pipe(
+                        concatMap((ok: boolean) => this.service.modalService.confirme(modal))
+                    ).subscribe(
+                        () => {
+                            subscription.unsubscribe();
+                        }
+                    );
                 }
             });
-            KfBootstrap.ajouteClasse(bouton, 'btn', 'light');
+            KfBootstrap.ajouteClasse(bouton, 'btn', 'primary');
             bouton.ajouteClasse({ nom: 'active', active });
             return bouton;
         }
         const groupe = Fabrique.titrePage.bbtnGroup('action');
+        let contenusModal: KfComposant[];
+        let étiquette: KfEtiquette;
+        contenusModal = [];
+        étiquette = Fabrique.ajouteEtiquetteP(contenusModal);
+        Fabrique.ajouteTexte(étiquette,
+            `Vos clients ont plein accès à votre site.`,
+        );
+        étiquette = Fabrique.ajouteEtiquetteP(contenusModal);
+        Fabrique.ajouteTexte(étiquette,
+            `Vos clients ont plein accès à votre site.`,
+        );
         groupe.ajoute(créeBouton('consulter', 'Consultation',
             () => {
                 return this.service.termineModification(this.site);
@@ -84,8 +104,15 @@ export class CatalogueComponent extends PageBaseComponent implements OnInit, OnD
             () => {
                 this.service.termineModificationOk(this.site);
             },
-            (() => this.site.etat !== IdEtatSite.catalogue).bind(this)
+            (() => this.site.etat !== IdEtatSite.catalogue).bind(this),
+            'Fin de la modification du catalogue',
+            contenusModal
         ));
+        contenusModal = [];
+        étiquette = Fabrique.ajouteEtiquetteP(contenusModal);
+        Fabrique.ajouteTexte(étiquette,
+            `Vos clients ont plein accès à votre site.`,
+        );
         groupe.ajoute(créeBouton('modifier', 'Modification',
             () => {
                 return this.service.commenceModification(this.site);
@@ -93,14 +120,11 @@ export class CatalogueComponent extends PageBaseComponent implements OnInit, OnD
             () => {
                 this.service.commenceModificationOk(this.site);
             },
-            (() => this.site.etat === IdEtatSite.catalogue).bind(this)
+            (() => this.site.etat === IdEtatSite.catalogue).bind(this),
+            'Modification du catalogue',
+            contenusModal
         ));
-
-        const barre = Fabrique.titrePage.barreTitre({
-            pageDef: this.pageDef,
-            contenuAidePage: this.contenuAidePage(),
-        });
-        barre.ajoute({ groupe });
+        barre.ajoute({ groupe: groupe });
 
         barre.ajoute(Fabrique.titrePage.groupeDefAccès());
 
@@ -174,13 +198,6 @@ export class CatalogueComponent extends PageBaseComponent implements OnInit, OnD
                 apiAction = this.apiRequêteCommencer;
                 break;
         }
-        this.actionDef = {
-            infos,
-            alerte,
-            inactif,
-            apiAction,
-            titre
-        };
         this.barre.site = this.service.navigation.litSiteEnCours();
         this.barre.rafraichit();
     }

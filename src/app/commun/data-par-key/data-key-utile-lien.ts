@@ -29,9 +29,6 @@ export class DataKeyUtileLien<T extends IDataKey> {
     edite(t: T): KfLien {
         return Fabrique.lien.lien(this.def(this.pUtile.urlKey.edite(t), Fabrique.contenu.edite));
     }
-    aperçu(t: T): KfLien {
-        return Fabrique.lien.lien(this.def(this.pUtile.urlKey.edite(t), Fabrique.contenu.aperçu));
-    }
     supprime(t: T): KfLien {
         return Fabrique.lien.lien(this.def(this.pUtile.urlKey.supprime(t), Fabrique.contenu.supprime));
     }

@@ -1,3 +1,4 @@
+import { PageDef } from "../commun/page-def";
 
 /**
  * Pour qu'une route ait un NavigationSegment, elle doit avoir dans sa définition:
@@ -21,6 +22,10 @@
  *  data: { pageDef: undefined }
  */
 export class NavigationSegment {
+    /**
+     * PageDef de la page cible du braedcrumb
+     */
+    pageDef: PageDef;
     /**
      * Segment du title Html du window pour l'historique de navigation
      */

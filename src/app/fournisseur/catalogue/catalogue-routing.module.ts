@@ -7,6 +7,7 @@ import { FournisseurPages } from '../fournisseur-pages';
 import { CataloguePages } from './catalogue-pages';
 import { CatalogueFinitService } from './catalogue-finit.service';
 import { CatalogueCommenceService } from './catalogue-commence.service';
+import { ProduitSitePasCatalogueGarde } from './produits/produit-site-pas-catalogue-garde';
 
 const routes: Routes = [
     {
@@ -35,6 +36,9 @@ const routes: Routes = [
             },
             {
                 path: CataloguePages.categories.urlSegment,
+                canActivate: [
+                    ProduitSitePasCatalogueGarde,
+                ],
                 data: {
                     pageDef: CataloguePages.categories,
                 },

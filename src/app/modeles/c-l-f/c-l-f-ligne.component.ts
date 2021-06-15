@@ -87,12 +87,13 @@ export abstract class CLFLigneAjouteComponent extends PageBaseComponent implemen
     }
 
     créeBarreTitre = (): BarreTitre => {
-        const def: IBarreDef = {
+        const groupe = Fabrique.titrePage.bbtnGroup('boutons');
+        groupe.ajoute(this.utile.lien.retourDeAjoute(this.ligne));
+        const barre = Fabrique.titrePage.barreTitre({
             pageDef: this.pageDef,
             contenuAidePage: this.contenuAidePage(),
-        };
-        def.boutonsPourBtnGroup = [[this.utile.lien.retourDeAjoute(this.ligne)]];
-        const barre = Fabrique.titrePage.barreTitre(def);
+            groupesDeBoutons: [groupe]
+        });
         return barre;
     }
 

@@ -49,7 +49,7 @@ export abstract class ProduitIndexBaseComponent extends KeyUidRnoNoIndexComponen
             colonnesDef: this.service.utile.colonne.colonnes(),
             outils,
             triInitial: { colonne: this.service.utile.nom.catégorie, direction: 'asc' },
-            pagination: Fabrique.vueTable.pagination<Produit>()
+            pagination: Fabrique.vueTable.pagination<Produit>('produit')
         };
         return vueTableDef;
     }

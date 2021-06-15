@@ -25,6 +25,7 @@ import { KfRadios } from 'src/app/commun/kf-composants/kf-elements/kf-radios/kf-
 import { KfRadio } from 'src/app/commun/kf-composants/kf-elements/kf-radios/kf-radio';
 import { GroupeBoutonsMessages } from 'src/app/disposition/fabrique/fabrique-formulaire';
 import { KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
+import { KfCaseACocher } from 'src/app/commun/kf-composants/kf-elements/kf-case-a-cocher/kf-case-a-cocher';
 
 
 @Component({
@@ -81,6 +82,10 @@ export class ConnectionComponent extends FormulaireComponent implements OnInit {
             KfBootstrap.prépareRadio(radio, { label: {}, interrupteur: true })
             radios.ajoute(radio);
         }
+        const caseACocher = new KfCaseACocher('case', 'Case à cocher');
+        KfBootstrap.prépareCaseACocher(caseACocher, { label: {}, interrupteur: true });
+        groupe.ajoute(caseACocher);
+        caseACocher.gereHtml.suitLaValeur();
         const boutonSoumettre = Fabrique.bouton.soumettre(groupe, 'Test');
         const grpBtn = new GroupeBoutonsMessages(groupe.nom, { boutons: [boutonSoumettre] })
         groupe.ajoute(grpBtn.groupe);

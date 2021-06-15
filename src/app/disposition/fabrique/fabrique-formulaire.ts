@@ -4,11 +4,12 @@ import { KfSuperGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-super-g
 import { KfBouton } from 'src/app/commun/kf-composants/kf-elements/kf-bouton/kf-bouton';
 import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
 import { AfficheResultat } from '../affiche-resultat/affiche-resultat';
-import { BootstrapType, KfBootstrap } from '../../commun/kf-composants/kf-partages/kf-bootstrap';
+import { BootstrapType, IKfBootstrapOptions, KfBootstrap } from '../../commun/kf-composants/kf-partages/kf-bootstrap';
 import { FabriqueMembre } from './fabrique-membre';
-import { Fabrique, FabriqueClasse } from './fabrique';
+import { FabriqueClasse } from './fabrique';
 import { KfValidateurs } from 'src/app/commun/kf-composants/kf-partages/kf-validateur';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
+import { KfDivTableColonne, KfDivTableLigne } from 'src/app/commun/kf-composants/kf-groupe/kf-div-table';
 
 export interface IFormulaireComponent {
     nom: string;
@@ -26,6 +27,12 @@ export interface IFormulaireComponent {
 
     aprèsBoutons?: () => KfComposant[];
 
+    /**
+     * Si undefined, préparation Bootstrap avec les options par défaut.
+     * Si null, pas de préparation Bootsrap.
+     */
+    optionsBootstrap?: IKfBootstrapOptions;
+
     /** défini après création */
     avantFormulaire?: KfComposant[];
     formulaire?: KfGroupe;
@@ -40,7 +47,7 @@ export interface IFormulaireComponent {
 export class GroupeBoutonsMessages {
     private pGroupe: KfGroupe;
     private pBoutons: (KfBouton | KfLien)[];
-    private pLigneDesBoutons: KfGroupe;
+    private pLigneDesBoutons: KfDivTableLigne;
     private pMessages: KfComposant[];
 
     constructor(nom: string, def: {
@@ -49,32 +56,26 @@ export class GroupeBoutonsMessages {
     }) {
         this.pGroupe = new KfGroupe(nom);
         this.pGroupe.ajouteClasse('mb-2');
-        let grCol: KfGroupe;
-        let grRow: KfGroupe;
+        this.pGroupe.créeDivTable();
+        let ligne: KfDivTableLigne;
+        let col: KfDivTableColonne;
+
         if (def.messages) {
             this.pMessages = def.messages;
-            grRow = new KfGroupe(nom + '_msg');
-            grRow.ajouteClasse('row justify-content-center');
-            this.pGroupe.ajoute(grRow);
-            grCol = new KfGroupe('');
-            grCol.ajouteClasse('col text-center');
-            grRow.ajoute(grCol);
-            def.messages.forEach(m => {
-                grCol.ajoute(m);
-            });
+            ligne = this.pGroupe.divTable.ajoute();
+            ligne.ajouteClasse('row justify-content-center');
+            col = ligne.ajoute(def.messages);
+            col.ajouteClasse('col text-center');
         }
         if (def.boutons) {
             this.pBoutons = def.boutons;
-            grRow = new KfGroupe(nom + '_btn');
-            this.pGroupe.ajoute(grRow);
-            grRow.ajouteClasse('row justify-content-center');
+            ligne = this.pGroupe.divTable.ajoute();
+            ligne.ajouteClasse('row justify-content-center');
             def.boutons.forEach(b => {
-                grCol = new KfGroupe('');
-                grCol.ajouteClasse('col-sm');
-                grCol.ajoute(b);
-                grRow.ajoute(grCol);
+                col = ligne.ajoute([b]);
+                col.ajouteClasse('col text-center');
             });
-            this.pLigneDesBoutons = grRow;
+            this.pLigneDesBoutons = ligne;
         }
     }
 
@@ -111,7 +112,10 @@ export class FabriqueFormulaire extends FabriqueMembre {
             def.avantFormulaire.forEach(c => superGroupe.ajoute(c));
         }
         def.formulaire = def.créeEdition();
-        KfBootstrap.prépare(def.formulaire.contenus, this.fabrique.optionsBootstrap.formulaire);
+        const optionsBootstrap = def.optionsBootstrap !== undefined ? def.optionsBootstrap : this.fabrique.optionsBootstrap.formulaire
+        if (optionsBootstrap !== null) {
+            KfBootstrap.prépare(def.formulaire.contenus, optionsBootstrap);
+        }
         if (def.formulaire.gereValeur) {
         }
         superGroupe.ajoute(def.formulaire);

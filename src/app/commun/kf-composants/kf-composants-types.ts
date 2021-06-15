@@ -18,6 +18,7 @@ export enum KfTypeDeComposant {
     icone = 'icone',
     image = 'image',
     texte = 'texte',
+    bsSpinner = 'bsSpinner',
 
     table = 'table',
 
@@ -42,8 +43,8 @@ export enum KfTypeDeComposant {
     groupe = 'groupe',
     vuetable = 'vuetable',
     ul = 'ul',
+    li = 'li',
     b_btn_group = 'b_btn_group',
-    b_btn_toolbar = 'b_btn_toolbar',
 
     liste = 'liste',
     listeEditeur = 'listeEditeur',

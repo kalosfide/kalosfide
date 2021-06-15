@@ -16,6 +16,13 @@ import { IdentificationService } from '../securite/identification.service';
 import { FournisseurRoutes } from '../fournisseur/fournisseur-pages';
 import { ClientRoutes } from '../client/client-pages';
 import { KfUlComposant } from '../commun/kf-composants/kf-ul/kf-ul-composant';
+import { IContenuPhraseDef } from '../disposition/fabrique/fabrique-contenu-phrase';
+import { MaxLengthValidator } from '@angular/forms';
+import { KfBootstrap } from '../commun/kf-composants/kf-partages/kf-bootstrap';
+import { IKfAvecSurvol } from '../commun/kf-composants/kf-partages/kf-survol/i-kf-avec-survol';
+import { KfCaseACocher } from '../commun/kf-composants/kf-elements/kf-case-a-cocher/kf-case-a-cocher';
+import { KfTypeDEvenement, KfEvenement, KfStatutDEvenement, KfTypeDHTMLEvents } from '../commun/kf-composants/kf-partages/kf-evenements';
+import { KfVueJson } from '../commun/kf-composants/kf-elements/kf-vue-json/kf-vue-json';
 
 @Component({
     templateUrl: '../disposition/page-base/page-base.html',
@@ -33,6 +40,96 @@ export class AppSiteAccueilComponent extends PageBaseComponent implements OnInit
         private identification: IdentificationService,
     ) {
         super();
+    }
+
+    test(): KfGroupe {
+        const test = new KfGroupe('test');
+        test.ajoute(Fabrique.icone.iconeConnection());
+        const boutons = new KfGroupe('boutons');
+        const commence = Fabrique.bouton.bouton({
+            nom: 'commence',
+            contenu: {
+                icone: Fabrique.icone.iconeVerrouFermé(),
+                texte: 'Commence'
+            },
+            bootstrap: { type: 'primary', outline: 'outline' }
+        });
+        boutons.ajoute(commence);
+        const finit = Fabrique.bouton.bouton({
+            nom: 'finit',
+            contenu: {
+                icone: Fabrique.icone.iconeVerrouOuvert(),
+                texte: 'Finit'
+            },
+        });
+        boutons.ajoute(finit);
+        test.ajoute(boutons);
+        const inputs = Fabrique.formulaire.formulaire('inputs');
+        const input = Fabrique.input.texte('input', 'Input', 'Input avec survol');
+        KfBootstrap.prépareInput(input, {
+            label: {}
+        });
+        inputs.ajoute(input);
+        test.ajoute(inputs);
+
+        const créeAttente = (avecSurvol: IKfAvecSurvol) => {
+            const icone = Fabrique.icone.iconeAttente();
+            avecSurvol.créeSurvol(icone);
+            return  {
+                commence: avecSurvol.survol.commence,
+                finit: avecSurvol.survol.finit
+            };
+        };
+        let attentes: { commence: () => void, finit: () => void }[] = [];
+        const attenteBouton = créeAttente(commence);
+        Fabrique.bouton.fixeActionBouton(commence, () => {
+            attentes.push(attenteBouton);
+            attenteBouton.commence();
+        });
+        const attenteInput = créeAttente(input);
+        input.gereHtml.suitLeFocus(
+            () => {},
+            () => {
+                attentes.push(attenteInput);
+                attenteInput.commence();
+            }
+        )
+        Fabrique.bouton.fixeActionBouton(finit, () => {
+            attentes.forEach(attente => attente.finit());
+            attentes = [];
+        });
+        finit.ajouteClasse('btn',
+            { nom: KfBootstrap.classe('btn', 'secondary'), active: () => attentes.length === 0 },
+            { nom: KfBootstrap.classe('btn', 'secondary', 'outline'), active: () => attentes.length !== 0 },
+        )
+
+        const modification = new KfCaseACocher('modification', 'Modification');
+        KfBootstrap.prépareCaseACocher(modification, {
+            bouton: {
+                nom: 'primary',
+                outline: 'outline',
+                nomChecked: 'primary'
+            }
+        });
+        modification.gereHtml.suitLaValeur();
+        const action = () => {
+            if (modification.valeur) {
+                input.label.ajouteClasse('couleur-fond-beige');
+            } else {
+                input.label.supprimeClasse('couleur-fond-beige');
+            }
+        }
+        modification.gereHtml.ajouteTraiteur(KfTypeDEvenement.valeurChange,
+            (évenement: KfEvenement) => {
+                évenement.statut = KfStatutDEvenement.fini;
+                action();
+            });
+        inputs.ajoute(modification);
+
+        const vue = new KfVueJson('inputs', () => inputs.valeur);
+        test.ajoute(vue);
+
+        return test;
     }
 
     créePrésentation(): KfGroupe {
@@ -176,12 +273,14 @@ export class AppSiteAccueilComponent extends PageBaseComponent implements OnInit
 
     protected créeContenus() {
         this.superGroupe = new KfSuperGroupe(this.nom);
+        this.superGroupe.ajoute(this.test());
         this.superGroupe.ajoute(this.créePrésentation());
         if (this.identifiant) {
             this.superGroupe.ajoute(this.créeAvecIdentifiant());
         } else {
             this.superGroupe.ajoute(this.créeSansIdentifiant());
         }
+        this.superGroupe.quandTousAjoutés();
     }
 
     ngOnInit() {

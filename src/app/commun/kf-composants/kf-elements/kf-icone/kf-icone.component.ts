@@ -9,6 +9,7 @@ import { KfIcone } from './kf-icone';
 })
 export class KfIconeComponent extends KfComposantComponent implements OnInit, AfterViewInit {
     @ViewChild('htmlElement', {static: false}) htmlElement: ElementRef;
+    @ViewChild('fondHtmlElement', {static: false}) fondHtmlElement: ElementRef;
 
     ngOnInit() {
     }
@@ -16,6 +17,9 @@ export class KfIconeComponent extends KfComposantComponent implements OnInit, Af
     ngAfterViewInit() {
         if (this.htmlElement) {
             this.composant.initialiseHtml(this.htmlElement.nativeElement, this.output);
+        }
+        if (this.fondHtmlElement) {
+            this.icone.fond.initialiseHtml(this.fondHtmlElement.nativeElement, this.output);
         }
     }
     clic() {

@@ -76,7 +76,6 @@ const routes: Routes = [
             },
             {
                 path: AppPages.compte.urlSegment,
-                data: { pageDef: AppPages.compte },
                 loadChildren: () => import('../compte/compte.module').then(mod => mod.CompteModule)
             },
             {

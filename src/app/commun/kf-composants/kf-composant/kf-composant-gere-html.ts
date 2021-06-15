@@ -135,7 +135,14 @@ export class KfComposantGereHtml {
         this.enfants.push(enfant);
     }
 
-    suitLaValeur() {
+    /**
+     * S'il n'y a pas de composant ou si le composant n'a pas de valeur, est sans effet.
+     * Si appelé avant initialiseHtml, le suivi de la valeur est activé: chaque émission de l'observable valueChanges de l'abstractControl 
+     * déclenche le traitement d'un KfEvenenment valeurChange.
+     * Aprés initialiseHtml, est indéfini si le suivi de la valeur n'a jamais été activé, est vrai si le suivi de la valeur est actif
+     * et est faux si le suivi de la valeur est suspendu.
+     */
+     suitLaValeur() {
         this.pSuitLaValeur = true;
     }
 
@@ -384,13 +391,21 @@ export class KfComposantGereHtml {
             this.attributs[index].valeur = valeur;
         }
     }
+    /**
+     * Valeur de l'attribut de l'htmlElement s'il existe ou du tableau des attributs initial
+     * @param nom nom d'un attribut Html
+     * @returns undefined si l'attribut n'existe pas, null si l'attribut existe et n'a pas de valeur
+     */
     attribut(nom: string): string {
+        if (this.htmlElement) {
+            const attr = this.htmlElement.attributes.getNamedItem(nom);
+            return attr ? attr.value : null;
+        }
         if (this.attributs) {
             const attribut = this.attributs.find(a => a.nom === nom);
-            if (attribut) {
-                return attribut.valeur;
-            }
+            return attribut ? attribut.valeur : null;
         }
+        return undefined;
     }
 
     /**

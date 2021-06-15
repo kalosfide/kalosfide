@@ -1,6 +1,6 @@
 import { IKfVueTableOutil } from './kf-vue-table-outil';
 import { KfBBtnGroup, KfBBtnGroupElement } from '../kf-b-btn-group/kf-b-btn-group';
-import { KfBBtnToolbarElement } from '../kf-b-btn-toolbar/kf-b-btn-toolbar';
+import { KfComposant } from '../kf-composant/kf-composant';
 
 export class KfVueTableOutilBtnGroupe<T> implements IKfVueTableOutil<T> {
     private pComposant: KfBBtnGroup;
@@ -20,7 +20,7 @@ export class KfVueTableOutilBtnGroupe<T> implements IKfVueTableOutil<T> {
         return this.pNom;
     }
 
-    get composant(): KfBBtnToolbarElement {
+    get composant(): KfComposant {
         return this.pComposant;
     }
 }

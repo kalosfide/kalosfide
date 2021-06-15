@@ -4,7 +4,6 @@ import { KfNgClasse } from '../kf-partages/kf-gere-css-classe';
 import { KfVueTableLigne } from './kf-vue-table-ligne';
 import { KfGéreCss } from '../kf-partages/kf-gere-css';
 import { IKfVueTableOutilVue, IKfVueTableOutil } from './kf-vue-table-outil';
-import { KfBBtnToolbar } from '../kf-b-btn-toolbar/kf-b-btn-toolbar';
 import { KfNgStyle } from '../kf-partages/kf-gere-css-style';
 import { KfTypeDEvenement } from '../kf-partages/kf-evenements';
 
@@ -13,7 +12,7 @@ export interface IKfVueTableOutils {
     outils: IKfVueTableOutilVue[];
     classe: KfNgClasse;
     style: KfNgStyle;
-    btnToolbar: KfBBtnToolbar;
+    groupe: KfGroupe;
 }
 
 export class KfVueTableOutils<T> extends KfGéreCss implements IKfVueTableOutils {
@@ -22,17 +21,17 @@ export class KfVueTableOutils<T> extends KfGéreCss implements IKfVueTableOutils
     /** remplace les lignes quand les filtres ne laissent rien passer */
     texteRienPasseFiltres: string;
     /**
-     * Groupe KfBBtnToolbar d'affichage des outils
+     * Groupe d'affichage des outils
      */
-    private pBtnToolbar: KfBBtnToolbar;
+    private pGroupe: KfGroupe;
 
     private pFiltreChercheALeFocus: boolean;
 
     constructor() {
         super();
         this.pOutils = [];
-        // créer btnToolbar ici pour pouvoir lui ajouter des classes css
-        this.pBtnToolbar = new KfBBtnToolbar('outils');
+        // créer le groupe ici pour pouvoir tout de suite lui ajouter des classes css
+        this.pGroupe = new KfGroupe('outils');
         this.texteRienPasseFiltres = `Il n'y aucune ligne correspondant aux critères de filtrage.`;
     }
 
@@ -43,14 +42,14 @@ export class KfVueTableOutils<T> extends KfGéreCss implements IKfVueTableOutils
     initialise(vueTable: KfVueTable<T>) {
         this.pVueTable = vueTable;
         this.suitLaVisiblité(vueTable);
-        this.pBtnToolbar.créeGereValeur();
-        this.pBtnToolbar.estRacineV = true;
-        this.pBtnToolbar.gereHtml.ajouteTraiteur(KfTypeDEvenement.valeurChange,
+        this.pGroupe.créeGereValeur();
+        this.pGroupe.estRacineV = true;
+        this.pGroupe.gereHtml.ajouteTraiteur(KfTypeDEvenement.valeurChange,
             () => {
                 vueTable.appliqueFiltres();
             });
         this.pOutils.forEach(outil => {
-            this.pBtnToolbar.ajoute(outil.composant);
+            this.pGroupe.ajoute(outil.composant);
             if (outil.initialise) {
                 outil.initialise(this);
             }
@@ -94,7 +93,7 @@ export class KfVueTableOutils<T> extends KfGéreCss implements IKfVueTableOutils
     }
 
     /**
-     * Définit des classes css à appliquer suivant l'état des filtres.
+     * Définit des classes css à appliquer à la div des outils suivant l'état des filtres.
      * @param siFiltreActif classe css du groupe des outils quand un filtre est actif
      * @param siFiltreInactif classe css du groupe des outils quand aucun filtre n'est actif
      */
@@ -113,8 +112,8 @@ export class KfVueTableOutils<T> extends KfGéreCss implements IKfVueTableOutils
         }
     }
 
-    get btnToolbar(): KfBBtnToolbar {
-        return this.pBtnToolbar;
+    get groupe(): KfGroupe {
+        return this.pGroupe;
     }
 
     ajoute(outil: IKfVueTableOutil<T>) {

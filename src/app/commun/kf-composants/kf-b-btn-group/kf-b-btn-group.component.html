@@ -1,51 +1,104 @@
-<div #htmlElement role="group" [attr.aria-label]="ariaLabel" [class]="bbtnGroup.groupeClasse"
-    [ngClass]="bbtnGroup.classe" [ngStyle]="bbtnGroup.style">
-    <ng-container *ngFor="let bouton of bbtnGroup.contenus">
-        <ng-container *ngIf="!bouton.nePasAfficher">
-            <!-- test bouton -->
-            <ng-container *ngIf="bbtnGroup.estBouton(bouton); else pasBoutonTemplate">
-                <!-- bouton test popover -->
-                <ng-container *ngIf="bouton.ngbPopover; else buttonTemplate">
-                    <!-- bouton popover -->
-                    <app-kf-bouton [composant]="bouton"></app-kf-bouton>
-                </ng-container>
-                <ng-template #buttonTemplate>
-                    <button [type]="bouton.typeDeBouton" [name]="bouton.nom" [disabled]="bouton.inactif" [ngClass]="bouton.classe"
-                    [ngStyle]="bouton.style">
-                    <app-kf-contenu-phrase [contenuPhrase]="bouton.contenuAAfficher"></app-kf-contenu-phrase>
-                </button>
-                            </ng-template>
+<ng-template #boutonTemplate let-bouton>
+    <!-- bouton test popover -->
+    <ng-container *ngIf="bouton.ngbPopover; else boutonNormalTemplate">
+        <!-- bouton popover -->
+        <ng-template #popContent>
+            <ng-container *ngFor="let contenu of bouton.ngbPopover.contenus">
+                <app-kf-composant [composant]="contenu"></app-kf-composant>
             </ng-container>
-            <!-- pas bouton -->
-            <ng-template #pasBoutonTemplate>
-                <!-- test lien -->
-                <ng-container *ngIf="bbtnGroup.estLien(bouton); else pasLienTemplate">
-                    <!-- lien -->
-                    <ng-container *ngTemplateOutlet="lienTemplate; context: { bouton1: bouton }"></ng-container>
-                </ng-container>
-                <!-- pas lien -->
-                <ng-template #pasLienTemplate>
-                    <!-- test etiquette -->
-                    <ng-container *ngIf="bbtnGroup.estEtiquette; else pasEtiquetteTemplate">
-                        <span [ngClass]="bouton.classe" [ngStyle]="bouton.style">
-                            <app-kf-contenu-phrase [contenuPhrase]="bouton.contenuPhrase"></app-kf-contenu-phrase>
-                        </span>
-                    </ng-container>
-                    <ng-template #pasEtiquetteTemplate>
-
-                    </ng-template>
-
-                </ng-template>
-
-                <ng-template #lienTemplate let-lien="bouton1">
-                    <a [routerLink]="lien.route" routerLinkActive="active" [queryParams]="lien.queryParams"
-                        [fragment]="lien.fragment" [ngClass]="lien.classe" [ngStyle]="lien.style"
-                        [attr.title]="lien.titleHtml">
-                        <app-kf-contenu-phrase [contenuPhrase]="lien.contenuPhrase"></app-kf-contenu-phrase>
-                    </a>
-                </ng-template>
-            </ng-template>
-
+        </ng-template>
+        <ng-template #popTitle>
+            <app-kf-etiquette *ngIf="bouton.ngbPopover.titre" [composant]="bouton.ngbPopover.titre">
+            </app-kf-etiquette>
+        </ng-template>
+    
+        <button #htmlElement type="button" [name]="bouton.nom" [ngClass]="bouton.classe" [ngStyle]="bouton.style"
+            [disabled]="bouton.inactif" [ngbPopover]="popContent" [popoverTitle]="popTitle"
+            [placement]="bouton.ngbPopover.placement ? bouton.ngbPopover.placement : 'auto'" container="body">
+            <app-kf-contenu-phrase [contenuPhrase]="bouton.contenuAAfficher"></app-kf-contenu-phrase>
+        </button>
         </ng-container>
+    <ng-template #boutonNormalTemplate>
+        <!-- bouton normal -->
+        <button [type]="bouton.typeDeBouton" [name]="bouton.nom" [disabled]="bouton.inactif" [ngClass]="bouton.classe"
+            [ngStyle]="bouton.style">
+            <app-kf-contenu-phrase [contenuPhrase]="bouton.contenuAAfficher"></app-kf-contenu-phrase>
+        </button>
+    </ng-template>
+</ng-template>
+
+<ng-template #lienTemplate let-lien>
+    <a [routerLink]="lien.route" routerLinkActive="active" [queryParams]="lien.queryParams" [fragment]="lien.fragment"
+        [ngClass]="lien.classe" [ngStyle]="lien.style" [attr.title]="lien.titleHtml">
+        <app-kf-contenu-phrase [contenuPhrase]="lien.contenuPhrase"></app-kf-contenu-phrase>
+    </a>
+</ng-template>
+
+<ng-template #etiquetteTemplate let-etiquette>
+    <span [ngClass]="etiquette.classe" [ngStyle]="etiquette.style">
+        <app-kf-contenu-phrase [contenuPhrase]="etiquette.contenuPhrase"></app-kf-contenu-phrase>
+    </span>
+</ng-template>
+
+<ng-template #labelTemplate let-avecLabel>
+    <label #labelElement [attr.for]="avecLabel.nom" [ngClass]="avecLabel.label.classe">
+        <app-kf-contenu-phrase [contenuPhrase]="avecLabel.label.contenuPhrase"></app-kf-contenu-phrase>
+    </label>
+</ng-template>
+<ng-template #caseACocherTemplate let-case>
+    <ng-container *ngIf="case.classeEntree; else caseTemplate">
+        <div [ngClass]="case.classeEntree" [id]="case.nom + '_Entrée'">
+            <ng-container *ngTemplateOutlet="caseTemplate"></ng-container>
+        </div>
     </ng-container>
-</div>
+    <ng-template #caseTemplate>
+        <ng-container *ngIf="case.avecLabelAvant">
+            <ng-container *ngTemplateOutlet="labelTemplate; context: { $implicit: case }"></ng-container>
+        </ng-container>
+
+        <ng-container *ngIf="case.aspect; else caseNormaleTemplate">
+            <input type='checkbox' #inputElement [name]="case.nom" class="kf-invisible" [formControl]="case.formControl"
+                [attr.disabled]="case.inactif" />
+            <app-kf-composant [composant]="case.aspect"></app-kf-composant>
+        </ng-container>
+        <ng-template #caseNormaleTemplate>
+            <input type='checkbox' #inputElement [name]="case.nom" [ngClass]="case.classe"
+                [formControl]="case.formControl" [attr.disabled]="case.inactif" />
+        </ng-template>
+        <ng-container *ngIf="case.avecLabelApres">
+            <ng-container *ngTemplateOutlet="labelTemplate; context: { $implicit: case }"></ng-container>
+        </ng-container>
+    </ng-template>
+</ng-template>
+
+<ng-container *ngIf="bbtnGroup.estNonVide">
+
+    <div #htmlElement role="group" [attr.aria-label]="ariaLabel" [class]="bbtnGroup.groupeClasse"
+        [ngClass]="bbtnGroup.classe" [ngStyle]="bbtnGroup.style">
+        <ng-container *ngFor="let contenu of bbtnGroup.contenus">
+            <ng-container *ngIf="!contenu.nePasAfficher">
+                <ng-container [ngSwitch]="contenu.type">
+                    <ng-container *ngSwitchCase="type.bouton">
+                        <ng-container *ngTemplateOutlet="boutonTemplate; context: { $implicit: contenu }">
+                        </ng-container>
+                    </ng-container>
+                    <ng-container *ngSwitchCase="type.lien">
+                        <ng-container *ngTemplateOutlet="lienTemplate; context: { $implicit: contenu }"></ng-container>
+                    </ng-container>
+                    <ng-container *ngSwitchCase="type.caseacocher">
+                        <ng-container *ngTemplateOutlet="caseACocherTemplate; context: { $implicit: contenu }">
+                        </ng-container>
+                    </ng-container>
+                    <ng-container *ngSwitchCase="type.etiquette">
+                        <ng-container *ngTemplateOutlet="etiquetteTemplate; context: { $implicit: contenu }">
+                        </ng-container>
+                    </ng-container>
+                    <ng-container *ngSwitchDefault>
+                    </ng-container>
+                </ng-container>
+
+            </ng-container>
+        </ng-container>
+    </div>
+
+</ng-container>

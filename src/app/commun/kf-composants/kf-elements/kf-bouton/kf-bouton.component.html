@@ -1,8 +1,20 @@
-<ng-container *ngIf="bouton.ngbPopover; then ngbPopoverTemplate; else normalTemplate"></ng-container>
+<ng-container *ngIf="!bouton.ngbPopover; else ngbPopoverTemplate">
+    <ng-container *ngIf="bouton.survol; then survolTemplate; else normalTemplate"></ng-container>
+</ng-container>
+
 <ng-template #normalTemplate>
     <button #htmlElement [type]="bouton.typeDeBouton" [name]="bouton.nom" [disabled]="inactif" [ngClass]="bouton.classe"
         [ngStyle]="bouton.style">
         <app-kf-contenu-phrase [contenuPhrase]="bouton.contenuAAfficher"></app-kf-contenu-phrase>
+    </button>
+</ng-template>
+<ng-template #survolTemplate>
+    <button #htmlElement [type]="bouton.typeDeBouton" [name]="bouton.nom" [disabled]="inactif" [ngClass]="bouton.classe"
+        [ngStyle]="bouton.style">
+        <div [ngClass]="bouton.classeSurvol">
+            <app-kf-contenu-phrase [contenuPhrase]="bouton.contenuAAfficher"></app-kf-contenu-phrase>
+            <app-kf-survol *ngIf="bouton.survol" [composant]="bouton.survol"></app-kf-survol>
+        </div>
     </button>
 </ng-template>
 <ng-template #ngbPopoverTemplate>
@@ -16,17 +28,9 @@
         </app-kf-etiquette>
     </ng-template>
 
-    <ng-container *ngIf="bouton.btnGroupe; else boutonPopoverTemplate">
-        <div [class]="bouton.btnGroupe.popoverGroupeClasse" role="group">
-            <ng-container *ngTemplateOutlet="boutonPopoverTemplate"></ng-container>
-        </div>
-    </ng-container>
-
-    <ng-template #boutonPopoverTemplate>
-        <button #htmlElement type="button" [name]="bouton.nom" [ngClass]="bouton.classe" [ngStyle]="bouton.style"
-            [disabled]="bouton.inactif" [ngbPopover]="popContent" [popoverTitle]="popTitle"
-            [placement]="bouton.ngbPopover.placement ? bouton.ngbPopover.placement : 'auto'" container="body">
-            <app-kf-contenu-phrase [contenuPhrase]="bouton.contenuAAfficher"></app-kf-contenu-phrase>
-        </button>
-    </ng-template>
+    <button #htmlElement type="button" [name]="bouton.nom" [ngClass]="bouton.classe" [ngStyle]="bouton.style"
+        [disabled]="bouton.inactif" [ngbPopover]="popContent" [popoverTitle]="popTitle"
+        [placement]="bouton.ngbPopover.placement ? bouton.ngbPopover.placement : 'auto'" container="body">
+        <app-kf-contenu-phrase [contenuPhrase]="bouton.contenuAAfficher"></app-kf-contenu-phrase>
+    </button>
 </ng-template>

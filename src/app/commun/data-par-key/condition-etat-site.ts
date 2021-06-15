@@ -8,14 +8,11 @@ export class ConditionEtatSite extends Conditions<IdEtatSite> {
 
     constructor(navigation: NavigationService) {
         super();
-        const o0 = KfInitialObservable.nouveau(navigation.litSiteEnCours(), navigation.siteObs());
         this.nom = 'site';
-        const o = KfInitialObservable.transforme(o0, (site: Site): IdEtatSite => site ? site.etat : IdEtatSite.aucun);
-        o.nom = 'ConditionEtatSite';
-        o.observable.subscribe(v => console.log('transforme ' + v));
-        this.observe(
+        this.observeObjet<Site>(
             [IdEtatSite.aucun, IdEtatSite.catalogue, IdEtatSite.ouvert],
-            o
+            (site: Site): IdEtatSite => site ? site.etat : IdEtatSite.aucun,
+            KfInitialObservable.nouveau(navigation.litSiteEnCours(), navigation.siteObs())
         );
     }
 
@@ -23,15 +20,7 @@ export class ConditionEtatSite extends Conditions<IdEtatSite> {
         return this.conditionIO(IdEtatSite.catalogue);
     }
 
-    get pas_catalogue(): KfInitialObservable<boolean> {
-        return this.pas_conditionIO(IdEtatSite.catalogue);
-    }
-
     get ouvert(): KfInitialObservable<boolean> {
         return this.conditionIO(IdEtatSite.ouvert);
-    }
-
-    get pas_ouvert(): KfInitialObservable<boolean> {
-        return this.pas_conditionIO(IdEtatSite.ouvert);
     }
 }

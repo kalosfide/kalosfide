@@ -4,7 +4,7 @@
             *ngTemplateOutlet="texteTemplate"></ng-container>
     </ng-container>
     <ng-container *ngSwitchCase="'haut'">
-        <span [ngClass]="icone.classeFond" [ngStyle]="icone.styleFond" [id]="icone.nomIcone + '_fond'">
+        <span #fondHtmlElement [ngClass]="icone.fond.classe" [ngStyle]="icone.fond.style" [id]="icone.fond.nom">
             <ng-container *ngTemplateOutlet="texteAvecCss"></ng-container>
             <ng-container *ngTemplateOutlet="iconeTemplate"></ng-container>
         </span>
@@ -14,14 +14,14 @@
             *ngTemplateOutlet="iconeTemplate"></ng-container>
     </ng-container>
     <ng-container *ngSwitchCase="'bas'">
-        <span [ngClass]="icone.classeFond" [ngStyle]="icone.styleFond" [id]="icone.nomIcone + '_fond'">
+        <span #fondHtmlElement [ngClass]="icone.fond.classe" [ngStyle]="icone.fond.style" [id]="icone.fond.nom">
             <ng-container *ngTemplateOutlet="iconeTemplate"></ng-container>
             <ng-container *ngTemplateOutlet="texteAvecCss"></ng-container>
         </span>
     </ng-container>
     <ng-container *ngSwitchDefault>
-        <ng-container *ngIf="icone.classeFond; else sansFondTemplate">
-            <span [ngClass]="icone.classeFond" [ngStyle]="icone.styleFond" [id]="icone.nomIcone + '_fond'">
+        <ng-container *ngIf="icone.fond; else sansFondTemplate">
+            <span #fondHtmlElement [ngClass]="icone.fond.classe" [ngStyle]="icone.fond.style" [id]="icone.fond.nom">
                 <ng-container *ngTemplateOutlet="iconeTemplate"></ng-container>
             </span>
         </ng-container>
@@ -46,9 +46,9 @@
             <i #htmlElement [class]="icone.faClasse" [ngClass]="icone.classe" [ngStyle]="icone.style"></i>
         </ng-container>
         <ng-template #couchesTemplate>
-            <span #htmlElement [class]="icone.faClassePile" [ngClass]="icone.classeFond" [ngStyle]="icone.styleFond">
+            <span #htmlElement [class]="icone.faClassePile" [ngClass]="icone.fond.classe" [ngStyle]="icone.fond.style">
                 <ng-container *ngFor="let icone of icone.couches">
-                    <ng-container *ngIf="icone.nomIcone; else texteTemplate">
+                    <ng-container *ngIf="icone.iconeDef; else texteTemplate">
                         <i [class]="icone.faClasse" [ngClass]="icone.classe" [ngStyle]="icone.style"></i>
                     </ng-container>
                     <ng-template #texteTemplate>
@@ -57,8 +57,5 @@
                 </ng-container>
                 
             </span>
-        </ng-template>
-    <span>
-
-    </span>
+        </ng-template> 
 </ng-template>

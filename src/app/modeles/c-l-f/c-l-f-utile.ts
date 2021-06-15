@@ -6,7 +6,6 @@ import { CLFUtileColonne } from './c-l-f-utile-colonne';
 import { ConditionAction, ModeAction } from './condition-action';
 import { KfInitialObservable } from 'src/app/commun/kf-composants/kf-partages/kf-initial-observable';
 import { DataKeyUtile } from 'src/app/commun/data-par-key/data-key-utile';
-import { Conditions } from 'src/app/commun/condition/condition';
 import { ApiDocument } from './api-document';
 import { CLFLigne } from './c-l-f-ligne';
 import { CLFService } from './c-l-f.service';

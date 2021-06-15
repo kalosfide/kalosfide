@@ -83,7 +83,7 @@ export class ClientUtileColonne extends DataUtileColonne {
             },
             classeDefs: ['client-compte'],
             compare: Compare.texte((client: Client) => client.compte),
-            nePasAfficherSi: this.utile.conditionTable.pasEdition,
+            afficherSi: this.utile.conditionTable.edition,
         };
     }
 
@@ -99,7 +99,7 @@ export class ClientUtileColonne extends DataUtileColonne {
                 return lien;
             },
             classeDefs: ['action'],
-            nePasAfficherSi: this.utile.conditionTable.pasEdition,
+            afficherSi: this.utile.conditionTable.edition,
         };
     }
 
@@ -118,7 +118,7 @@ export class ClientUtileColonne extends DataUtileColonne {
                 return lien;
             },
             classeDefs: ['action'],
-            nePasAfficherSi: this.utile.conditionTable.pasEdition,
+            afficherSi: this.utile.conditionTable.edition,
         };
     }
 

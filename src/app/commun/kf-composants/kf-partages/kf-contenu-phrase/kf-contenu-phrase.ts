@@ -6,7 +6,7 @@ import { KfLien } from '../../kf-elements/kf-lien/kf-lien';
 import { KfComposant } from '../../kf-composant/kf-composant';
 import { KfTypeDeComposant } from '../../kf-composants-types';
 import { KfImageDef } from '../kf-image-def';
-import { FANomIcone } from '../kf-icone-def';
+import { IKfIconeDef } from '../kf-icone-def';
 
 export type KfTypeContenuPhrasé = KfTexte | KfImage | KfIcone | KfLien;
 
@@ -113,8 +113,8 @@ export class KfContenuPhrase {
         }
     }
 
-    private créeKfIcone(nomIcone: FANomIcone): KfIcone {
-        const kfIcone = new KfIcone((this.composant ? this.composant.nom : '') + '_t', nomIcone);
+    private créeKfIcone(iconeDef: IKfIconeDef): KfIcone {
+        const kfIcone = new KfIcone((this.composant ? this.composant.nom : '') + '_t', iconeDef);
         this.contenus.push(kfIcone);
         return kfIcone;
     }
@@ -128,7 +128,7 @@ export class KfContenuPhrase {
     /**
      * retourne l'icone du premier contenu qui est un KfIcone
      */
-    get icone(): FANomIcone {
+    get icone(): IKfIconeDef {
         const kfIcone = this.kfIcone;
         if (kfIcone) {
             return kfIcone.icone;
@@ -137,13 +137,13 @@ export class KfContenuPhrase {
     /**
      * fixe l'icone du premier contenu qui est un KfIcone ou crée un contenu KfIcone
      */
-    fixeIcone(nomIcone: FANomIcone): KfIcone {
+    fixeIcone(iconeDef: IKfIconeDef): KfIcone {
         const kfIcone = this.kfIcone;
         if (kfIcone) {
-            kfIcone.nomIcone = nomIcone;
+            kfIcone.iconeDef = iconeDef;
             return kfIcone;
         } else {
-            return this.créeKfIcone(nomIcone);
+            return this.créeKfIcone(iconeDef);
         }
     }
 

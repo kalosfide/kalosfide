@@ -46,8 +46,8 @@ export class SiteEditeur extends KeyUidRnoEditeur<Site> {
     créeUrl(): KfInputTexte {
         this.kfUrl = Fabrique.input.texte('url', 'Nom du site');
         this.kfUrl.placeholder = this.ajoutePréfixe(this.transforme(this.placeholder));
-        this.kfUrl.ajouteCopieur(Fabrique.icone.nomIcone.copier, this.kfNom, this.transforme);
-        this.kfUrl.ajouteEffaceur(Fabrique.icone.nomIcone.croix);
+        this.kfUrl.ajouteCopieur(Fabrique.icone.def.copier, this.kfNom, this.transforme);
+        this.kfUrl.ajouteEffaceur(Fabrique.icone.def.croix);
         this.kfUrl.texteAide = Fabrique.étiquetteAide(this.kfUrl.nom,
             `Ce nom doit uniquement contenir des lettres minuscules non accentuées, des chiffres et '-' et '_'.`);
         const texteAutorisés = `Seuls les 26 lettres minuscules, les 9 chiffres et '-' et '_' sont autorisés.`;
@@ -69,8 +69,8 @@ export class SiteEditeur extends KeyUidRnoEditeur<Site> {
 
     créeTitre(): KfInputTexte {
         this.kfTitre = Fabrique.input.texte('titre', 'Titre du site');
-        this.kfTitre.ajouteCopieur(Fabrique.icone.nomIcone.copier, this.kfNom);
-        this.kfTitre.ajouteEffaceur(Fabrique.icone.nomIcone.croix);
+        this.kfTitre.ajouteCopieur(Fabrique.icone.def.copier, this.kfNom);
+        this.kfTitre.ajouteEffaceur(Fabrique.icone.def.croix);
         this.kfTitre.placeholder = this.ajoutePréfixe(this.placeholder);
         this.kfTitre.ajouteValidateur(
             KfValidateurs.required,

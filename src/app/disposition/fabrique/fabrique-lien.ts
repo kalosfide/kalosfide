@@ -6,7 +6,7 @@ import { IUrlDef } from './fabrique-url';
 import { FabriqueMembre } from './fabrique-membre';
 import { FabriqueClasse } from './fabrique';
 import { BootstrapNom, BootstrapType, KfBootstrap } from '../../commun/kf-composants/kf-partages/kf-bootstrap';
-import { FANomIcone } from 'src/app/commun/kf-composants/kf-partages/kf-icone-def';
+import { IKfIconeDef } from 'src/app/commun/kf-composants/kf-partages/kf-icone-def';
 
 export interface ILienDef {
     nom?: string;
@@ -32,7 +32,7 @@ export class FabriqueLien extends FabriqueMembre {
         if (!def.contenu) {
             def.contenu = {};
         }
-        if (!def.contenu.nomIcone && !def.contenu.icone && def.contenu.texte === undefined) {
+        if (!def.contenu.iconeDef && !def.contenu.icone && def.contenu.texte === undefined) {
             def.contenu.texte = def.urlDef.pageDef.lien ? def.urlDef.pageDef.lien : def.urlDef.pageDef.urlSegment;
         }
         this.fabrique.contenu.fixeDef(lien, def.contenu);
@@ -137,12 +137,12 @@ export class FabriqueLien extends FabriqueMembre {
         return groupe;
     }
 
-    deBarre(urlDef: IUrlDef, nomIcone: FANomIcone, texte?: string): KfLien {
+    deBarre(urlDef: IUrlDef, iconeDef: IKfIconeDef, texte?: string): KfLien {
         return this.lienBouton({
             nom: urlDef.pageDef.urlSegment,
             urlDef,
             contenu: {
-                nomIcone,
+                iconeDef,
                 texte: texte ? texte : urlDef.pageDef.lien,
                 positionTexte: 'droite',
             }

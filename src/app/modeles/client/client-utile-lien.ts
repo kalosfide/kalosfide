@@ -18,18 +18,18 @@ export class ClientUtileLien extends DataUtileLien {
     accueil(): KfLien {
         return Fabrique.lien.deBarre(
             this.utile.urlKey.dePageDef(FournisseurClientPages.accueil),
-            Fabrique.icone.nomIcone.info);
+            Fabrique.icone.def.info);
     }
     clients(): KfLien {
         return Fabrique.lien.deBarre(
             this.utile.urlKey.dePageDef(FournisseurClientPages.index),
-            Fabrique.icone.nomIcone.personnes,
+            Fabrique.icone.def.personnes,
             'Liste');
     }
     invitations(): KfLien {
         return Fabrique.lien.deBarre(
             this.utile.urlKey.dePageDef(FournisseurClientPages.invitations),
-            Fabrique.icone.nomIcone.envelope);
+            Fabrique.icone.def.envelope);
     }
     index(): KfLien {
         return this.utile.lienKey.index();

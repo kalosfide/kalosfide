@@ -8,6 +8,7 @@ import { KfTypeDInput } from '../kf-elements/kf-input/kf-type-d-input';
 import { KfEvenement, KfStatutDEvenement, KfTypeDEvenement, KfTypeDHTMLEvents } from '../kf-partages/kf-evenements';
 import { KfComposantGereValeur } from '../kf-composant/kf-composant-gere-valeur';
 import { KfBouton } from '../kf-elements/kf-bouton/kf-bouton';
+import { KfDivTableLigne } from './kf-div-table';
 
 /**
  * racine d'un arbre de disposition
@@ -102,6 +103,22 @@ export class KfSuperGroupe extends KfGroupe {
             while (enfant) {
                 créeArbresDeValeurs(enfant.objet as KfComposant, pV);
                 enfant = enfant.suivant;
+            }
+            if (composant.type === KfTypeDeComposant.groupe) {
+                const groupe = composant as KfGroupe;
+                const créeArbresDeValeursLigne = (divLigne: KfDivTableLigne) => {
+                        divLigne.colonnes.forEach(divColonne => {
+                            if (divColonne.composants) {
+                                divColonne.composants.forEach(composant => créeArbresDeValeurs(composant, pV));
+                            }
+                        });
+                    }
+                if (groupe.divTable) {
+                    groupe.divTable.lignes.forEach(divLigne => créeArbresDeValeursLigne(divLigne));
+                }
+                if (groupe.divLigne) {
+                    créeArbresDeValeursLigne(groupe.divLigne);
+                }
             }
         };
 

@@ -26,7 +26,7 @@ import { KfValidateur } from '../kf-partages/kf-validateur';
 import { KfTexteDef } from '../kf-partages/kf-texte-def';
 import { KfImageDef } from '../kf-partages/kf-image-def';
 import { IKfVueTable } from '../kf-vue-table/kf-vue-table';
-import { FANomIcone } from '../kf-partages/kf-icone-def';
+import { IKfIconeDef } from '../kf-partages/kf-icone-def';
 import { KfGéreCss } from '../kf-partages/kf-gere-css';
 import { Subscription, Observable } from 'rxjs';
 import { KfInitialObservable } from '../kf-partages/kf-initial-observable';
@@ -119,14 +119,6 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
     }
     set contenuPhrase(contenuPhrase: KfContenuPhrase) {
         this.pContenuPhrase = contenuPhrase;
-    }
-
-    /**
-     * pour entourer le template du composant dans un ou des éléments div
-     */
-    private pDiv: KfDiv;
-    get div(): KfDiv {
-        return this.pDiv;
     }
 
     /**
@@ -291,7 +283,7 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
         return this.estRacineV && this.type === KfTypeDeComposant.groupe && !!this.gereValeur;
     }
     get estGroupe(): boolean {
-        return this.type === KfTypeDeComposant.groupe || this.type === KfTypeDeComposant.b_btn_toolbar;
+        return this.type === KfTypeDeComposant.groupe;
     }
     get estListe(): boolean {
         return this.type === KfTypeDeComposant.liste;
@@ -322,10 +314,14 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
         }
     }
 
+    get estValidable(): boolean {
+        return this.gereValeur && this.gereValeur.validateurs && this.gereValeur.validateurs.length > 0;
+    }
+
+
     get estInvalide(): boolean {
         return this.gereValeur && this.gereValeur.invalide;
     }
-
     get nomPourErreur(): string {
         if (this.pNomPourErreur) {
             return this.pNomPourErreur;
@@ -413,7 +409,7 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
 
     initialiseHtml(htmlElement: HTMLElement, output: EventEmitter<KfEvenement>) {
         this.gereHtml.htmlElement = htmlElement;
-        this.composant.gereHtml.initialiseHtml(output);
+        this.gereHtml.initialiseHtml(output);
     }
 
     get tabIndex(): number {
@@ -493,7 +489,7 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
     /**
      * retourne l'icone de l'element ou de son label si l'élément est équivalent à un label ou a un label
      */
-    get icone(): FANomIcone {
+    get icone(): IKfIconeDef {
         if (this.contenuPhrase) {
             return this.contenuPhrase.icone;
         }
@@ -501,7 +497,7 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
     /**
      * fixe l'icone de l'element ou de son label
      */
-    fixeIcone(icone: FANomIcone) {
+    fixeIcone(icone: IKfIconeDef) {
         if (!this.contenuPhrase) {
             throw new Error(`Ce composant n'a pas de contenu phrasé.`);
         } else {

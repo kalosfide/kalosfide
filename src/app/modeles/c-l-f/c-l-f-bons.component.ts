@@ -193,7 +193,7 @@ export abstract class CLFBonsComponent extends PageTableComponent<CLFDoc> implem
             nom: 'creer',
             action: () => this.service.routeur.navigueUrlDef(this.utile.url.envoi(this.clfDocs)),
             contenu: { texte: 'Créer ' + this.texteUtile.le_doc },
-            bootstrapType: 'primary'
+            bootstrap: { type: 'primary' }
         };
         this.boutonCréer = Fabrique.bouton.bouton(def);
         boutons.push(this.boutonCréer);

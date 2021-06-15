@@ -73,7 +73,7 @@ export class KfSousMenu extends KfComposant {
     }
 
     get selecteur(): KfComposant {
-        return this.enfants[0];
+        return this.contenus[0];
     }
 
     get sansSousMenus(): boolean {
@@ -81,7 +81,7 @@ export class KfSousMenu extends KfComposant {
     }
 
     get sousMenus(): KfSousMenu[] {
-        return this.enfants.slice(1).map(c => c as KfSousMenu);
+        return this.contenus.slice(1).map(c => c as KfSousMenu);
     }
 
     get menu(): KfMenu {

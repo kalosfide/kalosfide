@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RacineComponent } from './racine.component';
 
@@ -6,7 +6,7 @@ describe('PageComponent', () => {
   let component: RacineComponent;
   let fixture: ComponentFixture<RacineComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ RacineComponent ]
     })

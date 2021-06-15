@@ -15,6 +15,10 @@ import { EtatTable, IEtatTableDef } from './etat-table';
 import { GroupeBoutonsMessages } from './fabrique-formulaire';
 import { KfBouton } from 'src/app/commun/kf-composants/kf-elements/kf-bouton/kf-bouton';
 import { IKfVueTablePaginationDef, KfVueTablePagination } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-pagination';
+import { IKfIconeDef } from 'src/app/commun/kf-composants/kf-partages/kf-icone-def';
+import { KfIcone } from 'src/app/commun/kf-composants/kf-elements/kf-icone/kf-icone';
+import { KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
+import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 
 export class FabriqueVueTable extends FabriqueMembre {
 
@@ -30,22 +34,18 @@ export class FabriqueVueTable extends FabriqueMembre {
         return this.fabrique.couleur.classeCouleurFond(Couleur.whitesmoke);
     }
 
-    private get classeOutilActif(): string {
-        return this.fabrique.couleur.classeCouleurFond(Couleur.orange);
-    }
-
     vueTable<T>(nom: string, vueTableDef: IKfVueTableDef<T>): KfVueTable<T> {
         vueTableDef.nePasMontrerIconeDeTriSiPasTrié = true;
         vueTableDef.colonneNoLigneDef = {
             classeDefs: ['no-ligne'],
         };
         const vueTable = new KfVueTable<T>(nom + '_table', vueTableDef);
-        vueTable.ajouteClasse('table-sm table-hover');
+        vueTable.ajouteClasse('table-sm table-hover table-borderless');
         if (vueTable.enTete) {
-            vueTable.enTete.gereCss.ajouteClasse('thead-light');
+            vueTable.enTete.gereCss.ajouteClasse('table-light');
         }
         if (vueTable.bilan) {
-            vueTable.bilan.gereCss.ajouteClasse('thead-light');
+            vueTable.bilan.gereCss.ajouteClasse('table-light');
         }
         vueTable.colonnes.forEach(colonne => {
             colonne.ajouteClasseItem('align-middle');
@@ -68,58 +68,63 @@ export class FabriqueVueTable extends FabriqueMembre {
 
     outils<T>(): KfVueTableOutils<T> {
         const outils = new KfVueTableOutils<T>();
-        outils.btnToolbar.ajouteClasse('justify-content-between');
+        KfBootstrap.prépareToolbar(outils.groupe, 'outils');
+        outils.groupe.ajouteClasse('justify-content-between');
         return outils;
     }
 
-    private _prépareFiltreOuCherche<T>(filtre: KfVueTableFiltreBase<T>) {
-        filtre.composant.géreClasseEntree.ajouteClasse('input-group input-group-sm');
+    private iconeAvant(iconeDef: IKfIconeDef, inactif: () => boolean): KfEtiquette {
+        const icone = this.fabrique.icone.icone(iconeDef);
+        icone.ajouteClasse(
+            {
+                nom: this.fabrique.couleur.classeCouleur(Couleur.gray),
+                active: inactif
+            }
+        )
+        const étiquette = new KfEtiquette('');
+        étiquette.contenuPhrase.ajoute(icone);
+        return étiquette;
     }
 
     private _prépareFiltre<T>(filtre: KfVueTableFiltreTexte<T> | KfVueTableFiltreNombre<T>, titre: string, placeholder?: string) {
-        this._prépareFiltreOuCherche<T>(filtre);
-        filtre.composant.ajouteClasse('form-control');
-        const fauxBouton = this.fabrique.bouton.bouton({
-            nom: '',
-            contenu: { nomIcone: this.fabrique.icone.nomIcone.filtre }
-        });
-        fauxBouton.inactivité = true;
-        filtre.liste.fixeComposantAvant(fauxBouton, 'input-group-text');
+        const inactif: () => boolean = () => filtre.liste.valeur === undefined;
+        const fauxBouton = this.iconeAvant(this.fabrique.icone.def.filtre, inactif);
+        filtre.liste.fixeComposantAvant(fauxBouton);
         if (placeholder) {
             const option0 = filtre.liste.créeOption0();
             option0.contenuPhrase.fixeTexte(placeholder);
             filtre.liste.gereHtml.ajouteTraiteur(KfTypeDEvenement.valeurChange,
                 () => {
                     console.log(filtre.liste.valeur);
-                    const estSur0 = filtre.liste.valeur === undefined;
-                    if (estSur0) {
+                    if (inactif()) {
                         option0.contenuPhrase.fixeTexte(placeholder);
                         option0.supprimeClasse('font-italic');
-                        fauxBouton.supprimeClasse(this.classeOutilActif);
                     } else {
                         option0.contenuPhrase.fixeTexte('Annuler le filtre');
                         option0.ajouteClasse('font-italic font-weight-bold');
-                        fauxBouton.ajouteClasse(this.classeOutilActif);
                     }
 
                 });
         }
+        KfBootstrap.prépare(filtre.composant, {
+            taille: 'sm',
+            dansInputGroup: true
+        });
         return filtre;
     }
 
     cherche<T>(nom: string, titre: string, colonne: string, placeholder?: string): KfVueTableFiltreCherche<T> {
         const filtre = new KfVueTableFiltreCherche<T>(nom, colonne);
-        this._prépareFiltreOuCherche<T>(filtre);
-        const fauxBouton = this.fabrique.bouton.bouton({
-            nom: '',
-            contenu: { nomIcone: this.fabrique.icone.nomIcone.cherche }
-        });
-        fauxBouton.inactivité = true;
-        fauxBouton.ajouteClasse({ nom: this.classeOutilActif, active: () => filtre.texte.valeur && filtre.texte.valeur !== '' });
-        filtre.texte.fixeComposantAvant(fauxBouton, 'input-group-prepend');
-        filtre.texte.ajouteEffaceur(this.fabrique.icone.nomIcone.croix);
-        filtre.texte.ajouteCssDivBouton('input-group-sm');
+        filtre.composant.ajouteClasse('form-control');
+        const inactif: () => boolean = () => !filtre.texte.valeur || filtre.texte.valeur === ''
+        const fauxBouton = this.iconeAvant(this.fabrique.icone.def.cherche, inactif);
+        filtre.texte.fixeComposantAvant(fauxBouton);
+        filtre.texte.ajouteEffaceur(this.fabrique.icone.def.croix);
         filtre.texte.placeholder = placeholder;
+        KfBootstrap.prépare(filtre.composant, {
+            taille: 'sm',
+            dansInputGroup: true
+        });
         return filtre;
     }
 
@@ -161,27 +166,31 @@ export class FabriqueVueTable extends FabriqueMembre {
         return etatTable;
     }
 
-    pagination<T>(): KfVueTablePagination<T> {
+    pagination<T>(nomLigne?: string, nomLignes?: string): KfVueTablePagination<T> {
         const def: IKfVueTablePaginationDef = {
             icone: this.fabrique.icone.iconesPagination(),
             nbBoutons: 5,
             choixNbParPage: [4, 8, 12],
             nbParPage: 8,
-            avecEtat: true,
+            avecEtat: {
+                nomLigne,
+                nomLignes
+            },
             optionToutesLesLignes: true,
             nePasAfficherSiUneSeulePage: true,
         };
         const pagination = new KfVueTablePagination<T>(def);
-        pagination.btnToolbar.ajouteClasse('justify-content-between pt-1');
+        KfBootstrap.prépareToolbar(pagination.groupe, 'pagination')
+        pagination.groupe.ajouteClasse('justify-content-between pt-1');
         pagination.etat.bbtnGroup.taille('sm');
         pagination.etat.etiquette.ajouteClasse('form-control-sm');
         pagination.boutons.bbtnGroup.taille('sm');
         pagination.boutons.bbtnGroup.ajouteClasse('pagination');
         pagination.boutons.boutons.forEach(b => {
-            b.ajouteClasse('btn btn-light btn-sm');
-            });
+            b.ajouteClasse('btn', KfBootstrap.classe('btn', 'secondary', 'outline'));
+        });
         pagination.choixNbParPage.liste.géreClasseEntree.ajouteClasse('input-group input-group-sm');
-        pagination.choixNbParPage.liste.ajouteClasse('form-control-sm');
+        pagination.choixNbParPage.liste.ajouteClasse('form-select form-select-sm');
         return pagination;
     }
 }

@@ -106,11 +106,8 @@ $table-action-texte-sous-icone: 68px;
     width: 60px;
 }
 
-.modal-confirme .modal-content {
-    background-color: lightgray;
-}
-
-.breadcrumb {
+$breadcrumb-divider: quote("-");
+.breadcrumb1 {
     background: none;
     font-size: 0.8em;
     margin: 0;

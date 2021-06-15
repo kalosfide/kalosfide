@@ -37,7 +37,6 @@ export class VCProduitsComponent extends ProduitIndexBaseComponent implements On
 
     protected get barreTitreDef(): IBarreDef {
         const def = this._barreTitreDef;
-        def.boutonsPourBtnGroup = [[]];
         return def;
     }
 

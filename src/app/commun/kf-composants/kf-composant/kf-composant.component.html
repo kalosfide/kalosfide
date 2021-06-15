@@ -14,9 +14,6 @@
         <app-kf-b-btn-group *ngSwitchCase="type.b_btn_group" [composant]="composant">
         </app-kf-b-btn-group>
 
-        <app-kf-b-btn-toolbar *ngSwitchCase="type.b_btn_toolbar" [composant]="composant">
-        </app-kf-b-btn-toolbar>
-
         <app-kf-ul *ngSwitchCase="type.ul" [composant]="composant">
         </app-kf-ul>
 
@@ -34,6 +31,12 @@
 
                 <app-kf-icone *ngSwitchCase="type.icone" [composant]="composant">
                 </app-kf-icone>
+
+                <app-kf-bootstrap-spinner *ngSwitchCase="type.bsSpinner" [composant]="composant">
+                </app-kf-bootstrap-spinner>
+
+                <app-kf-vue-json *ngSwitchCase="type.vuejson" [composant]="composant"
+                   ></app-kf-vue-json>
 
                 <!-- éléments -->
                 <app-kf-etiquette *ngSwitchCase="type.etiquette" [composant]="composant"></app-kf-etiquette>
@@ -91,7 +94,5 @@
                 <app-kf-menu *ngSwitchCase="type.menu" [composant]="composant"
                    ></app-kf-menu>
 
-                <app-kf-vue-json *ngSwitchCase="type.vuejson" [composant]="composant"
-                   ></app-kf-vue-json>
 
 -->

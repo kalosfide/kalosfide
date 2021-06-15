@@ -17,12 +17,10 @@ export class DataUtile {
     protected pBouton?: DataUtileBouton;
     protected pOutils?: DataUtileOutils;
     protected pColonne: DataUtileColonne;
-    private pConditionSite: ConditionEtatSite;
     private pConditionTable?: ConditionTable;
 
     constructor(service: DataService) {
         this.pService = service;
-        this.pConditionSite = new ConditionEtatSite(service.navigation);
     }
 
     get url(): DataUtileUrl {
@@ -47,10 +45,6 @@ export class DataUtile {
 
     get routeur(): RouteurService {
         return this.pService.routeur;
-    }
-
-    get conditionSite(): ConditionEtatSite {
-        return this.pConditionSite;
     }
 
     observeModeTable(modeTableIo: KfInitialObservable<ModeTable>) {

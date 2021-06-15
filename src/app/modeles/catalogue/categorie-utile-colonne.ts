@@ -47,7 +47,7 @@ export class CategorieUtileColonne extends DataUtileColonne {
                 return btnGroup;
             },
             classeDefs: ['colonne-btn-group-2'],
-            nePasAfficherSi: this.utile.conditionTable.pasEdition,
+            afficherSi: this.utile.conditionTable.edition,
         };
     }
 

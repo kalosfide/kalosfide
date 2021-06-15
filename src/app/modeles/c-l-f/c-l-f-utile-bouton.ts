@@ -169,7 +169,7 @@ export class CLFUtileBouton extends DataUtileBouton {
         const def: IBoutonDef = {
             nom: 'annuler',
             contenu: { texte: this.utile.texte.textes(clfDocs.type).bouton.annulerVérifier },
-            bootstrapType: BootstrapNom.dark,
+            bootstrap: { type: BootstrapNom.dark },
             action: () => {
                 this.service.routeur.navigueUrlDef(this.service.utile.url.retourDEnvoi(client));
             }
@@ -212,14 +212,14 @@ export class CLFUtileBouton extends DataUtileBouton {
                 contenu: {
                     texte: texteUtile.bouton.vérifier,
                 },
-                bootstrapType: 'secondary',
+                bootstrap: { type: 'secondary' },
                 action: () => {
                     this.service.routeur.navigueUrlDef(this.service.utile.url.envoi(clfDocs));
                 },
             });
             vérifier.inactivité = !(this.utile.conditionAction.edite && prêt);
             Fabrique.contenu.fixeDef(info, {
-                nomIcone: Fabrique.icone.nomIcone.info,
+                iconeDef: Fabrique.icone.def.info,
                 couleurIcone: couleur,
             });
             Fabrique.titrePage.fixePopover(info, '', infos);
@@ -248,14 +248,14 @@ export class CLFUtileBouton extends DataUtileBouton {
                 contenu: {
                     texte: texteUtile.bouton.annulerVérifier,
                 },
-                bootstrapType: 'dark',
+                bootstrap: { type: 'dark' },
                 action: () => {
                     this.service.routeur.navigueUrlDef(this.service.utile.url.retourDEnvoi(client));
                 },
             });
             vérifier.inactivité = false;
             Fabrique.contenu.fixeDef(info, {
-                nomIcone: Fabrique.icone.nomIcone.info,
+                iconeDef: Fabrique.icone.def.info,
                 couleurIcone: Couleur.green,
             });
             Fabrique.titrePage.fixePopover(info, '', infos);

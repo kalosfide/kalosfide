@@ -80,11 +80,12 @@ export abstract class KfVueTableSectionBase<T> implements IKfVueTableSection {
 
     protected initialiseHtmlLignes(): boolean {
         let changé = false;
-        if (this.lignesVisibles) {
+        const lignesVisibles = this.lignesVisibles;
+        if (lignesVisibles) {
             const trs = this.pGéreHtml.htmlElement.children;
-            for (let index = 0; index < this.lignesVisibles.length; index++) {
+            for (let index = 0; index < lignesVisibles.length; index++) {
                 const tr = trs[index] as HTMLTableRowElement;
-                const ligne = this.lignesVisibles[index];
+                const ligne = lignesVisibles[index];
                 if (ligne.géreHtml.htmlElement !== tr) {
                     ligne.initialiseHtml(tr);
                     changé = true;

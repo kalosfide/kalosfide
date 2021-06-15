@@ -16,7 +16,6 @@ import { TypeCommande } from 'src/app/modeles/type-commande';
 import { ReglesDeMotDePasse } from 'src/app/securite/mot-de-passe';
 import { IKfEntreeFocusClavier } from 'src/app/commun/kf-composants/kf-elements/kf-entree/i-kf-entree-focus-clavier';
 import { KfRadios } from 'src/app/commun/kf-composants/kf-elements/kf-radios/kf-radios';
-import { IKfBootstrapOptions, KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
 import { KfRadio } from 'src/app/commun/kf-composants/kf-elements/kf-radios/kf-radio';
 
 class FabriqueEntrée extends FabriqueMembre {
@@ -26,16 +25,16 @@ class FabriqueEntrée extends FabriqueMembre {
 
     prépareSuitValeurEtFocus(entrée: KfEntrée, apiAction: ApiRequêteAction, service: DataService) {
         const icone = this.fabrique.icone.iconeAttente();
-        icone.survole(entrée);
-        apiAction.attente = icone.attenteSurvol;
+        entrée.créeSurvol(icone);
+        apiAction.attente = {
+            commence: entrée.survol.commence,
+            finit: entrée.survol.finit
+        };
 
         const def: IKfEntreeFocusClavier = {
             /*
-            lectureSeuleSiPasFocus: true,
             sauveQuandPerdFocus: true,
-            toucheRétablit: 'Escape',
             */
-            toucheDébutEdition: 'F2',
             toucheRétablit: 'Escape',
             toucheSauvegarde: 'Enter',
             sauvegarde: () => service.actionObs(apiAction)
@@ -97,7 +96,7 @@ export class FabriqueInput extends FabriqueEntrée {
                 input.ajouteValidateur(KfValidateurs.requireNonAlphanumeric);
             }
         }
-        input.ajouteMontreMotDePasse('eye', 'eye-slash');
+        input.ajouteMontreMotDePasse(this.fabrique.icone.def.oeil, this.fabrique.icone.def.oeil_barré);
         return input;
     }
     nombre(nom: string, texte?: KfTexteDef, placeholder?: string): KfInputNombre {

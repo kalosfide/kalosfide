@@ -8,14 +8,12 @@ import { KfBBtnGroup, KfBBtnGroupElement } from 'src/app/commun/kf-composants/kf
 import { IBoutonDef } from '../fabrique-bouton';
 import { IContenuPhraseDef } from '../fabrique-contenu-phrase';
 import { Couleur } from '../fabrique-couleurs';
-import { KfBBtnToolbar } from 'src/app/commun/kf-composants/kf-b-btn-toolbar/kf-b-btn-toolbar';
 import { Site } from 'src/app/modeles/site/site';
 import { KfBootstrap } from '../../../commun/kf-composants/kf-partages/kf-bootstrap';
-import { GroupeAccès } from './groupe-acces';
 import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 import { KfDivTableColonne } from 'src/app/commun/kf-composants/kf-groupe/kf-div-table';
-import { EtatSite } from '../fabrique-etat-site';
 import { IdEtatSite } from 'src/app/modeles/etat-site';
+import { KfSuperGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-super-groupe';
 
 export interface IBtnGroupeDef {
     groupe: KfBBtnGroup;
@@ -25,17 +23,18 @@ export interface IBtnGroupeDef {
 export class BarreTitre {
     pageDef: PageDef;
     site: Site;
-    private toolbar: KfBBtnToolbar;
+    private toolbar: KfGroupe;
     private rafraichissements: ((barre: BarreTitre) => void)[];
 
     constructor(pageDef: PageDef) {
         this.pageDef = pageDef;
-        this.toolbar = new KfBBtnToolbar(pageDef.urlSegment);
+        this.toolbar = new KfGroupe(pageDef.urlSegment);
+        KfBootstrap.prépareToolbar(this.toolbar, 'titre');
         this.toolbar.ajouteClasse('justify-content-between');
         this.rafraichissements = [];
     }
 
-    get barre(): KfBBtnToolbar {
+    get barre(): KfGroupe {
         return this.toolbar;
     }
 
@@ -57,7 +56,7 @@ export interface IBarreDef {
      */
     pageDef: PageDef;
     contenuAidePage?: KfComposant[];
-    boutonsPourBtnGroup?: (KfBBtnGroupElement[])[];
+    groupesDeBoutons?: KfBBtnGroup[];
 }
 
 export class FabriqueTitrePage extends FabriqueMembre {
@@ -67,15 +66,9 @@ export class FabriqueTitrePage extends FabriqueMembre {
         const barre = new BarreTitre(barreDef.pageDef);
         if (barreDef.contenuAidePage) {
             barre.ajoute(this.groupeDefAidePage(barre, barreDef.contenuAidePage));
-        } else {
-            barre.ajoute({ groupe: new KfBBtnGroup('') });
         }
-        if (barreDef.boutonsPourBtnGroup) {
-            barreDef.boutonsPourBtnGroup.forEach(boutons => {
-                const groupe = this.bbtnGroup('');
-                boutons.forEach(bouton => {
-                    groupe.ajoute(bouton);
-                });
+        if (barreDef.groupesDeBoutons) {
+            barreDef.groupesDeBoutons.forEach(groupe => {
                 barre.ajoute({ groupe });
             });
         }
@@ -101,7 +94,7 @@ export class FabriqueTitrePage extends FabriqueMembre {
 
     contenuBoutonInfo(titre?: string): IContenuPhraseDef {
         const contenu: IContenuPhraseDef = {
-            nomIcone: this.fabrique.icone.nomIcone.info,
+            iconeDef: this.fabrique.icone.def.info,
             couleurIcone: Couleur.blue,
             texte: titre,
             positionTexte: 'droite',
@@ -117,13 +110,13 @@ export class FabriqueTitrePage extends FabriqueMembre {
 
     boutonAide(nom: string, titre?: string): KfBouton {
         const bouton = this.bouton(nom, this.fabrique.contenu.aide(titre));
-        KfBootstrap.ajouteClasse(bouton, 'btn', 'light');
+        KfBootstrap.ajouteClasse(bouton, 'btn', 'light', 'outline');
         return bouton;
     }
 
     contenuBoutonRafraichit(titre?: string): IContenuPhraseDef {
         const contenu: IContenuPhraseDef = {
-            nomIcone: this.fabrique.icone.nomIcone.rafraichit,
+            iconeDef: this.fabrique.icone.def.rafraichit,
             couleurIcone: Couleur.blue,
             texte: titre,
             positionTexte: 'droite',
@@ -150,7 +143,7 @@ export class FabriqueTitrePage extends FabriqueMembre {
     }
 
     fixePopover(bouton: KfBouton, titre: string | KfEtiquette, contenus: KfComposant[]) {
-        this.fabrique.bouton.fixePopover(bouton, titre, contenus, this.fabrique.icone.nomIcone.ouvert);
+        this.fabrique.bouton.fixePopover(bouton, titre, contenus, this.fabrique.icone.def.ouvert);
     }
 
     groupeDefAidePage(barre: BarreTitre, contenus: KfComposant[]): IBtnGroupeDef {
@@ -165,7 +158,7 @@ export class FabriqueTitrePage extends FabriqueMembre {
         const boutonVerrou = this.fabrique.bouton.bouton({
             nom: 'bouton_verrou',
             contenu: {
-                nomIcone: this.fabrique.icone.nomIcone.verrou_fermé,
+                iconeDef: this.fabrique.icone.def.verrou_fermé,
             }
         });
         const etiquetteTitreVerrou = new KfEtiquette('titre_verrou', 'Site fermé');
@@ -195,16 +188,20 @@ export class FabriqueTitrePage extends FabriqueMembre {
         const def: IBtnGroupeDef = {
             groupe,
             rafraichit: (barre: BarreTitre) => {
-                groupe.nePasAfficher = barre.site.etat !== IdEtatSite.catalogue;
+                boutonVerrou.ajouteClasse({
+                    nom: 'invisible',
+                    active: () => barre.site.etat !== IdEtatSite.catalogue
+                });
+//                groupe.nePasAfficher = barre.site.etat !== IdEtatSite.catalogue;
             }
         }
         return def;
     }
 
-    titrePage(titre: string, niveau: number, créeBarreTitre?: () => BarreTitre): KfGroupe {
-        const groupe = new KfGroupe('titre');
+    titrePage(titre: string, niveau: number, créeBarreTitre?: () => BarreTitre): KfSuperGroupe {
+        const groupe = new KfSuperGroupe('titre');
         groupe.créeDivLigne();
-        groupe.divLigne.ajouteClasse('titre-page', 'row', 'align-items-center', 'couleur-fond-beige', 'px-1', 'py-1', 'mb-2');
+        groupe.divLigne.ajouteClasse('titre-page', 'row', 'align-items-center', 'bg-info', 'bg-gradient', 'px-1', 'py-1', 'mb-2');
 
         let col: KfDivTableColonne;
 
@@ -219,6 +216,7 @@ export class FabriqueTitrePage extends FabriqueMembre {
             col = groupe.divLigne.ajoute([créeBarreTitre().barre]);
             col.ajouteClasse('col');
         }
+        groupe.quandTousAjoutés();
 
         return groupe;
     }

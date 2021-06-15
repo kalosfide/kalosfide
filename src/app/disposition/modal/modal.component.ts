@@ -50,7 +50,7 @@ export abstract class ModalComponent extends PageBaseComponent implements OnInit
                 modalComponentDef.boutonDefs.forEach(def => {
                     const action = { nom: def.nom, action: def.action };
                     actionDefs.push(action);
-                    const bouton = Fabrique.bouton.bouton({ nom: def.nom, contenu: def.contenu, bootstrapType: def.bootstrapType });
+                    const bouton = Fabrique.bouton.bouton({ nom: def.nom, contenu: def.contenu, bootstrap: def.bootstrap });
                     modalDef.boutonsDontOk.push(bouton);
                 });
                 const modal = new KfNgbModal(modalDef);

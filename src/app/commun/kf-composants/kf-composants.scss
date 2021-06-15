@@ -1,3 +1,4 @@
+@import "../../../../node_modules/bootstrap/scss/bootstrap";
 
 .kf-input-bouton-flottant {
     z-index: 999;
@@ -17,13 +18,27 @@
     display: none !important;
 }
 
-.kf-input-icone {
+@function decalage-vertical($base-height, $base-padding-bottom, $base-margin-bottom, $over-height) {
+    $distance-milieux: $base-height * 0.5 + $base-padding-bottom + $base-margin-bottom + $over-height * 0.5;
+    @return -$distance-milieux;
+}
+@mixin kf-input-icone-mix($base-height, $base-padding-bottom, $base-margin-bottom, $font-size) {
     float: right;
-    margin-right: 5px;
-    margin-top: -25px;
     position: relative;
-    z-index: 2;
+    z-index: 3;
     cursor: pointer;
+    @include font-size($font-size);
+    margin-right: 5px;
+    margin-top: -$base-height * 1em;
+}
+.kf-input-icone {
+    @include kf-input-icone-mix($input-line-height, $input-padding-y, 0, $input-font-size);
+}
+.kf-input-icone-sm {
+    @include kf-input-icone-mix($input-line-height, $input-padding-y-sm, 0, $input-font-size-sm);
+}
+.kf-input-icone-lg {
+    @include kf-input-icone-mix($input-line-height, $input-padding-y-lg, 0, $input-font-size-lg);
 }
 
 .kf-texte-dans-icone-fond {

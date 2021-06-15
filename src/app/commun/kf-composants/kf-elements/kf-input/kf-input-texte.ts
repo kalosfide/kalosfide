@@ -1,6 +1,6 @@
 import { KfGéreCss } from '../../kf-partages/kf-gere-css';
 import { KfNgClasseDef } from '../../kf-partages/kf-gere-css-classe';
-import { FANomIcone } from '../../kf-partages/kf-icone-def';
+import { IKfIconeDef } from '../../kf-partages/kf-icone-def';
 import { KfTexteDef } from '../../kf-partages/kf-texte-def';
 import { KfIcone } from '../kf-icone/kf-icone';
 import { KfInput } from './kf-input';
@@ -15,10 +15,9 @@ class IconeBouton {
     quandEnfonce?: () => void;
     quandRelache?: () => void;
 
-    constructor(nom: string, nomIcone: FANomIcone) {
-        this.icone = new KfIcone(nom, nomIcone);
+    constructor(nom: string, iconeDef: IKfIconeDef) {
+        this.icone = new KfIcone(nom, iconeDef);
         this.icone.largeurFixe = true;
-        this.icone.ajouteClasse('kf-input-icone');
         this.quandClic = () => { return; };
         this.quandEnfonce = () => { return; };
         this.quandRelache = () => { return; };
@@ -69,10 +68,10 @@ export class KfInputTexte extends KfInput {
 
     /**
      * Ajoute après l'input un span contenant une icone qui quand on le clique efface la valeur de l'input.
-     * @param nomIcone icone à afficher
+     * @param iconeDef icone à afficher
      */
-    ajouteEffaceur(nomIcone: FANomIcone) {
-        const iconeBouton = new IconeBouton('c', nomIcone);
+    ajouteEffaceur(iconeDef: IKfIconeDef) {
+        const iconeBouton = new IconeBouton('c', iconeDef);
         iconeBouton.icone.ajouteClasse(
             { nom: 'kf-invisible', active: (() => this.estVide).bind(this) }
         );
@@ -85,12 +84,12 @@ export class KfInputTexte extends KfInput {
     /**
      * Ajoute après l'input un span contenant une icone qui quand on le clique copie dans la valeur de l'input
      * la valeur d'un autre input éventuellement transformée par une fonction.
-     * @param nomIcone icone à afficher
+     * @param iconeDef icone à afficher
      * @param input input à copier
      * @param transforme fonction de transformation
      */
-    ajouteCopieur(nomIcone: FANomIcone, input: KfInputTexte, transforme?: (valeur: any) => any) {
-        const iconeBouton = new IconeBouton('montreMotDePasse', nomIcone);
+    ajouteCopieur(iconeDef: IKfIconeDef, input: KfInputTexte, transforme?: (valeur: any) => any) {
+        const iconeBouton = new IconeBouton('montreMotDePasse', iconeDef);
         iconeBouton.icone.ajouteClasse(
             { nom: 'kf-invisible', active: (() => !this.estVide || input.estVide).bind(this) }
         );
@@ -110,7 +109,7 @@ export class KfInputTexte extends KfInput {
      * @param iconeMontre icone à afficher (sauf pendant le clic si il y a deux icones)
      * @param iconeCache icone à afficher pendant le clic si présent
      */
-    ajouteMontreMotDePasse(iconeMontre: FANomIcone, iconeCache?: FANomIcone) {
+    ajouteMontreMotDePasse(iconeMontre: IKfIconeDef, iconeCache?: IKfIconeDef) {
         const iconeBouton = new IconeBouton('montreMotDePasse', iconeMontre);
         iconeBouton.icone.ajouteClasse(
             { nom: 'kf-invisible', active: (() => this.estVide).bind(this) }
@@ -118,13 +117,13 @@ export class KfInputTexte extends KfInput {
         iconeBouton.quandEnfonce = () => {
             this.typeDInput = KfTypeDInput.texte;
             if (iconeCache) {
-                iconeBouton.icone.nomIcone = iconeCache;
+                iconeBouton.icone.iconeDef = iconeCache;
             }
         };
         iconeBouton.quandRelache = () => {
             this.typeDInput = KfTypeDInput.password;
             if (iconeCache) {
-                iconeBouton.icone.nomIcone = iconeMontre;
+                iconeBouton.icone.iconeDef = iconeMontre;
             }
         };
         this.iconesBoutons = [iconeBouton];

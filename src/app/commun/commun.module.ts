@@ -12,6 +12,7 @@ import { KfGroupeComponent } from './kf-composants/kf-groupe/kf-groupe.component
 import { KfBoutonComponent } from './kf-composants/kf-elements/kf-bouton/kf-bouton.component';
 import { KfEtiquetteComponent } from './kf-composants/kf-elements/kf-etiquette/kf-etiquette.component';
 import { QuicklinkModule } from 'ngx-quicklink';
+import { KfUlComponent } from './kf-composants/kf-ul/kf-ul.component';
 
 @NgModule({
     imports: [
@@ -37,6 +38,7 @@ import { QuicklinkModule } from 'ngx-quicklink';
         KfBoutonComponent,
         KfEtiquetteComponent,
         KfLienComponent,
+        KfUlComponent,
         QuicklinkModule
     ]
 })

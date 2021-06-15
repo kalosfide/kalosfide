@@ -1,36 +1,38 @@
 import { KfBBtnGroup } from '../kf-b-btn-group/kf-b-btn-group';
-import { KfBBtnToolbar } from '../kf-b-btn-toolbar/kf-b-btn-toolbar';
 import { KfBouton } from '../kf-elements/kf-bouton/kf-bouton';
 import { KfEtiquette } from '../kf-elements/kf-etiquette/kf-etiquette';
-import { KfIcone } from '../kf-elements/kf-icone/kf-icone';
-import { KfLien } from '../kf-elements/kf-lien/kf-lien';
 import { KfListeDeroulanteNombre } from '../kf-elements/kf-liste-deroulante/kf-liste-deroulante-texte';
 import { KfGroupe } from '../kf-groupe/kf-groupe';
-import { KfEvenement, KfTypeDEvenement } from '../kf-partages/kf-evenements';
+import { KfEvenement, KfTypeDEvenement, KfTypeDHTMLEvents } from '../kf-partages/kf-evenements';
 import { KfGéreCss } from '../kf-partages/kf-gere-css';
 import { KfNgClasse, KfNgClasseDef } from '../kf-partages/kf-gere-css-classe';
-import { FANomIcone } from '../kf-partages/kf-icone-def';
+import { IKfIconeDef } from '../kf-partages/kf-icone-def';
 import { KfTexteDef } from '../kf-partages/kf-texte-def';
-import { IKfVueTable, KfVueTable } from './kf-vue-table';
+import { KfVueTable } from './kf-vue-table';
 
 export interface IKfVueTablePaginationDef {
     /**
      * Si un membre début, précédent, suivant ou fin est présent, un bouton sera créé avec cette icone.
      */
     icone?: {
-        début?: FANomIcone,
-        précédent?: FANomIcone,
-        suivant?: FANomIcone,
-        fin?: FANomIcone,
+        début?: IKfIconeDef,
+        précédent?: IKfIconeDef,
+        suivant?: IKfIconeDef,
+        fin?: IKfIconeDef,
     };
     /**
      * Nombre maximum de boutons de choix de la page sans compter début et fin
      */
     nbBoutons?: number;
     /**
-     * Si présent et vrai, un composant affichant les nombres de lignes et de pages sera créé
+     * Si présent, un composant affichant les nombres de lignes et de pages sera créé.
+     * nomLigne est le nom de l'objet affiché dans une ligne de la table. Si absent, 'ligne' est utilisé.
+     * nomLignes est le pluriel du nom de l'objet affiché dans une ligne de la table. Si absent, un 's' est ajouté à nomLigne.
      */
-    avecEtat?: boolean;
+    avecEtat?: {
+        nomLigne?: string,
+        nomLignes?: string,
+    };
     /**
      * Choix possibles du nombre de lignes par page.
      * S'il y a plusieurs choix une zone de liste sera ajoutée.
@@ -54,7 +56,7 @@ export interface IKfVueTablePaginationDef {
 interface BoutonDef {
     index: 'D' | 'P' | 'S' | 'F' | number;
     pageCible: () => number;
-    icone?: FANomIcone;
+    icone?: IKfIconeDef;
     inactivité?: () => boolean;
     activitéLi?: () => boolean;
     visible?: () => boolean;
@@ -69,6 +71,7 @@ class Bouton {
     constructor(def: BoutonDef) {
         this.index = def.index;
         this.kfBouton = new KfBouton('page' + def.index);
+        this.kfBouton.gereHtml.ajouteEvenementASuivre(KfTypeDHTMLEvents.click);
         if (def.activitéLi) {
             this.kfBouton.ajouteClasse({ nom: 'active', active: def.activitéLi });
         }
@@ -118,7 +121,8 @@ class Boutons<T> {
             def = {
                 index: 'D',
                 pageCible: () => 1,
-                icone: parent.def.icone.début
+                icone: parent.def.icone.début,
+                inactivité: () => parent.pageActive === 1
             };
             bouton = new Bouton(def);
             this.bbtnGroup.ajoute(bouton.kfBouton);
@@ -154,7 +158,7 @@ class Boutons<T> {
                 index: 'S',
                 pageCible: () => parent.pageActive + 1,
                 icone: parent.def.icone.suivant,
-                inactivité: () => parent.pageActive === parent.nbPages
+                inactivité: () => parent.nbPages === 0 || parent.pageActive === parent.nbPages
             };
             bouton = new Bouton(def);
             this.bbtnGroup.ajoute(bouton.kfBouton);
@@ -166,6 +170,7 @@ class Boutons<T> {
                 index: 'F',
                 pageCible: () => parent.nbPages,
                 icone: parent.def.icone.fin,
+                inactivité: () => parent.nbPages === 0 || parent.pageActive === parent.nbPages
             };
             bouton = new Bouton(def);
             this.bbtnGroup.ajoute(bouton.kfBouton);
@@ -270,7 +275,7 @@ class ChoixNbParPage<T> {
 }
 
 export interface IKfVueTablePagination {
-    btnToolbar: KfBBtnToolbar;
+    groupe: KfGroupe;
 }
 
 export class KfVueTablePagination<T> implements IKfVueTablePagination {
@@ -316,12 +321,14 @@ export class KfVueTablePagination<T> implements IKfVueTablePagination {
      */
     etat: Etat;
 
+    private rafraichitEtat: () => void;
+
     /**
      * Liste du choix du nombre de lignes par page
      */
     choixNbParPage: ChoixNbParPage<T>;
 
-    btnToolbar: KfBBtnToolbar;
+    groupe: KfGroupe;
 
     vueTable: KfVueTable<T>;
 
@@ -331,19 +338,29 @@ export class KfVueTablePagination<T> implements IKfVueTablePagination {
         this.pagePremierBouton = 1;
         this.nbParPage = def.nbParPage;
 
-        this.btnToolbar = new KfBBtnToolbar('pagination');
+        this.groupe = new KfGroupe('pagination');
 
         if (def.avecEtat) {
             this.etat = new Etat();
-            this.btnToolbar.ajoute(this.etat.bbtnGroup);
-        }
+            this.groupe.ajoute(this.etat.bbtnGroup);
+            const nomLigne = def.avecEtat.nomLigne ? def.avecEtat.nomLigne : 'ligne';
+            const nomLignes = def.avecEtat.nomLignes ? def.avecEtat.nomLignes : nomLigne + 's';
+            this.rafraichitEtat = () => {
+                let texte = `${this.nbLignes} ${this.nbLignes === 1 ? nomLigne : nomLignes} `;
+                if (this.estFiltrée) {
+                    texte += `(sur ${this.vueTable.nblignes}) `;
+                }
+                texte += `dans ${this.nbPages} pages`;
+                this.etat.etiquette.fixeTexte(texte);
+            }
+                }
 
         this.boutons = new Boutons(this);
-        this.btnToolbar.ajoute(this.boutons.bbtnGroup);
+        this.groupe.ajoute(this.boutons.bbtnGroup);
 
         if (def.choixNbParPage) {
             this.choixNbParPage = new ChoixNbParPage(this);
-            this.btnToolbar.ajoute(this.choixNbParPage.liste);
+            this.groupe.ajoute(this.choixNbParPage.liste);
         }
     }
 
@@ -381,7 +398,7 @@ export class KfVueTablePagination<T> implements IKfVueTablePagination {
         if (this.def.nePasAfficherSiUneSeulePage) {
             const caché = this.nbPages === 1 // il n'y a qu'une seule page
                 && this.choixNbParPage && !this.choixNbParPage.optionUneSeulePageChoisie; // et ce n'est pas par choix
-            this.btnToolbar.visible = !caché;
+            this.groupe.visible = !caché;
         }
     }
 
@@ -407,7 +424,7 @@ export class KfVueTablePagination<T> implements IKfVueTablePagination {
         if (this.def.nePasAfficherSiUneSeulePage) {
             const caché = this.nbPages === 1 // il n'y a qu'une seule page
                 && this.choixNbParPage && !this.choixNbParPage.optionUneSeulePageChoisie; // et ce n'est pas par choix
-            this.btnToolbar.visible = !caché;
+            this.groupe.visible = !caché;
         }
     }
 
@@ -443,7 +460,7 @@ export class KfVueTablePagination<T> implements IKfVueTablePagination {
         if (this.def.nePasAfficherSiUneSeulePage) {
             const caché = this.nbPages === 1 // il n'y a qu'une seule page
                 && this.choixNbParPage && !this.choixNbParPage.optionUneSeulePageChoisie; // et ce n'est pas par choix
-            this.btnToolbar.visible = !caché;
+            this.groupe.visible = !caché;
         }
 
     }
@@ -501,15 +518,6 @@ export class KfVueTablePagination<T> implements IKfVueTablePagination {
         if (this.pageActive < this.nbPages) {
             this.vaAPageEtActivePremièreLigne(this.pageActive + 1);
         }
-    }
-
-    private rafraichitEtat() {
-        let texte = `${this.nbLignes} lignes `;
-        if (this.estFiltrée) {
-            texte += 'filtrées ';
-        }
-        texte += `dans ${this.nbPages} pages`;
-        this.etat.etiquette.fixeTexte(texte);
     }
 
     /**

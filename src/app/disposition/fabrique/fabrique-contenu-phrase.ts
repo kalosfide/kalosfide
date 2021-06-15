@@ -3,14 +3,14 @@ import { KfIcone } from 'src/app/commun/kf-composants/kf-elements/kf-icone/kf-ic
 import { KfTexteDef } from 'src/app/commun/kf-composants/kf-partages/kf-texte-def';
 import { FabriqueMembre } from './fabrique-membre';
 import { FabriqueClasse } from './fabrique';
-import { FANomIcone } from 'src/app/commun/kf-composants/kf-partages/kf-icone-def';
+import { IKfIconeDef } from 'src/app/commun/kf-composants/kf-partages/kf-icone-def';
 import { Couleur } from './fabrique-couleurs';
 import { KfIconePositionTexte } from 'src/app/commun/kf-composants/kf-elements/kf-icone/kf-icone-types';
 import { KfContenuPhrase } from 'src/app/commun/kf-composants/kf-partages/kf-contenu-phrase/kf-contenu-phrase';
 
 export interface IContenuPhraseDef {
     icone?: KfIcone;
-    nomIcone?: FANomIcone;
+    iconeDef?: IKfIconeDef;
     couleurIcone?: Couleur;
     texte?: KfTexteDef;
     positionTexte?: KfIconePositionTexte;
@@ -21,87 +21,81 @@ export class FabriqueContenuPhrase extends FabriqueMembre {
     constructor(fabrique: FabriqueClasse) { super(fabrique); }
 
     accepter: IContenuPhraseDef = {
-        nomIcone: this.fabrique.icone.nomIcone.accepter,
+        iconeDef: this.fabrique.icone.def.accepter,
         couleurIcone: Couleur.success,
         texte: 'Accepter',
         positionTexte: 'bas'
     };
-    aperçu: IContenuPhraseDef = {
-        nomIcone: this.fabrique.icone.nomIcone.liste,
-        couleurIcone: Couleur.info,
-        texte: 'Aperçu',
-        positionTexte: 'bas'
-    };
     choisit: IContenuPhraseDef = {
-        nomIcone: this.fabrique.icone.nomIcone.accepter,
+        iconeDef: this.fabrique.icone.def.accepter,
         couleurIcone: Couleur.success,
         texte: 'Choisir',
         positionTexte: 'bas'
     };
     edite: IContenuPhraseDef = {
-        nomIcone: this.fabrique.icone.nomIcone.modifier,
+        iconeDef: this.fabrique.icone.def.modifier,
         couleurIcone: Couleur.dark,
         texte: 'Modifier',
         positionTexte: 'bas'
     };
     invite: IContenuPhraseDef = {
-        nomIcone: { nom: this.fabrique.icone.nomIcone.envelope, regular: true },
+        iconeDef: this.fabrique.icone.def.envelope_pleine,
         couleurIcone: Couleur.dark,
         texte: 'Inviter',
         positionTexte: 'bas'
     };
     réinvite: IContenuPhraseDef = {
-        nomIcone: this.fabrique.icone.nomIcone.envelope,
+        iconeDef: this.fabrique.icone.def.envelope,
         couleurIcone: Couleur.dark,
         texte: 'Réinviter',
         positionTexte: 'bas'
     };
     invité: IContenuPhraseDef = {
-        nomIcone: this.fabrique.icone.nomIcone.envelope,
+        iconeDef: this.fabrique.icone.def.envelope,
         couleurIcone: Couleur.dark,
         texte: 'Invité',
         positionTexte: 'bas'
     };
     supprime: IContenuPhraseDef = {
-        nomIcone: this.fabrique.icone.nomIcone.supprimer,
+        iconeDef: this.fabrique.icone.def.supprimer,
         couleurIcone: Couleur.dark,
         texte: 'Supprimer',
         positionTexte: 'bas'
     };
     exclure: IContenuPhraseDef = {
-        nomIcone: this.fabrique.icone.nomIcone.refuser,
+        iconeDef: this.fabrique.icone.def.refuser,
         couleurIcone: Couleur.danger,
         texte: 'Exclure',
         positionTexte: 'bas'
     };
     copier: IContenuPhraseDef = {
-        nomIcone: this.fabrique.icone.nomIcone.copier,
+        iconeDef: this.fabrique.icone.def.copier,
         couleurIcone: Couleur.info,
         texte: 'Auto',
         positionTexte: 'bas'
     };
     annule: IContenuPhraseDef = {
         // icone: this.fabrique.icone.iconeAnnule(),
-        nomIcone: this.fabrique.icone.nomIcone.refuser,
+        iconeDef: this.fabrique.icone.def.refuser,
         couleurIcone: Couleur.dark,
         texte: 'Annuler',
         positionTexte: 'bas'
     };
 
     prix: IContenuPhraseDef = {
-        nomIcone: this.fabrique.icone.nomIcone.prix,
+        iconeDef: this.fabrique.icone.def.prix,
         couleurIcone: Couleur.orange,
         texte: 'Prix',
         positionTexte: 'bas'
     };
     prépare: IContenuPhraseDef = {
-        nomIcone: this.fabrique.icone.nomIcone.modifier,
+        iconeDef: this.fabrique.icone.def.modifier,
         couleurIcone: Couleur.dark,
         texte: 'Préparer',
         positionTexte: 'bas'
     };
     abandon: IContenuPhraseDef = {
-        nomIcone: this.fabrique.icone.nomIcone.liste,
+        iconeDef: this.fabrique.icone.def.liste,
         couleurIcone: Couleur.info,
         texte: 'Annuler',
         positionTexte: 'bas'
@@ -109,7 +103,7 @@ export class FabriqueContenuPhrase extends FabriqueMembre {
 
     aide(texte?: string): IContenuPhraseDef {
         return {
-            nomIcone: this.fabrique.icone.nomIcone.question,
+            iconeDef: this.fabrique.icone.def.question,
             couleurIcone: Couleur.blue,
             texte,
             positionTexte: 'droite',
@@ -117,7 +111,7 @@ export class FabriqueContenuPhrase extends FabriqueMembre {
     }
     info(texte?: string): IContenuPhraseDef {
         return {
-            nomIcone: this.fabrique.icone.nomIcone.info,
+            iconeDef: this.fabrique.icone.def.info,
             couleurIcone: Couleur.success,
             texte: texte ? texte : 'Info',
             positionTexte: 'bas'
@@ -125,7 +119,7 @@ export class FabriqueContenuPhrase extends FabriqueMembre {
     }
     avertit(texte?: string): IContenuPhraseDef {
         return {
-            nomIcone: this.fabrique.icone.nomIcone.danger_cercle,
+            iconeDef: this.fabrique.icone.def.danger_cercle,
             couleurIcone: Couleur.warning,
             texte: texte ? texte : 'Alerte',
             positionTexte: 'bas'
@@ -133,7 +127,7 @@ export class FabriqueContenuPhrase extends FabriqueMembre {
     }
     danger(texte?: string): IContenuPhraseDef {
         return {
-            nomIcone: this.fabrique.icone.nomIcone.danger,
+            iconeDef: this.fabrique.icone.def.danger,
             couleurIcone: Couleur.danger,
             texte: texte ? texte : 'Alerte',
             positionTexte: 'bas'
@@ -142,7 +136,7 @@ export class FabriqueContenuPhrase extends FabriqueMembre {
 
     retour(texte: string): IContenuPhraseDef {
         return {
-            nomIcone: this.fabrique.icone.nomIcone.retour,
+            iconeDef: this.fabrique.icone.def.retour,
             texte,
             positionTexte: 'droite'
         };
@@ -150,14 +144,14 @@ export class FabriqueContenuPhrase extends FabriqueMembre {
 
     ajoute(texte: string): IContenuPhraseDef {
         return {
-            nomIcone: this.fabrique.icone.nomIcone.ajoute,
+            iconeDef: this.fabrique.icone.def.ajoute,
             texte,
             positionTexte: 'droite'
         };
     }
 
     /**
-     * si def.nomIcone ou def.icone, si def.texte et def.positionTexte === 'dans', le texte est ajouté en couche dans l'icone
+     * si def.iconeDef ou def.icone, si def.texte et def.positionTexte === 'dans', le texte est ajouté en couche dans l'icone
      * @param composant composant avec ContenuPhrase
      * @param def définition des contenus
      */
@@ -165,11 +159,11 @@ export class FabriqueContenuPhrase extends FabriqueMembre {
         const contenuPhrase = new KfContenuPhrase();
 
         let icone: KfIcone = def.icone;
-        if (def.nomIcone) {
+        if (def.iconeDef) {
             if (icone) {
-                icone.nomIcone = def.nomIcone;
+                icone.iconeDef = def.iconeDef;
             } else {
-                icone = this.fabrique.icone.icone(def.nomIcone);
+                icone = this.fabrique.icone.icone(def.iconeDef);
             }
         }
         if (icone) {

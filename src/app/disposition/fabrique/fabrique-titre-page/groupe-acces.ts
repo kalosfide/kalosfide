@@ -39,9 +39,9 @@ export class GroupeAccès implements IBtnGroupeDef {
         this.fabrique.etatSite.états.forEach(état => {
             const etiquette = new KfEtiquette('titre');
             this.fabrique.contenu.fixeDef(etiquette, {
-                nomIcone: état.id === IdEtatSite.ouvert
-                    ? this.fabrique.icone.nomIcone.verrou_ouvert
-                    : this.fabrique.icone.nomIcone.verrou_fermé,
+                iconeDef: état.id === IdEtatSite.ouvert
+                    ? this.fabrique.icone.def.verrou_ouvert
+                    : this.fabrique.icone.def.verrou_fermé,
                 texte: état.titre,
                 positionTexte: 'droite'
             });
@@ -63,7 +63,7 @@ export class GroupeAccès implements IBtnGroupeDef {
 
         if (etat.id === IdEtatSite.ouvert) {
             contenu = {
-                nomIcone: this.fabrique.icone.nomIcone.verrou_ouvert,
+                iconeDef: this.fabrique.icone.def.verrou_ouvert,
             };
             this.etiquetteTitreVerrou.fixeTexte('Site ouvert');
             etiquette = this.fabrique.ajouteEtiquetteP(infos);
@@ -81,7 +81,7 @@ export class GroupeAccès implements IBtnGroupeDef {
             etiquette = this.fabrique.ajouteEtiquetteP(infos);
             this.fabrique.ajouteTexte(etiquette, etat.titre + ' en cours');
             contenu = {
-                nomIcone: this.fabrique.icone.nomIcone.verrou_fermé,
+                iconeDef: this.fabrique.icone.def.verrou_fermé,
             };
             this.etiquetteTitreVerrou.fixeTexte('Site fermé');
             etiquette = this.fabrique.ajouteEtiquetteP(infos);

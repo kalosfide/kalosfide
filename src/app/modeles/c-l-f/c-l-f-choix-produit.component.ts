@@ -13,6 +13,7 @@ import { CLFUtile } from './c-l-f-utile';
 import { RouteurService } from 'src/app/services/routeur.service';
 import { CLFDoc } from './c-l-f-doc';
 import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
+import { KfBBtnGroup } from 'src/app/commun/kf-composants/kf-b-btn-group/kf-b-btn-group';
 
 @Directive()
 export abstract class CLFChoixProduitComponent extends PageTableComponent<CLFLigne> implements OnInit, OnDestroy {
@@ -40,11 +41,15 @@ export abstract class CLFChoixProduitComponent extends PageTableComponent<CLFLig
     get client(): Client { return this.clfDoc.client; }
 
     créeBarreTitre = (): BarreTitre => {
+        const groupesDeBoutons: KfBBtnGroup[] = [];
+        let groupe = Fabrique.titrePage.bbtnGroup('vide');
+        groupesDeBoutons.push(groupe);
+        groupe = Fabrique.titrePage.bbtnGroup('boutons');
+        groupe.ajoute(this._utile.lien.retourDeChoixProduit());
         const barre = Fabrique.titrePage.barreTitre({
             pageDef: this.pageDef,
-            boutonsPourBtnGroup: [[], [this._utile.lien.retourDeChoixProduit()]]
+            groupesDeBoutons
         });
-
         return barre;
     }
 
@@ -61,7 +66,7 @@ export abstract class CLFChoixProduitComponent extends PageTableComponent<CLFLig
             },
             quandClic: { colonneDuClic: this._utile.nom.choisit }, // (ligne: CLFLigne) => (() => this.routeur.navigueUrlDef(this._utile.url.ajoute(ligne))).bind(this),
             triInitial: { colonne: this._utile.nom.catégorie, direction: 'asc' },
-            pagination: Fabrique.vueTable.pagination<CLFLigne>()
+            pagination: Fabrique.vueTable.pagination<CLFLigne>('produit')
         };
         return {
             vueTableDef

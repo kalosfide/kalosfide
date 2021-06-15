@@ -73,7 +73,7 @@ export class RetourEnHautComponent implements OnInit {
             contenu: {
                 icone: Fabrique.icone.retourEnHaut()
             },
-            bootstrapType: 'dark'
+            bootstrap: { type: 'dark' }
         };
         this.groupe.ajoute(Fabrique.bouton.bouton(def));
     }

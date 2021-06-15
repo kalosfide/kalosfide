@@ -3,12 +3,15 @@ import { KfComposant } from '../../kf-composant/kf-composant';
 import { KfTexteDef } from '../../kf-partages/kf-texte-def';
 import { KfContenuPhrase } from '../../kf-partages/kf-contenu-phrase/kf-contenu-phrase';
 import { IKfNgbPopoverDef } from './kf-ngb-popover';
-import { IKfAvecIconeSurvol, KfIcone } from '../kf-icone/kf-icone';
-import { KfBBtnGroup } from '../../kf-b-btn-group/kf-b-btn-group';
+import { KfIcone } from '../kf-icone/kf-icone';
 import { KfGéreCss } from '../../kf-partages/kf-gere-css';
 import { KfGroupe } from '../../kf-groupe/kf-groupe';
+import { IKfAvecSurvol } from '../../kf-partages/kf-survol/i-kf-avec-survol';
+import { KfSurvol } from '../../kf-partages/kf-survol/kf-survol';
+import { IKfSurvole } from '../../kf-partages/kf-survol/i-kf-survole';
+import { KfNgClasse } from '../../kf-partages/kf-gere-css-classe';
 
-export class KfBouton extends KfComposant implements IKfAvecIconeSurvol {
+export class KfBouton extends KfComposant implements IKfAvecSurvol {
     private pTypeDeBouton: KfTypeDeBouton;
     /**
      * Présent si le type de bouton est submit ou reset
@@ -16,14 +19,19 @@ export class KfBouton extends KfComposant implements IKfAvecIconeSurvol {
     private pFormulaire: KfGroupe;
 
     private pNgbPopover: IKfNgbPopoverDef;
+    /**
+     * Icone affichée dans le bouton s'il ouvre un NgbPopOver.
+     */
     private pIconePopover: KfIcone;
 
-    btnGroupe: KfBBtnGroup;
-
     /**
-     * Icone affichée dans le bouton s'il ouvre un NgbPopOver ou icone affichée par dessus le bouton que l'on peut montrer ou cacher.
+     * Composant affichant une icone ou un BootstrapSpinner centré au dessus du bouton que l'on peut montrer ou cacher.
      */
-    private pIconeSurvol: KfIcone;
+     private pSurvol: KfSurvol;
+     /**
+      * GéreCss de la div ajoutée à l'intérieur du bouton pour son contenu phrasé et l'icone ou le BootstrapSpinner
+      */
+     private pConteneurSurvolé: KfGéreCss;
 
     constructor(nom: string, texte?: KfTexteDef) {
         super(nom, KfTypeDeComposant.bouton);
@@ -37,6 +45,7 @@ export class KfBouton extends KfComposant implements IKfAvecIconeSurvol {
     fixeTypeDeBouton(typeDeBouton: 'submit' | 'reset', formulaire: KfGroupe) {
         this.pTypeDeBouton = typeDeBouton;
         this.pFormulaire = formulaire;
+        this.gereHtml.fixeAttribut('form', formulaire.nom);
     }
     get formulaire(): KfGroupe {
         return this.pFormulaire;
@@ -47,8 +56,8 @@ export class KfBouton extends KfComposant implements IKfAvecIconeSurvol {
     }
     set ngbPopover(def: IKfNgbPopoverDef) {
         this.pNgbPopover = def;
-        if (def && def.nomIcone) {
-            this.pIconePopover = new KfIcone('', def.nomIcone);
+        if (def && def.iconeDef) {
+            this.pIconePopover = new KfIcone('', def.iconeDef);
             this.pIconePopover.ajouteClasse('kf-popover-icone');
         } else {
             this.pIconePopover = undefined;
@@ -59,50 +68,70 @@ export class KfBouton extends KfComposant implements IKfAvecIconeSurvol {
     }
 
     get contenuAAfficher(): KfContenuPhrase {
-        const iconePopoverOuSurvol = this.pIconePopover ? this.pIconePopover : this.pIconeSurvol;
-        if (iconePopoverOuSurvol) {
+        if (this.pIconePopover) {
             const àAfficher = new KfContenuPhrase();
-            àAfficher.contenus = this.contenuPhrase.contenus.concat([iconePopoverOuSurvol]);
+            àAfficher.contenus = this.contenuPhrase.contenus.concat([this.pIconePopover]);
             return àAfficher;
         }
         return this.contenuPhrase;
     }
 
-    /// Interface IKfAvecIconeSurvol ///
+    /// Interface IKfAvecSurvol ///
+
     /**
-     * Icone que l'on peut montrer ou cacher à afficher par dessus le composant.
+     * Composant affichant une icone ou un BootstrapSpinner centré au dessus du bouton que l'on peut montrer ou cacher.
      */
-    get iconeSurvol(): KfIcone {
-        return this.pIconeSurvol;
+     get survol(): KfSurvol {
+        return this.pSurvol;
     }
     /**
-     * Ajoute une icone que l'on peut montrer ou cacher à afficher par dessus le composant.
+     * Crée le composant affichant une icone ou un BootstrapSpinner centré au dessus du bouton que l'on peut montrer ou cacher.
      */
-    ajouteIconeSurvol(icone: KfIcone) {
-        this.pIconeSurvol = icone;
+     créeSurvol(survole: IKfSurvole) {
+        this.pConteneurSurvolé = new KfGéreCss();
+        this.pSurvol = new KfSurvol(this, survole, { avecSurvolInactifPendantSurvol: true });
         this.contenuPhrase.contenus.forEach(c => {
             if (c.type === KfTypeDeComposant.icone) {
-                (c as KfIcone).créegéreCssFond();
+                (c as KfIcone).créeFond();
             }
         });
     }
-    /**
-     * KfGéreCss de l'élément html qui contient l'icone que l'on peut montrer ou cacher à afficher par dessus le composant.
-     */
-    get conteneurSurvolé(): KfGéreCss {
-        return this;
+     /**
+      * GéreCss de la div ajoutée à l'intérieur du bouton pour son contenu phrasé et l'icone ou le BootstrapSpinner
+      */
+      get conteneurSurvolé(): KfGéreCss {
+        return this.pConteneurSurvolé;
+    }
+    get classeSurvol(): KfNgClasse {
+        return this.pConteneurSurvolé.classe;
     }
     /**
      * Array des KfGéreCss des contenus (autre que l'icone) de l'élément html qui contient
      * l'icone que l'on peut montrer ou cacher à afficher par dessus le composant.
      */
     get contenusSurvolés(): KfGéreCss[] {
-        return this.contenuPhrase.contenus            .map(c => {
+        return this.contenuPhrase.contenus.map(c => {
             if (c.type === KfTypeDeComposant.icone) {
-                return (c as KfIcone).géreCssFond;
+                return (c as KfIcone).fond;
             }
             return c;
         });
+    }
+
+    get actionSurvol(): {
+        commence: () => void,
+        finit: () => void
+    } {
+        let inactivité: boolean;
+        return {
+            commence: () => {
+                inactivité = this.inactivité;
+                this.inactivité = true;
+            },
+            finit: () => {
+                this.inactivité = inactivité;
+            }
+        }
     }
     /// Fin Interface IKfAvecIconeSurvol ///
 

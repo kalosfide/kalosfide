@@ -1,9 +1,9 @@
 import { KfVueTableOutils } from './kf-vue-table-outils';
-import { KfBBtnToolbarElement } from '../kf-b-btn-toolbar/kf-b-btn-toolbar';
 import { KfVueTableLigne } from './kf-vue-table-ligne';
+import { KfComposant } from '../kf-composant/kf-composant';
 
 export interface IKfVueTableOutilVue {
-    composant: KfBBtnToolbarElement;
+    composant: KfComposant;
 }
 
 export interface IKfVueTableOutil<T> extends IKfVueTableOutilVue {

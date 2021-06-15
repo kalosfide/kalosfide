@@ -5,9 +5,9 @@
         </div>
     </ng-container>
     <ng-template #outilsTemplate>
-        <app-kf-b-btn-toolbar [composant]="vueTable.outils.btnToolbar"></app-kf-b-btn-toolbar>
+        <app-kf-groupe [composant]="vueTable.outils.groupe"></app-kf-groupe>
         <ng-container *ngIf="avecPagination">
-            <app-kf-b-btn-toolbar [composant]="vueTable.pagination.btnToolbar"></app-kf-b-btn-toolbar>
+            <app-kf-groupe [composant]="vueTable.pagination.groupe"></app-kf-groupe>
         </ng-container>
     </ng-template>
 

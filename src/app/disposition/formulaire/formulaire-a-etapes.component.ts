@@ -29,7 +29,7 @@ export interface IFormulaireAEtapes {
 
 // TODO: Add Angular decorator.
 export abstract class FormulaireAEtapesComponent extends FormulaireBaseComponent implements IFormulaireAEtapes, OnDestroy {
-    titrePage: KfGroupe;
+    titrePage: KfSuperGroupe;
 
     etapes: EtapeDeFormulaire[] = [];
     index: number;

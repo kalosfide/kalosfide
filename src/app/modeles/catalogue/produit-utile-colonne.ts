@@ -120,7 +120,7 @@ export class ProduitUtileColonne extends DataUtileColonne {
                 return bouton;
             },
             classeDefs: ['action'],
-            nePasAfficherSi: this.utile.conditionTable.pasEdition,
+            afficherSi: this.utile.conditionTable.edition,
         };
     }
 
@@ -133,7 +133,7 @@ export class ProduitUtileColonne extends DataUtileColonne {
                 return bouton;
             },
             classeDefs: ['action'],
-            nePasAfficherSi: this.utile.conditionTable.pasEdition,
+            afficherSi: this.utile.conditionTable.edition,
         };
     }
 
@@ -152,7 +152,7 @@ export class ProduitUtileColonne extends DataUtileColonne {
                 return btnGroup;
             },
             classeDefs: ['colonne-btn-group-2'],
-            nePasAfficherSi: this.utile.conditionTable.pasEdition,
+            afficherSi: this.utile.conditionTable.edition,
         };
     }
     colonnes(): IKfVueTableColonneDef<Produit>[] {

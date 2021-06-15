@@ -346,7 +346,7 @@ export class KfComposantGereValeur {
         }
     }
 
-    get Validateurs(): KfValidateur[] {
+    get validateurs(): KfValidateur[] {
         return this.pValidateurs;
     }
 
@@ -389,7 +389,7 @@ export class KfComposantGereValeur {
         const messages: string[] = [];
         const errors = this.composant.abstractControl.errors;
         if (errors) {
-            const validateurs = this.Validateurs;
+            const validateurs = this.validateurs;
             Object.keys(errors).forEach(
                 key => {
                     const message = KfValidateurs.fixeMessage(validateurs, key, errors[key]);

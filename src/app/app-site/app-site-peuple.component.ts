@@ -16,8 +16,10 @@ import { KfEtiquette } from '../commun/kf-composants/kf-elements/kf-etiquette/kf
 import { KfTypeDeBaliseHTML } from '../commun/kf-composants/kf-composants-types';
 import { KfNgbModalService } from '../commun/kf-composants/kf-ngb-modal/kf-ngb-modal.service';
 import { IKfNgbModalDef, KfNgbModal } from '../commun/kf-composants/kf-ngb-modal/kf-ngb-modal';
-import { KfBootstrap } from '../commun/kf-composants/kf-partages/kf-bootstrap';
+import { IKfBootstrapOptions, KfBootstrap } from '../commun/kf-composants/kf-partages/kf-bootstrap';
 import { ApiResult500InternalServerError } from '../api/api-results/api-result-500-internal-server-error';
+import { KfComposant } from '../commun/kf-composants/kf-composant/kf-composant';
+import { KfInputTexte } from '../commun/kf-composants/kf-elements/kf-input/kf-input-texte';
 
 @Component({
     templateUrl: '../disposition/page-base/page-base.html',
@@ -28,8 +30,92 @@ export class AppSitePeupleComponent extends FormulaireComponent implements OnIni
 
     private sansPeuple: KfCaseACocher;
 
+    get optionsBootstrap(): IKfBootstrapOptions {
+        return null;
+    }
+
+    créeAvantFormulaire = (): KfComposant[] => {
+        const valeur = new KfEtiquette('valeur', () => JSON.stringify(this.valeur, null, 2));
+        valeur.baliseHtml = KfTypeDeBaliseHTML.pre;
+        return [valeur];
+    }
+
     créeEdition = (): KfGroupe => {
+        const info = (input: KfInputTexte)  => ({
+            nom: input.nom,
+            div: input.classeDiv,
+            composantAvant: input.classeComposantAvant,
+            entrée: input.classeEntree,
+            input: input.classe,
+            btIcone: input.ajouteCssDivBouton
+        })
+        const créeInput: (nom: string, options?: IKfBootstrapOptions) => KfInputTexte = (nom: string, options?: IKfBootstrapOptions) => {
+            const input = Fabrique.input.texte(nom, `Label (${nom})`, `Placeholder (${nom})`);
+            input.valeur = '123456';
+            input.ajouteEffaceur(Fabrique.icone.def.croix);
+            if (options) {
+                options.classeDiv = 'mb-3';
+                KfBootstrap.prépareInput(input, options);
+            }
+            return input;
+        }
+
         const groupe = Fabrique.formulaire.formulaire();
+        let nom: string;
+        let input: KfInputTexte;
+
+        nom = 'defaut';
+        input = créeInput(nom, {
+//            taille: 'lg',
+            texteBrutSiLectureSeule: true,
+        });
+        groupe.ajoute(input);
+        console.log(info(input));
+
+        nom = 'flottant';
+        input = créeInput(nom, {
+            taille: 'lg',
+            label: 'labelFlottant',
+        });
+        groupe.ajoute(input);
+        console.log(info(input));
+
+        nom = 'colonne';
+        input = créeInput(nom, {
+            taille: 'lg',
+            label: { breakpoint: 'sm', width: 2 }
+        });
+        groupe.ajoute(input);
+        console.log(info(input));
+
+        nom = 'dansGroupe';
+        input = créeInput(nom);
+        let étiquette = new KfEtiquette('dansGroupe');
+        const icone = Fabrique.icone.icone(Fabrique.icone.def.filtre);
+        étiquette.contenuPhrase.fixeContenus(icone);
+        input.fixeComposantAvant(étiquette);
+        input.lectureSeule = true;
+        KfBootstrap.prépare(input, {
+            taille: 'lg',
+            dansInputGroup: true,
+            texteBrutSiLectureSeule: true,
+        })
+        groupe.ajoute(input);
+        console.log(info(input));
+
+        const grInput = new KfGroupe('inputGroup');
+        grInput.ajouteClasse('mb-3');
+        étiquette = new KfEtiquette('icone1')
+        étiquette.fixeIcone(Fabrique.icone.def.filtre);
+        grInput.ajoute(étiquette);
+        grInput.ajoute(créeInput(nom + '1'));
+        KfBootstrap.prépare(grInput, {
+//            label: 'nePasAfficherLabel',
+            taille: 'sm',
+            dansInputGroup: true
+        });
+        groupe.ajoute(grInput);
+
         this.sansPeuple = Fabrique.caseACocher('sansPeuple');
         this.sansPeuple.visible = true;
         Fabrique.caseACocherAspect(this.sansPeuple, true);
@@ -51,12 +137,12 @@ export class AppSitePeupleComponent extends FormulaireComponent implements OnIni
         const boutonOk = Fabrique.bouton.bouton({
             nom: 'Ok',
             contenu: { texte: 'Ok' },
-            bootstrapType: 'primary'
+            bootstrap: { type: 'primary' }
         });
         const boutonAnnuler = Fabrique.bouton.bouton({
             nom: 'Annuler',
             contenu: { texte: 'Annuler' },
-            bootstrapType: 'secondary'
+            bootstrap: { type: 'secondary' }
         });
         const test = new KfGroupe('');
         test.ajoute(Fabrique.bouton.bouton({

@@ -16,6 +16,7 @@ import { FacturePages } from 'src/app/fournisseur/factures/facture-pages';
 import { CLFLigne } from './c-l-f-ligne';
 import { CLFService } from './c-l-f.service';
 import { CLFUtileTexteChamp } from './c-l-f-utile-texte';
+import { KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
 
 export class CLFLigneEditeur extends KeyUidRnoNo2Editeur<CLFLigne> {
     private ligne: CLFLigne;
@@ -163,6 +164,7 @@ export class CLFLigneEditeur extends KeyUidRnoNo2Editeur<CLFLigne> {
                 ];
                 this.lieDemandeEtTypeCommande();
                 this.kfQuantité.ajouteValidateur(KfValidateurs.required);
+                KfBootstrap.prépare(this.kfDeData, Fabrique.optionsBootstrap.formulaire);
                 break;
             case LivraisonPages.ajoute:
             case FacturePages.ajoute:
@@ -179,6 +181,7 @@ export class CLFLigneEditeur extends KeyUidRnoNo2Editeur<CLFLigne> {
                 this.kfQuantitéLS.nePasAfficher = true;
                 this.kfTypeCommandeLS.nePasAfficher = true;
                 this.kfAFixer.ajouteValidateur(KfValidateurs.min(0));
+                KfBootstrap.prépare(this.kfDeData, Fabrique.optionsBootstrap.formulaire);
                 break;
             case CommandePages.lignes:
                 champ = this.service.utile.texte.commande.champ;
@@ -188,6 +191,7 @@ export class CLFLigneEditeur extends KeyUidRnoNo2Editeur<CLFLigne> {
                 ];
                 this.lieDemandeEtTypeCommande();
                 this.kfQuantité.ajouteValidateur(KfValidateurs.required);
+                KfBootstrap.prépare(this.kfDeData, Fabrique.optionsBootstrap.dansVueTable);
                 break;
             case LivraisonPages.lignes:
             case FacturePages.lignes:
@@ -198,6 +202,7 @@ export class CLFLigneEditeur extends KeyUidRnoNo2Editeur<CLFLigne> {
                     this.créeAFixer(champ.aFixer),
                 ];
                 this.kfAFixer.ajouteValidateur(KfValidateurs.required);
+                KfBootstrap.prépare(this.kfDeData, Fabrique.optionsBootstrap.dansVueTable);
                 break;
 
             default:

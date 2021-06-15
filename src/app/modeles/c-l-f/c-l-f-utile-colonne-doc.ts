@@ -181,16 +181,16 @@ export class CLFUtileColonneDocCLF {
             },
             créeContenu: (clfDoc: CLFDoc) => this.btnGroupDoc(clfDoc),
             classeDefs: ['colonne-btn-group-3'],
-            nePasAfficherSi: this.utile.conditionTable.pasEdition,
+            afficherSi: this.utile.conditionTable.edition,
         };
     }
 
     copier(synthèse: CLFDoc): IKfVueTableColonneDef<CLFDoc> {
-        const rienACopier = KfInitialObservable.transforme(this.utile.service.clsBilanIO,
+        const peutCopier = KfInitialObservable.transforme(this.utile.service.clsBilanIO,
             () => {
-                return synthèse.nbCopiables === 0;
+                return synthèse.nbCopiables > 0;
             });
-        const nePasAfficherSi = KfInitialObservable.ou(rienACopier, this.utile.conditionTable.pasEdition);
+        const afficherSi = KfInitialObservable.et(peutCopier, this.utile.conditionTable.edition);
         const enTête = this.utile.bouton.copieDocs(synthèse);
         enTête.inactivitéIO = KfInitialObservable.transforme(
             this.utile.service.clsBilanIO,
@@ -207,16 +207,16 @@ export class CLFUtileColonneDocCLF {
                 );
                 return bouton;
             },
-            nePasAfficherSi,
+            afficherSi,
         };
     }
 
     annuler(synthèse: CLFDoc): IKfVueTableColonneDef<CLFDoc> {
-        const rienAAnnuler = KfInitialObservable.transforme(this.utile.service.clsBilanIO,
+        const peutAnnuler = KfInitialObservable.transforme(this.utile.service.clsBilanIO,
             () => {
-                return synthèse.àSynthétiser.length === 0;
+                return synthèse.àSynthétiser.length > 0;
             });
-        const nePasAfficherSi = KfInitialObservable.ou(rienAAnnuler, this.utile.conditionTable.pasEdition);
+        const nePasAfficherSi = KfInitialObservable.et(peutAnnuler, this.utile.conditionTable.edition);
         const enTête = this.utile.bouton.annuleDoc(synthèse);
         enTête.inactivitéIO = KfInitialObservable.transforme(
             this.utile.service.clsBilanIO,

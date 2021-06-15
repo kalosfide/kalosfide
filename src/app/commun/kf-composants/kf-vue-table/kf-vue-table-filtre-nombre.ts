@@ -1,9 +1,8 @@
-import { KfListeDeroulanteBase } from '../kf-elements/kf-liste-deroulante/kf-liste-deroulante-base';
 import {
     KfListeDeroulanteNombre} from '../kf-elements/kf-liste-deroulante/kf-liste-deroulante-texte';
 import { KfVueTableFiltreBase } from './kf-vue-table-filtre-base';
-import { KfBBtnToolbarInputGroup } from '../kf-b-btn-toolbar/kf-b-btn-toolbar';
 import { KfVueTableLigne } from './kf-vue-table-ligne';
+import { KfComposant } from '../kf-composant/kf-composant';
 
 export class KfVueTableFiltreNombre<T> extends KfVueTableFiltreBase<T> {
     private pListe: KfListeDeroulanteNombre;
@@ -22,7 +21,7 @@ export class KfVueTableFiltreNombre<T> extends KfVueTableFiltreBase<T> {
         return this.pListe;
     }
 
-    get composant(): KfBBtnToolbarInputGroup {
+    get composant(): KfComposant {
         return this.pListe;
     }
 }

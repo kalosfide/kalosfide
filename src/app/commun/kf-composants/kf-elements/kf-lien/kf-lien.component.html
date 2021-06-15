@@ -12,8 +12,17 @@
     </ng-container>
 </ng-template>
 <ng-template #routerLinkActiveTemplate>
-    <a #baliseElement [routerLink]="lien.route" routerLinkActive="active" [queryParams]="lien.queryParams"
-        [fragment]="lien.fragment" [ngClass]="lien.classe" [ngStyle]="lien.style">
+    <ng-container *ngIf="!lien.routerLinkActiveOptions; else routerLinkActiveOptionsTemplate">
+        <a #baliseElement [routerLink]="lien.route" [routerLinkActive]="lien.routerLinkActive"
+            [queryParams]="lien.queryParams" [fragment]="lien.fragment" [ngClass]="lien.classe" [ngStyle]="lien.style">
+            <app-kf-contenu-phrase [contenuPhrase]="lien.contenuPhrase"></app-kf-contenu-phrase>
+        </a>
+    </ng-container>
+</ng-template>
+<ng-template #routerLinkActiveOptionsTemplate>
+    <a #baliseElement [routerLink]="lien.route" [routerLinkActive]="lien.routerLinkActive"
+        [routerLinkActiveOptions]="lien.routerLinkActiveOptions" [queryParams]="lien.queryParams" [fragment]="lien.fragment"
+        [ngClass]="lien.classe" [ngStyle]="lien.style">
         <app-kf-contenu-phrase [contenuPhrase]="lien.contenuPhrase"></app-kf-contenu-phrase>
     </a>
 </ng-template>
