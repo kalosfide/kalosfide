@@ -6,7 +6,7 @@ import { KfIcone } from '../kf-icone/kf-icone';
 import { KfClavierToucheEnfoncée } from '../../kf-partages/kf-clavier/kf-clavier-touche-enfoncee';
 import { KfTypeDHTMLEvents, KfTypeDEvenement, KfEvenement, KfStatutDEvenement } from '../../kf-partages/kf-evenements';
 import { IKfEntreeFocusClavier } from './i-kf-entree-focus-clavier';
-import { KfTexteDef } from '../../kf-partages/kf-texte-def';
+import { KfStringDef } from '../../kf-partages/kf-string-def';
 import { KfAvecLabel } from '../../kf-composant/kf-avecLabel';
 import { IKfAvecSurvol } from '../../kf-partages/kf-survol/i-kf-avec-survol';
 import { KfSurvol } from '../../kf-partages/kf-survol/kf-survol';
@@ -28,7 +28,7 @@ export abstract class KfEntrée extends KfAvecLabel implements IKfAvecSurvol {
      */
     private pSurvol: KfSurvol;
 
-    constructor(nom: string, type: KfTypeDeComposant, texteLabel?: KfTexteDef) {
+    constructor(nom: string, type: KfTypeDeComposant, texteLabel?: KfStringDef) {
         super(nom, type, texteLabel);
         this.gereValeur = new KfComposantGereValeur(this, KfTypeDeValeur.avecEntree);
     }

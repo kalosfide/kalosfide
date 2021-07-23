@@ -33,12 +33,12 @@ export class LivraisonClientComponent extends CLFClientComponent implements OnIn
         let etiquette: KfEtiquette;
 
         etiquette = Fabrique.ajouteEtiquetteP(infos);
-        Fabrique.ajouteTexte(etiquette,
+        etiquette.ajouteTextes(
             `Commander consiste à choisir des produits et à fixer les quantités demandées. `
             + `Traiter une commande consiste à fixer la quantité à livrer de chaque produit demandé.`);
 
         etiquette = Fabrique.ajouteEtiquetteP(infos);
-        Fabrique.ajouteTexte(etiquette,
+        etiquette.ajouteTextes(
             `Pour les commandes créées par un client, `,
             { texte: 'Supprimer', balise: KfTypeDeBaliseHTML.b },
             ' est remplacé par ',
@@ -47,12 +47,12 @@ export class LivraisonClientComponent extends CLFClientComponent implements OnIn
         );
 
         etiquette = Fabrique.ajouteEtiquetteP(infos);
-        Fabrique.ajouteTexte(etiquette,
+        etiquette.ajouteTextes(
             `Refuser une commande consiste à fixer à 0 les quantités à livrer des produits demandés.`
         );
 
         etiquette = Fabrique.ajouteEtiquetteP(infos);
-        Fabrique.ajouteTexte(etiquette,
+        etiquette.ajouteTextes(
             `Quand vous créez une ligne, il n'est pas nécessaire de fixer la quantité demandée.`
         );
 

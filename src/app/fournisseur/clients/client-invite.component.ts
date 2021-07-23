@@ -1,33 +1,29 @@
 import { Component, OnInit } from '@angular/core';
-import { BarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
+import { IBarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { Identifiant } from 'src/app/securite/identifiant';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 import { AppSite } from 'src/app/app-site/app-site';
-import { KfSuperGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-super-groupe';
 import { Client } from 'src/app/modeles/client/client';
 import { FormulaireComponent } from 'src/app/disposition/formulaire/formulaire.component';
 import { KfInputTexte } from 'src/app/commun/kf-composants/kf-elements/kf-input/kf-input-texte';
-import { Observable, concat, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { ApiResult } from 'src/app/api/api-results/api-result';
 import { ActivatedRoute, Data } from '@angular/router';
-import { CompteService } from 'src/app/compte/compte.service';
 import { FournisseurClientPages } from './client-pages';
 import { Site } from 'src/app/modeles/site/site';
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
 import { KfTypeDEvenement } from 'src/app/commun/kf-composants/kf-partages/kf-evenements';
 import { ClientService } from 'src/app/modeles/client/client.service';
-import { concatMap, take, map, switchMap } from 'rxjs/operators';
 import { KfCaseACocher } from 'src/app/commun/kf-composants/kf-elements/kf-case-a-cocher/kf-case-a-cocher';
 import { GroupeBoutonsMessages } from 'src/app/disposition/fabrique/fabrique-formulaire';
 import { TexteOutils } from 'src/app/commun/outils/texte-outils';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
-import { BootstrapNom } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
 import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
-import { Invitation } from 'src/app/modeles/invitation/invitation';
-import { InvitationData } from 'src/app/modeles/invitation/invitation-data';
-import { InvitationService } from 'src/app/modeles/invitation/invitation.service';
-import { InvitationUtileTexte } from 'src/app/modeles/invitation/invitation-utile-texte';
+import { Invitation } from 'src/app/modeles/client/invitation';
+import { InvitationUtileTexte } from 'src/app/modeles/client/invitation-utile-texte';
+import { KfValidateurs } from 'src/app/commun/kf-composants/kf-partages/kf-validateur';
+import { PageDef } from 'src/app/commun/page-def';
 import { IUrlDef } from 'src/app/disposition/fabrique/fabrique-url';
 
 @Component({
@@ -35,20 +31,27 @@ import { IUrlDef } from 'src/app/disposition/fabrique/fabrique-url';
 })
 export class ClientInviteComponent extends FormulaireComponent implements OnInit {
 
-    pageDef = FournisseurClientPages.invite;
+    pageDef: PageDef;
 
 
     get titre(): string {
+        if (this._client) {
+            return this.pageDef.titre + ' ' + this._client.nom;
+        }
+        if (this._invitation) {
+            return this.pageDef.titre + ' ' + this._invitation.email;
+        }
         return this.pageDef.titre;
     }
 
     site: Site;
     identifiant: Identifiant;
 
+    clients: Client[];
     invitations: Invitation[];
-    urlSegmentParent: string;
 
-    client: Client;
+    _client: Client;
+    _invitation: Invitation;
     email: KfInputTexte;
     remplace: KfCaseACocher;
     confirme: GroupeBoutonsMessages;
@@ -57,37 +60,44 @@ export class ClientInviteComponent extends FormulaireComponent implements OnInit
         return this.valeur;
     }
 
-    get urlDefParent(): IUrlDef {
-        switch (this.urlSegmentParent) {
-            case FournisseurClientPages.accueil.urlSegment:
-                return this.service.utile.url.accueil();
-            case FournisseurClientPages.invitations.urlSegment:
-                return this.service.utile.url.invitations();
-            case FournisseurClientPages.index.urlSegment:
-                return this.service.utile.url.retourIndex(this.client);
-            default:
-                break;
+    get client(): Client {
+        if (this._client) {
+            return this._client;
+        }
+        if (this._invitation) {
+            return this._invitation.client;
         }
     }
 
+    get urlRetour(): IUrlDef {
+        if (this._client) {
+            return this.service.utile.url.retourIndex(this._client);
+        }
+        if (this._invitation) {
+            return this.service.utile.url.retourInvitations(this._invitation);
+        }
+        return this.service.utile.url.invitations();
+    }
+
     créeBoutonsDeFormulaire = (formulaire: KfGroupe) => {
-        const annuler = Fabrique.lien.boutonAnnuler(this.urlDefParent);
+        const annuler = Fabrique.lien.boutonAnnuler(this.urlRetour);
         this.boutonSoumettre = Fabrique.bouton.soumettre(formulaire, `Envoyer l'invitation`);
         return [annuler, this.boutonSoumettre];
     }
 
     apiDemande = (): Observable<ApiResult> => {
-        return this.invitationService.envoie(this.invitation);
+        return this.service.envoie(this.invitation);
     }
 
     actionSiOk = (créé: any): void => {
         Fabrique.formulaire.désactiveEtCacheBoutons(this);
         this.invitation.date = créé.date;
-        this.invitationService.quandEnvoi(this.invitation);
+        this.service.quandEnvoi(this.invitation);
+        this.confirme.groupe.nePasAfficher = true;
         this.afficheResultat.fixeDétails([
             `Un message a été envoyé à l'adresse ${this.email.valeur}`
             + ` contenant un lien sur lequel l'utilisateur devra cliquer pour `
-            + InvitationUtileTexte.résultatEnregistrement(this.client)
+            + InvitationUtileTexte.résultatEnregistrement(this.client),
         ]);
     }
 
@@ -101,7 +111,7 @@ export class ClientInviteComponent extends FormulaireComponent implements OnInit
         } else {
             const étiquette: KfEtiquette = this.confirme.messages[0] as KfEtiquette;
             étiquette.contenuPhrase.contenus = [];
-            Fabrique.ajouteTexte(étiquette,
+            étiquette.ajouteTextes(
                 `Un message avait déjà été envoyé à l'utilisateur ${this.email.valeur} pour l'inviter à `,
                 InvitationUtileTexte.résultatEnregistrementAAjouter(existante.client),
                 `le ${TexteOutils.date.en_chiffres(existante.date)} à ${TexteOutils.date.h_Min(existante.date)}.`
@@ -113,7 +123,6 @@ export class ClientInviteComponent extends FormulaireComponent implements OnInit
     constructor(
         protected route: ActivatedRoute,
         protected service: ClientService,
-        private invitationService: InvitationService,
     ) {
         super(service);
 
@@ -121,12 +130,13 @@ export class ClientInviteComponent extends FormulaireComponent implements OnInit
         this.titreRésultatSucces = `Le message d'invitation a bien été envoyé`;
     }
 
-    créeBarreTitre = (): BarreTitre => {
-        const lienIndex = this.client
-            ? this.service.utile.lienKey.retourIndex(this.client)
-            : this.service.utile.lienKey.index();
-        const groupe = Fabrique.titrePage.bbtnGroup('boutons');
-        groupe.ajoute(lienIndex);
+    créeBarreTitre = (): IBarreTitre => {
+        const lienIndex = this._client
+            ? this.service.utile.lienKey.retourIndex(this._client)
+            : this._invitation
+                ? this.service.utile.lien.retourInvitation(this._invitation)
+                : this.service.utile.lien.invitations();
+        const groupe = Fabrique.titrePage.groupeRetour(lienIndex);
         const barre = Fabrique.titrePage.barreTitre({
             pageDef: this.pageDef,
             groupesDeBoutons: [groupe]
@@ -139,7 +149,7 @@ export class ClientInviteComponent extends FormulaireComponent implements OnInit
     créeAvantFormulaire = (): KfComposant[] => {
         const composants: KfComposant[] = [];
         let étiquette = Fabrique.ajouteEtiquetteP(composants);
-        Fabrique.ajouteTexte(étiquette,
+        étiquette.ajouteTextes(
             `Pour qu'un de vos clients puisse accéder à ses données sur votre site, vous devez lui envoyer `
             + `une invitation, c'est à dire un message email envoyé par le serveur de ${AppSite.titre} contenant le texte: `,
             {
@@ -149,7 +159,7 @@ export class ClientInviteComponent extends FormulaireComponent implements OnInit
             }
         );
         étiquette = Fabrique.ajouteEtiquetteP(composants);
-        Fabrique.ajouteTexte(étiquette,
+        étiquette.ajouteTextes(
             `En cliquant sur ce lien, votre client accèdera à une page de ${AppSite.nom} où il pourra `,
             InvitationUtileTexte.résultatEnregistrementAAjouter(this.client)
         );
@@ -160,12 +170,12 @@ export class ClientInviteComponent extends FormulaireComponent implements OnInit
         const messages: KfEtiquette[] = [];
         let étiquette = Fabrique.ajouteEtiquetteP(messages);
         étiquette = Fabrique.ajouteEtiquetteP(messages);
-        Fabrique.ajouteTexte(étiquette,
+        étiquette.ajouteTextes(
             `Etes- vous sûr de vouloir remplacer cette invitation et proposer à l'utilisateur invité de `,
             InvitationUtileTexte.résultatEnregistrementAAjouter(this.client)
         );
         this.confirme = new GroupeBoutonsMessages('confirme', { messages });
-        this.confirme.alerte(BootstrapNom.warning);
+        this.confirme.alerte('warning');
         this.confirme.groupe.visible = false;
     }
 
@@ -177,17 +187,43 @@ export class ClientInviteComponent extends FormulaireComponent implements OnInit
         const rno = Fabrique.input.nombreInvisible('rno');
         rno.valeur = this.site.rno;
         groupe.ajoute(rno);
-        this.email = Fabrique.input.email('email', 'Email du client');
-        this.email.gereHtml.suitLaValeur();
-        this.email.gereHtml.ajouteTraiteur(KfTypeDEvenement.valeurChange, this.quandEmailChange.bind(this));
+        const emailTexte = 'Email du client';
+        let client: Client;
+        if (this._invitation) {
+            client = this._invitation.client;
+            this.email = Fabrique.input.texteLectureSeule('email', emailTexte);
+            this.email.valeur = this._invitation.email;
+            groupe.comportementFormulaire.neSoumetPasSiPristine = false;
+        } else {
+            client = this.client;
+            this.email = Fabrique.input.email('email', );
+            // l'utilisateur invité ne doit pas être déjà client
+            this.email.ajouteValidateur(KfValidateurs.validateurDeFn('client_existe',
+                (value: any) => {
+                    const existe = value && this.clients.find(c => c.email === value);
+                    return !!existe;
+                },
+                `Il y a déjà un client enregistré avec cette adresse email.`));
+            // l'utilisateur ne doit pas être le fournisseur
+            this.email.ajouteValidateur(KfValidateurs.validateurDeFn('est_fournisseur',
+                (value: any) => value === this.identifiant.userName,
+                'Vous ne pouvez pas être client de votre site.'
+            ))
+            this.email.gereHtml.suitLaValeur();
+            this.email.gereHtml.ajouteTraiteur(KfTypeDEvenement.valeurChange, this.quandEmailChange.bind(this));
+        }
         groupe.ajoute(this.email);
         const uidClient = Fabrique.input.texteInvisible('uidClient');
         groupe.ajoute(uidClient);
         const rnoClient = Fabrique.input.nombreInvisible('rnoClient');
         groupe.ajoute(rnoClient);
-        if (this.client) {
-            uidClient.valeur = this.client.uid;
-            rnoClient.valeur = this.client.rno;
+        if (client) {
+            uidClient.valeur = client.uid;
+            rnoClient.valeur = client.rno;
+            if (client.invitation) {
+                this.email.valeur = client.invitation.email;
+                groupe.comportementFormulaire.neSoumetPasSiPristine = false;
+            }
         }
 
         this.créeConfirme();
@@ -198,11 +234,13 @@ export class ClientInviteComponent extends FormulaireComponent implements OnInit
 
     ngOnInit() {
         this.subscriptions.push(this.route.data.subscribe((data: Data) => {
+            this._invitation = data.invitation;
+            this._client = data.client;
+            this.pageDef = this._client ? FournisseurClientPages.inviteClient : this._invitation ? FournisseurClientPages.réinvite : FournisseurClientPages.invite;
+            this.clients = data.clients;
+            this.invitations = data.liste;
             this.niveauTitre = 1;
             this.créeTitrePage();
-            this.client = data.valeur;
-            this.invitations = data.liste;
-            this.urlSegmentParent = data.retour;
             this.site = this.navigation.litSiteEnCours();
             this.identifiant = this.identification.litIdentifiant();
             this.superGroupe = Fabrique.formulaire.superGroupe(this);

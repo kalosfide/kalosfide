@@ -2,7 +2,7 @@ import { KfGroupe } from '../kf-groupe/kf-groupe';
 import { KfBouton } from '../kf-elements/kf-bouton/kf-bouton';
 import { NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { KfGéreCss } from '../kf-partages/kf-gere-css';
-import { KfTexteDef } from '../kf-partages/kf-texte-def';
+import { KfStringDef } from '../kf-partages/kf-string-def';
 import { KfNgClasseDef, KfNgClasse } from '../kf-partages/kf-gere-css-classe';
 import { KfComposant } from '../kf-composant/kf-composant';
 
@@ -51,7 +51,7 @@ export class KfNgbModal {
     }
     get options(): NgbModalOptions { return this.pOptions; }
 
-    ajouteClasseEnTête(...classeDefs: (KfTexteDef | KfNgClasseDef)[]) {
+    ajouteClasseEnTête(...classeDefs: (KfStringDef | KfNgClasseDef)[]) {
         if (!this.pGéreCssEnTête) {
             this.pGéreCssEnTête = new KfGéreCss();
         }
@@ -64,7 +64,7 @@ export class KfNgbModal {
         }
     }
 
-    ajouteClasseTitre(...classeDefs: (KfTexteDef | KfNgClasseDef)[]) {
+    ajouteClasseTitre(...classeDefs: (KfStringDef | KfNgClasseDef)[]) {
         if (!this.pGéreCssTitre) {
             this.pGéreCssTitre = new KfGéreCss();
         }
@@ -77,7 +77,7 @@ export class KfNgbModal {
         }
     }
 
-    ajouteClasseCorps(...classeDefs: (KfTexteDef | KfNgClasseDef)[]) {
+    ajouteClasseCorps(...classeDefs: (KfStringDef | KfNgClasseDef)[]) {
         if (!this.pGéreCssCorps) {
             this.pGéreCssCorps = new KfGéreCss();
         }
@@ -90,7 +90,7 @@ export class KfNgbModal {
         }
     }
 
-    ajouteClassePied(...classeDefs: (KfTexteDef | KfNgClasseDef)[]) {
+    ajouteClassePied(...classeDefs: (KfStringDef | KfNgClasseDef)[]) {
         if (!this.pGéreCssPied) {
             this.pGéreCssPied = new KfGéreCss();
         }

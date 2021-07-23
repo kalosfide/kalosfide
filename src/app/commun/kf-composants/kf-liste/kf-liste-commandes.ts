@@ -4,7 +4,7 @@ import { KfComposant } from '../kf-composant/kf-composant';
 import { KfTypeDeComposant, KfTypeDActionDeListe } from '../kf-composants-types';
 import { KfTypeDEvenement, KfEvenement, KfStatutDEvenement } from '../kf-partages/kf-evenements';
 import { KfParametres } from '../kf-composants-parametres';
-import { KfTexteDef } from '../kf-partages/kf-texte-def';
+import { KfStringDef } from '../kf-partages/kf-string-def';
 import { KfImageDef } from '../kf-partages/kf-image-def';
 import { KfImage } from '../kf-elements/kf-image/kf-image';
 import { KfTexte } from '../kf-elements/kf-texte/kf-texte';
@@ -17,7 +17,7 @@ import { KfTexte } from '../kf-elements/kf-texte/kf-texte';
 export interface KfCommandesDeListeInterface {
     types?: KfTypeDActionDeListe[];
     creeDeclencheur?: (type: KfTypeDActionDeListe) => KfComposant;
-    texte?: (type: KfTypeDActionDeListe) => KfTexteDef;
+    texte?: (type: KfTypeDActionDeListe) => KfStringDef;
     imageAvant?: (type: KfTypeDActionDeListe) => KfImageDef;
     imageApres?: (type: KfTypeDActionDeListe) => KfImageDef;
     type?: KfTypeDeComposant;
@@ -91,11 +91,11 @@ export class KfListeCommandes {
                     const nom = KfParametres.listeParDefaut.nomBouton(c.type);
                     c.declencheur = new KfBouton(nom);
                     if (commandesInterface.imageAvant) {
-                        c.declencheur.contenuPhrase.ajoute(new KfImage('', commandesInterface.imageAvant(c.type)));
+                        c.declencheur.contenuPhrase.ajouteContenus(new KfImage('', commandesInterface.imageAvant(c.type)));
                     }
-                    c.declencheur.contenuPhrase.ajoute(new KfTexte('', commandesInterface.texte(c.type)));
+                    c.declencheur.contenuPhrase.ajouteContenus(new KfTexte('', commandesInterface.texte(c.type)));
                     if (commandesInterface.imageApres) {
-                        c.declencheur.contenuPhrase.ajoute(new KfImage('', commandesInterface.imageApres(c.type)));
+                        c.declencheur.contenuPhrase.ajouteContenus(new KfImage('', commandesInterface.imageApres(c.type)));
                     }
                 }
                 c.declencheur.inactivitéFnc = this.inactivitéFnc(c.type);

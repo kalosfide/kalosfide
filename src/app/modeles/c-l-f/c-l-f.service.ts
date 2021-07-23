@@ -2,7 +2,7 @@ import { Subscription, Observable } from 'rxjs';
 import { ApiRequêteService } from 'src/app/api/api-requete.service';
 import { Site } from '../site/site';
 import { ModeTable } from 'src/app/commun/data-par-key/condition-table';
-import { KfInitialObservable } from 'src/app/commun/kf-composants/kf-partages/kf-initial-observable';
+import { ValeurEtObservable } from 'src/app/commun/outils/valeur-et-observable';
 import { ModeAction } from './condition-action';
 import { ApiDocument } from './api-document';
 import { CatalogueService } from '../catalogue/catalogue.service';
@@ -26,22 +26,24 @@ import { IUrlDef } from 'src/app/disposition/fabrique/fabrique-url';
 import { KfSuperGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-super-groupe';
 import { AfficheResultat } from 'src/app/disposition/affiche-resultat/affiche-resultat';
 import { CLFDocs } from './c-l-f-docs';
+import { TypeCLF } from './c-l-f-type';
 
 /**
  * Implémentations: ClientCLFService, FournisseurCLFService
  */
 export abstract class CLFService extends CLFLectureService {
 
-    private pModeActionIO: KfInitialObservable<ModeAction>;
+    private pModeActionIO: ValeurEtObservable<ModeAction>;
     private pSubscriptionDeModeTableAModeAction: Subscription;
 
     constructor(
+        nomStockage: string,
         protected catalogueService: CatalogueService,
         protected stockageService: StockageService,
         protected clientService: ClientService,
         protected apiRequeteService: ApiRequêteService
     ) {
-        super(catalogueService, stockageService, clientService, apiRequeteService);
+        super(nomStockage, catalogueService, stockageService, clientService, apiRequeteService);
         this.créeUtile();
     }
 
@@ -80,8 +82,8 @@ export abstract class CLFService extends CLFLectureService {
 
     créeUtile() {
         const site = this.navigation.litSiteEnCours();
-        this.pModeActionIO = KfInitialObservable.nouveau<ModeAction>(this.transformeSiteFnc(site));
-        this.pModeTableIO = KfInitialObservable.nouveau<ModeTable>(this.transformeModeFnc(this.pModeActionIO.valeur));
+        this.pModeActionIO = ValeurEtObservable.nouveau<ModeAction>(this.transformeSiteFnc(site));
+        this.pModeTableIO = ValeurEtObservable.nouveau<ModeTable>(this.transformeModeFnc(this.pModeActionIO.valeur));
         this.modeTableSouscritAModeAction();
         this.pUtile = new CLFUtile(this);
         this.pUtile.observeModeTable(this.pModeTableIO);
@@ -112,7 +114,7 @@ export abstract class CLFService extends CLFLectureService {
         }
     }
 
-    get modeActionIO(): KfInitialObservable<ModeAction> {
+    get modeActionIO(): ValeurEtObservable<ModeAction> {
         return this.pModeActionIO;
     }
 
@@ -127,7 +129,7 @@ export abstract class CLFService extends CLFLectureService {
     // Actions sur les commandes
 
     protected _paramsAvecContexte(params: { [param: string]: string }): { [param: string]: string } {
-//        params.dateCatalogue = null;
+        //        params.dateCatalogue = null;
         return params;
     }
 
@@ -197,24 +199,57 @@ export abstract class CLFService extends CLFLectureService {
      * Crée une nouvelle commande vide d'un client.
      * @param ikeyClient tout objet ayant l'uid et le rno du client
      */
-    public apiRequêteCrée(ikeyClient: IKeyUidRno, formulaire?: KfSuperGroupe, afficheResultat?: AfficheResultat): ApiRequêteAction {
-        return this.apiRequêteAction(
-            () => this.post(ApiController.commande, ApiAction.commande.nouveau, null, this.paramsKeyClient(ikeyClient)),
-            (stock: CLFDocs, créé: ApiDocument) => stock.quandCommandeCréée(créé),
-            this.utile.url.bon(),
-            formulaire,
-            afficheResultat
-        );
+    public apiRequêteCrée(type: TypeCLF, ikeyClient: IKeyUidRno, formulaire?: KfSuperGroupe, afficheResultat?: AfficheResultat): ApiRequêteAction {
+        let controller: string;
+        switch (type) {
+            case 'commande':
+                controller = ApiController.commande;
+                break;
+            case 'livraison':
+                controller = ApiController.livraison;
+                break;
+            default:
+                break;
+        }
+        if (controller) {
+            return this.apiRequêteAction(
+                () => this.post(controller, ApiAction.bon.nouveau, null, this.paramsKeyClient(ikeyClient)),
+                (stock: CLFDocs, créé: ApiDocument) => stock.quandBonCréé(créé),
+                this.utile.url.bon(),
+                formulaire,
+                afficheResultat
+            );
+        }
     }
 
     /**
      * Crée une nouvelle commande d'un client copie de la précédente commande.
      * @param ikeyClient tout objet ayant l'uid et le rno du client
      */
-    public apiRequêteCréeCopie(ikeyClient: IKeyUidRno, formulaire?: KfSuperGroupe, afficheResultat?: AfficheResultat): ApiRequêteAction {
+    public apiRequêteCréeCopie(type: TypeCLF, ikeyClient: IKeyUidRno, formulaire?: KfSuperGroupe, afficheResultat?: AfficheResultat): ApiRequêteAction {
+        let controller: string;
+        switch (type) {
+            case 'commande':
+                controller = ApiController.commande;
+                break;
+            case 'livraison':
+                controller = ApiController.livraison;
+                break;
+            default:
+                break;
+        }
+        if (controller) {
+            return this.apiRequêteAction(
+                () => this.post(controller, ApiAction.bon.clone, null, this.paramsKeyClient(ikeyClient)),
+                (stock: CLFDocs, créé: ApiDocument) => stock.quandBonCréé(créé),
+                this.utile.url.bon(),
+                formulaire,
+                afficheResultat
+            );
+        }
         return this.apiRequêteAction(
-            () => this.post(ApiController.commande, ApiAction.commande.clone, null, this.paramsKeyClient(ikeyClient)),
-            (stock: CLFDocs, créé: ApiDocument) => stock.quandCommandeCréée(créé),
+            () => this.post(ApiController.commande, ApiAction.bon.clone, null, this.paramsKeyClient(ikeyClient)),
+            (stock: CLFDocs, créé: ApiDocument) => stock.quandBonCréé(créé),
             this.utile.url.bon(),
             formulaire,
             afficheResultat
@@ -226,7 +261,7 @@ export abstract class CLFService extends CLFLectureService {
      * @param ikeyCommande tout objet ayant l'uid, le rno et le no de la commande
      */
     supprimeOuRefuse$(ikeyCommande: IKeyUidRnoNo) {
-        return this.post(ApiController.commande, ApiAction.commande.efface, null, this.paramsKeyCommande(ikeyCommande));
+        return this.post(ApiController.commande, ApiAction.bon.efface, null, this.paramsKeyCommande(ikeyCommande));
     }
     /** actionSiOk de supprimeOuRefuse si l'utilisateur est le fournisseur */
     siSupprimeOuRefuseOk(ikeyCommande: IKeyUidRnoNo) {
@@ -245,7 +280,7 @@ export abstract class CLFService extends CLFLectureService {
     private ajouteLigne(ligne: CLFLigne): Observable<ApiResult> {
         const controller = this.controller(ligne.parent.type);
         const apiLigne = ligne.apiLigneAEnvoyer();
-        return this.post<ApiLigne>(controller, ApiAction.commande.ajoute, apiLigne, this.paramsVide());
+        return this.post<ApiLigne>(controller, ApiAction.bon.ajoute, apiLigne, this.paramsVide());
     }
     /**
      * modifie une ligne
@@ -292,12 +327,12 @@ export abstract class CLFService extends CLFLectureService {
      */
     public apiRequêteSupprimeLigne(ligne: CLFLigne, rafraichitTable: (stock: CLFDocs) => void): ApiRequêteAction {
         return this.apiRequêteAction(
-                () => this.delete(ApiController.commande, ApiAction.commande.supprime, this.paramsKeyLigne(ligne)),
-                (stock: CLFDocs) => {
-                    stock.quandLigneSupprimée(ligne);
-                    rafraichitTable(stock);
-                }
-            );
+            () => this.delete(ApiController.commande, ApiAction.bon.supprime, this.paramsKeyLigne(ligne)),
+            (stock: CLFDocs) => {
+                stock.quandLigneSupprimée(ligne);
+                rafraichitTable(stock);
+            }
+        );
     }
 
     /**

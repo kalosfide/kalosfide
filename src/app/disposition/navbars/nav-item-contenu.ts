@@ -1,4 +1,4 @@
-import { KfTexteDef } from 'src/app/commun/kf-composants/kf-partages/kf-texte-def';
+import { KfStringDef } from 'src/app/commun/kf-composants/kf-partages/kf-string-def';
 import { KfContenuPhrase } from 'src/app/commun/kf-composants/kf-partages/kf-contenu-phrase/kf-contenu-phrase';
 import { KfImageDef } from 'src/app/commun/kf-composants/kf-partages/kf-image-def';
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
@@ -31,7 +31,7 @@ export class NavItemContenu extends NavItem {
         return this.pComposant;
     }
 
-    set texte(texte: KfTexteDef) {
+    set texte(texte: KfStringDef) {
         this.pComposant.fixeTexte(texte);
     }
 
@@ -55,7 +55,7 @@ export class NavItemContenu extends NavItem {
         }
     }
 
-    set url(url: KfTexteDef) {
+    set url(url: KfStringDef) {
         if (this.pComposant.type === KfTypeDeComposant.lien) {
             (this.pComposant as KfLien).fixeRoute(url);
         }

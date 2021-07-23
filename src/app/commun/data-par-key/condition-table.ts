@@ -1,4 +1,4 @@
-import { KfInitialObservable } from '../kf-composants/kf-partages/kf-initial-observable';
+import { ValeurEtObservable } from '../outils/valeur-et-observable';
 import { Conditions } from '../condition/condition';
 
 export enum ModeTable {
@@ -9,16 +9,16 @@ export enum ModeTable {
 
 export class ConditionTable extends Conditions<ModeTable> {
 
-    constructor(modeTableIo: KfInitialObservable<ModeTable>) {
+    constructor(modeTableIo: ValeurEtObservable<ModeTable>) {
         super();
         this.observe([ModeTable.aperçu, ModeTable.edite], modeTableIo);
         this.nom = 'table';
     }
 
-    get edition(): KfInitialObservable<boolean> {
+    get edition(): ValeurEtObservable<boolean> {
         return this.conditionIO(ModeTable.edite);
     }
-    get aperçu(): KfInitialObservable<boolean> {
+    get aperçu(): ValeurEtObservable<boolean> {
         return this.conditionIO(ModeTable.aperçu);
     }
 

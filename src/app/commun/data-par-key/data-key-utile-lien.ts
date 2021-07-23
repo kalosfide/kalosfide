@@ -18,7 +18,7 @@ export class DataKeyUtileLien<T extends IDataKey> {
     }
 
     index(): KfLien {
-        return Fabrique.lien.lien(this.def(this.pUtile.urlKey.index()));
+        return Fabrique.lien.retour(this.pUtile.urlKey.index());
     }
     retourIndex(t: T, texte?: string): KfLien {
         return Fabrique.lien.retour(this.pUtile.urlKey.retourIndex(t), texte);
@@ -26,10 +26,11 @@ export class DataKeyUtileLien<T extends IDataKey> {
     ajoute(): KfLien {
         return Fabrique.lien.ajoute(this.pUtile.urlKey.ajoute());
     }
-    edite(t: T): KfLien {
-        return Fabrique.lien.lien(this.def(this.pUtile.urlKey.edite(t), Fabrique.contenu.edite));
+    edite(t?: T): KfLien {
+        const urlDef = t ? this.pUtile.urlKey.edite(t) : undefined;
+        return Fabrique.lien.bouton(this.def(urlDef, Fabrique.contenu.edite));
     }
     supprime(t: T): KfLien {
-        return Fabrique.lien.lien(this.def(this.pUtile.urlKey.supprime(t), Fabrique.contenu.supprime));
+        return Fabrique.lien.bouton(this.def(this.pUtile.urlKey.supprime(t), Fabrique.contenu.supprime));
     }
 }

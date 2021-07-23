@@ -1,6 +1,6 @@
 import { KfTypeDeComposant, KfTypeDeBouton } from '../../kf-composants-types';
 import { KfComposant } from '../../kf-composant/kf-composant';
-import { KfTexteDef } from '../../kf-partages/kf-texte-def';
+import { KfStringDef } from '../../kf-partages/kf-string-def';
 import { KfContenuPhrase } from '../../kf-partages/kf-contenu-phrase/kf-contenu-phrase';
 import { IKfNgbPopoverDef } from './kf-ngb-popover';
 import { KfIcone } from '../kf-icone/kf-icone';
@@ -33,7 +33,7 @@ export class KfBouton extends KfComposant implements IKfAvecSurvol {
       */
      private pConteneurSurvolé: KfGéreCss;
 
-    constructor(nom: string, texte?: KfTexteDef) {
+    constructor(nom: string, texte?: KfStringDef) {
         super(nom, KfTypeDeComposant.bouton);
         this.pTypeDeBouton = 'button';
         this.contenuPhrase = new KfContenuPhrase(this, texte);

@@ -12,13 +12,13 @@ import { ApiRequêteService } from '../../api/api-requete.service';
 import { ClientUtile } from './client-utile';
 import { Stockage } from 'src/app/services/stockage/stockage';
 import { StockageService } from 'src/app/services/stockage/stockage.service';
-import { ApiResult200Ok } from 'src/app/api/api-results/api-result-200-ok';
 import { IKeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/i-key-uid-rno';
-import { Compare } from '../../commun/outils/tri';
 import { ApiResult201Created } from 'src/app/api/api-results/api-result-201-created';
+import { Invitation, InvitationDeApi, InvitationVersApi } from './invitation';
 
 class ApiClients {
     clients: Client[];
+    invitations: InvitationDeApi[];
 
     /**
      * date de lecture ou de mise à jour
@@ -31,6 +31,7 @@ class Stock {
     siteRno: number;
     identifiantUid: string;
     clients: Client[];
+    invitations: InvitationDeApi[];
 
     /**
      * date de lecture ou de mise à jour
@@ -94,20 +95,7 @@ export class ClientService extends KeyUidRnoService<Client> {
         this.identification.fixeSiteIdentifiant(site);
     }
 
-    /**
-     * change l'état d'un client
-     * @param client client
-     */
-    changeEtat(client: Client, etat: string) {
-        client.etat = etat;
-        // on ne transmet que la key et l'état
-        const c = new Client();
-        KeyUidRno.copieKey(client, c);
-        c.etat = etat;
-        return this.put<Client>(ApiController.client, ApiAction.client.etat, c);
-    }
-    /** actionSiOk de changeEtat */
-    quandEtatChange(client: Client) {
+    private quandEtatChange(client: Client) {
         const stock = this.stockage.litStock();
         if (!stock) {
             throw new Error('Clients: Pas de stock');
@@ -116,23 +104,80 @@ export class ClientService extends KeyUidRnoService<Client> {
         if (index === -1) {
             throw new Error('Clients: édité absent du stock');
         }
-        stock.clients[index].etat = client.etat === EtatClient.exclu ? EtatClient.inactif : EtatClient.actif;
+        stock.clients[index].etat = client.etat === EtatClient.fermé ? EtatClient.inactif : EtatClient.actif;
         stock.clients[index].dateEtat = new Date(Date.now());
         this.stockage.fixeStock(stock);
     }
 
-    ajoute(objet: Client): Observable<ApiResult> {
+    private remplace(client: Client, nouveau: Client) {
+        const stock = this.stockage.litStock();
+        if (!stock) {
+            throw new Error('Clients: Pas de stock');
+        }
+        const index = stock.clients.findIndex(c => KeyUidRno.compareKey(c, client));
+        if (index === -1) {
+            throw new Error('Clients: édité absent du stock');
+        }
+        stock.clients[index] = nouveau;
+        this.stockage.fixeStock(stock);
+    }
+
+    active(client: Client) {
+        return this.post<Client>(ApiController.client, ApiAction.client.active, null, KeyUidRno.créeParams(client));
+    }
+    quandActivé(client: Client) {
+        client.etat = EtatClient.actif;
+        this.quandEtatChange(client);
+    }
+
+    inactive(client: Client) {
+        return this.post<Client>(ApiController.client, ApiAction.client.inactive, null, KeyUidRno.créeParams(client));
+    }
+    quandInactivé(client: Client): (créé: Client) => void {
+        return (créé: Client) => {
+            if (client.email) {
+                // le compte est géré par le client
+                if (client.etat === EtatClient.actif) {
+                    // il était actif, il est devenu inactif
+                    client.etat = EtatClient.inactif;
+                    this.quandEtatChange(client);
+                    return;
+                }
+                // le compte était d'état nouveau
+                // il a été créé par invitation
+                // l'api a retourné null si l'invitation ne comprenait aucun compte à gérer
+                if (créé) {
+                    // créé est un compte identique à celui qui existait quand le client a été invité à le gérer
+                    this.remplace(client, créé);
+                } else {
+                    this.quandSupprime(client);
+                }
+                return;
+            }
+            // le compte est géré par le fournisseur
+            if (client.avecDocuments) {
+                // il est devenu inactif
+                client.etat = EtatClient.inactif;
+                this.quandEtatChange(client);
+            } else {
+                // il a été supprimé
+                this.quandSupprime(client);
+            }
+        }
+    }
+
+    ajoute(client: Client): Observable<ApiResult> {
         const site = this.navigation.litSiteEnCours();
         const params: { [param: string]: string } = KeyUidRno.créeParams(site);
-        params.nom = objet.nom;
-        params.adresse = objet.adresse;
+        params.nom = client.nom;
+        params.adresse = client.adresse;
         return this.post(this.controllerUrl, ApiAction.data.ajoute, params).pipe(
             tap((apiResult: ApiResult) => {
                 if (apiResult.statusCode === ApiResult201Created.code) {
                     // l'api retourne la clé du client créé
                     const keyClient = (apiResult as ApiResult201Created).entity;
-                    objet.uid = keyClient.uid;
-                    objet.rno = keyClient.rno;
+                    client.uid = keyClient.uid;
+                    client.rno = keyClient.rno;
                 }
             })
         );
@@ -175,73 +220,141 @@ export class ClientService extends KeyUidRnoService<Client> {
         this.stockage.fixeStock(stock);
     }
 
-    quandInvitation(client: Client, invité: boolean) {
+    private quandInvitation(invitation: Invitation, supprime?: boolean) {
         const stock = this.stockage.litStock();
         if (!stock) {
             throw new Error('Clients: Pas de stock');
         }
-        const index = stock.clients.findIndex(c => KeyUidRno.compareKey(c, client));
-        if (index === -1) {
+        const client = stock.clients.find(c => c.uid === invitation.uidClient);
+        if (!client) {
             throw new Error('Clients: invité absent du stock');
         }
-        stock.clients[index].compte = invité ? 'I' : 'N';
+        if (supprime) {
+            client.email = undefined;
+            client.invitation = undefined;
+        } else {
+            client.email = invitation.email;
+            client.invitation = invitation;
+        }
         this.stockage.fixeStock(stock);
     }
 
-    private _clients$(siteUid: string, siteRno: number, identifiantUid: string): Observable<Client[]> {
-        // c'est le fournisseur
-        const keySite: IKeyUidRno = { uid: siteUid, rno: siteRno };
-        const demandeApi = () => this.get<ApiClients>(ApiController.client, ApiAction.client.liste, KeyUidRno.créeParams(keySite));
+    quandInvitationAjoutée(invitation: Invitation) {
+        this.quandInvitation(invitation);
+    }
+
+    quandInvitationSupprimée(invitation: Invitation) {
+        this.quandInvitation(invitation, true);
+    }
+
+    /**
+     * Charge le stock depuis l'api sauf s'il est déjà chargé et qu'il n'y a pas d'invitations.
+     * S'il y a des invitations, elles ont pu recevoir des réponses et il faut recharger le stock
+     * @returns true ou un Observable qui émet true après avoir chargé le stock
+     */
+    chargeClientsEtInvitations(): Observable<boolean> {
+        let stock = this.stockage.litStock();
+        if (stock && stock.invitations.length === 0) {
+            // Le stock est chargé et aucune invitation n'attend de réponse.
+            // Les seuls changements possibles des clients sont la modification du nom ou de l'adresse
+            // qui n'ont pas d'importance pour choisir un client dans la liste ou changer son état.
+            return of(true);
+        }
+        const site = this.navigation.litSiteEnCours();
+        const identifiant = this.identification.litIdentifiant();
+        const demandeApi = () => this.get<ApiClients>(ApiController.client, ApiAction.client.liste, KeyUidRno.créeParams(site));
         return this.lectureObs<ApiClients>({ demandeApi }).pipe(
             take(1),
             map(apiClients => {
-                const stock = new Stock();
-                stock.siteUid = siteUid;
-                stock.siteRno = siteRno;
-                stock.identifiantUid = identifiantUid;
-                stock.clients = apiClients.clients;
-                stock.date = apiClients.date;
-                this.stockage.fixeStock(stock);
-                return apiClients.clients;
+                const nouveauStock = new Stock();
+                nouveauStock.siteUid = site.uid;
+                nouveauStock.siteRno = site.rno;
+                nouveauStock.identifiantUid = identifiant.uid;
+                nouveauStock.clients = apiClients.clients;
+                nouveauStock.invitations = apiClients.invitations;
+                if (stock) {
+                    // il y avait des invitations
+                    // on a répondu à celles qui ne figurent pas dans la nouvelle liste
+                    const répondues = stock.invitations.filter(invitation => nouveauStock.invitations.find(i => i.email === invitation.email) === undefined);
+                    // on donne l'état nouveau aux clients créés par ces réponses
+                    répondues.forEach(invitation => {
+                        const client = nouveauStock.clients.find(c => c.email === invitation.email);
+                        client.etat = EtatClient.nouveau;
+                    })
+                }
+                nouveauStock.date = apiClients.date;
+                this.stockage.fixeStock(nouveauStock);
+                return true;
             })
         );
+
+    }
+
+    /**
+     * Lit les clients dans le stock
+     * @returns liste des clients avec leur propriété invitation
+     */
+    litClients(): Client[] {
+        const stock = this.stockage.litStock();
+        if (!stock) {
+            throw new Error('Clients: Pas de stock');
+        }
+        stock.invitations.forEach(invitation => {
+            if (invitation.uidClient) {
+                const client = stock.clients.find(c => c.uid === invitation.uidClient);
+                client.invitation = invitation;
+            }
+        });
+        return stock.clients;
+    }
+
+    litClient(key: KeyUidRno): Client {
+        const stock = this.stockage.litStock();
+        if (!stock) {
+            throw new Error('Clients: Pas de stock');
+        }
+        const client = stock.clients.find(c => c.uid === key.uid && c.rno === key.rno);
+        if (client) {
+            client.invitation = stock.invitations.find(invitation => invitation.uidClient === client.uid && invitation.rnoClient === client.rno);
+        }
+        return client;
+    }
+
+    private créeInvitation(invitationData: InvitationDeApi, clients: Client[]): Invitation {
+        const invitation = Invitation.nouveau(invitationData);
+        if (invitation.uidClient) {
+            const client = clients.find(c => c.uid === invitation.uidClient && c.rno === invitation.rnoClient);
+            invitation.client = client;
+        }
+        return invitation;
+    }
+
+    litInvitations(): Invitation[] {
+        const stock = this.stockage.litStock();
+        if (!stock) {
+            throw new Error('Clients: Pas de stock');
+        }
+        return stock.invitations.map(invitationData => this.créeInvitation(invitationData, stock.clients));
+    }
+
+    litInvitation(email: string): Invitation {
+        const stock = this.stockage.litStock();
+        if (!stock) {
+            throw new Error('Clients: Pas de stock');
+        }
+        const invitation = stock.invitations.find(i => i.email === email);
+        if (invitation) {
+            return this.créeInvitation(invitation, stock.clients);
+        }
     }
 
     /**
      * retourne un Observable d'une liste des clients du site en cours
      */
     clients$(): Observable<Client[]> {
-        const stock = this.stockage.litStock();
-        const site = this.navigation.litSiteEnCours();
-        const identifiant = this.identification.litIdentifiant();
-        if (!stock) {
-            return this._clients$(site.uid, site.rno, identifiant.uid);
-        }
-        return of(stock.clients);
-    }
-
-    /**
-     * vérifie si des clients ont ouvert un compte depuis la date du stock et met à jour le stock
-     */
-    rafraichitStock(): Observable<Client[]> {
-        const stock = this.stockage.litStock();
-        const site = this.navigation.litSiteEnCours();
-
-        const params = {
-            uid: site.uid,
-            rno: '' + site.rno,
-            date: (new Date(stock.date)).toDateString()
-        };
-        // charge la liste des clients qui ont ouvert un compte depuis la date du stock
-        const demandeApi = () => this.get<ApiClients>(ApiController.client, ApiAction.client.rafraichit, params);
-        return this.lectureObs<ApiClients>({ demandeApi }).pipe(
-            map((apiClients: ApiClients) => {
-                stock.date = new Date(apiClients.date);
-                stock.clients = stock.clients
-                    .filter(c => c.etat !== EtatClient.nouveau)
-                    .concat(apiClients.clients);
-                this.stockage.fixeStock(stock);
-                return stock.clients;
+        return this.chargeClientsEtInvitations().pipe(
+            map(() => {
+                return this.litClients();
             })
         );
     }
@@ -251,12 +364,65 @@ export class ClientService extends KeyUidRnoService<Client> {
      * @param key key du client
      */
     client$(key: KeyUidRno): Observable<Client> {
-        return this.clients$().pipe(
-            map(clients => {
-                const client = clients.find(c => c.uid === key.uid && c.rno === key.rno);
-                return client;
+        return this.chargeClientsEtInvitations().pipe(
+            map(() => {
+                return this.litClient(key);
             })
         );
     }
 
+    /**
+     * Si l'invité n'a jamais eu d'invitation à ce site ou si l'InviteClient est semblable à celle déjà enregistrée
+     * dans la table Invitation de la BDD (ou si le champ remplace du paramétre est true),
+     * l'Api envoie l'invitation à l'email de l'invité et ajoute ou modifie l'enregistrement dans la table Invitation;
+     * retourne une invitation avec la date de l'enregistrement.
+     * Si l'invité a une invitation à ce site qui diffère par son client de l'enregistrement dans la table Invitation,
+     * ne fait rien
+     * Retourne l'enregistrement de la table Invitation contenant la date de l'invitation enregistrée de l'invité sur le site
+     * et éventuellement la clé du client à gérer. La date est undefined ou nulle si l'utilisateur
+     * n'a pas déjà été invité.
+     * @param àEnvoyer  contient l'email de l'invité et la key du site
+     */
+    envoie(àEnvoyer: Invitation): Observable<ApiResult> {
+        const site = this.navigation.litSiteEnCours();
+        return this.post<InvitationVersApi>(ApiController.utilisateur, ApiAction.utilisateur.invitation, InvitationVersApi.nouveau(àEnvoyer, site));
+    }
+    quandEnvoi(invitation: Invitation) {
+        const stock = this.stockage.litStock();
+        if (!stock) {
+            throw new Error('Clients: Pas de stock');
+        }
+        const index = stock.invitations.findIndex(i => i.email === invitation.email);
+        if (index !== -1) {
+            stock.invitations[index] = invitation;
+        } else {
+            stock.invitations.push(invitation);
+        }
+        if (invitation.uidClient) {
+            const client = stock.clients.find(c => c.uid === invitation.uidClient);
+            if (!client) {
+                throw new Error('Clients: invité absent du stock');
+            }
+            client.invitation = invitation;
+        }
+        this.stockage.fixeStock(stock);
+    }
+
+    supprimeInvitation(invitation: Invitation): Observable<ApiResult> {
+        return this.delete(ApiController.utilisateur, ApiAction.utilisateur.invitation, Invitation.créeParamsKey(invitation));
+    }
+    quandSupprimeInvitation(invitation: Invitation) {
+        const stock = this.stockage.litStock();
+        if (!stock) {
+            throw new Error('Clients: Pas de stock');
+        }
+        const index = stock.invitations.findIndex(i => i.email === invitation.email);
+        if (index === -1) {
+            throw new Error('Clients: invitation absent du stock');
+        }
+        stock.invitations.splice(index, 1);
+        if (invitation.uidClient) {
+            this.quandInvitationSupprimée(invitation);
+        }
+    }
 }

@@ -1,7 +1,7 @@
 import { Observable, of, EMPTY } from 'rxjs';
 import { ApiResult } from '../api/api-results/api-result';
 import { AfficheResultat } from '../disposition/affiche-resultat/affiche-resultat';
-import { KfSuperGroupe } from '../commun/kf-composants/kf-groupe/kf-super-groupe';
+import { KfGroupe } from '../commun/kf-composants/kf-groupe/kf-groupe';
 
 export class ApiRequêteAction {
     /**
@@ -20,7 +20,7 @@ export class ApiRequêteAction {
     /**
      * Si présent, formulaire contenant les champs auxquels attribuer les erreurs BadRequest.
      */
-    formulaire?: KfSuperGroupe;
+    formulaire?: KfGroupe;
     /**
      * Si présent, affiche le résultat de la requête si ce n'est pas l'erreur 401 Unautorized.
      * Si absent, une erreur autre que 401 est affichée dans une fenêtre modale

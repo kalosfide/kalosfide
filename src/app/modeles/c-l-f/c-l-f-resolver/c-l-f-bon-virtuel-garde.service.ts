@@ -9,7 +9,7 @@ import { CLFService } from '../c-l-f.service';
  * Redirige vers la page de création si le document n'est pas le bon virtuel ouvert.
  * Garde les pages d'édition autres que lignes.
  */
-export class CLFBonVirtuelGardeService extends CLFGardeService implements CanActivate {
+export class CLFBonVirtuelGardeService extends CLFGardeService {
 
     constructor(
         protected service: CLFService,

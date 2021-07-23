@@ -48,10 +48,22 @@ export class SiteService extends KeyUidRnoService<Site> {
         return this.lectureObs<Site>({ demandeApi });
     }
 
-    public litEtat(site: Site): Observable<IdEtatSite> {
+    /**
+     * Lit dans l'Api l'état du site en cours et si changé, met à jour les stockage du site 
+     * @returns 
+     */
+    public litEtat(): Observable<IdEtatSite> {
+        const site = this.navigation.litSiteEnCours();
         const demandeApi = () => this.get<Site>(this.controllerUrl, ApiAction.site.etat, KeyUidRno.créeParams(site));
         return this.lectureObs<Site>({ demandeApi }).pipe(
-            map(s => s.etat)
+            map(s => {
+                if (site.etat !== s.etat) {
+                    site.etat = s.etat;
+                    this.navigation.fixeSiteEnCours(site);
+                    this.identification.fixeSiteIdentifiant(site);
+                }
+                return s.etat;
+            })
         );
     }
 
@@ -59,20 +71,5 @@ export class SiteService extends KeyUidRnoService<Site> {
         site.etat = état;
         this.navigation.fixeSiteEnCours(site);
         this.identification.fixeSiteIdentifiant(site);
-    }
-
-    public vérifieEtat(): Observable<IdEtatSite> {
-        const site = this.navigation.litSiteEnCours();
-        return this.litEtat(site).pipe(
-            take(1),
-            map(etat => {
-                if (site.etat !== etat) {
-                    site.etat = etat;
-                    this.navigation.fixeSiteEnCours(site);
-                    this.identification.fixeSiteIdentifiant(site);
-                }
-                return etat;
-            })
-        );
     }
 }

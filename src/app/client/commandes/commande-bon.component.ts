@@ -6,7 +6,7 @@ import { ClientCLFService } from '../client-c-l-f.service';
 import { CommandeComponent } from './commande.component';
 import { CommandePages } from './commande-pages';
 import { ModeAction } from 'src/app/modeles/c-l-f/condition-action';
-import { BarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
+import { IBarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 
 @Component({
@@ -27,12 +27,11 @@ export class CommandeBonComponent extends CommandeComponent implements OnInit, O
         return `${this.utile.texte.commande.def.Doc} n° ${this.clfDoc.no}`;
     }
 
-    créeBarreTitre = (): BarreTitre => {
+    créeBarreTitre = (): IBarreTitre => {
         const barre = Fabrique.titrePage.barreTitre({
             pageDef: this.pageDef,
+            groupesDeBoutons: [this.utile.bouton.btnGroupeDefVérifier()]
         });
-
-        barre.ajoute(this.utile.bouton.btnGroupeDefVérifier());
 
         this.barre = barre;
         return barre;

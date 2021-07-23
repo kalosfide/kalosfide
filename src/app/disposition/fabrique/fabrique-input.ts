@@ -4,7 +4,7 @@ import { DataService } from 'src/app/services/data.service';
 import { FabriqueMembre } from './fabrique-membre';
 import { FabriqueClasse } from './fabrique';
 import { KfEntrée } from 'src/app/commun/kf-composants/kf-elements/kf-entree/kf-entree';
-import { KfTexteDef } from 'src/app/commun/kf-composants/kf-partages/kf-texte-def';
+import { KfStringDef } from 'src/app/commun/kf-composants/kf-partages/kf-string-def';
 import { KfInputTexte } from 'src/app/commun/kf-composants/kf-elements/kf-input/kf-input-texte';
 import { KfInputNombre } from 'src/app/commun/kf-composants/kf-elements/kf-input/kf-input-nombre';
 import {
@@ -48,12 +48,12 @@ export class FabriqueInput extends FabriqueEntrée {
         super(fabrique);
     }
 
-    texte(nom: string, texte?: KfTexteDef, placeholder?: string): KfInputTexte {
+    texte(nom: string, texte?: KfStringDef, placeholder?: string): KfInputTexte {
         const input = new KfInputTexte(nom, texte);
         input.placeholder = placeholder;
         return input;
     }
-    texteLectureSeule(nom: string, texte?: KfTexteDef, valeur?: string): KfInputTexte {
+    texteLectureSeule(nom: string, texte?: KfStringDef, valeur?: string): KfInputTexte {
         const input = this.texte(nom, texte);
         input.valeur = valeur;
         input.lectureSeule = true;
@@ -66,13 +66,13 @@ export class FabriqueInput extends FabriqueEntrée {
         input.visible = false;
         return input;
     }
-    email(nom?: string, texte?: KfTexteDef): KfInputTexte {
+    email(nom?: string, texte?: KfStringDef): KfInputTexte {
         const input = this.texte(!nom ? 'email' : nom, !texte ? 'Adresse email' : texte, 'nom@kalosfide.fr');
         input.typeDInput = KfTypeDInput.email;
         input.ajouteValidateur(KfValidateurs.required, KfValidateurs.email);
         return input;
     }
-    motDePasse(règlesDeMotDePasse: ReglesDeMotDePasse, nom?: string, texte?: KfTexteDef): KfInputTexte {
+    motDePasse(règlesDeMotDePasse: ReglesDeMotDePasse, nom?: string, texte?: KfStringDef): KfInputTexte {
         const input = this.texte(!nom ? 'password' : nom, !texte ? 'Mot de passe' : texte, 'Mot de passe');
         input.typeDInput = KfTypeDInput.password;
         input.ajouteValidateur(KfValidateurs.required);
@@ -99,7 +99,7 @@ export class FabriqueInput extends FabriqueEntrée {
         input.ajouteMontreMotDePasse(this.fabrique.icone.def.oeil, this.fabrique.icone.def.oeil_barré);
         return input;
     }
-    nombre(nom: string, texte?: KfTexteDef, placeholder?: string): KfInputNombre {
+    nombre(nom: string, texte?: KfStringDef, placeholder?: string): KfInputNombre {
         const input = new KfInputNombre(nom, texte);
         input.placeholder = placeholder;
         return input;
@@ -110,17 +110,17 @@ export class FabriqueInput extends FabriqueEntrée {
         input.visible = false;
         return input;
     }
-    nombrePrix(nom: string, texte?: KfTexteDef, placeholder?: string): KfInputNombre {
+    nombrePrix(nom: string, texte?: KfStringDef, placeholder?: string): KfInputNombre {
         const input = this.nombre(nom, texte, placeholder);
         input.ajouteValidateur(KfValidateurs.nombreVirgule(7, 2, '>'));
         return input;
     }
-    nombreUnités(nom: string, texte?: KfTexteDef, placeholder?: string): KfInputNombre {
+    nombreUnités(nom: string, texte?: KfStringDef, placeholder?: string): KfInputNombre {
         const input = this.nombre(nom, texte, placeholder);
         input.ajouteValidateur(KfValidateurs.nombreVirgule(8, 0, '>='));
         return input;
     }
-    nombreQuantité(nom: string, typeCommande: () => string, texte?: KfTexteDef, placeholder?: string): KfInputNombre {
+    nombreQuantité(nom: string, typeCommande: () => string, texte?: KfStringDef, placeholder?: string): KfInputNombre {
         const input = this.nombre(nom, texte, placeholder);
         input.min = 0;
         input.pas = typeCommande() === TypeCommande.id.ALUnité ? 1 : .001;
@@ -138,15 +138,15 @@ export class FabriqueListeDéroulante extends FabriqueEntrée {
     }
 
     // liste déroulante
-    texte(nom: string, texte?: KfTexteDef): KfListeDeroulanteTexte {
+    texte(nom: string, texte?: KfStringDef): KfListeDeroulanteTexte {
         const liste = new KfListeDeroulanteTexte(nom, texte);
         return liste;
     }
-    nombre(nom: string, texte?: KfTexteDef): KfListeDeroulanteNombre {
+    nombre(nom: string, texte?: KfStringDef): KfListeDeroulanteNombre {
         const liste = new KfListeDeroulanteNombre(nom, texte);
         return liste;
     }
-    objet<T>(nom: string, texte?: KfTexteDef): KfListeDeroulanteObjet<T> {
+    objet<T>(nom: string, texte?: KfStringDef): KfListeDeroulanteObjet<T> {
         const liste = new KfListeDeroulanteObjet<T>(nom, texte);
         return liste;
     }
@@ -158,11 +158,11 @@ export class FabriqueRadios extends FabriqueEntrée {
     }
 
     // liste déroulante
-    groupe(nom: string, texte?: KfTexteDef): KfRadios {
+    groupe(nom: string, texte?: KfStringDef): KfRadios {
         const radios = new KfRadios(nom, texte);
         return radios;
     }
-    radio(nom: string, valeur: string, texte?: KfTexteDef): KfRadio {
+    radio(nom: string, valeur: string, texte?: KfStringDef): KfRadio {
         const radio = new KfRadio(nom, valeur, texte);
         return radio;
     }

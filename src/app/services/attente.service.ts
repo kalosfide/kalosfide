@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { KfInitialObservable } from '../commun/kf-composants/kf-partages/kf-initial-observable';
+import { ValeurEtObservable } from '../commun/outils/valeur-et-observable';
 
 export class Attente {
     /**
@@ -39,7 +39,7 @@ export class Attente {
     providedIn: 'root'
 })
 export class AttenteService {
-    private enCoursIO: KfInitialObservable<boolean>;
+    private enCoursIO: ValeurEtObservable<boolean>;
 
     /**
      * Array des Date.now() au commencement des attentes
@@ -57,7 +57,7 @@ export class AttenteService {
     private délai: number;
 
     constructor() {
-        this.enCoursIO = KfInitialObservable.nouveau(false);
+        this.enCoursIO = ValeurEtObservable.nouveau(false);
         this.délai = 2;
         this.initialise();
     }

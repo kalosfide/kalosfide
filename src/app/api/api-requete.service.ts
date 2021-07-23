@@ -241,8 +241,7 @@ export class ApiRequêteService implements IAvecServices {
         let traitées: ApiErreur400[];
         if (requêteDef.formulaire && apiErreurs) {
             if (requêteDef.formulaire.gereValeur) {
-                const édition = requêteDef.formulaire.contenus.find(c => c.nom === FabriqueFormulaire.nomEdition);
-                const champs = édition.gereValeur.contenus;
+                const champs = requêteDef.formulaire.gereValeur.contenus;
                 champs.forEach(c => {
                     validateurs = c.gereValeur.validateurs;
                     if (!validateurs) {
@@ -374,15 +373,17 @@ export class ApiRequêteService implements IAvecServices {
                         if (requêteDef.traiteErreur && requêteDef.traiteErreur(result)) {
                             return of(false);
                         }
+                        const apiErreur = result as ApiResultErreur;
                         if (requêteDef.afficheResultat) {
                             requêteDef.afficheResultat.affiche({
                                 titre: requêteDef.titreErreur,
                                 typeAlert: 'danger',
-                                détails: (result as ApiResultErreur).messages
+                                détails: apiErreur.messages
                             });
                             return of(false);
                         } else {
-                            return this.modalService.confirme(Fabrique.erreurModal(result as ApiResultErreur));
+                            apiErreur.action = requêteDef.titreErreur;
+                            return this.modalService.confirme(Fabrique.erreurModal(apiErreur));
                         }
                 }
             })

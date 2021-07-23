@@ -2,7 +2,7 @@ import 'rxjs/add/observable/of';
 import { KfTypeDeComposant } from '../../kf-composants-types';
 import { KfComposant } from '../../kf-composant/kf-composant';
 import { FormControl } from '@angular/forms';
-import { KfTexteDef } from '../../kf-partages/kf-texte-def';
+import { KfStringDef } from '../../kf-partages/kf-string-def';
 import { KfContenuPhrase } from '../../kf-partages/kf-contenu-phrase/kf-contenu-phrase';
 import { KfEvenement, KfTypeDEvenement } from '../../kf-partages/kf-evenements';
 
@@ -30,7 +30,7 @@ export class KfFichier extends KfComposant {
 
     inputVisible: boolean;
 
-    constructor(nom: string, texte?: KfTexteDef) {
+    constructor(nom: string, texte?: KfStringDef) {
         super(KfNomFichier(nom), KfTypeDeComposant.fichier);
         this.contenuPhrase = new KfContenuPhrase(this, texte);
         this.typesMime = [];

@@ -12,6 +12,8 @@ import { ClientUtileBouton } from './client-utile-bouton';
 import { DataKeyUtileOutils } from 'src/app/commun/data-par-key/data-key-utile-outils';
 import { KeyUidRnoUtile } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno-utile';
 import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
+import { KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
+import { IdEtatSite } from '../etat-site';
 
 export class ClientUtile extends KeyUidRnoUtile<Client> {
     constructor(service: ClientService) {
@@ -55,5 +57,34 @@ export class ClientUtile extends KeyUidRnoUtile<Client> {
 
     get service(): ClientService {
         return this.pService as ClientService;
+    }
+
+    get classeNouveau(): string {
+        return KfBootstrap.classe('text', 'danger');
+    }
+
+    get joursInactifAvantFermé(): number {
+        return 60;
+    }
+
+    textesEtatSite(état: IdEtatSite): {
+        titre: string,
+        textes: string[]
+    } {
+        return état === IdEtatSite.ouvert
+            ? {
+                titre: 'Réouverture du site',
+                textes: [
+                    `La modification du catalogue est terminée.`,
+                    `Vous avez à nouveau accès aux pages du catalogue et des commandes.`
+                ]
+            }
+            : {
+                titre: 'Le site est actuellement fermé',
+                textes: [
+                    `Une modification du catalogue est en cours.`,
+                    `Vous ne pouvez pas accéder aux pages du catalogue et des commandes.`
+                ]
+            }
     }
 }

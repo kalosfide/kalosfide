@@ -4,11 +4,8 @@ import { ProduitIndexBaseComponent } from '../modeles/catalogue/produit-index-ba
 import { ActivatedRoute, Data } from '@angular/router';
 import { ProduitService } from 'src/app/modeles/catalogue/produit.service';
 import { ClientPages } from './client-pages';
-import { BarreTitre, IBarreDef } from '../disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
+import { IBarreTitre, IBarreDef } from '../disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { Fabrique } from '../disposition/fabrique/fabrique';
-import { KfComposant } from '../commun/kf-composants/kf-composant/kf-composant';
-import { KfEtiquette } from '../commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
-import { KfTypeDeBaliseHTML } from '../commun/kf-composants/kf-composants-types';
 import { IPageTableDef } from '../disposition/page-table/i-page-table-def';
 
 @Component({
@@ -16,7 +13,7 @@ import { IPageTableDef } from '../disposition/page-table/i-page-table-def';
 })
 export class CProduitsComponent extends ProduitIndexBaseComponent implements OnInit, OnDestroy {
 
-    pageDef: PageDef = ClientPages.produits;
+    pageDef: PageDef = ClientPages.catalogue;
 
     get titre(): string {
         return this.pageDef.titre;
@@ -31,9 +28,9 @@ export class CProduitsComponent extends ProduitIndexBaseComponent implements OnI
         super(route, service);
     }
 
-    créeBarreTitre = (): BarreTitre => {
+    créeBarreTitre = (): IBarreTitre => {
+        this.barreTitreDef.groupesDeBoutons = [Fabrique.titrePage.groupeDefAccès('client')]
         const barre = Fabrique.titrePage.barreTitre(this.barreTitreDef);
-        barre.ajoute(Fabrique.titrePage.groupeDefAccès('client'));
         this.barre = barre;
         return barre;
     }
@@ -41,21 +38,6 @@ export class CProduitsComponent extends ProduitIndexBaseComponent implements OnI
     protected get barreTitreDef(): IBarreDef {
         const def = this._barreTitreDef;
         return def;
-    }
-
-    protected contenuAidePage = (): KfComposant[] => {
-        const infos: KfComposant[] = [];
-
-        let etiquette: KfEtiquette;
-
-        etiquette = Fabrique.ajouteEtiquetteP(infos);
-        Fabrique.ajouteTexte(etiquette,
-            `Ceci est `,
-            { texte: 'à faire', balise: KfTypeDeBaliseHTML.b },
-            '.'
-        );
-
-        return infos;
     }
 
     créePageTableDef(): IPageTableDef {

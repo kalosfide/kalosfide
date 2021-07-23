@@ -6,7 +6,7 @@ import { ClientCLFService } from '../client-c-l-f.service';
 import { CommandeComponent } from './commande.component';
 import { CommandePages } from './commande-pages';
 import { ModeAction } from 'src/app/modeles/c-l-f/condition-action';
-import { BarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
+import { IBarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { IKfVueTableColonneDef } from 'src/app/commun/kf-composants/kf-vue-table/i-kf-vue-table-colonne-def';
 import { CLFLigne } from 'src/app/modeles/c-l-f/c-l-f-ligne';
@@ -25,13 +25,11 @@ export class CommandeEnvoiComponent extends CommandeComponent implements OnInit,
         super(route, service);
     }
 
-    créeBarreTitre = (): BarreTitre => {
+    créeBarreTitre = (): IBarreTitre => {
         const barre = Fabrique.titrePage.barreTitre({
             pageDef: this.pageDef,
+            groupesDeBoutons: [this.utile.bouton.btnGroupeDefAnnulerVérifier()]
         });
-
-        barre.ajoute(this.utile.bouton.btnGroupeDefAnnulerVérifier());
-
         this.barre = barre;
         return barre;
     }

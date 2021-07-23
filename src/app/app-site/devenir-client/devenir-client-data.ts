@@ -5,6 +5,6 @@ import { ClientData } from '../../modeles/client/client';
  */
 export class DevenirClientData extends ClientData {
     code: string;
-    urlSite: string;
+    url: string;
     titre: string;
 }

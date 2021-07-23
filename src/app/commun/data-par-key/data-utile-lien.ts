@@ -26,7 +26,7 @@ export class DataUtileLien {
 
     def(nom: string, urlDef: IUrlDef, contenu?: IContenuPhraseDef): ILienDef {
         const def: ILienDef = {
-            nom: nom ? nom : urlDef.pageDef.urlSegment,
+            nom: nom ? nom : urlDef ? urlDef.pageDef.urlSegment : '',
             urlDef,
             contenu: contenu
                 ? contenu
@@ -36,6 +36,6 @@ export class DataUtileLien {
     }
 
     déconnection() {
-        return Fabrique.lien.lienEnLigne(this.def('deconnection', this.url.déconnection(), { texte: 'déconnecter' }));
+        return Fabrique.lien.enLigne(this.def('deconnection', this.url.déconnection(), { texte: 'déconnecter' }), 'dansAlerte');
     }
 }

@@ -1,8 +1,7 @@
-import { AppPages } from 'src/app/app-pages';
-import { PageDef } from 'src/app/commun/page-def';
 import { ApiResult } from './api-result';
 
 export abstract class ApiResultErreur extends ApiResult {
+    action: string;
     titre: string;
     messages: string[];
     // pour toutes sauf 400 et 401, redirection vers la page modale

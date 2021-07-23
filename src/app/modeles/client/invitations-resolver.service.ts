@@ -2,26 +2,26 @@ import { Injectable } from '@angular/core';
 import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
 import { RouteurService } from 'src/app/services/routeur.service';
+import { ClientService } from '../client/client.service';
 import { Invitation } from './invitation';
-import { InvitationService } from './invitation.service';
-import { DataResolverService } from '../../services/data-resolver.service';
 
 /**
- * résoud la liste des invitations du site en cours
+ * Résoud la liste des invitations.
+ * Doit être protégé par ClientChargeEtLaissePasserGardeService.
  */
-@Injectable()
+ @Injectable()
 export class InvitationsResolverService implements Resolve<Invitation[]> {
 
     constructor(
         private router: RouteurService,
-        private service: InvitationService,
+        private service: ClientService,
     ) {
     }
 
     get routeur(): RouteurService { return this.router; }
 
-    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<never> | Observable<Invitation[]> {
-        return this.service.invitations$();
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<never> | Invitation[] | Observable<Invitation[]> {
+        return this.service.litInvitations();
     }
 
 }

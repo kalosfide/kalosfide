@@ -164,7 +164,7 @@ export class CLFLigneEditeur extends KeyUidRnoNo2Editeur<CLFLigne> {
                 ];
                 this.lieDemandeEtTypeCommande();
                 this.kfQuantité.ajouteValidateur(KfValidateurs.required);
-                KfBootstrap.prépare(this.kfDeData, Fabrique.optionsBootstrap.formulaire);
+                Fabrique.formulaire.préparePourPage(this.kfDeData);
                 break;
             case LivraisonPages.ajoute:
             case FacturePages.ajoute:
@@ -181,7 +181,7 @@ export class CLFLigneEditeur extends KeyUidRnoNo2Editeur<CLFLigne> {
                 this.kfQuantitéLS.nePasAfficher = true;
                 this.kfTypeCommandeLS.nePasAfficher = true;
                 this.kfAFixer.ajouteValidateur(KfValidateurs.min(0));
-                KfBootstrap.prépare(this.kfDeData, Fabrique.optionsBootstrap.formulaire);
+                Fabrique.formulaire.préparePourPage(this.kfDeData);
                 break;
             case CommandePages.lignes:
                 champ = this.service.utile.texte.commande.champ;
@@ -191,7 +191,7 @@ export class CLFLigneEditeur extends KeyUidRnoNo2Editeur<CLFLigne> {
                 ];
                 this.lieDemandeEtTypeCommande();
                 this.kfQuantité.ajouteValidateur(KfValidateurs.required);
-                KfBootstrap.prépare(this.kfDeData, Fabrique.optionsBootstrap.dansVueTable);
+                Fabrique.formulaire.préparePourVueTable(this.kfDeData);
                 break;
             case LivraisonPages.lignes:
             case FacturePages.lignes:
@@ -202,7 +202,7 @@ export class CLFLigneEditeur extends KeyUidRnoNo2Editeur<CLFLigne> {
                     this.créeAFixer(champ.aFixer),
                 ];
                 this.kfAFixer.ajouteValidateur(KfValidateurs.required);
-                KfBootstrap.prépare(this.kfDeData, Fabrique.optionsBootstrap.dansVueTable);
+                Fabrique.formulaire.préparePourVueTable(this.kfDeData);
                 break;
 
             default:

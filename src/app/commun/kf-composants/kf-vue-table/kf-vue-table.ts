@@ -11,7 +11,7 @@ import { KfGéreCss } from '../kf-partages/kf-gere-css';
 import { KfNgClasse } from '../kf-partages/kf-gere-css-classe';
 import { KfNgStyle } from '../kf-partages/kf-gere-css-style';
 import { KfVueTableOutils, IKfVueTableOutils } from './kf-vue-table-outils';
-import { KfInitialObservable } from '../kf-partages/kf-initial-observable';
+import { ValeurEtObservable } from '../../outils/valeur-et-observable';
 import { IKfVueTableDef } from './i-kf-vue-table-def';
 import { KfVueTableEnTete } from './kf-vue-table-section-en-tete';
 import { IKfVueTablePagination, KfVueTablePagination } from './kf-vue-table-pagination';
@@ -55,7 +55,11 @@ export interface IKfVueTable extends IKfComposant {
     gereHtml: KfComposantGereHtml;
     initialiseHtml(table: HTMLTableElement, output: EventEmitter<KfEvenement>): void;
     vérifieHtml(): void;
-}
+    /**
+     * Vrai si table-layout: fixed
+     */
+    avecColgroup: boolean;
+    }
 
 export class KfVueTable<T> extends KfComposant implements IKfVueTable {
     private def: IKfVueTableDef<T>;
@@ -112,6 +116,11 @@ export class KfVueTable<T> extends KfComposant implements IKfVueTable {
 
     private pNavigationAuClavier: KfVueTableNavigationBase<T>;
 
+    /**
+     * Si vrai, un élément colgroup sera ajouté.
+     */
+     private pAvecColgroup: boolean;
+
     constructor(nom: string, vueTableDef: IKfVueTableDef<T>) {
         super(nom, KfTypeDeComposant.vuetable);
         this.def = vueTableDef;
@@ -122,6 +131,12 @@ export class KfVueTable<T> extends KfComposant implements IKfVueTable {
         }
 
         this.créeColonnes(vueTableDef.colonnesDef, vueTableDef.colonneNoLigneDef);
+
+        // si une des colonnes a une largeur
+        if ((vueTableDef.colonneNoLigneDef && vueTableDef.colonneNoLigneDef.largeur) || vueTableDef.colonnesDef.find(c => c.largeur !== undefined)) {
+            this.fixeStyleDef('table-layout', 'fixed');
+            this.pAvecColgroup = true;
+        }
 
         if (vueTableDef.outils) {
             this.pOutils = vueTableDef.outils;
@@ -169,11 +184,11 @@ export class KfVueTable<T> extends KfComposant implements IKfVueTable {
             index0++;
         }
         const listeNePasAfficher: {
-            io: KfInitialObservable<boolean>,
+            io: ValeurEtObservable<boolean>,
             colonnes: KfVueTableColonne<T>[]
         }[] = [];
         const listeAfficher: {
-            io: KfInitialObservable<boolean>,
+            io: ValeurEtObservable<boolean>,
             colonnes: KfVueTableColonne<T>[]
         }[] = [];
         for (let index = 0; index < colonnesDef.length; index++) {
@@ -181,10 +196,10 @@ export class KfVueTable<T> extends KfComposant implements IKfVueTable {
             const colonne = new KfVueTableColonne<T>(this, def, index + index0);
             colonnes.push(colonne);
             let liste: {
-                io: KfInitialObservable<boolean>,
+                io: ValeurEtObservable<boolean>,
                 colonnes: KfVueTableColonne<T>[]
             }[];
-            let io: KfInitialObservable<boolean>;
+            let io: ValeurEtObservable<boolean>;
             if (def.nePasAfficherSi) {
                 liste = listeNePasAfficher;
                 io = def.nePasAfficherSi;
@@ -361,6 +376,10 @@ export class KfVueTable<T> extends KfComposant implements IKfVueTable {
         }
     }
 
+    remplaceItem(index: number, item: T) {
+        this.pLignes[index].item = item;
+    }
+
     supprimeItem(index: number) {
         // Supprime la ligne de la liste
         const ligne = this.pLignes.splice(index, 1)[0];
@@ -433,6 +452,13 @@ export class KfVueTable<T> extends KfComposant implements IKfVueTable {
     }
 
     /**
+     * Si vrai, un élément colgroup sera ajouté.
+     */
+    get avecColgroup(): boolean {
+        return this.pAvecColgroup;
+    }
+
+    /**
      * Remplit la table en créant les lignes et initialise éventuellement la valeur, le tri, les outils, la pagination
      * et la référence de l'item à la ligne
      */
@@ -482,6 +508,10 @@ export class KfVueTable<T> extends KfComposant implements IKfVueTable {
         this.gereHtml.htmlElement = table;
         this.gereHtml.initialiseHtml(output);
         let childIndex = 0;
+        if (this.pAvecColgroup) {
+            // il y a un colgroup
+            childIndex++;
+        }
         if (this.pEnTete) {
             this.pEnTete.initialiseHtml(table.children[childIndex++] as HTMLElement);
         }

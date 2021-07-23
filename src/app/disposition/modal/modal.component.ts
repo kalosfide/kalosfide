@@ -2,7 +2,7 @@
 import { PageBaseComponent } from '../page-base/page-base.component';
 import { Data, ActivatedRoute } from '@angular/router';
 import { DataService } from 'src/app/services/data.service';
-import { OnInit, OnDestroy, Directive } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 import { IKfNgbModalDef, KfNgbModal } from 'src/app/commun/kf-composants/kf-ngb-modal/kf-ngb-modal';
 import { IBoutonDef } from '../fabrique/fabrique-bouton';
@@ -10,28 +10,28 @@ import { NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { Fabrique } from '../fabrique/fabrique';
 import { IUrlDef } from '../fabrique/fabrique-url';
 import { IAvecServices } from 'src/app/services/i-avec-services';
+import { ApiRequêteService } from 'src/app/api/api-requete.service';
 
 export interface IModalComponentDef {
     titre: string;
     corps: KfGroupe;
     /**
      * Les noms doivent être différents entre eux et différent de ngbModalCroix.
-     * Les actions doivent se conclure par une redirection.
+     * Les actions doivent être des functions et se conclure par une redirection.
      */
     boutonDefs: IBoutonDef[];
     options?: NgbModalOptions;
     urlSiPasAction: string | IUrlDef;
 }
 
-@Directive()
+@Component({ template: '' })
 export abstract class ModalComponent extends PageBaseComponent implements OnInit, OnDestroy {
-
 
     abstract créeDef(data: Data): IModalComponentDef;
 
     constructor(
         protected route: ActivatedRoute,
-        protected service: IAvecServices
+        protected service: ApiRequêteService
     ) {
         super();
     }
@@ -48,10 +48,12 @@ export abstract class ModalComponent extends PageBaseComponent implements OnInit
                 };
                 const actionDefs: { nom: string, action: () => void }[] = [];
                 modalComponentDef.boutonDefs.forEach(def => {
-                    const action = { nom: def.nom, action: def.action };
-                    actionDefs.push(action);
-                    const bouton = Fabrique.bouton.bouton({ nom: def.nom, contenu: def.contenu, bootstrap: def.bootstrap });
-                    modalDef.boutonsDontOk.push(bouton);
+                    if (typeof (def.action) === 'function') {
+                        const action = { nom: def.nom, action: def.action };
+                        actionDefs.push(action);
+                        const bouton = Fabrique.bouton.bouton({ nom: def.nom, contenu: def.contenu, bootstrap: def.bootstrap });
+                        modalDef.boutonsDontOk.push(bouton);
+                    }
                 });
                 const modal = new KfNgbModal(modalDef);
                 modal.avecFond = 'static';

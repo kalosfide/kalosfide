@@ -117,7 +117,8 @@ const routes: Routes = [
                         path: FacturePages.bon.urlSegment + '/:' + CLFPages.nomParamNoDoc,
                         data: {
                             pageDef: FacturePages.bon,
-                            pageDefDescendantParDéfaut: FacturePages.lignes
+                            pageDefDescendantParDéfaut: FacturePages.lignes,
+                            cheminDeKey: ['clfDoc', 'no']
                         },
                         resolve: {
                             // pour que les gardes des enfants aient accès au résolu de la route
@@ -133,7 +134,7 @@ const routes: Routes = [
                             {
                                 path: FacturePages.lignes.urlSegment,
                                 data: {
-                                    pageDef: FacturePages.lignes,
+                                    pageDef: undefined,
                                     estEnfantPathVide: true
                                 },
                                 component: FactureBonLignesComponent,

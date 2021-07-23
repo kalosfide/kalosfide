@@ -1,4 +1,4 @@
-import { OnInit, OnDestroy, Directive } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { Site } from 'src/app/modeles/site/site';
@@ -11,7 +11,7 @@ import { KfSuperGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-super-g
 import { RouteurService } from 'src/app/services/routeur.service';
 import { PageTableComponent } from 'src/app/disposition/page-table/page-table.component';
 import { IGroupeTableDef, GroupeTable } from 'src/app/disposition/page-table/groupe-table';
-import { BarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
+import { IBarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { CLFDoc } from './c-l-f-doc';
 import { CLFUtile } from './c-l-f-utile';
 import { CLFDocs } from './c-l-f-docs';
@@ -24,7 +24,7 @@ import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
  * Page de choix du document terminé à afficher
  * Table des documents terminés avec lien vers document/type/:key.
  */
-@Directive()
+@Component({ template: '' })
 export abstract class CLFDocsComponent extends PageTableComponent<CLFDoc> implements OnInit, OnDestroy {
 
     site: Site;
@@ -48,7 +48,7 @@ export abstract class CLFDocsComponent extends PageTableComponent<CLFDoc> implem
         return this.utile.texte.textes(this.clfDocs.type);
     }
 
-    créeBarreTitre = (): BarreTitre => {
+    créeBarreTitre = (): IBarreTitre => {
         const barre = Fabrique.titrePage.barreTitre({
             pageDef: this.pageDef,
         });

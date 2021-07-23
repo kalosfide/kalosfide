@@ -42,7 +42,8 @@ export enum KfTypeDeComposant {
      */
     groupe = 'groupe',
     vuetable = 'vuetable',
-    ul = 'ul',
+    ulol = 'ulol',
+    description = 'description',
     li = 'li',
     b_btn_group = 'b_btn_group',
 
@@ -112,4 +113,5 @@ export enum KfTypeDeBaliseHTML {
     span = 'span',
     small = 'small',
     strong = 'strong',
+    definition = 'dfn',
 }

@@ -1,0 +1,14 @@
+    <dl #htmlElement [ngClass]="descriptions.classe" [ngStyle]="descriptions.style">
+        <ng-container *ngFor="let description of descriptions.descriptions">
+            <ng-container *ngIf="!description.nePasAfficher">
+                <dt [ngClass]="description.classeTitre" [ngStyle]="description.styleTitre">
+                    <app-kf-composant [composant]="description.titre">
+                    </app-kf-composant>
+                </dt>
+                <dd [ngClass]="description.classeContenu" [ngStyle]="description.styleContenu">
+                    <app-kf-composant [composant]="description.contenu">
+                    </app-kf-composant>
+                </dd>
+            </ng-container>
+        </ng-container>
+    </dl>

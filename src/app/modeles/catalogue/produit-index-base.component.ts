@@ -1,4 +1,4 @@
-import { OnDestroy, Directive } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 
 import { ActivatedRoute, Data } from '@angular/router';
 import { ProduitService } from 'src/app/modeles/catalogue/produit.service';
@@ -15,7 +15,7 @@ import {
 import { ILienDef } from 'src/app/disposition/fabrique/fabrique-lien';
 import { CategoriePages, CategorieRoutes } from 'src/app/fournisseur/catalogue/categories/categorie-pages';
 import { ProduitPages, ProduitRoutes } from 'src/app/fournisseur/catalogue/produits/produit-pages';
-import { BootstrapType, KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
+import { BootstrapType } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
 import { IUrlDef } from 'src/app/disposition/fabrique/fabrique-url';
 import { IGroupeTableDef } from 'src/app/disposition/page-table/groupe-table';
 import { EtatTable } from 'src/app/disposition/fabrique/etat-table';
@@ -23,7 +23,7 @@ import { Site } from '../site/site';
 import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
 
 
-@Directive()
+@Component({ template: '' })
 export abstract class ProduitIndexBaseComponent extends KeyUidRnoNoIndexComponent<Produit> implements OnDestroy {
 
     site: Site;

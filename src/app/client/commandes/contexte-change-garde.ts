@@ -3,7 +3,6 @@ import { CanActivateChild, CanActivate } from '@angular/router';
 import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
 import { ClientCLFService } from '../client-c-l-f.service';
-import { map, tap } from 'rxjs/operators';
 
 @Injectable()
 /**

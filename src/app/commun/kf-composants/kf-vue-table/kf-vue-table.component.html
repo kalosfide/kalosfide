@@ -16,6 +16,13 @@
 
 <table #tableElement [ngClass]="vueTable.classe" [ngStyle]="vueTable.style">
 
+    <colgroup *ngIf="vueTable.avecColgroup">
+        <ng-container *ngFor="let colonne of vueTable.colonnes">
+            <col *ngIf="!colonne.nePasAfficher" [attr.width]= "colonne.largeur" [ngClass]="colonne.classeCol">
+        </ng-container>
+        
+    </colgroup>
+
     <!-- en-têtes -->
     <thead *ngIf="vueTable.enTete" [ngClass]="vueTable.enTete.classe">
         <ng-container *ngFor="let ligne of vueTable.enTete.lignes">

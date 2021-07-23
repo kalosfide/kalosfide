@@ -3,7 +3,6 @@ import { Observable, EMPTY, of } from 'rxjs';
 import { CLFDoc } from 'src/app/modeles/c-l-f/c-l-f-doc';
 import { CLFResolverService } from 'src/app/modeles/c-l-f/c-l-f-resolver/c-l-f-resolver.service';
 import { CLFPages } from '../c-l-f-pages';
-import { switchMap } from 'rxjs/operators';
 import { ApiResult404NotFound } from 'src/app/api/api-results/api-result-404-not-found';
 import { CLFService } from '../c-l-f.service';
 

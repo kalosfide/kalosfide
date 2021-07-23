@@ -8,7 +8,7 @@ import { CLFService } from '../c-l-f.service';
 /**
  * Redirige vers la page .nouveau si la commande éditable n'existe pas ou n'est pas ouverte.
  */
-export class CLFDoitCréerGardeService extends CLFGardeService implements CanActivate, CanActivateChild {
+export class CLFDoitCréerGardeService extends CLFGardeService {
 
     constructor(
         protected service: CLFService,

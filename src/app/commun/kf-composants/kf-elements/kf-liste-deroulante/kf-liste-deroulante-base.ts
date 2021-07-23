@@ -1,6 +1,6 @@
 import { KfListeDeroulanteType } from './kf-liste-deroulante-type';
 import { KfEntrée } from '../kf-entree/kf-entree';
-import { KfTexteDef } from '../../kf-partages/kf-texte-def';
+import { KfStringDef } from '../../kf-partages/kf-string-def';
 import { KfTypeDeComposant } from '../../kf-composants-types';
 import { KfContenuPhrase } from '../../kf-partages/kf-contenu-phrase/kf-contenu-phrase';
 import { KfOptionBase, IKfOption } from './kf-option-base';
@@ -27,7 +27,7 @@ export abstract class KfListeDeroulanteBase extends KfEntrée {
 
     private pOption0: KfOptionNulle;
 
-    constructor(nom: string, type: KfListeDeroulanteType, texteLabel?: KfTexteDef) {
+    constructor(nom: string, type: KfListeDeroulanteType, texteLabel?: KfStringDef) {
         super(nom, KfTypeDeComposant.listederoulante, texteLabel);
         // position par défaut
         this.positionLabel = 'avant';
@@ -95,7 +95,7 @@ export abstract class KfListeDeroulanteBase extends KfEntrée {
             return this.pGéreClasseComposantAvant.classe;
         }
     }
-    fixeComposantAvant(composant: KfComposant, ...classeDefs: (KfTexteDef | KfNgClasseDef)[]) {
+    fixeComposantAvant(composant: KfComposant, ...classeDefs: (KfStringDef | KfNgClasseDef)[]) {
         this.pComposantAvant = composant;
         if (classeDefs.length > 0) {
             this.pGéreClasseComposantAvant = new KfGéreCss();

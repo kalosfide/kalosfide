@@ -118,7 +118,7 @@ export class AppSitePeupleComponent extends FormulaireComponent implements OnIni
 
         this.sansPeuple = Fabrique.caseACocher('sansPeuple');
         this.sansPeuple.visible = true;
-        Fabrique.caseACocherAspect(this.sansPeuple, true);
+//        Fabrique.caseACocherAspect(this.sansPeuple, true);
         this.sansPeuple.ajouteValidateur(KfValidateurs.requiredTrue);
         groupe.ajoute(this.sansPeuple);
         groupe.ajoute(this.créeTest());
@@ -190,6 +190,7 @@ export class AppSitePeupleComponent extends FormulaireComponent implements OnIni
         this.subscriptions.push(this.route.data.subscribe(
             data => {
                 this.superGroupe = Fabrique.formulaire.superGroupe(this);
+                this.formulaire.comportementFormulaire.neSoumetPasSiPristine = undefined;
                 this.sansPeuple.valeur = !data.estPeuplé;
             }
         ));

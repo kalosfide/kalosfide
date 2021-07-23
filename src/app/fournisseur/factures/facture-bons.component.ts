@@ -30,7 +30,7 @@ export class FactureBonsComponent extends CLFBonsComponent implements OnInit, On
         let etiquette: KfEtiquette;
 
         etiquette = Fabrique.ajouteEtiquetteP(infos);
-        Fabrique.ajouteTexte(etiquette,
+        etiquette.ajouteTextes(
             `Ceci est `,
             { texte: 'à faire', balise: KfTypeDeBaliseHTML.b},
             '.'

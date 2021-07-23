@@ -1,4 +1,4 @@
-import { KfInitialObservable } from 'src/app/commun/kf-composants/kf-partages/kf-initial-observable';
+import { ValeurEtObservable } from 'src/app/commun/outils/valeur-et-observable';
 import { Conditions } from 'src/app/commun/condition/condition';
 
 export enum ModeAction {
@@ -13,7 +13,7 @@ export enum ModeAction {
 
 export class ConditionAction extends Conditions<ModeAction> {
 
-    constructor(modeActionIo: KfInitialObservable<ModeAction>) {
+    constructor(modeActionIo: ValeurEtObservable<ModeAction>) {
         super();
         this.observe([
             ModeAction.aperçu,
@@ -64,15 +64,15 @@ export class ConditionAction extends Conditions<ModeAction> {
         return this.pas_conditionIO(ModeAction.supprime);
     }
 */
-    get edite(): KfInitialObservable<boolean> {
+    get edite(): ValeurEtObservable<boolean> {
         return this.conditionIO(ModeAction.edite);
     }
 
-    get envoi(): KfInitialObservable<boolean> {
+    get envoi(): ValeurEtObservable<boolean> {
         return this.conditionIO(ModeAction.envoi);
     }
 
-    get envoyé(): KfInitialObservable<boolean> {
+    get envoyé(): ValeurEtObservable<boolean> {
         return this.conditionIO(ModeAction.envoyé);
     }
 

@@ -13,7 +13,7 @@ import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { SiteEditeur } from 'src/app/modeles/site/site-editeur';
 import { CompteService } from 'src/app/compte/compte.service';
 import { FormulaireComponent } from 'src/app/disposition/formulaire/formulaire.component';
-import { BarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
+import { IBarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { Identifiant } from 'src/app/securite/identifiant';
 import { KfSuperGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-super-groupe';
 import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';

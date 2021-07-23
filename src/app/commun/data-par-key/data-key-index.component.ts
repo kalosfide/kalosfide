@@ -3,18 +3,18 @@ import { DataKeyService } from './data-key.service';
 import { ActivatedRoute } from '@angular/router';
 import { IDataKey } from './data-key';
 import { Site } from 'src/app/modeles/site/site';
-import { KfTexteDef } from '../kf-composants/kf-partages/kf-texte-def';
+import { KfStringDef } from '../kf-composants/kf-partages/kf-string-def';
 import { ILienDef } from 'src/app/disposition/fabrique/fabrique-lien';
-import { BarreTitre, IBarreDef } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
+import { IBarreTitre, IBarreDef } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { KfComposant } from '../kf-composants/kf-composant/kf-composant';
-import { Directive } from "@angular/core";
+import { Component,} from '@angular/core';
 
-@Directive()
+@Component({ template: '' })
 export abstract class DataKeyIndexComponent<T extends IDataKey> extends PageTableComponent<T>  {
 
     abstract site: Site;
-    get urlSiteDef(): KfTexteDef {
+    get urlSiteDef(): KfStringDef {
         return () => this.site.url;
     }
     protected contenuAidePage: () => KfComposant[];
@@ -39,7 +39,7 @@ export abstract class DataKeyIndexComponent<T extends IDataKey> extends PageTabl
         return this._barreTitreDef;
     }
 
-    créeBarreTitre = (): BarreTitre => {
+    créeBarreTitre = (): IBarreTitre => {
         const barre = Fabrique.titrePage.barreTitre(this.barreTitreDef);
         return barre;
     }

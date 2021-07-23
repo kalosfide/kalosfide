@@ -6,7 +6,7 @@ import { IDataKey } from './data-key';
 import { ApiAction } from '../../api/api-route';
 import { tap } from 'rxjs/operators';
 import { DataUtile } from 'src/app/commun/data-par-key/data-utile';
-import { KfInitialObservable } from '../kf-composants/kf-partages/kf-initial-observable';
+import { ValeurEtObservable } from '../outils/valeur-et-observable';
 import { ModeTable } from './condition-table';
 import { DataKeyUtile } from './data-key-utile';
 import { ApiResult } from 'src/app/api/api-results/api-result';
@@ -18,7 +18,7 @@ export abstract class DataKeyService<T extends IDataKey> extends DataService {
 
     get dataService(): DataService { return this; }
 
-    protected pModeTableIO: KfInitialObservable<ModeTable>;
+    protected pModeTableIO: ValeurEtObservable<ModeTable>;
 
     abstract urlSegmentDeKey(key: T): string;
     fragment(t: T): string {
@@ -32,7 +32,7 @@ export abstract class DataKeyService<T extends IDataKey> extends DataService {
     }
 
     créeUtile() {
-        this.pModeTableIO = KfInitialObservable.nouveau<ModeTable>(ModeTable.sans);
+        this.pModeTableIO = ValeurEtObservable.nouveau<ModeTable>(ModeTable.sans);
         this._créeUtile();
         this.pUtile.observeModeTable(this.pModeTableIO);
     }
@@ -53,7 +53,7 @@ export abstract class DataKeyService<T extends IDataKey> extends DataService {
         return this.pModeTableIO.valeur;
     }
 
-    get modeTableIO(): KfInitialObservable<ModeTable> {
+    get modeTableIO(): ValeurEtObservable<ModeTable> {
         return this.pModeTableIO;
     }
 

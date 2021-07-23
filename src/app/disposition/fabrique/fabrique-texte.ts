@@ -5,21 +5,14 @@ import { ICoût } from 'src/app/modeles/c-l-f/cout';
 import { estNombre } from 'src/app/commun/outils/est-nombre';
 import { TexteOutils } from 'src/app/commun/outils/texte-outils';
 import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
-import { KfTypeContenuPhrasé } from 'src/app/commun/kf-composants/kf-partages/kf-contenu-phrase/kf-contenu-phrase';
 
-export interface IDefTexte {
+export interface IKfstringDef {
     nom?: string;
     texte: string;
     balise?: KfTypeDeBaliseHTML;
     suiviDeSaut?: boolean;
     classe?: string;
 }
-
-export type DefTexte = string | IDefTexte;
-export type DefsTextes = DefTexte | DefTexte[];
-
-export type DefContenu = DefTexte | KfTypeContenuPhrasé;
-export type DefContenus = DefContenu | DefContenu[];
 
 export class FabriqueTexte {
 

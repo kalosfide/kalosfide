@@ -1,6 +1,6 @@
 import { KfTypeDeComposant } from '../../kf-composants-types';
 import { KfEntrée } from '../kf-entree/kf-entree';
-import { KfTexteDef } from '../../kf-partages/kf-texte-def';
+import { KfStringDef } from '../../kf-partages/kf-string-def';
 import { KfComposant } from '../../kf-composant/kf-composant';
 import { KfNgClasse, KfNgClasseDef } from '../../kf-partages/kf-gere-css-classe';
 import { KfGéreCss } from '../../kf-partages/kf-gere-css';
@@ -17,7 +17,7 @@ export abstract class KfInput extends KfEntrée {
      */
     placeholder: string;
 
-    constructor(nom: string, texteLabel?: KfTexteDef) {
+    constructor(nom: string, texteLabel?: KfStringDef) {
         super(nom, KfTypeDeComposant.input, texteLabel);
         // position par défaut
         this.positionLabel = 'avant';
@@ -36,7 +36,7 @@ export abstract class KfInput extends KfEntrée {
             return this.pGéreClasseComposantAvant.classe;
         }
     }
-    fixeComposantAvant(composant: KfComposant, ...classeDefs: (KfTexteDef | KfNgClasseDef)[]) {
+    fixeComposantAvant(composant: KfComposant, ...classeDefs: (KfStringDef | KfNgClasseDef)[]) {
         this.pComposantAvant = composant;
         if (classeDefs.length > 0) {
             this.pGéreClasseComposantAvant = new KfGéreCss();

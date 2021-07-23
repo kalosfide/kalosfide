@@ -1,4 +1,4 @@
-import { OnInit, Directive } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FournisseurClientRoutes, FournisseurClientPages } from './client-pages';
 import { Site } from 'src/app/modeles/site/site';
@@ -7,7 +7,7 @@ import { ClientService } from 'src/app/modeles/client/client.service';
 import { ClientEditeur } from '../../modeles/client/client-editeur';
 import { KeyUidRnoALESComponent } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno-ales.component';
 
-@Directive()
+@Component({ template: '' })
 export abstract class ClientALESComponent extends KeyUidRnoALESComponent<Client> implements OnInit {
 
     get titre(): string {

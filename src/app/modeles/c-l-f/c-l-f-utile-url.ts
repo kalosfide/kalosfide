@@ -18,7 +18,7 @@ import { ClientRoutes } from 'src/app/client/client-pages';
 import { ClientPages } from 'src/app/client/client-pages';
 import { FournisseurRoutes, FournisseurPages } from 'src/app/fournisseur/fournisseur-pages';
 import { KeyUidRnoNo } from 'src/app/commun/data-par-key/key-uid-rno-no/key-uid-rno-no';
-import { ValeurTexteDef } from 'src/app/commun/kf-composants/kf-partages/kf-texte-def';
+import { ValeurStringDef } from 'src/app/commun/kf-composants/kf-partages/kf-string-def';
 
 export class CLFUtileUrl extends DataUtileUrl {
 
@@ -174,15 +174,15 @@ export class CLFUtileUrl extends DataUtileUrl {
      * Route: commande/contexte
      * Url de la page du contexte.
      */
-    contexte(): IUrlDef {
-        return this.__urlDef(CommandeRoutes, CommandePages.contexte);
+    sitePasOuvert(): IUrlDef {
+        return this.__urlDef(ClientRoutes, ClientPages.pasOuvert);
     }
 
     /**
      * Route: commande/bon
      * Url de la page du bon.
      */
-    retourDeContexte(): IUrlDef {
+    retourDeSitePasOuvert(): IUrlDef {
         return this.__urlDef(CommandeRoutes, CommandePages.bon);
     }
 
@@ -196,7 +196,7 @@ export class CLFUtileUrl extends DataUtileUrl {
     }
     routeBonVirtuel(client: Client): string {
         const def = this.bonVirtuel(client);
-        return def.routes.url(ValeurTexteDef(def.urlSite), [CLFPages.nouveau.urlSegment]);
+        return def.routes.url(ValeurStringDef(def.urlSite), [CLFPages.nouveau.urlSegment]);
     }
 
     /**

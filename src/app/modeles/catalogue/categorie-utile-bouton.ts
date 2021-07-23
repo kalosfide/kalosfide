@@ -30,7 +30,7 @@ export class CategorieUtileBouton extends DataUtileBouton {
         const titre = `Suppression d'une catégorie`;
         const description = new KfEtiquette('');
         description.baliseHtml = KfTypeDeBaliseHTML.p;
-        Fabrique.ajouteTexte(description,
+        description.ajouteTextes(
             `La catégorie `,
             {
                 texte: catégorie.nom,

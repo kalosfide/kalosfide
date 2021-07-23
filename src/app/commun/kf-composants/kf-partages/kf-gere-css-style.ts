@@ -1,8 +1,8 @@
-import { KfTexteDef } from './kf-texte-def';
+import { KfStringDef } from './kf-string-def';
 
 export class KfNgStyleDef {
     nom: string;
-    valeur: KfTexteDef;
+    valeur: KfStringDef;
     active?: () => boolean;
 
     clone(): KfNgStyleDef {

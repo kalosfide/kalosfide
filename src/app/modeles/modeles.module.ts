@@ -4,11 +4,12 @@ import { CommunModule } from '../commun/commun.module';
 import { DispositionModule } from '../disposition/disposition.module';
 import { SiteService } from './site/site.service';
 import { ClientService } from './client/client.service';
-import { ClientResolverService, ClientRésoluResolverService } from './client/client-resolver.service';
-import { ClientsResolverService, ClientsRésoluResolverService } from './client/clients-resolver.service';
+import { ClientResolverService } from './client/client-resolver.service';
+import { ClientsResolverService } from './client/clients-resolver.service';
 import { CatalogueModule } from './catalogue/catalogue.module';
-import { InvitationService } from './invitation/invitation.service';
-import { InvitationsResolverService } from './invitation/invitations-resolver.service';
+import { InvitationsResolverService } from './client/invitations-resolver.service';
+import { InvitationResolverService } from './client/invitation-resolver.service';
+import { ClientChargeEtLaissePasserGardeService } from './client/client-charge-et-laisse-passer-garde.service';
 
 @NgModule({
     imports: [
@@ -21,13 +22,12 @@ import { InvitationsResolverService } from './invitation/invitations-resolver.se
     ],
     providers: [
         SiteService,
+        ClientChargeEtLaissePasserGardeService,
 //        ClientService,
         ClientResolverService,
-        ClientRésoluResolverService,
         ClientsResolverService,
-        ClientsRésoluResolverService,
-        InvitationService,
-        InvitationsResolverService
+        InvitationsResolverService,
+        InvitationResolverService,
     ],
     exports: [
         CatalogueModule

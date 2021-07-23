@@ -1,12 +1,12 @@
 import { KfListeDeroulanteBase, IKfListeDeroulante } from './kf-liste-deroulante-base';
 import { KfOptionTexte } from './kf-option-texte';
-import { KfTexteDef } from '../../kf-partages/kf-texte-def';
+import { KfStringDef } from '../../kf-partages/kf-string-def';
 import { KfListeDeroulanteType } from './kf-liste-deroulante-type';
 import { IKfOption } from './kf-option-base';
 
 export class KfListeDeroulanteTexteBase extends KfListeDeroulanteBase implements IKfListeDeroulante {
 
-    constructor(nom: string, texte?: KfTexteDef) {
+    constructor(nom: string, texte?: KfStringDef) {
         super(nom, KfListeDeroulanteType.valeurTexte, texte);
     }
 
@@ -23,7 +23,7 @@ export class KfListeDeroulanteTexteBase extends KfListeDeroulanteBase implements
 
 export class KfListeDeroulanteTexte extends KfListeDeroulanteTexteBase implements IKfListeDeroulante {
 
-    constructor(nom: string, texte?: KfTexteDef) {
+    constructor(nom: string, texte?: KfStringDef) {
         super(nom, texte);
     }
 
@@ -48,7 +48,7 @@ export class KfListeDeroulanteTexte extends KfListeDeroulanteTexteBase implement
 
 export class KfListeDeroulanteNombre extends KfListeDeroulanteTexteBase implements IKfListeDeroulante {
 
-    constructor(nom: string, texte?: KfTexteDef) {
+    constructor(nom: string, texte?: KfStringDef) {
         super(nom, texte);
     }
 

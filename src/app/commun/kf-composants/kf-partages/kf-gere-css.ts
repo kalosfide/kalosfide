@@ -1,8 +1,8 @@
-import { KfTexteDef, ValeurTexteDef } from './kf-texte-def';
+import { KfStringDef, ValeurStringDef } from './kf-string-def';
 import { KfNgClasse, KfNgClasseDef } from './kf-gere-css-classe';
 import { KfNgStyle, KfNgStyleDef } from './kf-gere-css-style';
 import { Observable, Subscription } from 'rxjs';
-import { KfInitialObservable } from './kf-initial-observable';
+import { ValeurEtObservable } from '../../outils/valeur-et-observable';
 
 export class KfGéreCss {
     /**
@@ -13,7 +13,7 @@ export class KfGéreCss {
 
     private pNgInvisible: KfNgClasseDef;
 
-    private pClasseDefs: KfTexteDef[];
+    private pClasseDefs: KfStringDef[];
 
     private pNgClasseDefs: KfNgClasseDef[];
 
@@ -40,7 +40,7 @@ export class KfGéreCss {
 
     // NE PAS AFFICHER
 
-    afficherSi(condition?: KfInitialObservable<boolean>) {
+    afficherSi(condition?: ValeurEtObservable<boolean>) {
         if (this.pSubscriptionAfficher) {
             this.pSubscriptionAfficher.unsubscribe();
         }
@@ -50,7 +50,7 @@ export class KfGéreCss {
         }
     }
 
-    nePasAfficherSi(condition: KfInitialObservable<boolean>) {
+    nePasAfficherSi(condition: ValeurEtObservable<boolean>) {
         if (this.pSubscriptionAfficher) {
             this.pSubscriptionAfficher.unsubscribe();
         }
@@ -126,12 +126,12 @@ export class KfGéreCss {
         this.pSubscriptionInvisible = invisibilitéObs.subscribe(visible => this.visible = !visible);
     }
 
-    set visibilitéIO(visibilitéIO: KfInitialObservable<boolean>) {
+    set visibilitéIO(visibilitéIO: ValeurEtObservable<boolean>) {
         this.visible = visibilitéIO.valeur;
         this.visibilitéObs = visibilitéIO.observable;
     }
 
-    set invisibilitéIO(invisibilitéIO: KfInitialObservable<boolean>) {
+    set invisibilitéIO(invisibilitéIO: ValeurEtObservable<boolean>) {
         this.visible = !invisibilitéIO.valeur;
         this.invisibilitéObs = invisibilitéIO.observable;
     }
@@ -172,26 +172,31 @@ export class KfGéreCss {
         });
     }
 
-    private _motsOuFonctions(classeDefs: KfTexteDef[]): KfTexteDef[] {
-        const motsOuFonctions: KfTexteDef[] = [];
-        classeDefs.forEach(
-            classeDef => {
-                if (typeof (classeDef) === 'string') {
-                    const cs = classeDef.trim().split(' ');
+    /**
+     * Remplace dans la liste chaque string par les mots qui la composent.
+     * @param stringDefs liste de string ou de () => string
+     */
+    private motsOuFonctions(stringDefs: KfStringDef[]): KfStringDef[] {
+        const motsOuFonctions: KfStringDef[] = [];
+        stringDefs.forEach(
+            stringDef => {
+                if (typeof (stringDef) === 'string') {
+                    const cs = stringDef.trim().split(' ');
                     if (cs.length > 0) {
                         cs.forEach(mot => motsOuFonctions.push(mot));
                     }
                 } else {
-                    motsOuFonctions.push(classeDef);
+                    motsOuFonctions.push(stringDef);
                 }
             });
         return motsOuFonctions;
     }
-    private _ajouteTexteDef(classeDef: KfTexteDef) {
+
+    private _ajouteStringDef(classeDef: KfStringDef) {
         if (!this.pClasseDefs) {
             this.pClasseDefs = [];
         }
-        this._motsOuFonctions([classeDef]).forEach(
+        this.motsOuFonctions([classeDef]).forEach(
             c => {
                 if (!this.pClasseDefs.find(cd => c === cd)) {
                     this.pClasseDefs.push(c);
@@ -200,25 +205,36 @@ export class KfGéreCss {
         );
     }
 
-    private _ajouteClasseDef(classeDef: KfTexteDef | KfNgClasseDef) {
-        if ((classeDef as KfNgClasseDef).nom) {
+    private _ajouteClasseDef(classeDef: KfStringDef | KfNgClasseDef) {
+        if (typeof (classeDef) === 'string' || typeof (classeDef) === 'function') {
+            this._ajouteStringDef(classeDef as KfStringDef);
+        } else {
             const ng = classeDef as KfNgClasseDef;
             this._ajouteNg(ng);
-        } else {
-            this._ajouteTexteDef(classeDef as KfTexteDef);
         }
     }
 
-    ajouteClasse(...classeDefs: (KfTexteDef | KfNgClasseDef)[]): void {
+    ajouteClasse(...classeDefs: (KfStringDef | KfNgClasseDef)[]): void {
         classeDefs.forEach(classeDef => this._ajouteClasseDef(classeDef));
     }
 
-    supprimeClasse(...classeDefs: KfTexteDef[]): void {
-        const motsOuFonctions = this._motsOuFonctions(classeDefs);
+    supprimeClasse(...classeDefs: KfStringDef[]): void {
         if (this.pClasseDefs) {
-            this.pClasseDefs = this.pClasseDefs.filter(c => !motsOuFonctions.find(c1 => c1 === c));
+            const liste = this.motsOuFonctions(classeDefs);
+            this.pClasseDefs = this.pClasseDefs.filter(c => !liste.find(c1 => c1 === c));
             if (this.pClasseDefs.length === 0) {
                 this.pClasseDefs = undefined;
+            }
+        }
+        if (this.pNgClasseDefs) {
+            this.pNgClasseDefs = this.pNgClasseDefs.filter(ng => !classeDefs.find(c => {
+                if (typeof (c) === 'string' || typeof (c) === 'function') {
+                    return true;
+                }
+                return (c as KfNgClasseDef).nom === ng.nom;
+            }));
+            if (this.pNgClasseDefs.length === 0) {
+                this.pNgClasseDefs = undefined;
             }
         }
     }
@@ -231,17 +247,31 @@ export class KfGéreCss {
         }, durée);
     }
 
-    supprimeClasseAPréfixe(préfixe: string) {
+    /**
+     * Si suffixes n'est pas défini, supprime toutes les classes dont le nom commence par le préfixe.
+     * Si suffixes est défini, supprime toutes les classes dont le nom est constitué du préfixe suivi de '-' et de l'un des suffixes.
+     */
+    supprimeClasseAPréfixe(préfixe: string, suffixes?: string[]) {
         const nb = préfixe.length;
+        const filtre: (texte: string) => boolean = suffixes
+            ? (texte: string) => texte.length < nb || texte.slice(0, nb) !== préfixe
+            : (texte: string) => {
+                const avecTiret = préfixe + '-';
+                if (texte.length < nb + 1 || texte.slice(0, nb + 1) !== avecTiret) {
+                    return true;
+                }
+                const suffixe = texte.substring(nb + 1);
+                return suffixes.find(s => s === suffixe) === undefined;
+            }
         if (this.pClasseDefs) {
             this.pClasseDefs = this.pClasseDefs.filter(c => {
-                const texte = ValeurTexteDef(c);
+                const texte = ValeurStringDef(c);
                 return texte.length < nb || texte.slice(0, nb) !== préfixe;
             });
         }
         if (this.pNgClasseDefs) {
             this.pNgClasseDefs = this.pNgClasseDefs.filter(ngc => {
-                const texte = ValeurTexteDef(ngc.nom);
+                const texte = ValeurStringDef(ngc.nom);
                 return texte.length < nb || texte.slice(0, nb) !== préfixe;
             });
         }
@@ -285,7 +315,7 @@ export class KfGéreCss {
         return ngClasse;
     }
 
-    fixeStyleDef(nom: string, valeur: KfTexteDef, active?: () => boolean) {
+    fixeStyleDef(nom: string, valeur: KfStringDef, active?: () => boolean) {
         let def: KfNgStyleDef;
         if (this.pStyleDefs) {
             def = this.pStyleDefs.find(d => d.nom === nom);
@@ -322,7 +352,7 @@ export class KfGéreCss {
             const defs = this.pStyleDefs.filter(d => !d.active || d.active());
             if (defs.length > 0) {
                 const style: KfNgStyle = {};
-                this.pStyleDefs.forEach(d => style[d.nom] = ValeurTexteDef(d.valeur));
+                this.pStyleDefs.forEach(d => style[d.nom] = ValeurStringDef(d.valeur));
                 return style;
             }
         }

@@ -1,7 +1,7 @@
 import { KfGéreCss } from '../../kf-partages/kf-gere-css';
 import { KfNgClasseDef } from '../../kf-partages/kf-gere-css-classe';
 import { IKfIconeDef } from '../../kf-partages/kf-icone-def';
-import { KfTexteDef } from '../../kf-partages/kf-texte-def';
+import { KfStringDef } from '../../kf-partages/kf-string-def';
 import { KfIcone } from '../kf-icone/kf-icone';
 import { KfInput } from './kf-input';
 import { KfTypeDInput } from './kf-type-d-input';
@@ -37,7 +37,7 @@ export class KfInputTexte extends KfInput {
      */
     cssDivBouton: KfGéreCss;
 
-    constructor(nom: string, texte?: KfTexteDef) {
+    constructor(nom: string, texte?: KfStringDef) {
         super(nom, texte);
         this.typeDInput = KfTypeDInput.texte;
     }
@@ -52,7 +52,7 @@ export class KfInputTexte extends KfInput {
     /**
      * Ajoute des classes à un élément div contenant l'input et ses icones boutons.
      */
-    ajouteCssDivBouton(...classeDefs: (KfTexteDef | KfNgClasseDef)[]): void {
+    ajouteCssDivBouton(...classeDefs: (KfStringDef | KfNgClasseDef)[]): void {
         if (!this.cssDivBouton) {
             this.cssDivBouton = new KfGéreCss();
         }

@@ -2,7 +2,7 @@ import { KfTypeDeComposant } from '../kf-composants-types';
 import { KfEtiquette } from '../kf-elements/kf-etiquette/kf-etiquette';
 import { KfGéreCss } from '../kf-partages/kf-gere-css';
 import { KfNgClasse } from '../kf-partages/kf-gere-css-classe';
-import { KfTexteDef } from '../kf-partages/kf-texte-def';
+import { KfStringDef } from '../kf-partages/kf-string-def';
 import { KfComposant } from './kf-composant';
 
 export abstract class KfAvecLabel extends KfComposant {
@@ -27,7 +27,7 @@ export abstract class KfAvecLabel extends KfComposant {
       */
      private pEtiquetteAide: KfEtiquette;
 
-     constructor(nom: string, type: KfTypeDeComposant, texteLabel?: KfTexteDef) {
+     constructor(nom: string, type: KfTypeDeComposant, texteLabel?: KfStringDef) {
         super(nom, type);
         this.pEtiquetteLabel = new KfEtiquette('', texteLabel);
         this.pEtiquetteLabel.labelise(this);

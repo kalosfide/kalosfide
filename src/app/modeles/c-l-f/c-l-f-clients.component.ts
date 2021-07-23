@@ -1,4 +1,4 @@
-import { OnInit, OnDestroy, Directive } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { Site } from 'src/app/modeles/site/site';
@@ -12,7 +12,7 @@ import { KfSuperGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-super-g
 import { RouteurService } from 'src/app/services/routeur.service';
 import { PageTableComponent } from 'src/app/disposition/page-table/page-table.component';
 import { IGroupeTableDef, GroupeTable } from 'src/app/disposition/page-table/groupe-table';
-import { BarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
+import { IBarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
 import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
 import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
@@ -23,7 +23,7 @@ import { ILienDef } from 'src/app/disposition/fabrique/fabrique-lien';
 import { FournisseurRoutes, FournisseurPages } from 'src/app/fournisseur/fournisseur-pages';
 import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
 
-@Directive()
+@Component({ template: '' })
 export abstract class CLFClientsComponent extends PageTableComponent<CLFDocs> implements OnInit, OnDestroy {
 
     site: Site;
@@ -49,7 +49,7 @@ export abstract class CLFClientsComponent extends PageTableComponent<CLFDocs> im
         return this.utile.texte.textes(this.clfDocs.type);
     }
 
-    créeBarreTitre = (): BarreTitre => {
+    créeBarreTitre = (): IBarreTitre => {
         const barre = Fabrique.titrePage.barreTitre({
             pageDef: this.pageDef,
             contenuAidePage: this.contenuAidePage(),
@@ -66,7 +66,7 @@ export abstract class CLFClientsComponent extends PageTableComponent<CLFDocs> im
         let etiquette: KfEtiquette;
 
         etiquette = Fabrique.ajouteEtiquetteP(infos);
-        Fabrique.ajouteTexte(etiquette,
+        etiquette.ajouteTextes(
             `Ceci est `,
             { texte: 'à faire', balise: KfTypeDeBaliseHTML.b },
             '.'

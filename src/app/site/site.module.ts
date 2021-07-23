@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SiteResolverService } from './site-resolver.service';
 import { CommunModule } from '../commun/commun.module';
 
 import { DispositionModule } from '../disposition/disposition.module';
@@ -27,7 +26,6 @@ import { UsagerGarde } from './usager-garde';
         ClientRacineComponent,
     ],
     providers: [
-        SiteResolverService,
         UsagerGarde,
         FournisseurGarde,
         ClientGarde,

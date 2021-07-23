@@ -1,11 +1,11 @@
 import { KfComposant } from '../../kf-composant/kf-composant';
 import { KfTypeDeComposant, KfTypeDeBaliseHTML } from '../../kf-composants-types';
-import { KfTexteDef, ValeurTexteDef } from '../../kf-partages/kf-texte-def';
+import { KfStringDef, ValeurStringDef } from '../../kf-partages/kf-string-def';
 
 export class KfTexte extends KfComposant {
-    private texteDef: KfTexteDef;
+    private stringDef: KfStringDef;
 
-    morceaux: { highlight?: boolean; texte: string }[];
+    morceaux: { classe?: string; texte: string }[];
 
     /**
      * balises Html à ajouter dans le template autour de la partie rendant le composant
@@ -13,18 +13,18 @@ export class KfTexte extends KfComposant {
      */
     pBalisesAAjouter: KfTypeDeBaliseHTML[];
 
-    constructor(nom: string, texteDef: KfTexteDef) {
+    constructor(nom: string, stringDef: KfStringDef) {
         super(nom, KfTypeDeComposant.texte);
-        this.texteDef = texteDef;
+        this.stringDef = stringDef;
     }
 
     get texte(): string {
-        if (this.texteDef !== undefined) {
-            return ValeurTexteDef(this.texteDef);
+        if (this.stringDef !== undefined) {
+            return ValeurStringDef(this.stringDef);
         }
     }
-    fixeTexte(texte: KfTexteDef) {
-        this.texteDef = texte;
+    fixeTexte(texte: KfStringDef) {
+        this.stringDef = texte;
     }
 
     get balisesAAjouter(): KfTypeDeBaliseHTML[] {
@@ -38,21 +38,23 @@ export class KfTexte extends KfComposant {
         this.pBalisesAAjouter = balisesAAjouter;
     }
 
-    éclairage(àEclairer: string): boolean {
+    éclairage(àEclairer: string, classeEclairé: string): boolean {
         if (àEclairer === null || àEclairer === undefined || àEclairer === '') {
             this.morceaux = undefined;
             return true;
         }
+        àEclairer = àEclairer.toLowerCase();
+        const longueur = àEclairer.length;
         let texte = this.texte;
-        const morceaux: { highlight?: boolean; texte: string}[] = [];
+        const morceaux: { classe?: string; texte: string}[] = [];
         while (texte.length > 0) {
-            const débutEclairé = texte.toLowerCase().indexOf(àEclairer.toLowerCase());
+            const débutEclairé = texte.toLowerCase().indexOf(àEclairer);
             if (débutEclairé === -1) {
                 morceaux.push({ texte });
                 texte = '';
             } else {
-                morceaux.push({ texte: texte.slice(0, débutEclairé) }, { highlight: true, texte: àEclairer });
-                texte = texte.slice(débutEclairé + àEclairer.length);
+                morceaux.push({ texte: texte.slice(0, débutEclairé) }, { classe: classeEclairé, texte: texte.substr(débutEclairé, longueur) });
+                texte = texte.slice(débutEclairé + longueur);
             }
         }
         if (morceaux.length > 1) {

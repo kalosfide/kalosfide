@@ -1,6 +1,6 @@
 import { KfTypeDeComposant } from '../kf-composants-types';
 import { KfComposant } from '../kf-composant/kf-composant';
-import { KfTexteDef } from '../kf-partages/kf-texte-def';
+import { KfStringDef } from '../kf-partages/kf-string-def';
 import { KfImageDef } from '../kf-partages/kf-image-def';
 
 export enum KfTypeDeSousMenu {
@@ -18,7 +18,7 @@ export interface KfDefinitionDeMenu {
     /** selecteur doit être défini si type est special  */
     selecteur?: KfComposant;
     /** pour construire le sélecteur */
-    texte?: KfTexteDef;
+    texte?: KfStringDef;
     imageAvant?: KfImageDef;
     imageApres?: KfImageDef;
     /** pour pouvoir affecter la classe kf-choisi */

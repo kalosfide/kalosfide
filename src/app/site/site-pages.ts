@@ -26,12 +26,6 @@ export class SitePages {
         title: 'Catalogue',
         titre: 'Catalogue',
     };
-    static pasOuvert: PageDef = {
-        urlSegment: 'pasOuvert',
-        lien: '',
-        title: 'Fermé',
-        titre: 'Site fermé'
-    };
     static contact: PageDef = {
         urlSegment: 'contact',
         lien: 'Contact',

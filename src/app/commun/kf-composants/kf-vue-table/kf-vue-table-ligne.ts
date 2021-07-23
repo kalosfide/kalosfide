@@ -46,14 +46,7 @@ export class KfVueTableLigne<T> extends KfVueTableLigneBase<T> implements IKfVue
             this.pSuperGroupe = vueTable.superGroupe(item);
             this.pSuperGroupe.listeParent = vueTable;
         }
-        this.pItem = item;
-        this.pCellules = vueTable.colonnes.map(colonne => new KfVueTableCellule<T>(colonne, this, item));
-        if (vueTable.avecEnTêtesDeLigne) {
-            this.pCellules[0].thScope = 'row';
-        }
-        if (vueTable.gereCssLigne) {
-            this.pGéreCss = vueTable.gereCssLigne(item);
-        }
+        this.item = item;
         const équivalentPourClic = this.équivalentPourClic;
         if (vueTable.quandClic && équivalentPourClic) {
             let quandClic: () => void;
@@ -96,6 +89,17 @@ export class KfVueTableLigne<T> extends KfVueTableLigneBase<T> implements IKfVue
 
     public get item(): T {
         return this.pItem;
+    }
+
+    public set item(valeur: T) {
+        this.pItem = valeur;
+        this.pCellules = this.vueTable.colonnes.map(colonne => new KfVueTableCellule<T>(colonne, this, valeur));
+        if (this.vueTable.avecEnTêtesDeLigne) {
+            this.pCellules[0].thScope = 'row';
+        }
+        if (this.vueTable.gereCssLigne) {
+            this.pGéreCss = this.vueTable.gereCssLigne(valeur);
+        }
     }
 
     get id(): string {

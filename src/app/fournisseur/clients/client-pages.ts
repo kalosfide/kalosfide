@@ -1,19 +1,19 @@
 import { iSiteRoutePlusSegments } from 'src/app/site/site-pages';
-import { FournisseurRoutes, FournisseurPages, FournisseurSiteRoutes } from '../fournisseur-pages';
+import { FournisseurPages, FournisseurSiteRoutes } from '../fournisseur-pages';
 import { PageDef } from 'src/app/commun/page-def';
 
 export class FournisseurClientPages {
     static accueil: PageDef = {
         urlSegment: 'accueil',
         lien: 'Accueil',
-        title: 'accueil',
+        title: 'Accueil',
         titre: 'Accueil',
     };
     static index: PageDef = {
         urlSegment: 'index',
-        lien: 'Retour à la liste des clients',
-        title: 'Clients',
-        titre: 'Clients',
+        lien: 'Comptes',
+        title: 'Comptes',
+        titre: 'Comptes',
     };
     static ajoute: PageDef = {
         urlSegment: 'ajoute',
@@ -32,6 +32,18 @@ export class FournisseurClientPages {
         lien: 'Inviter',
         title: 'Clients - Inviter',
         titre: 'Inviter un client',
+    };
+    static inviteClient: PageDef = {
+        urlSegment: 'invite',
+        lien: 'Inviter',
+        title: 'Clients - Inviter',
+        titre: 'Inviter ',
+    };
+    static réinvite: PageDef = {
+        urlSegment: 'reinvite',
+        lien: 'Inviter',
+        title: 'Clients - Inviter',
+        titre: 'Réinviter ',
     };
     static aide: PageDef = {
         urlSegment: 'aide',

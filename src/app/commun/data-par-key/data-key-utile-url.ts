@@ -25,7 +25,7 @@ export class DataKeyUtileUrl<T extends IDataKey> {
     supprime(t: T): IUrlDef {
         return this.dePageDef(this.pUtile.dataPages.supprime, t);
     }
-    dePageDef(pageDef: PageDef, t?: T): IUrlDef {
+    dePageDef(pageDef?: PageDef, t?: T): IUrlDef {
         return this.pUtile.url.__urlDef(this.pUtile.dataRoutes, pageDef, t ? this.pUtile.service.urlSegmentDeKey(t) : null);
     }
 }

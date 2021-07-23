@@ -63,7 +63,10 @@ export class ClientEditeur extends KeyUidRnoEditeur<Client> {
             case FournisseurClientPages.ajoute:
                 roleEditeur.ajouteAideNom('client'),
                 this.kfNom = roleEditeur.ajouteNom('client', roleEditeur.validateursNom());
+                // vérifie que le nom n'appartient pas un client déjà connu
                 this.kfNom.ajouteValidateur(this.validateurNomAjoute());
+                // vérifie que le nom n'appartient pas à un client qui vient de répondre à une invitation
+                this.kfNom.ajouteValidateur(this.validateurNomAprèsSoumission());
                 roleEditeur.ajouteAideAdresse('client');
                 this.kfAdresse = roleEditeur.ajouteAdresse(roleEditeur.validateursAdresse());
                 break;

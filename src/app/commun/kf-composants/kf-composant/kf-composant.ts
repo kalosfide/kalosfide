@@ -23,13 +23,13 @@ import { KfGereTabIndex } from './kf-composant-gere-tabindex';
 import { KfContenuPhrase } from '../kf-partages/kf-contenu-phrase/kf-contenu-phrase';
 import { KfComposantGereValeur } from './kf-composant-gere-valeur';
 import { KfValidateur } from '../kf-partages/kf-validateur';
-import { KfTexteDef } from '../kf-partages/kf-texte-def';
+import { KfStringDef } from '../kf-partages/kf-string-def';
 import { KfImageDef } from '../kf-partages/kf-image-def';
 import { IKfVueTable } from '../kf-vue-table/kf-vue-table';
 import { IKfIconeDef } from '../kf-partages/kf-icone-def';
 import { KfGéreCss } from '../kf-partages/kf-gere-css';
 import { Subscription, Observable } from 'rxjs';
-import { KfInitialObservable } from '../kf-partages/kf-initial-observable';
+import { ValeurEtObservable } from '../../outils/valeur-et-observable';
 import { KfDiv } from '../kf-partages/kf-div/kf-div';
 import { KfNgClasse } from '../kf-partages/kf-gere-css-classe';
 import { KfNgStyle } from '../kf-partages/kf-gere-css-style';
@@ -216,7 +216,7 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
      */
     ajoute(composant: KfComposant) {
         if (composant.noeud.parent) {
-            throw new Error(`Le composant ${composant.nom} a déjà un parent.`);
+            throw new Error(`Le composant ${composant.nom} a déjà un parent ${composant.parent.nom}.`);
         }
         if (composant.type === KfTypeDeComposant.radio && this.type !== KfTypeDeComposant.radios) {
             throw new Error(`Un composant de type ${KfTypeDeComposant.radio} ne peut être ajouté à ${this.nom} qui n'est pas de type ${KfTypeDeComposant.radios}.`);
@@ -386,7 +386,7 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
             this._active(inactif);
         });
     }
-    set inactivitéIO(inactivitéIO: KfInitialObservable<boolean>) {
+    set inactivitéIO(inactivitéIO: ValeurEtObservable<boolean>) {
         this.inactivité = inactivitéIO.valeur;
         this.inactivitéObs = inactivitéIO.observable;
     }
@@ -459,7 +459,7 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
      * fixe le texte de l'element ou de son label
      * surcharge: KfTexte
      */
-    fixeTexte(texte: KfTexteDef) {
+    fixeTexte(texte: KfStringDef) {
         if (!this.contenuPhrase) {
             throw new Error(`Ce composant n'a pas de contenu phrasé.`);
         } else {

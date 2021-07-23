@@ -1,36 +1,115 @@
 import { KfGéreCss } from './kf-gere-css';
 import { KfNgClasse, KfNgClasseDefDe } from './kf-gere-css-classe';
+import { KfStringDefDe } from './kf-string-def';
 
 export class KfGéreCssDe<T> {
 
-    private pClasseDefs: (string | ((t: T) => string))[];
+    private pClasseDefs: KfStringDefDe<T>[];
 
     private pNgClasseDefs: KfNgClasseDefDe<T>[];
 
     // CLASSES
 
-    private _ajouteClasseDef(classeDef: string | ((t: T) => string) | KfNgClasseDefDe<T>) {
-        if ((classeDef as KfNgClasseDefDe<T>).nom) {
-            const ng = classeDef as KfNgClasseDefDe<T>;
-            if (!this.pNgClasseDefs) {
-                this.pNgClasseDefs = [ng];
-            } else {
-                this.pNgClasseDefs.push(ng);
-            }
+    /**
+     * Remplace dans la liste chaque string par les mots qui la composent.
+     * @param stringDefs liste de string ou de () => string
+     */
+     private motsOuFonctions(stringDefs: KfStringDefDe<T>[]): KfStringDefDe<T>[] {
+        const motsOuFonctions: KfStringDefDe<T>[] = [];
+        stringDefs.forEach(
+            stringDef => {
+                if (typeof (stringDef) === 'string') {
+                    const cs = stringDef.trim().split(' ');
+                    if (cs.length > 0) {
+                        cs.forEach(mot => motsOuFonctions.push(mot));
+                    }
+                } else {
+                    motsOuFonctions.push(stringDef);
+                }
+            });
+        return motsOuFonctions;
+    }
+
+    private _créeArray(nomsDef: string | string[]): string[] {
+        if (typeof (nomsDef) === 'string') {
+            return nomsDef.trim().split(' ');
         } else {
-            if (!this.pClasseDefs) {
-                this.pClasseDefs = [];
-            }
-            if (typeof (classeDef) === 'string') {
-                this.pClasseDefs.push(classeDef);
+            let noms: string[] = [];
+            nomsDef.forEach(n => noms = noms.concat(this._créeArray(n)));
+            return noms;
+        }
+    }
+    private _ajouteNg(nomsDef: string | string[] | { nom: string | string[], active?: (t: T) => boolean }) {
+        if (!this.pNgClasseDefs) {
+            this.pNgClasseDefs = [];
+        }
+        let noms = [];
+        let active: (t: T) => boolean;
+        if (typeof (nomsDef) === 'string' || Array.isArray(nomsDef)) {
+            noms = this._créeArray(nomsDef);
+        } else {
+            noms = this._créeArray(nomsDef.nom);
+            active = nomsDef.active;
+        }
+        noms.forEach(n => {
+            let ngc = this.pNgClasseDefs.find(ng => ng.nom === n);
+            if (ngc) {
+                ngc.active = active;
             } else {
-                this.pClasseDefs.push(classeDef as (t: T) => string);
+                ngc = new KfNgClasseDefDe<T>();
+                ngc.nom = n;
+                ngc.active = active;
+                this.pNgClasseDefs.push(ngc);
             }
+        });
+    }
+
+    private _ajouteStringDef(classeDef: KfStringDefDe<T>) {
+        if (!this.pClasseDefs) {
+            this.pClasseDefs = [];
+        }
+        const stringDef: KfStringDefDe<T>[] = [classeDef]
+        this.motsOuFonctions(stringDef).forEach(
+            c => {
+                if (!this.pClasseDefs.find(cd => c === cd)) {
+                    this.pClasseDefs.push(c);
+                }
+            }
+        );
+    }
+
+    private _ajouteClasseDef(classeDef: KfStringDefDe<T> | KfNgClasseDefDe<T>) {
+        if (typeof (classeDef) === 'string' || typeof (classeDef) === 'function') {
+            this._ajouteStringDef(classeDef as KfStringDefDe<T>);
+        } else {
+            const ng = classeDef as KfNgClasseDefDe<T>;
+            this._ajouteNg(ng);
         }
     }
 
-    ajouteClasseDef(...classeDefs: (string | ((t: T) => string) | KfNgClasseDefDe<T>)[]): void {
+    ajouteClasse(...classeDefs: (string | ((t: T) => string) | KfNgClasseDefDe<T>)[]): void {
         classeDefs.forEach(classeDef => this._ajouteClasseDef(classeDef));
+    }
+
+    supprimeClasse(...classeDefs: KfStringDefDe<T>[]): void {
+        if (this.pClasseDefs) {
+            const liste = this.motsOuFonctions(classeDefs);
+            this.pClasseDefs = this.pClasseDefs.filter(c => !liste.find(c1 => c1 === c));
+            if (this.pClasseDefs.length === 0) {
+                this.pClasseDefs = undefined;
+            }
+        }
+        if (this.pNgClasseDefs) {
+            this.pNgClasseDefs = this.pNgClasseDefs.filter(ng => !classeDefs.find(c => {
+                if (typeof (c) === 'string' || typeof (c) === 'function') {
+                    return true;
+                }
+                return (c as KfNgClasseDefDe<T>).nom === ng.nom;
+            }));
+            if (this.pNgClasseDefs.length === 0) {
+                this.pNgClasseDefs = undefined;
+            }
+        }
     }
 
     classe(t: T): KfNgClasse {

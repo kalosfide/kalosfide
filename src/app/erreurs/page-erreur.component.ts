@@ -8,6 +8,7 @@ import { PageBaseComponent } from '../disposition/page-base/page-base.component'
 import { KfSuperGroupe } from '../commun/kf-composants/kf-groupe/kf-super-groupe';
 import { ApiResultErreur } from '../api/api-results/api-result-erreur';
 import { Fabrique } from '../disposition/fabrique/fabrique';
+import { KfEtiquette } from '../commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 
 @Component({
     templateUrl: '../disposition/page-base/page-base.html',
@@ -29,9 +30,16 @@ export class PageErreurComponent extends PageBaseComponent implements OnInit, On
             const apiErreur: ApiResultErreur = data.apiErreur;
             this.titrePage = Fabrique.titrePage.titrePage(apiErreur.titre, 0);
             this.superGroupe = new KfSuperGroupe(this.nom);
+            let étiquette: KfEtiquette;
+            if (apiErreur.action) {
+                étiquette = Fabrique.ajouteEtiquetteP();
+                étiquette.ajouteTextes(apiErreur.action);
+                étiquette.ajouteClasse('fw-bold');
+                this.superGroupe.ajoute(étiquette);
+            }
             apiErreur.messages.forEach(message => {
-                const étiquette = Fabrique.ajouteEtiquetteP();
-                Fabrique.ajouteTexte(étiquette, message);
+                étiquette = Fabrique.ajouteEtiquetteP();
+                étiquette.ajouteTextes(message);
                 this.superGroupe.ajoute(étiquette);
             });
         }));

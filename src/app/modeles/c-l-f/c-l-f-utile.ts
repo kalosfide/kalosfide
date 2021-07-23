@@ -4,7 +4,7 @@ import { CLFUtileBouton } from './c-l-f-utile-bouton';
 import { CLFUtileOutils } from './c-l-f-utile-outils';
 import { CLFUtileColonne } from './c-l-f-utile-colonne';
 import { ConditionAction, ModeAction } from './condition-action';
-import { KfInitialObservable } from 'src/app/commun/kf-composants/kf-partages/kf-initial-observable';
+import { ValeurEtObservable } from 'src/app/commun/outils/valeur-et-observable';
 import { DataKeyUtile } from 'src/app/commun/data-par-key/data-key-utile';
 import { ApiDocument } from './api-document';
 import { CLFLigne } from './c-l-f-ligne';
@@ -85,7 +85,7 @@ export class CLFUtile extends DataKeyUtile<ApiDocument> {
         return ligne.parent.crééParLeClient && !ligne.parent.apiDoc.noGroupe;
     }
 
-    observeModeAction(modeActioIO: KfInitialObservable<ModeAction>) {
+    observeModeAction(modeActioIO: ValeurEtObservable<ModeAction>) {
         this.pConditionAction = new ConditionAction(modeActioIO);
     }
 
@@ -99,7 +99,7 @@ export class CLFUtile extends DataKeyUtile<ApiDocument> {
         etiquette.fixeTexte(`La création de ${this.texte.textes(type).def.doc} est impossible.`);
         etiquette = Fabrique.ajouteEtiquetteP(messages);
         etiquette.fixeTexte(message);
-        const bouton = Fabrique.lien.lien(lienDef);
+        const bouton = Fabrique.lien.bouton(lienDef);
         const grBtnsMsgs = new GroupeBoutonsMessages('créationImpossible', { messages, boutons: [bouton] });
         grBtnsMsgs.alerte('danger');
         return grBtnsMsgs.groupe;

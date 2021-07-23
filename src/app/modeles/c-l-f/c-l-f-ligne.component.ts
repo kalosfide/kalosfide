@@ -1,11 +1,9 @@
-import { OnDestroy, OnInit, AfterViewInit, Directive } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 
-import { ActivatedRoute, Data, RouterStateSnapshot } from '@angular/router';
+import { ActivatedRoute, RouterStateSnapshot } from '@angular/router';
 import { Site } from '../site/site';
 import { Identifiant } from 'src/app/securite/identifiant';
 import { Observable } from 'rxjs';
-import { ApiResult } from 'src/app/api/api-results/api-result';
-import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { Produit } from '../catalogue/produit';
 import { PeutQuitterService } from 'src/app/commun/peut-quitter/peut-quitter.service';
@@ -21,13 +19,13 @@ import { CLFUtile } from './c-l-f-utile';
 import { CLFService } from './c-l-f.service';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
-import { BarreTitre, IBarreDef } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
-import { ValeurTexteDef } from 'src/app/commun/kf-composants/kf-partages/kf-texte-def';
+import { IBarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
+import { ValeurStringDef } from 'src/app/commun/kf-composants/kf-partages/kf-string-def';
 import { IDataComponent } from 'src/app/commun/data-par-key/i-data-component';
 import { DataService } from 'src/app/services/data.service';
 import { CLFDoc } from './c-l-f-doc';
 
-@Directive()
+@Component({ template: '' })
 export abstract class CLFLigneAjouteComponent extends PageBaseComponent implements OnInit, OnDestroy, IDataComponent {
 
     site: Site;
@@ -77,7 +75,7 @@ export abstract class CLFLigneAjouteComponent extends PageBaseComponent implemen
         let etiquette: KfEtiquette;
 
         etiquette = Fabrique.ajouteEtiquetteP(infos);
-        Fabrique.ajouteTexte(etiquette,
+        etiquette.ajouteTextes(
             `Ceci est `,
             { texte: 'à faire', balise: KfTypeDeBaliseHTML.b },
             '.'
@@ -86,9 +84,8 @@ export abstract class CLFLigneAjouteComponent extends PageBaseComponent implemen
         return infos;
     }
 
-    créeBarreTitre = (): BarreTitre => {
-        const groupe = Fabrique.titrePage.bbtnGroup('boutons');
-        groupe.ajoute(this.utile.lien.retourDeAjoute(this.ligne));
+    créeBarreTitre = (): IBarreTitre => {
+        const groupe = Fabrique.titrePage.groupeRetour(this.utile.lien.retourDeAjoute(this.ligne));
         const barre = Fabrique.titrePage.barreTitre({
             pageDef: this.pageDef,
             contenuAidePage: this.contenuAidePage(),
@@ -99,11 +96,11 @@ export abstract class CLFLigneAjouteComponent extends PageBaseComponent implemen
 
     peutQuitter = (nextState?: RouterStateSnapshot): boolean | Observable<boolean> | Promise<boolean> => {
         if (nextState) {
-            let permise = ValeurTexteDef(Fabrique.url.url(this.utile.url.bon()));
+            let permise = ValeurStringDef(Fabrique.url.url(this.utile.url.bon()));
             if (nextState.url === permise) {
                 return true;
             }
-            permise = ValeurTexteDef(Fabrique.url.url(this.utile.url.ajoute(this.ligne)));
+            permise = ValeurStringDef(Fabrique.url.url(this.utile.url.ajoute(this.ligne)));
             if (nextState.url.substr(0, permise.length) === permise) {
                 return true;
             }
@@ -132,7 +129,6 @@ export abstract class CLFLigneAjouteComponent extends PageBaseComponent implemen
 
         this.afficheRésultat = Fabrique.formulaire.ajouteResultat(formulaire);
 
-        const apiRequêteAction = this.service.apiRequêteAjouteLigne(this.pLigne, this.superGroupe, this.afficheRésultat);
         const boutonAnnuler = Fabrique.lien.boutonAnnuler(this.utile.url.retourLigne(this.pLigne));
         const boutonAjoute = Fabrique.bouton.soumettre(formulaire, 'Ajouter');
         const btnsMsgs = new GroupeBoutonsMessages('ajoute', { boutons: [boutonAnnuler, boutonAjoute] });

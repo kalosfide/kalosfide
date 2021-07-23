@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { PageBaseComponent } from '../disposition/page-base/page-base.component';
 import { AppSitePages } from './app-site-pages';
-import { BarreTitre } from '../disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
+import { IBarreTitre } from '../disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { Fabrique } from '../disposition/fabrique/fabrique';
 import { KfSuperGroupe } from '../commun/kf-composants/kf-groupe/kf-super-groupe';
 import { Identifiant } from '../securite/identifiant';
@@ -15,14 +15,19 @@ import { CompteRoutes, ComptePages } from '../compte/compte-pages';
 import { IdentificationService } from '../securite/identification.service';
 import { FournisseurRoutes } from '../fournisseur/fournisseur-pages';
 import { ClientRoutes } from '../client/client-pages';
-import { KfUlComposant } from '../commun/kf-composants/kf-ul/kf-ul-composant';
-import { IContenuPhraseDef } from '../disposition/fabrique/fabrique-contenu-phrase';
-import { MaxLengthValidator } from '@angular/forms';
+import { KfUlComposant } from '../commun/kf-composants/kf-ul-ol/kf-ul-ol-composant';
 import { KfBootstrap } from '../commun/kf-composants/kf-partages/kf-bootstrap';
 import { IKfAvecSurvol } from '../commun/kf-composants/kf-partages/kf-survol/i-kf-avec-survol';
 import { KfCaseACocher } from '../commun/kf-composants/kf-elements/kf-case-a-cocher/kf-case-a-cocher';
 import { KfTypeDEvenement, KfEvenement, KfStatutDEvenement, KfTypeDHTMLEvents } from '../commun/kf-composants/kf-partages/kf-evenements';
 import { KfVueJson } from '../commun/kf-composants/kf-elements/kf-vue-json/kf-vue-json';
+import { KfNgbModal } from '../commun/kf-composants/kf-ngb-modal/kf-ngb-modal';
+import { ApiResult400BadRequest } from '../api/api-results/api-result-400-bad-request';
+import { KfNgbModalService } from '../commun/kf-composants/kf-ngb-modal/kf-ngb-modal.service';
+import { ApiResult401Unauthorized } from '../api/api-results/api-result-401-unauthorized';
+import { ApiResult403Forbidden } from '../api/api-results/api-result-403-forbidden';
+import { ApiResult404NotFound } from '../api/api-results/api-result-404-not-found';
+import { ApiResult409Conflict } from '../api/api-results/api-result-409-conflict';
 
 @Component({
     templateUrl: '../disposition/page-base/page-base.html',
@@ -38,11 +43,12 @@ export class AppSiteAccueilComponent extends PageBaseComponent implements OnInit
 
     constructor(
         private identification: IdentificationService,
+        private modalService: KfNgbModalService
     ) {
         super();
     }
 
-    test(): KfGroupe {
+    testSurvol(): KfGroupe {
         const test = new KfGroupe('test');
         test.ajoute(Fabrique.icone.iconeConnection());
         const boutons = new KfGroupe('boutons');
@@ -75,7 +81,7 @@ export class AppSiteAccueilComponent extends PageBaseComponent implements OnInit
         const créeAttente = (avecSurvol: IKfAvecSurvol) => {
             const icone = Fabrique.icone.iconeAttente();
             avecSurvol.créeSurvol(icone);
-            return  {
+            return {
                 commence: avecSurvol.survol.commence,
                 finit: avecSurvol.survol.finit
             };
@@ -88,7 +94,7 @@ export class AppSiteAccueilComponent extends PageBaseComponent implements OnInit
         });
         const attenteInput = créeAttente(input);
         input.gereHtml.suitLeFocus(
-            () => {},
+            () => { },
             () => {
                 attentes.push(attenteInput);
                 attenteInput.commence();
@@ -132,19 +138,49 @@ export class AppSiteAccueilComponent extends PageBaseComponent implements OnInit
         return test;
     }
 
+    testModal(): KfGroupe {
+        const test = new KfGroupe('testModal');
+        const boutons = new KfGroupe('boutons');
+        const apiErreur = new ApiResult409Conflict();
+        apiErreur.action = `La réouverture du site a échoué.`
+        const modal = Fabrique.erreurModal(apiErreur);
+        const commence = Fabrique.bouton.bouton({
+            nom: 'commence',
+            contenu: {
+                icone: Fabrique.icone.iconeVerrouFermé(),
+                texte: 'Commence'
+            },
+            bootstrap: { type: 'primary', outline: 'outline' },
+            action: () => {
+                const subscription = this.modalService.confirme(modal).subscribe(
+                    () => {
+                        subscription.unsubscribe();
+                    }
+                );
+            }
+        });
+        boutons.ajoute(commence);
+        test.ajoute(boutons);
+
+        const corps = Fabrique.erreurModal(apiErreur).corps;
+        test.ajoute(corps);
+
+        return test;
+    }
+
     créePrésentation(): KfGroupe {
         const groupe = new KfGroupe('presentation');
         const textes: KfEtiquette[] = [];
-        Fabrique.ajouteTexte(Fabrique.ajouteEtiquetteP(textes),
+        Fabrique.ajouteEtiquetteP(textes).ajouteTextes(
             `${AppSite.titre} permet à des fournisseurs de gérer dans leur site personnel les bons de commandes qu'il reçoivent `
             + `et les bons de livraison et les factures qu'ils emettent.`);
-        Fabrique.ajouteTexte(Fabrique.ajouteEtiquetteP(textes),
+        Fabrique.ajouteEtiquetteP(textes).ajouteTextes(
             `Après avoir ouvert son compte ${AppSite.titre}, un utilisateur peut créer son site et prendre ainsi un `,
             { texte: 'role de Fournisseur', balise: KfTypeDeBaliseHTML.b },
             `. Il peut alors y publier le catalogue de ses produits, gérer les données des ses bons de commandes, bons de livraison `
             + `et factures et télécharger ces documents. `
         );
-        Fabrique.ajouteTexte(Fabrique.ajouteEtiquetteP(textes),
+        Fabrique.ajouteEtiquetteP(textes).ajouteTextes(
             `Après avoir ouvert son compte ${AppSite.titre}, un utilisateur peut prendre un `,
             { texte: 'role de Client', balise: KfTypeDeBaliseHTML.b },
             ` du site d'un Fournisseur. Il peut alors gérer les données des ses bons de commandes`
@@ -153,7 +189,7 @@ export class AppSiteAccueilComponent extends PageBaseComponent implements OnInit
         const ul = new KfUlComposant('');
         let li: KfEtiquette;
         li = new KfEtiquette('');
-        Fabrique.ajouteTexte(li,
+        li.ajouteTextes(
             `Créer `,
         );
         ul.ajoute(li);
@@ -167,11 +203,11 @@ export class AppSiteAccueilComponent extends PageBaseComponent implements OnInit
         let étiquette: KfEtiquette;
         let def: ILienDef;
         étiquette = Fabrique.ajouteEtiquetteP(textes);
-        Fabrique.ajouteTexte(étiquette,
+        étiquette.ajouteTextes(
             `Vous n'êtes pas connecté à ${AppSite.titre}.`
         );
         étiquette = Fabrique.ajouteEtiquetteP(textes);
-        Fabrique.ajouteTexte(étiquette,
+        étiquette.ajouteTextes(
             `Si vous avez un compte, vous pouvez `
         );
         def = {
@@ -181,10 +217,10 @@ export class AppSiteAccueilComponent extends PageBaseComponent implements OnInit
             },
             contenu: { texte: 'vous connecter' },
         };
-        étiquette.contenuPhrase.ajoute(Fabrique.lien.lienEnLigne(def));
-        Fabrique.ajouteTexte(étiquette, ` à ${AppSite.titre}.`);
+        étiquette.contenuPhrase.ajouteContenus(Fabrique.lien.enLigne(def));
+        étiquette.ajouteTextes(` à ${AppSite.titre}.`);
         étiquette = Fabrique.ajouteEtiquetteP(textes);
-        Fabrique.ajouteTexte(étiquette,
+        étiquette.ajouteTextes(
             `Si vous n'avez pas de compte, vous pouvez `
         );
         def = {
@@ -194,8 +230,8 @@ export class AppSiteAccueilComponent extends PageBaseComponent implements OnInit
             },
             contenu: { texte: 'créer votre compte' },
         };
-        étiquette.contenuPhrase.ajoute(Fabrique.lien.lienEnLigne(def));
-        Fabrique.ajouteTexte(étiquette, ` ${AppSite.titre}.`);
+        étiquette.contenuPhrase.ajouteContenus(Fabrique.lien.enLigne(def));
+        étiquette.ajouteTextes(` ${AppSite.titre}.`);
 
         const groupe = new KfGroupe('');
         textes.forEach(t => groupe.ajoute(t));
@@ -207,7 +243,7 @@ export class AppSiteAccueilComponent extends PageBaseComponent implements OnInit
         const textes: KfEtiquette[] = [];
         let étiquette: KfEtiquette;
         étiquette = Fabrique.ajouteEtiquetteP(textes);
-        Fabrique.ajouteTexte(étiquette,
+        étiquette.ajouteTextes(
             {
                 texte: this.identifiant.userName,
                 balise: KfTypeDeBaliseHTML.b
@@ -217,7 +253,7 @@ export class AppSiteAccueilComponent extends PageBaseComponent implements OnInit
         let possèdeUnSite = false;
         if (this.identifiant.roles.length === 0) {
             étiquette = Fabrique.ajouteEtiquetteP(textes);
-            Fabrique.ajouteTexte(étiquette,
+            étiquette.ajouteTextes(
                 `Vous n'avez pas de role actif sur ${AppSite.titre}. Vous n'êtes ni fournisseur ni client `
                 + `d'un site.`
             );
@@ -226,7 +262,7 @@ export class AppSiteAccueilComponent extends PageBaseComponent implements OnInit
                 const estFournisseur = this.identifiant.estFournisseur(site);
                 possèdeUnSite = possèdeUnSite || estFournisseur;
                 étiquette = Fabrique.ajouteEtiquetteP(textes);
-                Fabrique.ajouteTexte(étiquette,
+                étiquette.ajouteTextes(
                     `Vous êtes `,
                     estFournisseur ? 'le fournisseur propriétaire' : 'un client',
                     ' du site '
@@ -239,14 +275,14 @@ export class AppSiteAccueilComponent extends PageBaseComponent implements OnInit
                     },
                     contenu: { texte: site.titre },
                 };
-                const lien = Fabrique.lien.lienEnLigne(def);
-                étiquette.contenuPhrase.ajoute(lien);
-                Fabrique.ajouteTexte(étiquette,
+                const lien = Fabrique.lien.enLigne(def);
+                étiquette.contenuPhrase.ajouteContenus(lien);
+                étiquette.ajouteTextes(
                     ` d'adresse ${AppSite.urlSegment}/s/${site.url}`);
             });
         }
         étiquette = Fabrique.ajouteEtiquetteP(textes);
-        Fabrique.ajouteTexte(étiquette,
+        étiquette.ajouteTextes(
             `Vous pouvez créer ${possèdeUnSite ? 'un autre' : 'votre'} site et devenir Fournisseur en suivant ce lien `
         );
         const defDevenirFournisseur: ILienDef = {
@@ -256,10 +292,10 @@ export class AppSiteAccueilComponent extends PageBaseComponent implements OnInit
             },
             contenu: { texte: 'Devenir Fournisseur' },
         };
-        const devenirFournisseur = Fabrique.lien.lienEnLigne(defDevenirFournisseur);
-        étiquette.contenuPhrase.ajoute(devenirFournisseur);
+        const devenirFournisseur = Fabrique.lien.enLigne(defDevenirFournisseur);
+        étiquette.contenuPhrase.ajouteContenus(devenirFournisseur);
         étiquette = Fabrique.ajouteEtiquetteP(textes);
-        Fabrique.ajouteTexte(étiquette,
+        étiquette.ajouteTextes(
             `Pour devenir client d'un site, vous devez contacter physiquement le fournisseur du site `
             + `et suivre les instructions contenues dans le message qu'il vous enverra à l'adresse email `
             + `de votre compte ${AppSite.titre}.`
@@ -273,7 +309,7 @@ export class AppSiteAccueilComponent extends PageBaseComponent implements OnInit
 
     protected créeContenus() {
         this.superGroupe = new KfSuperGroupe(this.nom);
-        this.superGroupe.ajoute(this.test());
+        this.superGroupe.ajoute(this.testModal());
         this.superGroupe.ajoute(this.créePrésentation());
         if (this.identifiant) {
             this.superGroupe.ajoute(this.créeAvecIdentifiant());

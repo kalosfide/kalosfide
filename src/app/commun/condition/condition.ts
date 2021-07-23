@@ -1,12 +1,12 @@
-import { KfInitialObservable } from '../kf-composants/kf-partages/kf-initial-observable';
+import { ValeurEtObservable } from '../outils/valeur-et-observable';
 
 export class Conditions<T extends string | number> {
     private _valeurs: T[];
-    private _condition: KfInitialObservable<boolean>[];
+    private _condition: ValeurEtObservable<boolean>[];
 
     nom: string;
 
-    observé: KfInitialObservable<T>;
+    observé: ValeurEtObservable<T>;
 
     /**
      * index de la valeur actuelle
@@ -24,11 +24,11 @@ export class Conditions<T extends string | number> {
      * @param valeurs liste de valeurs
      * @param observéIO initialObservable émettant des valeurs prises dans cette liste
      */
-    observe(valeurs: T[], observéIO: KfInitialObservable<T>) {
+    observe(valeurs: T[], observéIO: ValeurEtObservable<T>) {
         this._valeurs = valeurs;
         const nom = this.nom ? this.nom + ' ' : '';
         valeurs.forEach(v => {
-            const o = KfInitialObservable.nouveau(v === observéIO.valeur);
+            const o = ValeurEtObservable.nouveau(v === observéIO.valeur);
             o.nom = nom + `cond_${v.toString()}`;
             this._condition.push(o);
         });
@@ -61,11 +61,11 @@ export class Conditions<T extends string | number> {
      * @param transforme fonction retournant la valeur de la propriété de l'objet
      * @param observéIO initialObservable émettant des valeurs de type TObjet
      */
-    observeObjet<TObjet>(valeurs: T[], transforme: (objet: TObjet) => T, observéIO: KfInitialObservable<TObjet>) {
+    observeObjet<TObjet>(valeurs: T[], transforme: (objet: TObjet) => T, observéIO: ValeurEtObservable<TObjet>) {
         this._valeurs = valeurs;
         const nom = this.nom ? this.nom + ' ' : '';
         valeurs.forEach(v => {
-            const o = KfInitialObservable.nouveau(v === transforme(observéIO.valeur));
+            const o = ValeurEtObservable.nouveau(v === transforme(observéIO.valeur));
             o.nom = nom + `cond_${v.toString()}`;
             this._condition.push(o);
         });
@@ -94,7 +94,7 @@ export class Conditions<T extends string | number> {
         return this._valeurs.findIndex(v => v === valeur);
     }
 
-    protected conditionIO(valeur: T): KfInitialObservable<boolean> {
+    protected conditionIO(valeur: T): ValeurEtObservable<boolean> {
         return this._condition[this.index(valeur)];
     }
 

@@ -46,7 +46,7 @@ export class CategorieUtileColonne extends DataUtileColonne {
                 btnGroup.ajoute(bouton);
                 return btnGroup;
             },
-            classeDefs: ['colonne-btn-group-2'],
+            classesItem: ['colonne-btn-group-2'],
             afficherSi: this.utile.conditionTable.edition,
         };
     }

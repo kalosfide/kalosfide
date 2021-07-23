@@ -1,4 +1,4 @@
-import { ValeurTexteDef } from '../../kf-partages/kf-texte-def';
+import { ValeurStringDef } from '../../kf-partages/kf-string-def';
 import { ValeurNombreDef } from '../../kf-partages/kf-nombre-def';
 import { KfComposant } from '../../kf-composant/kf-composant';
 import { KfTypeDeComposant } from '../../kf-composants-types';
@@ -17,7 +17,7 @@ export class KfImage extends KfComposant {
     }
 
     get url(): string {
-        return ValeurTexteDef(this.imageDef.urlDef);
+        return ValeurStringDef(this.imageDef.urlDef);
     }
 
     get avecLargeur(): boolean {

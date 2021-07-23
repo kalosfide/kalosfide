@@ -4,7 +4,6 @@ import { Client } from '../client/client';
 import { Catalogue } from '../catalogue/catalogue';
 import { CLFLigne } from './c-l-f-ligne';
 import { ApiLigneData } from './api-ligne';
-import { DATE_EST_NULLE } from '../date-nulle';
 import { CLFDocEditeur } from './c-l-f-doc-editeur';
 import { IDataComponent } from 'src/app/commun/data-par-key/i-data-component';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
@@ -15,7 +14,6 @@ import { ApiDocumentsSynthèse } from './api-documents-client-data';
 import { KfCaseACocher } from 'src/app/commun/kf-composants/kf-elements/kf-case-a-cocher/kf-case-a-cocher';
 import { TypeCLF } from './c-l-f-type';
 import { CLFService } from './c-l-f.service';
-import { IKfVueTableLigne } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-ligne-base';
 import { CoûtDef, ICoût, LigneDocumentCoût } from './cout';
 import { KfVueTableLigne } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-ligne';
 
@@ -64,7 +62,7 @@ export class CLFDoc {
      * vrai si le document est une commande qui a été envoyée par le client
      */
     get crééParLeClient(): boolean {
-        return this.type === 'commande' && this.date !== undefined && !DATE_EST_NULLE(this.date);
+        return this.type === 'commande' && this.date !== undefined;
     }
 
     créeEditeur(component: IDataComponent) {
@@ -222,15 +220,6 @@ export class CLFDoc {
 
     get no_du_date(): string {
         return `n° ${this.no} du ${TexteOutils.date.en_chiffres(this.date)}`;
-    }
-
-    /**
-     * Ouverte = sans date (propriétaire = client) ou date égale à DATE_NULLE (propriétaire = fournisseur).
-     * Le document est une commande.
-     * Le propriétaire peut supprimer la commande, créer et supprimer des lignes et éditer leurs demandes.
-     */
-    get ouverte(): boolean {
-        return !this.date || DATE_EST_NULLE(this.date);
     }
 
     /**

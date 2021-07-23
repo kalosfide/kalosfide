@@ -1,5 +1,5 @@
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
-import { IKfComportementFormulaire, KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
+import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 import { KfSuperGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-super-groupe';
 import { KfBouton } from 'src/app/commun/kf-composants/kf-elements/kf-bouton/kf-bouton';
 import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
@@ -11,6 +11,9 @@ import { KfValidateurs } from 'src/app/commun/kf-composants/kf-partages/kf-valid
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 import { KfDivTableColonne, KfDivTableLigne } from 'src/app/commun/kf-composants/kf-groupe/kf-div-table';
 
+/**
+ * Interface implémenté par les components qui affichent un superGroupe dans une page (FormulaireComponent) 
+ */
 export interface IFormulaireComponent {
     nom: string;
     /** retourne les composants à afficher avant l'éditeur */
@@ -63,14 +66,14 @@ export class GroupeBoutonsMessages {
         if (def.messages) {
             this.pMessages = def.messages;
             ligne = this.pGroupe.divTable.ajoute();
-            ligne.ajouteClasse('row justify-content-center');
+            ligne.géreCss.ajouteClasse('row justify-content-center');
             col = ligne.ajoute(def.messages);
             col.ajouteClasse('col text-center');
         }
         if (def.boutons) {
             this.pBoutons = def.boutons;
             ligne = this.pGroupe.divTable.ajoute();
-            ligne.ajouteClasse('row justify-content-center');
+            ligne.géreCss.ajouteClasse('row justify-content-center');
             def.boutons.forEach(b => {
                 col = ligne.ajoute([b]);
                 col.ajouteClasse('col text-center');
@@ -88,12 +91,12 @@ export class GroupeBoutonsMessages {
      */
     set afficherBoutons(valeur: boolean) {
         if (this.pLigneDesBoutons) {
-            this.pLigneDesBoutons.nePasAfficher = valeur !== true;
+            this.pLigneDesBoutons.géreCss.nePasAfficher = valeur !== true;
         }
     }
 
     alerte(alerte: BootstrapType) {
-        KfBootstrap.ajouteClasse(this.groupe, 'alert', alerte);
+        KfBootstrap.ajouteClasseAlerte(this.groupe, alerte);
     }
 
 }
@@ -104,6 +107,39 @@ export class FabriqueFormulaire extends FabriqueMembre {
         super(fabrique);
     }
 
+    prépareLabelFlottant(composants: KfComposant | KfComposant[]) {
+        const optionsBootstrap: IKfBootstrapOptions = {
+            classeDiv: 'mb-3',
+            label: 'labelFlottant'
+        };
+        KfBootstrap.prépare(composants, optionsBootstrap);
+    }
+
+    prépareLabelColonne(composants: KfComposant | KfComposant[], largeur: number) {
+        const optionsBootstrap: IKfBootstrapOptions = {
+            classeDiv: 'mb-3',
+            label: { breakpoint: 'sm', width: largeur }
+        };
+        KfBootstrap.prépare(composants, optionsBootstrap);
+    }
+
+    prépareLabelASaLigne(composants: KfComposant | KfComposant[]) {
+        const optionsBootstrap: IKfBootstrapOptions = {
+            classeDiv: 'mb-3',
+            label: { breakpoint: 'sm', width: 2 }
+        };
+        KfBootstrap.prépare(composants, optionsBootstrap);
+    }
+
+    préparePourPage(composants: KfComposant | KfComposant[]) {
+       this.prépareLabelFlottant(composants);
+    }
+
+    préparePourVueTable(composants: KfComposant | KfComposant[]) {
+        const optionsBootstrap: IKfBootstrapOptions = { label: 'nePasAfficherLabel' };
+        KfBootstrap.prépare(composants, optionsBootstrap);
+    }
+
     superGroupe(def: IFormulaireComponent): KfSuperGroupe {
         const superGroupe = new KfSuperGroupe(def.nom);
 
@@ -112,11 +148,12 @@ export class FabriqueFormulaire extends FabriqueMembre {
             def.avantFormulaire.forEach(c => superGroupe.ajoute(c));
         }
         def.formulaire = def.créeEdition();
-        const optionsBootstrap = def.optionsBootstrap !== undefined ? def.optionsBootstrap : this.fabrique.optionsBootstrap.formulaire
-        if (optionsBootstrap !== null) {
-            KfBootstrap.prépare(def.formulaire.contenus, optionsBootstrap);
-        }
-        if (def.formulaire.gereValeur) {
+        if (def.optionsBootstrap === undefined) {
+            this.préparePourPage(def.formulaire.contenus);
+        } else {
+            if (def.optionsBootstrap !== null) {
+                KfBootstrap.prépare(def.formulaire.contenus, def.optionsBootstrap);
+            }
         }
         superGroupe.ajoute(def.formulaire);
 
@@ -141,22 +178,13 @@ export class FabriqueFormulaire extends FabriqueMembre {
             def.aprèsBoutons().forEach(c => superGroupe.ajoute(c));
         }
 
-        if (def.formulaire.gereValeur) {
-//            formulaire.créeGereValeur();
-            const comportementFormulaire: IKfComportementFormulaire = {
-                sauveQuandChange: true,
-                neSoumetPasSiPristine: true,
-            };
-            if (def.soumet) {
-                comportementFormulaire.traiteSubmit = { traitement: def.soumet }
-            }
-            if (def.sontEgaux) {
-                def.formulaire.ajouteValidateur(KfValidateurs.validateurAMarqueDeFormulaire(def.sontEgaux));
-            }
-            def.formulaire.comportementFormulaire = comportementFormulaire;
-            def.formulaire.avecInvalidFeedback = true;
-            superGroupe.quandTousAjoutés();
+        if (def.soumet) {
+            def.formulaire.comportementFormulaire.traiteSubmit = { traitement: def.soumet }
         }
+        if (def.sontEgaux) {
+            def.formulaire.ajouteValidateur(KfValidateurs.validateurAMarqueDeFormulaire(def.sontEgaux));
+        }
+        superGroupe.quandTousAjoutés();
         return superGroupe;
     }
 
@@ -170,10 +198,15 @@ export class FabriqueFormulaire extends FabriqueMembre {
     }
 
     formulaire(nom?: string): KfGroupe {
-        const groupe = new KfGroupe(nom ? nom : FabriqueFormulaire.nomEdition);
-        groupe.créeGereValeur();
-        groupe.estRacineV = true;
-        return groupe;
+        const formulaire = new KfGroupe(nom ? nom : FabriqueFormulaire.nomEdition);
+        formulaire.créeGereValeur();
+        formulaire.estRacineV = true;
+        formulaire.comportementFormulaire = {
+                sauveQuandChange: true,
+                neSoumetPasSiPristine: true,
+            };
+        formulaire.avecInvalidFeedback = true;
+        return formulaire;
     }
 
     ajouteResultat(formulaire: KfGroupe): AfficheResultat {

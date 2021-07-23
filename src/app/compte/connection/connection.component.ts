@@ -17,7 +17,7 @@ import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { KfSuperGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-super-groupe';
 import { ILienDef } from 'src/app/disposition/fabrique/fabrique-lien';
 import { ActivatedRoute } from '@angular/router';
-import { BarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
+import { IBarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { FournisseurRoutes } from 'src/app/fournisseur/fournisseur-pages';
 import { ClientRoutes } from 'src/app/client/client-pages';
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';

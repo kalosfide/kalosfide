@@ -10,7 +10,7 @@ export interface IKfVueTableCelluleDef {
     /**
      * Texte à afficher dans la cellule.
      * Si présent, la valeur de la cellule est un texte constant.
-     * Si présent, texteDef et composant sont absents et la colonne a un tri
+     * Si présent, stringDef et composant sont absents et la colonne a un tri
      * dans l'ordre de valeur si valeur est présent, de texte sinon.
      */
     texte?: string;
@@ -23,10 +23,10 @@ export interface IKfVueTableCelluleDef {
      * Fonction de mise à jour du texte affiché si le contenu dépend d'autres cellules dont la valeur peut changer.
      * Si présent, texte et valeur et composant sont absents et la colonne n'a pas de tri.
      */
-    texteDef?: () => string;
+    stringDef?: () => string;
     /**
      * Composant à afficher dans la cellule.
-     * Si présent, texte et valeur et texteDef sont absents et la colonne n'a pas de tri.
+     * Si présent, texte et valeur et stringDef sont absents et la colonne n'a pas de tri.
      */
     composantContenu?: KfComposant;
 }

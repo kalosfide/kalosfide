@@ -170,13 +170,13 @@ export class ProduitEditeur extends KeyUidRnoNoEditeur<Produit> {
                 this.créeTypesMesureEtCommande();
                 this.créePrix();
                 this.créeEtat();
-                KfBootstrap.prépare(this.kfDeData, Fabrique.optionsBootstrap.formulaire);
+                Fabrique.formulaire.préparePourPage(this.kfDeData);
                 break;
             case ProduitPages.edite:
                 this.créeCategorie();
                 this.créeNom(this.validateursNomEdite());
                 this.créeTypesMesureEtCommande();
-                KfBootstrap.prépare(this.kfDeData, Fabrique.optionsBootstrap.formulaire);
+                Fabrique.formulaire.préparePourPage(this.kfDeData);
                 break;
             case ProduitPages.index:
                 this.créeCategorie(lectureSeule);
@@ -184,7 +184,7 @@ export class ProduitEditeur extends KeyUidRnoNoEditeur<Produit> {
                 this.créeTypesMesureEtCommande(lectureSeule);
                 this.créePrix();
                 this.créeEtat();
-                KfBootstrap.prépare(this.kfDeData, Fabrique.optionsBootstrap.dansVueTable);
+                Fabrique.formulaire.préparePourVueTable(this.kfDeData);
                 break;
             default:
                 break;

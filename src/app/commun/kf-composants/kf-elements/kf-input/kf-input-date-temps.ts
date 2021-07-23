@@ -1,4 +1,4 @@
-import { KfTexteDef } from '../../kf-partages/kf-texte-def';
+import { KfStringDef } from '../../kf-partages/kf-string-def';
 import { KfInput } from './kf-input';
 import { KfTypeDInput } from './kf-type-d-input';
 import { KfInputDate } from './kf-input-date';
@@ -14,7 +14,7 @@ export class KfInputDateTemps extends KfInput {
     private pMin: Date;
     private pMax: Date;
 
-    constructor(nom: string, texte?: KfTexteDef) {
+    constructor(nom: string, texte?: KfStringDef) {
         super(nom, texte);
         this.typeDInput = KfTypeDInput.datetemps;
 

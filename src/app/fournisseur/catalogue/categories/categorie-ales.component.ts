@@ -1,12 +1,12 @@
 import { ActivatedRoute } from '@angular/router';
 import { Categorie } from 'src/app/modeles/catalogue/categorie';
-import { OnInit, Directive } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Site } from 'src/app/modeles/site/site';
 import { CategorieService } from 'src/app/modeles/catalogue/categorie.service';
 import { CategorieEditeur } from '../../../modeles/catalogue/categorie-editeur';
 import { KeyUidRnoNoALESComponent } from 'src/app/commun/data-par-key/key-uid-rno-no/key-uid-rno-no-ales.component';
 
-@Directive()
+@Component({ template: '' })
 export abstract class CategorieALESComponent extends KeyUidRnoNoALESComponent<Categorie> implements OnInit {
 
     get titre(): string {

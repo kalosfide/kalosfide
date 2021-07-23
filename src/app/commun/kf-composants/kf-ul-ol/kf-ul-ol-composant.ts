@@ -32,7 +32,7 @@ export class KfUlComposant extends KfComposant {
     private pGereCssLi: KfGéreCss;
 
     constructor(nom: string, dansNav?: boolean) {
-        super(nom, KfTypeDeComposant.ul);
+        super(nom, KfTypeDeComposant.ulol);
         this.lis = [];
         this.items = [];
     }

@@ -1,11 +1,11 @@
-import { OnInit, OnDestroy, Directive } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Data } from '@angular/router';
 
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { Client } from '../client/client';
 import { IGroupeTableDef } from 'src/app/disposition/page-table/groupe-table';
 import { IKfVueTableDef } from 'src/app/commun/kf-composants/kf-vue-table/i-kf-vue-table-def';
-import { BarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
+import { IBarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { PageTableComponent } from 'src/app/disposition/page-table/page-table.component';
 import { CLFLigne } from './c-l-f-ligne';
 import { CLFService } from './c-l-f.service';
@@ -15,7 +15,7 @@ import { CLFDoc } from './c-l-f-doc';
 import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
 import { KfBBtnGroup } from 'src/app/commun/kf-composants/kf-b-btn-group/kf-b-btn-group';
 
-@Directive()
+@Component({ template: '' })
 export abstract class CLFChoixProduitComponent extends PageTableComponent<CLFLigne> implements OnInit, OnDestroy {
 
     clfDoc: CLFDoc;
@@ -40,15 +40,11 @@ export abstract class CLFChoixProduitComponent extends PageTableComponent<CLFLig
 
     get client(): Client { return this.clfDoc.client; }
 
-    créeBarreTitre = (): BarreTitre => {
-        const groupesDeBoutons: KfBBtnGroup[] = [];
-        let groupe = Fabrique.titrePage.bbtnGroup('vide');
-        groupesDeBoutons.push(groupe);
-        groupe = Fabrique.titrePage.bbtnGroup('boutons');
-        groupe.ajoute(this._utile.lien.retourDeChoixProduit());
+    créeBarreTitre = (): IBarreTitre => {
+        const groupe = Fabrique.titrePage.groupeRetour(this._utile.lien.retourDeChoixProduit());
         const barre = Fabrique.titrePage.barreTitre({
             pageDef: this.pageDef,
-            groupesDeBoutons
+            groupesDeBoutons: [groupe]
         });
         return barre;
     }

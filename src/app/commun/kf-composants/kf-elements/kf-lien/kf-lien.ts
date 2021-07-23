@@ -1,14 +1,14 @@
 import { KfTypeDeComposant } from '../../kf-composants-types';
 import { KfComposant } from '../../kf-composant/kf-composant';
 import { KfTypeDHTMLEvents } from '../../kf-partages/kf-evenements';
-import { KfTexteDef, ValeurTexteDef } from '../../kf-partages/kf-texte-def';
+import { KfStringDef, ValeurStringDef } from '../../kf-partages/kf-string-def';
 import { Params } from '@angular/router';
 import { KfContenuPhrase } from '../../kf-partages/kf-contenu-phrase/kf-contenu-phrase';
 import { KfCssClasse } from '../../kf-partages/kf-css-classe';
 
 export class KfLien extends KfComposant {
 
-    private url: KfTexteDef;
+    private url: KfStringDef;
 
     /**
      * # fragment de la balise Html a
@@ -27,8 +27,8 @@ export class KfLien extends KfComposant {
      private pRouterLinkActiveOptions: { exact: true };
 
     constructor(nom: string,
-        url?: KfTexteDef,
-        texte?: KfTexteDef,
+        url?: KfStringDef,
+        texte?: KfStringDef,
     ) {
         super(nom, KfTypeDeComposant.lien);
         this.url = url;
@@ -40,11 +40,11 @@ export class KfLien extends KfComposant {
 
     get route(): any {
         if (this.url) {
-            return ValeurTexteDef(this.url);
+            return ValeurStringDef(this.url);
         }
     }
 
-    fixeRoute(url: KfTexteDef, params?: Params) {
+    fixeRoute(url: KfStringDef, params?: Params) {
         this.url = url;
         this.queryParams = params;
     }

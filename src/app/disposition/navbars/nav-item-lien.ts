@@ -1,4 +1,4 @@
-import { KfTexteDef } from 'src/app/commun/kf-composants/kf-partages/kf-texte-def';
+import { KfStringDef } from 'src/app/commun/kf-composants/kf-partages/kf-string-def';
 import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
 import { NavBar } from './navbar';
 import { NavItemDropdown } from './nav-item-dropdown';
@@ -22,7 +22,7 @@ export class NavItemLien extends NavItemContenu {
         return this.pComposant as KfLien;
     }
 
-    set url(url: KfTexteDef) {
+    set url(url: KfStringDef) {
         this.lien.fixeRoute(url);
     }
 }

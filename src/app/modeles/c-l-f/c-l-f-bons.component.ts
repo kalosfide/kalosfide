@@ -1,4 +1,4 @@
-import { OnInit, OnDestroy, Directive } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { Site } from 'src/app/modeles/site/site';
@@ -13,7 +13,7 @@ import { RouteurService } from 'src/app/services/routeur.service';
 import { PageTableComponent } from 'src/app/disposition/page-table/page-table.component';
 import { IGroupeTableDef, GroupeTable } from 'src/app/disposition/page-table/groupe-table';
 import { EtatTable } from 'src/app/disposition/fabrique/etat-table';
-import { BarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
+import { IBarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
 import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
 import { CLFDoc } from './c-l-f-doc';
@@ -38,7 +38,7 @@ import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
  * Table des bons du client avec leur état de préparation, lien vers ./client/:key/doc/:no et case de sélection.
  * Bouton: Vérifier.
  */
-@Directive()
+@Component({ template: '' })
 export abstract class CLFBonsComponent extends PageTableComponent<CLFDoc> implements OnInit, OnDestroy {
 
     site: Site;
@@ -69,7 +69,7 @@ export abstract class CLFBonsComponent extends PageTableComponent<CLFDoc> implem
         return this.utile.texte.textes(this.clfDocs.type);
     }
 
-    créeBarreTitre = (): BarreTitre => {
+    créeBarreTitre = (): IBarreTitre => {
         const barre = Fabrique.titrePage.barreTitre({
             pageDef: this.pageDef,
             contenuAidePage: this.contenuAidePage(),
@@ -86,14 +86,14 @@ export abstract class CLFBonsComponent extends PageTableComponent<CLFDoc> implem
         let etiquette: KfEtiquette;
 
         etiquette = Fabrique.ajouteEtiquetteP(infos);
-        Fabrique.ajouteTexte(etiquette,
+        etiquette.ajouteTextes(
             `Ceci est `,
             { texte: 'à faire', balise: KfTypeDeBaliseHTML.b },
             '.'
         );
 
         etiquette = Fabrique.ajouteEtiquetteP(infos);
-        Fabrique.ajouteTexte(etiquette,
+        etiquette.ajouteTextes(
             `Ceci est `,
             { texte: 'à faire', balise: KfTypeDeBaliseHTML.b },
             '.'
@@ -108,19 +108,19 @@ export abstract class CLFBonsComponent extends PageTableComponent<CLFDoc> implem
         let etiquette: KfEtiquette;
 
         etiquette = Fabrique.ajouteEtiquetteP(infos);
-        Fabrique.ajouteTexte(etiquette,
+        etiquette.ajouteTextes(
             `Indépendamment des ${this.texteUtile.def.bons} du client, vous pouvez ajouter des lignes à`
             + ` ${this.texteUtile.un_doc} en utilisant un ${this.texteUtile.def.bon} virtuel.`,
         );
 
         etiquette = Fabrique.ajouteEtiquetteP(infos);
-        Fabrique.ajouteTexte(etiquette, this.texteUtile.descriptionBonVirtuel);
+        etiquette.ajouteTextes(this.texteUtile.descriptionBonVirtuel);
 
         const bouton = Fabrique.bouton.aide({
             nom: 'infos_bon_virtuel',
             infos
         });
-        KfBootstrap.ajouteClasse(bouton, 'btn', 'light');
+        KfBootstrap.ajouteClasseBouton(bouton, 'light');
         return bouton;
     }
 
@@ -164,7 +164,7 @@ export abstract class CLFBonsComponent extends PageTableComponent<CLFDoc> implem
                 etat.grBtnsMsgs.alerte('info');
             }).bind(this)
         });
-        Fabrique.ajouteTexte(etatTable.grBtnsMsgs.messages[2] as KfEtiquette, { texte: '', balise: KfTypeDeBaliseHTML.small });
+        (etatTable.grBtnsMsgs.messages[2] as KfEtiquette).ajouteTextes({ texte: '', balise: KfTypeDeBaliseHTML.small });
         const def: IGroupeTableDef<CLFDoc> = {
             vueTableDef,
             etatTable
@@ -307,7 +307,7 @@ export abstract class CLFBonsComponent extends PageTableComponent<CLFDoc> implem
 
             this.étiquetteSélectionnez = new KfEtiquette('');
             this.étiquetteSélectionnez.baliseHtml = KfTypeDeBaliseHTML.p;
-            Fabrique.ajouteTexte(this.étiquetteSélectionnez,
+            this.étiquetteSélectionnez.ajouteTextes(
                 `Sélectionnez les ${this.texteUtile.def.bons} à inclure dans ${this.texteUtile.le_doc}. `,
                 { texte: `(Un bon doit être prêt pour pouvoir être sélectionné.)`, balise: KfTypeDeBaliseHTML.small }
             );

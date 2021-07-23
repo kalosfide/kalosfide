@@ -1,12 +1,12 @@
 import { KfVueTable, IKfVueTable } from './kf-vue-table';
 import { KfNgClasseDef, KfNgClasse, KfNgClasseDefDe } from '../kf-partages/kf-gere-css-classe';
-import { KfTexteDef } from '../kf-partages/kf-texte-def';
+import { KfStringDef } from '../kf-partages/kf-string-def';
 import { KfGéreCss } from '../kf-partages/kf-gere-css';
 import { KfGéreCssDe } from '../kf-partages/kf-gere-css-de-t';
 import { IKfVueTableColonneDef } from './i-kf-vue-table-colonne-def';
 import { IKfVueTableBilanDef } from './i-kf-vue-table-bilan-def';
 import { IKfVueTableEnTeteDef } from './i-kf-vue-table-en-tete-def';
-import { KfInitialObservable } from '../kf-partages/kf-initial-observable';
+import { ValeurEtObservable } from '../../outils/valeur-et-observable';
 import { KfVueTableLigne } from './kf-vue-table-ligne';
 import { Compare, Tri } from '../../outils/tri';
 import { KfVueTableCelluleDef } from './i-kf-vue-table-cellule-def';
@@ -24,17 +24,19 @@ export class KfVueTableColonne<T> implements IKfVueTableColonne {
     private pVueTable: KfVueTable<T>;
     private pIndex: number;
     private pColonneDef: IKfVueTableColonneDef<T>;
-    private pGereCssEntete: KfGéreCss;
+    private pGéreCssEntete: KfGéreCss;
     /**
      * Gére les classes à ajouter à l'élément td associèe à un item
      */
-    private pGereCssItem: KfGéreCssDe<T>;
-    private pGereCssBilan: KfGéreCss;
+    private pGéreCssItem: KfGéreCssDe<T>;
+    private pGéreCssBilan: KfGéreCss;
+
+    private pGéreCssCol: KfGéreCss;
 
     protected pTri: Tri;
 
     nePasAfficher: boolean;
-    nePasAfficherSi: KfInitialObservable<boolean>;
+    nePasAfficherSi: ValeurEtObservable<boolean>;
 
     constructor(vueTable: KfVueTable<T>, colonneDef: IKfVueTableColonneDef<T>, index: number) {
         this.pVueTable = vueTable;
@@ -46,8 +48,11 @@ export class KfVueTableColonne<T> implements IKfVueTableColonne {
         } else {
             if (colonneDef.afficherSi) {
                 this.nePasAfficher = !colonneDef.afficherSi.valeur;
-                this.nePasAfficherSi = KfInitialObservable.non(colonneDef.afficherSi);
+                this.nePasAfficherSi = ValeurEtObservable.non(colonneDef.afficherSi);
             }
+        }
+        if (colonneDef.classesCol) {
+            this.ajouteClasseCol(...colonneDef.classesCol);
         }
         if (colonneDef.enTeteDef) {
             if (colonneDef.enTeteDef.classeDefs) {
@@ -57,8 +62,8 @@ export class KfVueTableColonne<T> implements IKfVueTableColonne {
                 this.ajouteClasseEntete({ nom: 'kf-invisible', active: () => this.nePasAfficherSi.valeur });
             }
         }
-        if (colonneDef.classeDefs) {
-            this.ajouteClasseItem(...colonneDef.classeDefs);
+        if (colonneDef.classesItem) {
+            this.ajouteClasseItem(...colonneDef.classesItem);
         }
         if (this.nePasAfficherSi) {
             this.ajouteClasseItem({ nom: 'kf-invisible', active: () => this.nePasAfficherSi.valeur });
@@ -83,6 +88,10 @@ export class KfVueTableColonne<T> implements IKfVueTableColonne {
 
     get nom(): string { return this.pColonneDef.nom; }
 
+    get largeur(): string {
+        return this.pColonneDef.largeur;
+    }
+
     /**
      * texte ou composant à afficher dans la ligne d'en-tête
      */
@@ -96,7 +105,7 @@ export class KfVueTableColonne<T> implements IKfVueTableColonne {
     /**
      * nePasAfficherSi du tri associè à la colonne
      */
-    get nePasAfficherTriSi(): KfInitialObservable<boolean> { return this.pColonneDef.nePasAfficherTriSi; }
+    get nePasAfficherTriSi(): ValeurEtObservable<boolean> { return this.pColonneDef.nePasAfficherTriSi; }
 
     /**
      * texte ou composant à afficher dans l'élément td associèe à l'item
@@ -106,7 +115,7 @@ export class KfVueTableColonne<T> implements IKfVueTableColonne {
     /**
      * Liste des définitions de classes à ajouter à l'élément td associèe à un item
      */
-    get classeDefsItem(): (string | ((t: T) => string) | KfNgClasseDefDe<T>)[] { return this.pColonneDef.classeDefs; }
+    get classeDefsItem(): (string | ((t: T) => string) | KfNgClasseDefDe<T>)[] { return this.pColonneDef.classesItem; }
 
     /**
      * texte ou composant à afficher dans la ligne de bilan
@@ -114,55 +123,121 @@ export class KfVueTableColonne<T> implements IKfVueTableColonne {
     get bilanDef(): IKfVueTableBilanDef<T> { return this.pColonneDef.bilanDef; }
 
     /**
-     * classe à ajouter à l'élément th de l'en-tête
+     * Ajoute des classes à l'élément col du colgroup.
      */
-    ajouteClasseEntete(...classeDefs: (KfTexteDef | KfNgClasseDef)[]) {
-        if (!this.pGereCssEntete) {
-            this.pGereCssEntete = new KfGéreCss();
+    ajouteClasseCol(...classeDefs: (KfStringDef | KfNgClasseDef)[]) {
+        if (!this.pGéreCssCol) {
+            this.pGéreCssCol = new KfGéreCss();
         }
-        this.pGereCssEntete.ajouteClasse(...classeDefs);
+        this.pGéreCssCol.ajouteClasse(...classeDefs);
     }
 
-    get classeEntete(): KfNgClasse {
-        if (this.pGereCssEntete) {
-            return this.pGereCssEntete.classe;
+    /**
+     * Supprime des classes de l'élément col du colgroup.
+     */
+    supprimeClasseCol(...classeDefs: KfStringDef[]) {
+        if (this.pGéreCssCol) {
+            this.pGéreCssCol.supprimeClasse(...classeDefs);
         }
     }
 
     /**
-     * classe à ajouter à l'élément td de l'item
+     * KfNgClasse de l'élément col du colgroup.
+     */
+    get classeCol(): KfNgClasse {
+        if (this.pGéreCssCol) {
+            return this.pGéreCssCol.classe;
+        }
+    }
+
+    /**
+     * Ajoute des classes à l'élément th de l'en-tête.
+     */
+    ajouteClasseEntete(...classeDefs: (KfStringDef | KfNgClasseDef)[]) {
+        if (!this.pGéreCssEntete) {
+            this.pGéreCssEntete = new KfGéreCss();
+        }
+        this.pGéreCssEntete.ajouteClasse(...classeDefs);
+    }
+
+    /**
+     * Supprime des classes de l'élément th de l'en-tête.
+     */
+    supprimeClasseEntete(...classeDefs: KfStringDef[]) {
+        if (this.pGéreCssEntete) {
+            this.pGéreCssEntete.supprimeClasse(...classeDefs);
+        }
+    }
+
+    /**
+     * KfNgClasse de l'élément th de l'en-tête.
+     */
+    get classeEntete(): KfNgClasse {
+        if (this.pGéreCssEntete) {
+            return this.pGéreCssEntete.classe;
+        }
+    }
+
+    /**
+     * Ajoute des classes à l'élément td de l'item
      */
     ajouteClasseItem(...classeDefs: (string | ((t: T) => string) | KfNgClasseDefDe<T>)[]): void {
-        if (!this.pGereCssItem) {
-            this.pGereCssItem = new KfGéreCssDe<T>();
+        if (!this.pGéreCssItem) {
+            this.pGéreCssItem = new KfGéreCssDe<T>();
         }
-        this.pGereCssItem.ajouteClasseDef(...classeDefs);
+        this.pGéreCssItem.ajouteClasse(...classeDefs);
     }
 
-    classeItem(t: T): KfNgClasse {
-        if (this.pGereCssItem) {
-            return this.pGereCssItem.classe(t);
+    /**
+     * Supprime des classes de l'élément td de l'item
+     */
+    supprimeClasseItem(...classeDefs: KfStringDef[]) {
+        if (this.pGéreCssItem) {
+            this.pGéreCssItem.supprimeClasse(...classeDefs);
         }
     }
 
     /**
-     * classe à ajouter à l'élément th du bilan
+     * KfNgClasse de l'élément 
      */
-    ajouteClasseBilan(...classeDefs: (KfTexteDef | KfNgClasseDef)[]) {
-        if (!this.pGereCssBilan) {
-            this.pGereCssBilan = new KfGéreCss();
+    classeItem(t: T): KfNgClasse {
+        if (this.pGéreCssItem) {
+            return this.pGéreCssItem.classe(t);
         }
-        this.pGereCssBilan.ajouteClasse(...classeDefs);
     }
 
+    /**
+     * Ajoute des classes à l'élément th du bilan
+     */
+    ajouteClasseBilan(...classeDefs: (KfStringDef | KfNgClasseDef)[]) {
+        if (!this.pGéreCssBilan) {
+            this.pGéreCssBilan = new KfGéreCss();
+        }
+        this.pGéreCssBilan.ajouteClasse(...classeDefs);
+    }
+
+    /**
+     * Supprime des classes de l'élément th du bilan
+     */
+    supprimeClasseBilan(...classeDefs: KfStringDef[]) {
+        if (this.pGéreCssBilan) {
+            this.pGéreCssBilan.supprimeClasse(...classeDefs);
+        }
+    }
+
+    /**
+     * KfNgClasse de l'élément th du bilan
+     */
     get classeBilan(): KfNgClasse {
-        if (this.pGereCssBilan) {
-            return this.pGereCssBilan.classe;
+        if (this.pGéreCssBilan) {
+            return this.pGéreCssBilan.classe;
         }
     }
 }
 
 export class KfVueTableColonneNuméro<T> extends KfVueTableColonne<T> {
+    private pLargeur: string;
+
     constructor(vueTable: KfVueTable<T>, colonneNoLigneDef: IKfVueTableColonneNoLigneDef) {
         super(vueTable, {
             nom: 'no',
@@ -171,10 +246,15 @@ export class KfVueTableColonneNuméro<T> extends KfVueTableColonne<T> {
                 classeDefs: colonneNoLigneDef.classeDefsEnTete
             },
             créeContenu: null,
-            classeDefs: colonneNoLigneDef.classeDefs
+            classesItem: colonneNoLigneDef.classeDefs
         }, 0);
         if (colonneNoLigneDef.avecTri) {
             this.pTri = new Tri((l1: KfVueTableLigne<T>, l2: KfVueTableLigne<T>) => Compare.nombre(l => l.index)(l1, l2));
         }
+        this.pLargeur = colonneNoLigneDef.largeur;
+    }
+
+    get largeur(): string {
+        return this.pLargeur;
     }
 }

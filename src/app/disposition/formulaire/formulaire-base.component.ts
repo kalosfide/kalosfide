@@ -60,7 +60,7 @@ export abstract class FormulaireBaseComponent extends PageBaseComponent {
             const apiRequêteAction: ApiRequêteAction = {
                 demandeApi: this.apiDemande,
                 actionSiOk: this.actionSiOk,
-                formulaire: this.superGroupe,
+                formulaire: this.formulaire,
                 afficheResultat: this.afficheResultat,
                 titreErreur: this.titreRésultatErreur,
                 titreSucces: this.titreRésultatSucces

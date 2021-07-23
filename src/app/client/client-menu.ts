@@ -9,7 +9,7 @@ export class ClientMenu extends SiteMenu {
 
     protected créeItemsAction(): (NavItemLien | NavItemDropdown)[] {
         return [
-            this.créeItem(ClientPages.produits),
+            this.créeItem(ClientPages.catalogue),
             this.créeItem(ClientPages.commandes),
             this.créeItem(ClientPages.documents),
             this.créeItem(ClientPages.contact),

@@ -8,7 +8,7 @@ import { ActivatedRoute } from '@angular/router';
 import { AppSitePages } from './app-site-pages';
 import { AppSite } from './app-site';
 import { IdentificationService } from '../securite/identification.service';
-import { KfUlComposant } from '../commun/kf-composants/kf-ul/kf-ul-composant';
+import { KfUlComposant } from '../commun/kf-composants/kf-ul-ol/kf-ul-ol-composant';
 
 @Component({
     templateUrl: '../disposition/page-base/page-base.html',

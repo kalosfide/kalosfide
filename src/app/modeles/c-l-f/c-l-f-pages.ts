@@ -18,17 +18,6 @@ export class CLFPages {
     };
 
     /**
-     * Route: (livraison ou facture)/clients
-     * Page de choix du client pour lequel on veut créer un document de synthèse.
-     * Table de tous les clients sans bons à synthétiser et des liens vers ../client/:[nomParamKeyClient]/bon/0/nouveau.
-     */
-    static sansBons: PageDef = {
-        urlSegment: 'sansBons',
-        title: 'Clients',
-        titre: `Ajout d'un client`,
-    };
-
-    /**
      * Route: (livraison ou facture)/client/:[nomParamKeyClient]
      * Page titre contenant toutes les pages d'édition d'une synthèse d'un client.
      * Param nomParamKeyClient: key du client

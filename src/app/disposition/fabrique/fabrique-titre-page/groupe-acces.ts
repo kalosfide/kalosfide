@@ -1,4 +1,4 @@
-import { IBtnGroupeDef, FabriqueTitrePage, BarreTitre } from './fabrique-titre-page';
+import { IBtnGroupeDef, FabriqueTitrePage, IBarreTitre } from './fabrique-titre-page';
 import { KfBBtnGroup } from 'src/app/commun/kf-composants/kf-b-btn-group/kf-b-btn-group';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 import { KfBouton } from 'src/app/commun/kf-composants/kf-elements/kf-bouton/kf-bouton';
@@ -14,7 +14,7 @@ import { FournisseurRoutes } from 'src/app/fournisseur/fournisseur-pages';
 export class GroupeAccès implements IBtnGroupeDef {
     private parent: FabriqueTitrePage;
     groupe: KfBBtnGroup;
-    rafraichit: (barre: BarreTitre) => void;
+    rafraichit: (barre: IBarreTitre) => void;
     etiquetteTitreVerrou: KfEtiquette;
     boutonVerrou: KfBouton;
 
@@ -22,11 +22,11 @@ export class GroupeAccès implements IBtnGroupeDef {
         this.parent = parent;
         this.etiquetteTitreVerrou = new KfEtiquette('titre_verrou');
         this.boutonVerrou = this.parent.bouton('bouton_verrou');
-        KfBootstrap.ajouteClasse(this.boutonVerrou, 'btn', 'light');
+        KfBootstrap.ajouteClasseBouton(this.boutonVerrou, 'light');
         this.groupe = this.parent.bbtnGroup('accès');
         this.groupe.ajoute(this.boutonVerrou);
         this.groupe.ajoute(this.aideAccès());
-        this.rafraichit = (barre: BarreTitre) => this.rafraichitSelonRole(barre, estClient);
+        this.rafraichit = (barre: IBarreTitre) => this.rafraichitSelonRole(barre, estClient);
     }
 
     get fabrique(): FabriqueClasse {
@@ -46,7 +46,7 @@ export class GroupeAccès implements IBtnGroupeDef {
                 positionTexte: 'droite'
             });
             etiquette.baliseHtml = KfTypeDeBaliseHTML.p;
-            etiquette.ajouteClasse('bg-light');
+            etiquette.ajouteClasse(KfBootstrap.classeFond('light'));
             contenusAide.push(etiquette);
             contenusAide = contenusAide.concat(état.description());
         });
@@ -54,7 +54,7 @@ export class GroupeAccès implements IBtnGroupeDef {
         return bouton;
     }
 
-    rafraichitSelonRole(barre: BarreTitre, estClient: boolean) {
+    rafraichitSelonRole(barre: IBarreTitre, estClient: boolean) {
         const etat = this.fabrique.etatSite.état(barre.site.etat);
         const infos: KfComposant[] = [];
         let contenu: IContenuPhraseDef;
@@ -68,18 +68,18 @@ export class GroupeAccès implements IBtnGroupeDef {
             this.etiquetteTitreVerrou.fixeTexte('Site ouvert');
             etiquette = this.fabrique.ajouteEtiquetteP(infos);
             if (estClient) {
-                this.fabrique.ajouteTexte(etiquette,
+                etiquette.ajouteTextes(
                     `Vous avez plein accès au site.`
                 );
             } else {
-                KfBootstrap.ajouteClasse(this.boutonVerrou, 'btn', 'light');
-                this.fabrique.ajouteTexte(etiquette,
+                KfBootstrap.ajouteClasseBouton(this.boutonVerrou, 'light');
+                etiquette.ajouteTextes(
                     `Vos clients ont plein accès à votre site.`
                 );
             }
         } else {
             etiquette = this.fabrique.ajouteEtiquetteP(infos);
-            this.fabrique.ajouteTexte(etiquette, etat.titre + ' en cours');
+            etiquette.ajouteTextes( etat.titre + ' en cours');
             contenu = {
                 iconeDef: this.fabrique.icone.def.verrou_fermé,
             };
@@ -87,27 +87,27 @@ export class GroupeAccès implements IBtnGroupeDef {
             etiquette = this.fabrique.ajouteEtiquetteP(infos);
             etiquette.ajouteClasse('alert-danger');
             if (estClient) {
-                this.fabrique.ajouteTexte(etiquette,
+                etiquette.ajouteTextes(
                     `Votre accès au site est temporairement limité: vous ne pouvez pas commander.`
                 );
             } else {
-                KfBootstrap.ajouteClasse(this.boutonVerrou, 'btn', 'danger');
-                this.fabrique.ajouteTexte(etiquette,
+                KfBootstrap.ajouteClasseBouton(this.boutonVerrou, 'danger');
+                etiquette.ajouteTextes(
                     `Vos clients ont un accès limité à votre site.`
                 );
                 etiquette = this.fabrique.ajouteEtiquetteP(infos);
-                this.fabrique.ajouteTexte(etiquette, `Cet état du site est géré sur la page `);
+                etiquette.ajouteTextes( `Cet état du site est géré sur la page `);
                 if (etat.pageDef.urlSegment !== barre.pageDef.urlSegment) {
                     const url: IUrlDef = {
                         pageDef: etat.pageDef,
                         routes: FournisseurRoutes,
                         urlSite: barre.site.url,
                     };
-                    const lien = this.fabrique.lien.lienEnLigne({
+                    const lien = this.fabrique.lien.enLigne({
                         urlDef: url,
                         contenu: { texte: 'Changer' }
                     });
-                    etiquette.contenuPhrase.ajoute(lien);
+                    etiquette.contenuPhrase.ajouteContenus(lien);
                 }
             }
         }

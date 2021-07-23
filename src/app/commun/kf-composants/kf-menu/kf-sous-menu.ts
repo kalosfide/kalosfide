@@ -24,13 +24,13 @@ export class KfSousMenu extends KfComposant {
         let selecteur: KfComposant;
         const fixeContenuPhrasé = (s: KfComposant, d: KfDefinitionDeMenu) => {
             if (d.imageAvant) {
-                s.contenuPhrase.ajoute(new KfImage('', d.imageAvant));
+                s.contenuPhrase.ajouteContenus(new KfImage('', d.imageAvant));
             }
             if (d.texte) {
-                s.contenuPhrase.ajoute(new KfTexte('', d.texte));
+                s.contenuPhrase.ajouteContenus(new KfTexte('', d.texte));
             }
             if (d.imageApres) {
-                s.contenuPhrase.ajoute(new KfImage('', d.imageApres));
+                s.contenuPhrase.ajouteContenus(new KfImage('', d.imageApres));
             }
         };
         switch (def.type) {

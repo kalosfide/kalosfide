@@ -56,8 +56,7 @@ export class CategorieIndexComponent extends KeyUidRnoNoIndexComponent<Categorie
         };
         const lien = Fabrique.lien.retour(urlDef);
         const def = this._barreTitreDef;
-        const groupe = Fabrique.titrePage.bbtnGroup('boutons');
-        groupe.ajoute(lien);
+        const groupe = Fabrique.titrePage.groupeRetour(lien);
         def.groupesDeBoutons = [groupe];
     return def;
     }
@@ -68,7 +67,7 @@ export class CategorieIndexComponent extends KeyUidRnoNoIndexComponent<Categorie
         let etiquette: KfEtiquette;
 
         etiquette = Fabrique.ajouteEtiquetteP(infos);
-        Fabrique.ajouteTexte(etiquette,
+        etiquette.ajouteTextes(
             `Ceci est `,
             { texte: 'à faire', balise: KfTypeDeBaliseHTML.b},
             '.'

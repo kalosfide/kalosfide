@@ -14,12 +14,10 @@ import { CommandeAnnuleComponent } from './commande-annule.component';
 import { CommandeBonExisteGardeService } from './commande-bon-existe-garde.service';
 import { CommandeDoitCréerGardeService } from './commande-doit-creer-garde.service';
 import { CommandeEnvoiGardeService } from './commande-envoi-garde.service';
-import { CommandeContexteComponent } from './commande-contexte.component';
 import { CommandeNouveauComponent } from './commande-nouveau.component';
 import { CommandeLigneResolverService } from './commande-ligne-resolver.service';
 import { CommandeEnvoiComponent } from './commande-envoi.component';
 import { CommandeProduitPasDansBonGardeService } from './commande-produit-pas-dans-bon-garde.service';
-import { CommandeContexteResolverService } from './commande-contexte-resolver.service';
 
 @NgModule({
     imports: [
@@ -30,7 +28,6 @@ import { CommandeContexteResolverService } from './commande-contexte-resolver.se
     ],
     declarations: [
         CommandeAccueilComponent,
-        CommandeContexteComponent,
         CommandeBonComponent,
         CommandeNouveauComponent,
         CommandeAnnuleComponent,
@@ -44,7 +41,6 @@ import { CommandeContexteResolverService } from './commande-contexte-resolver.se
         CommandeBonExisteGardeService,
         CommandeDoitCréerGardeService,
         CommandeEnvoiGardeService,
-        CommandeContexteResolverService,
         CommandeBonResolverService,
         CommandeProduitResolverService,
         CommandeLigneResolverService,

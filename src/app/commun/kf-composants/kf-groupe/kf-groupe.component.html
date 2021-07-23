@@ -19,7 +19,7 @@
 
         <ng-template #avecFormGroup>
             <div #htmlElement [formGroup]="groupe.formGroup" [ngClass]="groupe.classe" [ngStyle]="groupe.style">
-                <ng-container *ngTemplateOutlet="sousDiv"></ng-container>
+                <ng-container *ngTemplateOutlet="contenus"></ng-container>
             </div>
             <div *ngIf="groupe.avecInvalidFeedback" class="invalid-feedback">
                 <p *ngFor="let erreur of groupe.erreurs">{{erreur}}</p>
@@ -28,7 +28,7 @@
 
         <ng-template #sansFormGroup>
             <div #htmlElement [ngClass]="groupe.classe" [ngStyle]="groupe.style">
-                <ng-container *ngTemplateOutlet="sousDiv"></ng-container>
+                <ng-container *ngTemplateOutlet="contenus"></ng-container>
             </div>
         </ng-template>
     </ng-template>
@@ -37,18 +37,9 @@
         <!--" -->
         <form #htmlElement [attr.id]="groupe.nom" [formGroup]="formGroup" novalidate [ngClass]="groupe.classe"
             [ngStyle]="groupe.style">
-            <ng-container *ngTemplateOutlet="sousDiv"></ng-container>
+            <ng-container *ngTemplateOutlet="contenus"></ng-container>
         </form>
     </ng-template>
-
-</ng-template>
-
-<ng-template #sousDiv>
-    <ng-container *ngIf="groupe.classeSousDiv; else contenus">
-        <div [ngClass]="groupe.classeSousDiv">
-            <ng-container *ngTemplateOutlet="contenus"></ng-container>
-        </div>
-    </ng-container>
 
 </ng-template>
 
@@ -56,34 +47,30 @@
     <ng-container *ngIf="!groupe.divTable; else divTable">
         <ng-container *ngIf="!groupe.divLigne; else divLigne">
             <ng-container *ngFor="let contenu of groupe.contenus">
-                    <app-kf-composant *ngIf="!contenu.nePasAfficher" [attr.nom]="contenu.nom" [composant]="contenu">
-                    </app-kf-composant>
+                <app-kf-composant *ngIf="!contenu.nePasAfficher" [attr.nom]="contenu.nom" [composant]="contenu">
+                </app-kf-composant>
             </ng-container>
         </ng-container>
     </ng-container>
 </ng-template>
 
 <ng-template #divTable>
-    <div [ngClass]="groupe.divTable.classe" [ngStyle]="groupe.divTable.style">
-        <ng-container *ngFor="let ligne of groupe.divTable.lignes">
-            <div [ngClass]="ligne.classe" [ngStyle]="ligne.style">
-                <ng-container *ngFor="let colonne of ligne.colonnes">
-                    <ng-container *ngTemplateOutlet="divColonne; context: { colonne1: colonne }"></ng-container>
-                </ng-container>
-            </div>
-        </ng-container>
-    </div>
+    <ng-container *ngFor="let ligne of groupe.divTable.lignes">
+        <div *ngIf="!ligne.nePasAfficher" [ngClass]="ligne.classe" [ngStyle]="ligne.style">
+            <ng-container *ngFor="let colonne of ligne.colonnes">
+                <ng-container *ngTemplateOutlet="divColonne; context: { $implicit: colonne }"></ng-container>
+            </ng-container>
+        </div>
+    </ng-container>
 </ng-template>
 
 <ng-template #divLigne>
-    <div [ngClass]="groupe.divLigne.classe" [ngStyle]="groupe.divLigne.style">
-        <ng-container *ngFor="let colonne of groupe.divLigne.colonnes">
-            <ng-container *ngTemplateOutlet="divColonne; context: { colonne1: colonne }"></ng-container>
-        </ng-container>
-    </div>
+    <ng-container *ngFor="let colonne of groupe.divLigne.colonnes">
+        <ng-container *ngTemplateOutlet="divColonne; context: { $implicit: colonne }"></ng-container>
+    </ng-container>
 </ng-template>
 
-<ng-template #divColonne let-colonne="colonne1">
+<ng-template #divColonne let-colonne>
     <div [ngClass]="colonne.classe" [ngStyle]="colonne.style">
         <ng-container *ngIf="colonne.texte; else composantsTemplate">
             {{ colonne.texte }}

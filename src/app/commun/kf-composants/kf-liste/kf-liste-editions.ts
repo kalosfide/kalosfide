@@ -9,7 +9,7 @@ import { KfListeEditeur } from './kf-liste-editeur';
 import { KfGroupe } from '../kf-groupe/kf-groupe';
 import { KfDialogueDef } from '../kf-dialogue/kf-dialogue-def';
 import { KfListeMiseAJour } from './kf-liste-mise-a-jour';
-import { KfTexteDef, ValeurTexteDef } from '../kf-partages/kf-texte-def';
+import { KfStringDef, ValeurStringDef } from '../kf-partages/kf-string-def';
 
 export interface KfListeEditionsInterface {
     /**
@@ -46,7 +46,7 @@ export interface KfListeEditionsInterface {
      * si défini, une KfEtiquette sera ajoutée à l'édition de l'item
      */
     titreItem?: {
-        texte?: KfTexteDef;
+        texte?: KfStringDef;
         balise?: KfTypeDeBaliseHTML;
         /** si true, le titre précédera l'en-tête */
         avantEnTete?: boolean;
@@ -166,7 +166,7 @@ export class KfListeEditions {
         if (inter.titreItem) {
             this.pTitreAvantEnTete = inter.titreItem.avantEnTete;
             this.titre = (item: object) => {
-                let t: KfTexteDef;
+                let t: KfStringDef;
                 if (inter.titreItem.texte) {
                     t = inter.titreItem.texte;
                 } else {
@@ -180,7 +180,7 @@ export class KfListeEditions {
                         t = this.liste.creeItems.composant(item).nom;
                     }
                 }
-                return ValeurTexteDef(t);
+                return ValeurStringDef(t);
             };
             this.etiquetteTitre = (item: object) => {
                 const e = new KfEtiquette('titre', item ? this.titre(item) : '');

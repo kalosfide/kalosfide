@@ -1,7 +1,18 @@
 <div ngbDropdown #dropdown [ngClass]="ngbDropdown.classe" [attr.placement]="ngbDropdown.placement">
-    <button [id]="ngbDropdown.nom" ngbDropdownToggle #htmlElement [disabled]="ngbDropdown.bouton.inactif" [ngClass]="ngbDropdown.bouton.classe">
-        <app-kf-contenu-phrase *ngIf="ngbDropdown.bouton.contenuPhrase" [contenuPhrase]="ngbDropdown.bouton.contenuPhrase"></app-kf-contenu-phrase>
-    </button>
+    <ng-container *ngIf="ngbDropdown.avecBouton; else avecLienTemplate">
+        <button [id]="ngbDropdown.nom" ngbDropdownToggle #htmlElement [disabled]="ngbDropdown.bouton.inactif"
+            [ngClass]="ngbDropdown.bouton.classe">
+            <app-kf-contenu-phrase *ngIf="ngbDropdown.contenuPhrase" [contenuPhrase]="ngbDropdown.contenuPhrase">
+            </app-kf-contenu-phrase>
+        </button>
+    </ng-container>
+    <ng-template #avecLienTemplate>
+        <a [id]="ngbDropdown.nom" ngbDropdownToggle #htmlElement [attr.disabled]="ngbDropdown.bouton.inactif" role="button"
+            [ngClass]="ngbDropdown.bouton.classe">
+            <app-kf-contenu-phrase *ngIf="ngbDropdown.contenuPhrase" [contenuPhrase]="ngbDropdown.contenuPhrase">
+            </app-kf-contenu-phrase>
+        </a>
+    </ng-template>
     <div ngbDropdownMenu [attr.aria-labelledby]="ngbDropdown.nom" [ngClass]="ngbDropdown.classeMenu">
         <ng-container *ngFor="let contenu of ngbDropdown.contenus">
             <ng-container *ngIf="estGroupe(contenu); then groupeTemplate; else itemTemplate"></ng-container>

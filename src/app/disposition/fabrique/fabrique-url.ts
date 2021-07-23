@@ -1,4 +1,4 @@
-import { KfTexteDef, ValeurTexteDef } from 'src/app/commun/kf-composants/kf-partages/kf-texte-def';
+import { KfStringDef, ValeurStringDef } from 'src/app/commun/kf-composants/kf-partages/kf-string-def';
 import { PageDef } from 'src/app/commun/page-def';
 import { ISiteRoutes } from 'src/app/site/site-pages';
 import { AppSiteRoutes } from 'src/app/app-site/app-site-pages';
@@ -6,7 +6,7 @@ import { AppSiteRoutes } from 'src/app/app-site/app-site-pages';
 export interface IUrlDef {
     pageDef?: PageDef;
     routes?: ISiteRoutes;
-    urlSite?: KfTexteDef;
+    urlSite?: KfStringDef;
 
     /**
      * Segments de l'url dépendant de la key d'un objet
@@ -26,7 +26,7 @@ export interface IUrlDef {
 }
 
 export class FabriqueUrl {
-    url(def: IUrlDef): KfTexteDef {
+    url(def: IUrlDef): KfStringDef {
         let segments: string[] = [];
         if (def.pageDef) {
             segments = [def.pageDef.urlSegment];
@@ -38,7 +38,7 @@ export class FabriqueUrl {
             console.log(def);
         }
         const url = def.urlSite
-            ? () => def.routes.url(ValeurTexteDef(def.urlSite), segments)
+            ? () => def.routes.url(ValeurStringDef(def.urlSite), segments)
             : () => AppSiteRoutes.url(segments);
         return url;
     }
@@ -56,7 +56,7 @@ export class FabriqueUrl {
     * @param def définition d'url
     */
     urlEstEgale(url: string, def: IUrlDef): boolean {
-        const defUrl = ValeurTexteDef(this.url(def));
+        const defUrl = ValeurStringDef(this.url(def));
         return url === defUrl;
     }
     /**
@@ -65,7 +65,7 @@ export class FabriqueUrl {
      * @param def définition d'url
      */
     segmentsDeKey(url: string, def: IUrlDef): string[] {
-        const defUrl = ValeurTexteDef(this.url(def));
+        const defUrl = ValeurStringDef(this.url(def));
         if (url.length >= defUrl.length && url.substr(0, defUrl.length) === defUrl) {
             const urlKey = url.substr(defUrl.length + 1);
             return urlKey.split('/');
@@ -77,7 +77,7 @@ export class FabriqueUrl {
      * @param def définition d'url
      */
     urlCommenceComme(url: string, def: IUrlDef): boolean {
-        const defUrl = ValeurTexteDef(this.url(def));
+        const defUrl = ValeurStringDef(this.url(def));
         return url.length >= defUrl.length && url.substr(0, defUrl.length) === defUrl;
     }
 

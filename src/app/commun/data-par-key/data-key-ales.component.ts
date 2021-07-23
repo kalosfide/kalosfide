@@ -11,12 +11,12 @@ import { IDataKey } from './data-key';
 import { ApiAction } from '../../api/api-route';
 import { Site } from 'src/app/modeles/site/site';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
-import { KfTexteDef } from '../kf-composants/kf-partages/kf-texte-def';
+import { KfStringDef } from '../kf-composants/kf-partages/kf-string-def';
 import { KfSuperGroupe } from '../kf-composants/kf-groupe/kf-super-groupe';
-import { OnInit, Directive } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { KfLien } from '../kf-composants/kf-elements/kf-lien/kf-lien';
 import { KfBouton } from '../kf-composants/kf-elements/kf-bouton/kf-bouton';
-import { BarreTitre, IBarreDef } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
+import { IBarreTitre, IBarreDef } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { KfComposant } from '../kf-composants/kf-composant/kf-composant';
 import { DataKeyEditeur } from './data-key editeur';
 import { IDataComponent } from './i-data-component';
@@ -28,11 +28,11 @@ export class ActionAles {
     actionSiOk?: () => void;
 }
 
-@Directive()
+@Component({ template: '' })
 export abstract class DataKeyALESComponent<T extends IDataKey> extends FormulaireComponent implements OnInit, IDataComponent {
 
     abstract site: Site;
-    get urlSiteDef(): KfTexteDef {
+    get urlSiteDef(): KfStringDef {
         return () => this.site.url;
     }
 
@@ -57,13 +57,12 @@ export abstract class DataKeyALESComponent<T extends IDataKey> extends Formulair
         super(service);
     }
 
-    créeBarreTitre = (): BarreTitre => {
+    créeBarreTitre = (): IBarreTitre => {
         const def: IBarreDef = {
             pageDef: this.pageDef,
         };
         if (this.lienIndex) {
-            const groupe = Fabrique.titrePage.bbtnGroup('boutons');
-            groupe.ajoute(this.lienIndex);
+            const groupe = Fabrique.titrePage.groupeRetour(this.lienIndex);
             def.groupesDeBoutons = [groupe];
         }
         if (this.contenuAidePage) {

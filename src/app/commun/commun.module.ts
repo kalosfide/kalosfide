@@ -12,7 +12,7 @@ import { KfGroupeComponent } from './kf-composants/kf-groupe/kf-groupe.component
 import { KfBoutonComponent } from './kf-composants/kf-elements/kf-bouton/kf-bouton.component';
 import { KfEtiquetteComponent } from './kf-composants/kf-elements/kf-etiquette/kf-etiquette.component';
 import { QuicklinkModule } from 'ngx-quicklink';
-import { KfUlComponent } from './kf-composants/kf-ul/kf-ul.component';
+import { KfUlOlComponent } from './kf-composants/kf-ul-ol/kf-ul-ol.component';
 
 @NgModule({
     imports: [
@@ -38,7 +38,7 @@ import { KfUlComponent } from './kf-composants/kf-ul/kf-ul.component';
         KfBoutonComponent,
         KfEtiquetteComponent,
         KfLienComponent,
-        KfUlComponent,
+        KfUlOlComponent,
         QuicklinkModule
     ]
 })

@@ -19,7 +19,6 @@ import { IdentifiantResolverService } from './securite/identifiant-resolver.serv
 import { CatalogueService } from './modeles/catalogue/catalogue.service';
 import { ApiRequêteService } from './api/api-requete.service';
 import { RetourneVraiResolverService } from './services/retourne-vrai-resolver.service';
-import { EtatSiteChangeGarde, SiteOuvertGarde } from './securite/site-ouvert-garde';
 import { StockageService } from './services/stockage/stockage.service';
 import { IdentifiantGardeService } from './securite/identifant-garde.service';
 import { RouteurService } from './services/routeur.service';
@@ -58,9 +57,6 @@ import { TraiteKeydownService } from './commun/traite-keydown/traite-keydown.ser
         ApiRequêteService,
 
         IdentifiantResolverService,
-
-        EtatSiteChangeGarde,
-        SiteOuvertGarde,
 
         CatalogueService,
         ClientService,

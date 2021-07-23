@@ -5,7 +5,7 @@ import { KfBouton } from '../kf-elements/kf-bouton/kf-bouton';
 import { KfParametres } from '../kf-composants-parametres';
 import { KfTypeDEvenement, KfEvenement, KfStatutDEvenement } from '../kf-partages/kf-evenements';
 import { KfLien } from '../kf-elements/kf-lien/kf-lien';
-import { KfTexteDef, ValeurTexteDef } from '../kf-partages/kf-texte-def';
+import { KfStringDef, ValeurStringDef } from '../kf-partages/kf-string-def';
 import { KfImageDef } from '../kf-partages/kf-image-def';
 import { KfImage } from '../kf-elements/kf-image/kf-image';
 import { KfTexte } from '../kf-elements/kf-texte/kf-texte';
@@ -55,7 +55,7 @@ export class KfListeSelecteurs {
 
     // valeur par défaut créée à partir de baseDesTextes
     // si item non défini, retourne la valeur pour le sélecteur de la commande nouveau
-    texte: (item?: object) => KfTexteDef;
+    texte: (item?: object) => KfStringDef;
 
     // si item non défini, retourne la valeur pour le sélecteur de la commande nouveau
     imageAvant: (item?: object) => KfImageDef;
@@ -169,13 +169,13 @@ export class KfListeSelecteurs {
                 }
                 if (selecteur) {
                     if (this.imageAvant) {
-                        selecteur.contenuPhrase.ajoute(new KfImage('', this.imageAvant(item)));
+                        selecteur.contenuPhrase.ajouteContenus(new KfImage('', this.imageAvant(item)));
                     }
                     if (this.texte) {
-                        selecteur.contenuPhrase.ajoute(new KfTexte('', this.texte(item)));
+                        selecteur.contenuPhrase.ajouteContenus(new KfTexte('', this.texte(item)));
                     }
                     if (this.imageApres) {
-                        selecteur.contenuPhrase.ajoute(new KfImage('', this.imageApres(item)));
+                        selecteur.contenuPhrase.ajouteContenus(new KfImage('', this.imageApres(item)));
                     }
                     selecteur.ajouteClasse('kf-liste-selecteur', {
                         nom: 'kf-choisi',
@@ -204,7 +204,7 @@ export class KfListeSelecteurs {
     titre(item: object): string {
         const i = this.liste.editions && this.liste.editions.itemNouveau === item ? null : item;
         if (this.texte) {
-            return ValeurTexteDef(this.texte(i));
+            return ValeurStringDef(this.texte(i));
         } else {
             return this.liste.contenuDeItem(i).nom;
         }

@@ -1,9 +1,8 @@
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 import { KfBouton } from 'src/app/commun/kf-composants/kf-elements/kf-bouton/kf-bouton';
-import { KfTexte } from 'src/app/commun/kf-composants/kf-elements/kf-texte/kf-texte';
 import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
-import { KfTexteDef } from 'src/app/commun/kf-composants/kf-partages/kf-texte-def';
+import { KfStringDef } from 'src/app/commun/kf-composants/kf-partages/kf-string-def';
 import { FabriqueIcone } from './fabrique-icone';
 import { KfCaseACocher } from 'src/app/commun/kf-composants/kf-elements/kf-case-a-cocher/kf-case-a-cocher';
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
@@ -12,20 +11,18 @@ import { FabriqueLien } from './fabrique-lien';
 import { FabriqueUrl } from './fabrique-url';
 import { FabriqueContenuPhrase } from './fabrique-contenu-phrase';
 import { FabriqueBouton } from './fabrique-bouton';
-import { BootstrapType, IKfBootstrapOptions, KfBootstrap } from '../../commun/kf-composants/kf-partages/kf-bootstrap';
+import { BootstrapType, KfBootstrap } from '../../commun/kf-composants/kf-partages/kf-bootstrap';
 import { FabriqueVueTable } from './fabrique-vue-table';
-import { FabriqueCouleur, Couleur } from './fabrique-couleurs';
+import { FabriqueCouleur } from './fabrique-couleurs';
 import { FabriqueTitrePage } from './fabrique-titre-page/fabrique-titre-page';
-import { DefContenus, DefsTextes, FabriqueTexte, IDefTexte } from './fabrique-texte';
+import { FabriqueTexte } from './fabrique-texte';
 import { FabriqueEtatSite } from './fabrique-etat-site';
 import { FabriqueFormulaire } from './fabrique-formulaire';
 import { FabriqueInput, FabriqueListeDéroulante } from './fabrique-input';
 import { IKfNgbModalDef, KfNgbModal } from 'src/app/commun/kf-composants/kf-ngb-modal/kf-ngb-modal';
 import { KfTypeDEvenement, KfTypeDHTMLEvents } from 'src/app/commun/kf-composants/kf-partages/kf-evenements';
 import { KfEntrée } from 'src/app/commun/kf-composants/kf-elements/kf-entree/kf-entree';
-import { KfTypeContenuPhrasé } from 'src/app/commun/kf-composants/kf-partages/kf-contenu-phrase/kf-contenu-phrase';
 import { ApiResultErreur } from 'src/app/api/api-results/api-result-erreur';
-import { IKfIconeDef } from 'src/app/commun/kf-composants/kf-partages/kf-icone-def';
 
 export interface IFormulaireGroupeDesBoutons {
     avantBoutons?: KfComposant[];
@@ -89,23 +86,9 @@ export class FabriqueClasse {
     // alertes
     alerte(nom: string, bootstrapDef: BootstrapType): KfGroupe {
         const groupe = new KfGroupe(nom);
-        KfBootstrap.ajouteClasse(groupe, 'alert', bootstrapDef);
+        KfBootstrap.ajouteClasseAlerte(groupe, bootstrapDef);
         return groupe;
     }
-
-    get optionsBootstrap(): {
-        formulaire: IKfBootstrapOptions,
-        dansVueTable: IKfBootstrapOptions,
-    } {
-        return {
-            formulaire: {
-                classeDiv: 'mb-3',
-                label: 'labelFlottant' // { breakpoint: 'sm', width: 2 }
-            },
-            dansVueTable: { label: 'nePasAfficherLabel' },
-        };
-    }
-
 
     /**
      * Crée une case à cocher avec aspect
@@ -140,7 +123,7 @@ export class FabriqueClasse {
      * @param texte définition du texte du label
      * @param quandChange traitement de l'évènement valuechange de la case à cocher
      */
-    caseACocher(nom: string, texte?: KfTexteDef, quandChange?: () => void): KfCaseACocher {
+    caseACocher(nom: string, texte?: KfStringDef, quandChange?: () => void): KfCaseACocher {
         const caseACocher = new KfCaseACocher(nom, texte);
         caseACocher.géreClasseDiv.ajouteClasse('form-group row');
         caseACocher.géreClasseDivVide.ajouteClasse('col-sm-2');
@@ -180,7 +163,7 @@ export class FabriqueClasse {
     // etiquettes et texte
 
     /**
-     * retourne une KfEtiquette dans une balise p au texte justifié si classe est défini
+     * Retourne une KfEtiquette dans une balise p au texte justifié si classe n'est pas défini
      * et l'ajoute à l'array si composants est défini
      */
     ajouteEtiquetteP(composants?: KfComposant[], classe?: string): KfEtiquette {
@@ -191,88 +174,6 @@ export class FabriqueClasse {
             composants.push(e);
         }
         return e;
-    }
-
-    /**
-     * ajoute à une étiquette des KfTexte avec balise Html, retourne l'array des KfTexte créés
-     * @param etiquette où ajouter le texte
-     * @param texte string à ajouter
-     * @param baliseHtml balise Html pour entourer le texte
-     */
-    ajouteTexte(etiquette: KfEtiquette, ...textes: DefsTextes[]): KfTexte[] {
-        const kfTextes: KfTexte[] = this.kfTextes(...textes);
-        etiquette.contenuPhrase.contenus.push(...kfTextes);
-        return kfTextes;
-    }
-    fixeTexte(etiquette: KfEtiquette, ...textes: DefsTextes[]): KfTexte[] {
-        const kfTextes: KfTexte[] = this.kfTextes(...textes);
-        etiquette.contenuPhrase.contenus = kfTextes;
-        return kfTextes;
-    }
-    kfTextes(...textes: DefsTextes[]): KfTexte[] {
-        const kfTextes: KfTexte[] = [];
-        textes.forEach(t => {
-            const kfTexte = new KfTexte('', '');
-            if (typeof (t) === 'string') {
-                kfTexte.fixeTexte(t);
-            } else {
-                if (Array.isArray(t)) {
-                    t.forEach(t1 => kfTextes.push(...this.kfTextes(t1)));
-                } else {
-                    if (t.nom) {
-                        kfTexte.nom = t.nom;
-                    }
-                    kfTexte.fixeTexte(t.texte);
-                    if (t.balise) {
-                        kfTexte.balisesAAjouter = [t.balise];
-                    }
-                    kfTexte.suiviDeSaut = t.suiviDeSaut;
-                    if (t.classe) {
-                        kfTexte.ajouteClasse(t.classe);
-                    }
-                }
-            }
-            kfTextes.push(kfTexte);
-        });
-        return kfTextes;
-    }
-
-    supprimeContenus(étiquette: KfEtiquette) {
-        étiquette.contenuPhrase.contenus = [];
-    }
-    ajouteString(étiquette: KfEtiquette, texte: string) {
-        const kfTexte = new KfTexte('', '');
-        kfTexte.fixeTexte(texte);
-        étiquette.contenuPhrase.contenus.push(kfTexte);
-    }
-    ajouteDefTexte(étiquette: KfEtiquette, t: IDefTexte) {
-        const kfTexte = new KfTexte('', '');
-        if (t.nom) {
-            kfTexte.nom = t.nom;
-        }
-        kfTexte.fixeTexte(t.texte);
-        if (t.balise) {
-            kfTexte.balisesAAjouter = [t.balise];
-        }
-        kfTexte.suiviDeSaut = t.suiviDeSaut;
-        if (t.classe) {
-            kfTexte.ajouteClasse(t.classe);
-        }
-        étiquette.contenuPhrase.contenus.push(kfTexte);
-    }
-    ajouteContenu(étiquette: KfEtiquette, defContenu: DefContenus) {
-        if (typeof (defContenu) === 'string') {
-            this.ajouteString(étiquette, defContenu);
-            return;
-        }
-        if (Array.isArray(defContenu)) {
-            this.ajouteContenu(étiquette, defContenu);
-            return;
-        }
-        if ((defContenu as KfTypeContenuPhrasé).type) {
-            étiquette.contenuPhrase.contenus.push(defContenu as KfTypeContenuPhrasé);
-        }
-        this.ajouteDefTexte(étiquette, defContenu as IDefTexte);
     }
 
     confirmeModal(titre: string, contenus: string | KfComposant[], focus?: 'surCroix' | 'surAnnuler' | 'surOk'): KfNgbModal {
@@ -317,27 +218,11 @@ export class FabriqueClasse {
         return modal;
     }
 
-    erreurModal(apiErreur: ApiResultErreur): KfNgbModal {
-        const corps = new KfGroupe('');
-        corps.créeDivTable();
-        corps.divTable.ajouteClasse('container-fluid');
-        const ligne = corps.divTable.ajoute();
-        ligne.ajouteClasse('row');
-        const icone = this.pIcone.icone(this.pIcone.def.danger);
-        icone.taille(5);
-        let colonne = ligne.ajoute([icone]);
-        colonne.ajouteClasse('col-md-4');
-        const messages: KfEtiquette[] = [];
-        apiErreur.messages.forEach(message => {
-            const etiquette = this.ajouteEtiquetteP(messages);
-            etiquette.fixeTexte(message);
-        });
-        colonne = ligne.ajoute(messages);
-        colonne.ajouteClasse('col');
-        const boutonOk = this.bouton.bouton({ nom: 'Ok', contenu: { texte: 'Fermer' }, bootstrap: { type: 'primary' } });
+    private _infoModal(titre: string, corps: KfGroupe): KfNgbModal {
+        const boutonOk = this.bouton.bouton({ nom: 'Ok', contenu: { texte: 'Fermer' }, bootstrap: { type: 'secondary' } });
         boutonOk.gereHtml.ajouteEvenementASuivre(KfTypeDHTMLEvents.click);
         const def: IKfNgbModalDef = {
-            titre: apiErreur.titre,
+            titre,
             corps,
             boutonOk,
             autoFocus: boutonOk
@@ -345,22 +230,41 @@ export class FabriqueClasse {
         const modal = new KfNgbModal(def);
         modal.ferméSiEchap = true;
         modal.windowClass = 'modal-info';
-        modal.ajouteClasseEnTête(this.couleur.classeCouleurFond(Couleur.red), this.couleur.classeCouleur(Couleur.white));
+        return modal;
+    }
+
+    erreurModal(apiErreur: ApiResultErreur): KfNgbModal {
+        const corps = new KfGroupe('');
+        corps.créeDivTable();
+        corps.ajouteClasse('container-fluid');
+        const ligne = corps.divTable.ajoute();
+        ligne.géreCss.ajouteClasse('row');
+        const icone = this.pIcone.icone(this.pIcone.def.danger);
+        icone.taille(2);
+        let colonne = ligne.ajoute([icone]);
+        colonne.ajouteClasse('col-4');
+        const messages: KfEtiquette[] = [];
+        let étiquette: KfEtiquette;
+        if (apiErreur.action) {
+            étiquette = this.ajouteEtiquetteP(messages);
+            étiquette.ajouteTextes(apiErreur.action);
+            étiquette.ajouteClasse(KfBootstrap.classeTexte({ poids: 'bold' }));
+        }
+        apiErreur.messages.forEach(message => {
+            étiquette = this.ajouteEtiquetteP(messages);
+            étiquette.fixeTexte(message);
+        });
+        colonne = ligne.ajoute(messages);
+        colonne.ajouteClasse('col');
+        const modal = this._infoModal(apiErreur.titre, corps);
+        modal.ajouteClasseEnTête(KfBootstrap.classeFond('danger'), KfBootstrap.classeTexte({ color: 'white' }));
         return modal;
     }
 
     infoModal(titre: string, contenus: KfComposant[]): KfNgbModal {
         const corps = new KfGroupe('');
         contenus.forEach(c => corps.ajoute(c));
-        const def: IKfNgbModalDef = {
-            titre,
-            corps,
-            boutonOk: this.bouton.bouton({ nom: 'Ok', contenu: { texte: 'Fermer' }, bootstrap: { type: 'primary' } }),
-        };
-        const modal = new KfNgbModal(def);
-        modal.ferméSiEchap = true;
-        modal.windowClass = 'modal-info';
-        return modal;
+        return this._infoModal(titre, corps);
     }
 }
 

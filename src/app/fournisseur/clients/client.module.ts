@@ -17,7 +17,6 @@ import { ClientComponent } from './client.component';
 import { ClientInviteComponent } from './client-invite.component';
 import { FClientAccueilComponent } from './client-accueil.component';
 import { ClientInvitationsComponent } from './client-invitations.component';
-import { ClientInviteParentResolverService } from './client-invite-parent-resolver.service';
 
 @NgModule({
     imports: [
@@ -41,7 +40,6 @@ import { ClientInviteParentResolverService } from './client-invite-parent-resolv
     providers: [
         ClientResolverService,
         ClientsResolverService,
-        ClientInviteParentResolverService,
     ],
 })
 export class ClientModule { }

@@ -1,5 +1,6 @@
-import { KfNgClasseDefDe } from '../kf-partages/kf-gere-css-classe';
-import { KfInitialObservable } from '../kf-partages/kf-initial-observable';
+import { KfNgClasseDef, KfNgClasseDefDe } from '../kf-partages/kf-gere-css-classe';
+import { ValeurEtObservable } from '../../outils/valeur-et-observable';
+import { KfStringDef } from '../kf-partages/kf-string-def';
 import { IKfVueTableBilanDef } from './i-kf-vue-table-bilan-def';
 import { KfVueTableCelluleDef } from './i-kf-vue-table-cellule-def';
 import { IKfVueTableEnTeteDef } from './i-kf-vue-table-en-tete-def';
@@ -26,12 +27,12 @@ export interface IKfVueTableColonneDef<T> {
     /**
      * valeur initiale et Observable définissant si le déclencheur de tri n'est pas affiché
      */
-    nePasAfficherTriSi?: KfInitialObservable<boolean>;
+    nePasAfficherTriSi?: ValeurEtObservable<boolean>;
 
     /**
      * Liste des définitions de classes à ajouter à l'élément td associé à un item
      */
-    classeDefs?: (string | ((t: T) => string) | KfNgClasseDefDe<T>)[];
+    classesItem?: (string | ((t: T) => string) | KfNgClasseDefDe<T>)[];
 
     /**
      * texte ou composant à afficher dans la ligne de bilan
@@ -41,10 +42,23 @@ export interface IKfVueTableColonneDef<T> {
     /**
      * valeur initiale et Observable définissant si la colonne n'est pas affichée
      */
-    nePasAfficherSi?: KfInitialObservable<boolean>;
+    nePasAfficherSi?: ValeurEtObservable<boolean>;
 
     /**
      * valeur initiale et Observable définissant si la colonne est affichée
      */
-    afficherSi?: KfInitialObservable<boolean>;
+    afficherSi?: ValeurEtObservable<boolean>;
+
+    /**
+     * Valeur de la propriété css width d'un htmlElement col.
+     * Si présent dans une colonne, le style table-layout: fixed est appliqué à la table
+     * et un élément colgroup est ajouté.
+     */
+    largeur?: string;
+
+    /**
+     * Liste des définitions de classes à ajouter à l'élement col.
+     * Si présent dans une colonne, le style table-layout: fixed est appliqué à la table.
+     */
+    classesCol?: (KfNgClasseDef | KfStringDef)[];
 }

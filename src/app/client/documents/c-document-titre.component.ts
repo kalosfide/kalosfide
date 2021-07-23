@@ -15,5 +15,6 @@ export class CDocumentTitreComponent extends CLFTitreComponent implements OnInit
         protected service: ClientCLFService,
     ) {
         super(service);
+        this.estClient = 'client';
     }
 }

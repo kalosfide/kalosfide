@@ -2,31 +2,32 @@ import { Injectable } from '@angular/core';
 import { CanActivate, CanActivateChild } from '@angular/router';
 import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
+import { map, take } from 'rxjs/operators';
 import { ApiResult403Forbidden } from '../api/api-results/api-result-403-forbidden';
-import { IdentificationService } from '../securite/identification.service';
-import { RouteurService } from '../services/routeur.service';
-import { SiteRoutes } from './site-pages';
+import { SiteService } from '../modeles/site/site.service';
 
-@Injectable({
+/**
+ * Si l'utilisateur est identifié et s'il est client du site en cours du NavigationService, laisse passer. Sinon, redirige vers la page erreur 403.
+ */
+ @Injectable({
     providedIn: 'root',
 })
 export class ClientGarde implements CanActivate, CanActivateChild {
 
     constructor(
-        private routeur: RouteurService,
-        private identification: IdentificationService,
+        private siteService: SiteService
     ) {
     }
 
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | boolean {
-        if (this.identification.estIdentifié) {
-            const identifiant = this.identification.litIdentifiant();
-            const urlSite = SiteRoutes.urlSite(state.url);
-            if (identifiant.estClientDeSiteParUrl(urlSite)) {
+        if (this.siteService.identification.estIdentifié) {
+            const identifiant = this.siteService.identification.litIdentifiant();
+            const site = this.siteService.navigation.litSiteEnCours();
+            if (identifiant.estClient(site)) {
                 return true;
             }
         }
-        this.routeur.navigueVersPageErreur(new ApiResult403Forbidden());
+        this.siteService.routeur.navigueVersPageErreur(new ApiResult403Forbidden());
         return false;
     }
     canActivateChild(childRoute: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | Observable<boolean> | Promise<boolean> {

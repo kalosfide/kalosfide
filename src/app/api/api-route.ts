@@ -99,38 +99,26 @@ export const ApiAction = {
          */
         edite: 'edite',
 
-        /**
-         * change l'état d'un client
-         *  nouveau -> actif (fournisseur)
-         *  actif <-> inactif (client)
-         *  nouveau ou actif ou inactif -> exclu (fournisseur)
-         */
-        etat: 'etat',
+        active: 'active',
+        inactive: 'inactive',
 
         /**
          * charge la liste des clients
          * param: keySite
          */
         liste: 'liste',
-
-        /**
-         * charge la liste des clients qui ont ouvert un compte depuis une date
-         * param: keySite
-         * param: date du stock
-         */
-        rafraichit: 'depuis',
     },
 
-    commande: {
+    bon: {
 
         /**
-         *  Si le site est d'état Catalogue, retourne un contexte Catalogue: état site = Catalogue, date catalogue = DateNulle.
+         *  Si le site est d'état Catalogue, retourne un contexte Catalogue: état site = Catalogue, date catalogue = null.
          *  Si le site est ouvert et si l'utilisateur a passé la date de son catalogue
          *  et si la date du catalogue utilisateur est postérieure à celle du catalogue de la bdd, les données utilisateur sont à jour,
-         *  retourne un contexte Ok: état site = ouvert, date catalogue = DataNulle.
+         *  retourne un contexte Ok: état site = ouvert, date catalogue = null.
          *  Si le site est ouvert et si l'utilisateur a passé la date de son catalogue
          *  et si la date du catalogue utilisateur est antérieure à celle du catalogue de la bdd
-         *  retourne un contexte Périmé: état site = ouvert, date catalogue = DataNulle.
+         *  retourne un contexte Périmé: état site = ouvert, date catalogue = null.
          *  Si le site est ouvert et si l'utilisateur n'a pas passé la date de son catalogue, il n'y pas de données utilisateur,
          *  retourne un CLFDocs dont le champ Documents contient les données pour client de la dernière commande du client
          * Param: key du Client et date du catalogue stocké s'il y en a un.

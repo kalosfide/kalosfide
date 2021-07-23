@@ -31,8 +31,8 @@ export class ClientExclutComponent extends ClientALESComponent {
         this.action = {
             nom: this.pageDef.urlSegment,
             texteSoumettre: 'Exclure le client',
-            apiDemande: () => this.service.changeEtat(this.client, EtatClient.exclu),
-            actionSiOk: (créé?: any) => this.service.quandEtatChange(this.client)
+            apiDemande: () => this.service.inactive(this.client),
+            actionSiOk: (créé?: any) => this.service.quandInactivé(this.client)
         };
 
         const messages: KfEtiquette[] = [];
@@ -42,7 +42,7 @@ export class ClientExclutComponent extends ClientALESComponent {
     }
 
     fixeGroupeBoutonsMessages = () => {
-        if (this.client.avecCommandes) {
+        if (this.client.avecDocuments) {
             this.groupeBoutonsMessages.alerte('warning');
             this._message(0).fixeTexte(
                 `Exclure un client le fait passer à l'état 'inactif' pour une période de 30 jours `

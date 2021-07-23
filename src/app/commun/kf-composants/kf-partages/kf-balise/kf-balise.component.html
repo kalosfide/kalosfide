@@ -85,4 +85,8 @@
         <ng-container *ngTemplateOutlet="contenu"></ng-container>
     </strong>
 
+    <dfn *ngSwitchCase="typeDeBalise.definition" #baliseElement [ngClass]="balise.classe" [ngStyle]="balise.style">
+        <ng-container *ngTemplateOutlet="contenu"></ng-container>
+    </dfn>
+
 </ng-container>

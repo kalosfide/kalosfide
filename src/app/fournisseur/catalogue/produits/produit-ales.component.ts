@@ -2,7 +2,7 @@ import { ActivatedRoute, Data } from '@angular/router';
 
 import { ProduitRoutes, ProduitPages } from './produit-pages';
 import { Produit } from 'src/app/modeles/catalogue/produit';
-import { OnInit, Directive } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Site } from 'src/app/modeles/site/site';
 import { ProduitService } from 'src/app/modeles/catalogue/produit.service';
 import { ProduitEditeur } from 'src/app/modeles/catalogue/produit-editeur';
@@ -13,7 +13,7 @@ import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquet
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
 
-@Directive()
+@Component({ template: '' })
 export abstract class ProduitALESComponent extends KeyUidRnoNoALESComponent<Produit> implements OnInit {
 
     site: Site;
@@ -40,7 +40,7 @@ export abstract class ProduitALESComponent extends KeyUidRnoNoALESComponent<Prod
         let etiquette: KfEtiquette;
 
         etiquette = Fabrique.ajouteEtiquetteP(infos);
-        Fabrique.ajouteTexte(etiquette,
+        etiquette.ajouteTextes(
             `Ceci est `,
             { texte: 'à faire', balise: KfTypeDeBaliseHTML.b},
             '.'

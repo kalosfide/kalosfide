@@ -1,5 +1,5 @@
 import { KfListeDeroulanteBase, IKfListeDeroulante } from './kf-liste-deroulante-base';
-import { KfTexteDef } from '../../kf-partages/kf-texte-def';
+import { KfStringDef } from '../../kf-partages/kf-string-def';
 import { KfListeDeroulanteType } from './kf-liste-deroulante-type';
 import { KfOptionObjet } from './kf-option-objet';
 
@@ -7,7 +7,7 @@ export class KfListeDeroulanteObjet<T> extends KfListeDeroulanteBase implements 
 
     private _compareItems: (t1: T, t2: T) => boolean;
 
-    constructor(nom: string, texte?: KfTexteDef) {
+    constructor(nom: string, texte?: KfStringDef) {
         super(nom, KfListeDeroulanteType.valeurObjet, texte);
     }
 

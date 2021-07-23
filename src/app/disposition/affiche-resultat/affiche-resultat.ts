@@ -2,11 +2,9 @@ import { IResultatAffichable } from './resultat-affichable';
 import { KfTypeDeBaliseHTML } from '../../commun/kf-composants/kf-composants-types';
 import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
-import { BootstrapType, KfBootstrap, BootstrapNom } from '../../commun/kf-composants/kf-partages/kf-bootstrap';
+import { BootstrapType, KfBootstrap } from '../../commun/kf-composants/kf-partages/kf-bootstrap';
 import { KfTexte } from 'src/app/commun/kf-composants/kf-elements/kf-texte/kf-texte';
-import { Subscription } from 'rxjs';
-import { KfContenuPhrase, KfTypeContenuPhrasé } from 'src/app/commun/kf-composants/kf-partages/kf-contenu-phrase/kf-contenu-phrase';
-import { TypeAlerte } from '../alerte/alerte';
+import { KfTypeContenuPhrasé } from 'src/app/commun/kf-composants/kf-partages/kf-contenu-phrase/kf-contenu-phrase';
 
 /**
  * Permet l'affichage du résultat de la soumission d'un formulaire
@@ -64,7 +62,7 @@ export class AfficheResultat {
         this.resultat = resultat;
         this.fixeContenus();
         this.pGroupe.visible = true;
-        if (resultat.typeAlert !== BootstrapNom.success) {
+        if (resultat.typeAlert !== 'success') {
             const subscription = this.pFormulaire.formGroup.valueChanges.subscribe(() => {
                 this.pGroupe.visible = false;
                 subscription.unsubscribe();
@@ -91,7 +89,7 @@ export class AfficheResultat {
             }
         }
         if (type) {
-            KfBootstrap.ajouteClasse(this.pGroupe, 'alert', type);
+            KfBootstrap.ajouteClasseAlerte(this.pGroupe, type);
             this.pType = type;
         } else {
             this.pType = 'success';

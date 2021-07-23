@@ -381,6 +381,10 @@ export class KfComposantGereHtml {
 
     // ATTRIBUTS HTML
     fixeAttribut(nom: string, valeur?: string) {
+        if (this.htmlElement) {
+            this.htmlElement.setAttribute(nom, valeur);
+            return;
+        }
         if (!this.attributs) {
             this.attributs = [];
         }
@@ -389,6 +393,18 @@ export class KfComposantGereHtml {
             this.attributs.push({ nom, valeur });
         } else {
             this.attributs[index].valeur = valeur;
+        }
+    }
+    supprimeAttribut(nom: string) {
+        if (this.htmlElement) {
+            this.htmlElement.removeAttribute(nom);
+            return;
+        }
+        if (this.attributs) {
+            const index = this.attributs.findIndex(a => a.nom === nom);
+            if (index !== -1) {
+                this.attributs.splice(index, 1);
+            }
         }
     }
     /**

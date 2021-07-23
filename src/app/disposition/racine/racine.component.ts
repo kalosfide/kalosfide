@@ -1,4 +1,4 @@
-import { OnDestroy } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 
@@ -13,13 +13,16 @@ import { AlerteConnection } from '../alerte/alerte-connection';
 import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 import { Fabrique } from '../fabrique/fabrique';
 import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
-import { KfUlComposant } from 'src/app/commun/kf-composants/kf-ul/kf-ul-composant';
+import { KfUlComposant } from 'src/app/commun/kf-composants/kf-ul-ol/kf-ul-ol-composant';
 import { NavigationSegment } from 'src/app/services/navigation-segment';
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
 
 // TODO: Add Angular decorator.
+@Component({
+    template: ''
+})
 export abstract class RacineComponent implements OnDestroy {
 
     subscriptions: Subscription[] = [];

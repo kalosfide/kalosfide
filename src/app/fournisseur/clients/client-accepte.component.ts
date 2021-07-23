@@ -37,9 +37,9 @@ export class ClientAccepteComponent extends ClientALESComponent {
         this.action = {
             nom: this.pageDef.urlSegment,
             texteSoumettre: 'Accepter le client',
-            apiDemande: () => this.service.changeEtat(this.client, EtatClient.actif),
+            apiDemande: () => this.service.active(this.client),
             actionSiOk: (créé?: any) => {
-                this.service.quandEtatChange(this.client);
+                this.service.quandActivé(this.client);
             }
         };
 
@@ -60,10 +60,10 @@ export class ClientAccepteComponent extends ClientALESComponent {
             );
         } else {
             this._message(0).fixeTexte(
-                `Activer un client en attente d'exclusion le fait passer à l'état 'actif'. `,
+                `Activer un client en attente d'ferméion le fait passer à l'état 'actif'. `,
             );
             this._message(1).fixeTexte(
-                `La procédure d'exclusion est annulée.`
+                `La procédure d'ferméion est annulée.`
             );
         }
 

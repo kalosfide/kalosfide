@@ -11,7 +11,7 @@ import { ComptePages } from '../compte-pages';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { ApiResult } from 'src/app/api/api-results/api-result';
 import { CompteService } from '../compte.service';
-import { BarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
+import { IBarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',

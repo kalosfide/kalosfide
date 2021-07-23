@@ -73,7 +73,7 @@ export class ProduitUtileColonne extends DataUtileColonne {
                 Compare.texte((produit: Produit) => produit.typeMesure),
                 Compare.nombre((produit: Produit) => produit.prix)
             ),
-            classeDefs: ['prix', 'apercu'],
+            classesItem: ['prix', 'apercu'],
             nePasAfficherSi: this.utile.conditionTable.edition
         };
         return def;
@@ -84,7 +84,7 @@ export class ProduitUtileColonne extends DataUtileColonne {
             nom: 'prix',
             enTeteDef: { titreDef: 'Prix en €' },
             créeContenu: (produit: Produit) => produit.editeur.kfPrix,
-            classeDefs: ['prix', 'edite'],
+            classesItem: ['prix', 'edite'],
             nePasAfficherSi: this.utile.conditionTable.aperçu
         };
         return def;
@@ -119,7 +119,7 @@ export class ProduitUtileColonne extends DataUtileColonne {
                 const bouton = this.utile.lien.edite(produit);
                 return bouton;
             },
-            classeDefs: ['action'],
+            classesItem: ['action'],
             afficherSi: this.utile.conditionTable.edition,
         };
     }
@@ -132,7 +132,7 @@ export class ProduitUtileColonne extends DataUtileColonne {
                 bouton.inactivité = produit.utilisé;
                 return bouton;
             },
-            classeDefs: ['action'],
+            classesItem: ['action'],
             afficherSi: this.utile.conditionTable.edition,
         };
     }
@@ -151,7 +151,7 @@ export class ProduitUtileColonne extends DataUtileColonne {
                 btnGroup.ajoute(bouton);
                 return btnGroup;
             },
-            classeDefs: ['colonne-btn-group-2'],
+            classesItem: ['colonne-btn-group-2'],
             afficherSi: this.utile.conditionTable.edition,
         };
     }

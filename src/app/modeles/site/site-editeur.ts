@@ -38,7 +38,7 @@ export class SiteEditeur extends KeyUidRnoEditeur<Site> {
 
     créeAideUrl(): KfEtiquette {
         const étiquette = Fabrique.ajouteEtiquetteP();
-        Fabrique.ajouteTexte(étiquette,
+        étiquette.ajouteTextes(
             `Le nom du site est utilisé dans l'adresse internet de vos pages.`
         );
         return étiquette;
@@ -81,7 +81,7 @@ export class SiteEditeur extends KeyUidRnoEditeur<Site> {
     }
     créeAideTitre(): KfEtiquette {
         const étiquette = Fabrique.ajouteEtiquetteP();
-        Fabrique.ajouteTexte(étiquette,
+        étiquette.ajouteTextes(
             `Le titre du site est utilisé dans les menus et les titres de vos pages.`
         );
         return étiquette;
@@ -89,7 +89,7 @@ export class SiteEditeur extends KeyUidRnoEditeur<Site> {
 
     créeAutresChamps(): KfComposant[] {
         const champs: KfComposant[] = [];
-        Fabrique.ajouteTexte(Fabrique.ajouteEtiquetteP(champs),
+        Fabrique.ajouteEtiquetteP(champs).ajouteTextes(
             `L'adresse est utilisé dans l'en-tête des documents.`
         );
         const adresse = Fabrique.input.texte('adresse', 'Adresse');
@@ -122,7 +122,7 @@ export class SiteEditeur extends KeyUidRnoEditeur<Site> {
                 );
                 roleEditeur.ajouteAideAdresse('fournisseur');
                 roleEditeur.ajouteAdresse(roleEditeur.validateursAdresse());
-                KfBootstrap.prépare(this.kfDeData, Fabrique.optionsBootstrap.formulaire);
+                Fabrique.formulaire.préparePourPage(this.kfDeData);
                 break;
             case FSitePages.edite:
                 break;

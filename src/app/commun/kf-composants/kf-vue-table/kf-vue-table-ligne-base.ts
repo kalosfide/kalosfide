@@ -1,4 +1,3 @@
-import { KfVueTableCellule } from './kf-vue-table-cellule';
 import { KfVueTableCelluleBase, IKfVueTableCellule } from './kf-vue-table-cellule-base';
 import { FormGroup } from '@angular/forms';
 import { KfVueTable } from './kf-vue-table';
@@ -7,8 +6,6 @@ import { KfNgClasse } from '../kf-partages/kf-gere-css-classe';
 import { KfNgStyle } from '../kf-partages/kf-gere-css-style';
 import { KfComposantGereHtml } from '../kf-composant/kf-composant-gere-html';
 import { KfVueTableSectionBase } from './kf-vue-table-section-base';
-import { EventEmitter } from '@angular/core';
-import { KfEvenement } from '../kf-partages/kf-evenements';
 
 /** pour que le component soit indépendant du générique T */
 export interface IKfVueTableLigne {

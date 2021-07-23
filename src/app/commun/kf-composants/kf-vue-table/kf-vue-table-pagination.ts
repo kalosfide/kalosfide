@@ -7,7 +7,7 @@ import { KfEvenement, KfTypeDEvenement, KfTypeDHTMLEvents } from '../kf-partages
 import { KfGéreCss } from '../kf-partages/kf-gere-css';
 import { KfNgClasse, KfNgClasseDef } from '../kf-partages/kf-gere-css-classe';
 import { IKfIconeDef } from '../kf-partages/kf-icone-def';
-import { KfTexteDef } from '../kf-partages/kf-texte-def';
+import { KfStringDef } from '../kf-partages/kf-string-def';
 import { KfVueTable } from './kf-vue-table';
 
 export interface IKfVueTablePaginationDef {
@@ -89,7 +89,7 @@ class Bouton {
         this.pageCible = def.pageCible;
     }
 
-    ajouteClasse(...classeDefs: (KfTexteDef | KfNgClasseDef)[]) {
+    ajouteClasse(...classeDefs: (KfStringDef | KfNgClasseDef)[]) {
         this.kfBouton.ajouteClasse(...classeDefs);
     }
 
@@ -260,7 +260,7 @@ class ChoixNbParPage<T> {
         return this.liste.valeur === 0;
     }
 
-    ajouteClasseDiv(...classeDefs: (KfTexteDef | KfNgClasseDef)[]) {
+    ajouteClasseDiv(...classeDefs: (KfStringDef | KfNgClasseDef)[]) {
         if (!this.géreCssDiv) {
             this.géreCssDiv = new KfGéreCss();
         }

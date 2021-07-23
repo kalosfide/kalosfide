@@ -25,7 +25,9 @@ export class KfCaseACocherComponent extends KfComposantComponent implements OnIn
 
     ngAfterViewInit() {
         this.composant.initialiseHtml(this.inputElement.nativeElement, this.output);
-        this.case.label.initialiseHtml(this.labelElement.nativeElement, this.output);
+        if (this.labelElement) {
+            this.case.label.initialiseHtml(this.labelElement.nativeElement, this.output);
+        }
     }
 
 }

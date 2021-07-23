@@ -1,9 +1,9 @@
 import { PageDef } from 'src/app/commun/page-def';
 import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 import { Fabrique } from '../fabrique/fabrique';
-import { OnInit, Directive } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
-@Directive()
+@Component({ template: '' })
 export abstract class PageMessageComponent implements OnInit {
     titrePage: KfGroupe;
 

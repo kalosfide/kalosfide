@@ -13,14 +13,14 @@ export class DataKeyUtileColonne<T extends IDataKey> {
         return {
             nom: 'edite',
             créeContenu: (t: T) => this.pUtile.lienKey.edite(t),
-            afficherSi: this.pUtile.conditionTable.edition
+            afficherSi: this.pUtile.conditionTable.edition,
         };
     }
     supprime(): IKfVueTableColonneDef<T> {
         return {
             nom: 'supprime',
             créeContenu: (t: T) => this.pUtile.lienKey.supprime(t),
-            afficherSi: this.pUtile.conditionTable.edition
+            afficherSi: this.pUtile.conditionTable.edition,
         };
     }
 }

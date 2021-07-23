@@ -2,7 +2,7 @@ import { KfComposant } from '../kf-composant/kf-composant';
 import { KfVueTableColonne, IKfVueTableColonne } from './kf-vue-table-colonne';
 import { KfVueTable } from './kf-vue-table';
 import { KfEtiquette } from '../kf-elements/kf-etiquette/kf-etiquette';
-import { KfTexteDef } from '../kf-partages/kf-texte-def';
+import { KfStringDef } from '../kf-partages/kf-string-def';
 import { KfTypeDeComposant } from '../kf-composants-types';
 import { KfTexte } from '../kf-elements/kf-texte/kf-texte';
 import { KfVueTableLigneBase, IKfVueTableLigne } from './kf-vue-table-ligne-base';
@@ -129,22 +129,22 @@ export abstract class KfVueTableCelluleBase<T> {
 
 
     protected _créeContenu(celluleDef: KfVueTableCelluleDef, type?: KfTypeDeComposant.etiquette) {
-        let texteDef: KfTexteDef;
+        let stringDef: KfStringDef;
         if (!celluleDef) {
-            texteDef = '';
+            stringDef = '';
         } else {
             if (typeof (celluleDef) === 'string') {
-                texteDef = celluleDef;
+                stringDef = celluleDef;
             } else {
                 if (typeof (celluleDef) === 'function') {
-                    texteDef = celluleDef;
+                    stringDef = celluleDef;
                 } else {
                     this.pContenu = celluleDef.composant;
                     return;
                 }
             }
         }
-        this.pContenu = type ? new KfEtiquette(this.nom, texteDef) : new KfTexte(this.nom, texteDef);
+        this.pContenu = type ? new KfEtiquette(this.nom, stringDef) : new KfTexte(this.nom, stringDef);
     }
     protected créeContenu(celluleDef: KfVueTableCelluleDef, type?: KfTypeDeComposant.etiquette) {
         this._créeContenu(celluleDef, type);

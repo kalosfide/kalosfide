@@ -1,12 +1,12 @@
-import { OnInit, Directive } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
 import { PageBaseComponent } from 'src/app/disposition/page-base/page-base.component';
-import { BarreTitre, IBarreDef } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
+import { IBarreTitre, IBarreDef } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { CLFService } from './c-l-f.service';
 
-@Directive()
+@Component({ template: '' })
 export abstract class CLFTitreComponent extends PageBaseComponent implements OnInit {
     estClient: 'client';
 
@@ -20,13 +20,15 @@ export abstract class CLFTitreComponent extends PageBaseComponent implements OnI
         super();
     }
 
-    créeBarreTitre = (): BarreTitre => {
-        const def: IBarreDef = { pageDef: this.pageDef };
+    créeBarreTitre = (): IBarreTitre => {
+        const def: IBarreDef = {
+            pageDef: this.pageDef,
+            groupesDeBoutons: [Fabrique.titrePage.groupeDefAccès(this.estClient)]
+        };
         if (this.contenuAidePage) {
             def.contenuAidePage = this.contenuAidePage();
         }
         const barre = Fabrique.titrePage.barreTitre(def);
-        barre.ajoute(Fabrique.titrePage.groupeDefAccès(this.estClient));
         this.barre = barre;
         return barre;
     }

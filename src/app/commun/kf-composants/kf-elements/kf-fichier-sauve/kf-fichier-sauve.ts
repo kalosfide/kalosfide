@@ -2,7 +2,7 @@ import { KfTypeDeComposant } from '../../kf-composants-types';
 import { KfComposant } from '../../kf-composant/kf-composant';
 import { KfEvenement, KfTypeDEvenement, KfTypeDHTMLEvents } from '../../kf-partages/kf-evenements';
 import { KfParametres } from '../../kf-composants-parametres';
-import { KfTexteDef } from '../../kf-partages/kf-texte-def';
+import { KfStringDef } from '../../kf-partages/kf-string-def';
 import { KfContenuPhrase } from '../../kf-partages/kf-contenu-phrase/kf-contenu-phrase';
 
 export class KfFichierSauve extends KfComposant {
@@ -10,7 +10,7 @@ export class KfFichierSauve extends KfComposant {
     private _nomFichier: () => string;
 
     constructor(nom: string, texteASauver: () => string, nomFichier: () => string,
-        texte?: KfTexteDef,
+        texte?: KfStringDef,
     ) {
         super(nom, KfTypeDeComposant.fichierSauve);
         this.texteASauver = texteASauver;

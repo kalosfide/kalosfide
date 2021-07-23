@@ -78,6 +78,6 @@ export class CategorieEditeur extends KeyUidRnoNoEditeur<Categorie> {
             default:
                 break;
         }
-        KfBootstrap.prépare(this.kfDeData, Fabrique.optionsBootstrap.formulaire);
+        Fabrique.formulaire.préparePourPage(this.kfDeData);
     }
 }

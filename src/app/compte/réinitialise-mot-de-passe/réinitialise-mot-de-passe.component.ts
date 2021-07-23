@@ -1,7 +1,7 @@
 import { ComptePages, CompteRoutes } from '../compte-pages';
 import { Component, OnInit } from '@angular/core';
 import { PageDef } from 'src/app/commun/page-def';
-import { BarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
+import { IBarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { ActivatedRoute } from '@angular/router';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { KfSuperGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-super-groupe';
@@ -58,7 +58,7 @@ export class RéinitialiseMotDePasseComponent  extends FormulaireComponent imple
             },
             contenu: { texte: 'Connection' },
         };
-        const lien = Fabrique.lien.lien(def);
+        const lien = Fabrique.lien.bouton(def);
         this.afficheResultat.fixeDétails([texte, lien]);
 }
 

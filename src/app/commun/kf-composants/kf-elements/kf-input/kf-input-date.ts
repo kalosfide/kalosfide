@@ -1,4 +1,4 @@
-import { KfTexteDef } from '../../kf-partages/kf-texte-def';
+import { KfStringDef } from '../../kf-partages/kf-string-def';
 import { KfInput } from './kf-input';
 import { KfTypeDInput } from './kf-type-d-input';
 import { Dateur } from 'src/app/commun/outils/dateur';
@@ -6,7 +6,7 @@ import { Dateur } from 'src/app/commun/outils/dateur';
 export class KfInputDate extends KfInput {
     typeDInput: KfTypeDInput;
 
-    constructor(nom: string, texte?: KfTexteDef) {
+    constructor(nom: string, texte?: KfStringDef) {
         super(nom, texte);
         this.typeDInput = KfTypeDInput.date;
     }

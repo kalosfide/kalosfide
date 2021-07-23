@@ -10,6 +10,8 @@ export class NavItemDropdown extends NavItemContenu {
 
     constructor(nom: string, parent: NavBar | NavItemUlLi) {
         super(nom, parent, new KfNgbDropdown(nom));
+        this.dropdown.bouton.ajouteClasse('btn');
+        this.dropdown.avecLien();
         this.pItems = [];
         this.pQuandChange = () => {
             this.pItems.forEach(item => item.quandChange());

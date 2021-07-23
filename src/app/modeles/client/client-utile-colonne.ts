@@ -6,6 +6,8 @@ import { TexteEtatClient, EtatClient } from './etat-client';
 import { Compare } from '../../commun/outils/tri';
 import { TexteOutils } from 'src/app/commun/outils/texte-outils';
 import { KfTexte } from 'src/app/commun/kf-composants/kf-elements/kf-texte/kf-texte';
+import { LargeurColonne } from 'src/app/disposition/largeur-colonne';
+import { KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
 
 export class ClientUtileColonne extends DataUtileColonne {
     constructor(utile: ClientUtile) {
@@ -36,6 +38,16 @@ export class ClientUtileColonne extends DataUtileColonne {
         };
     }
 
+    créé(): IKfVueTableColonneDef<Client> {
+        return {
+            nom: 'cree',
+            enTeteDef: { titreDef: 'Créé' },
+            créeContenu: (client: Client) => () => TexteOutils.date.en_chiffres(client.date0),
+            largeur: LargeurColonne.date,
+            compare: Compare.date((client: Client) => client.date0)
+        };
+    }
+
     état(): IKfVueTableColonneDef<Client> {
         return {
             nom: 'état',
@@ -44,80 +56,89 @@ export class ClientUtileColonne extends DataUtileColonne {
             compare: Compare.enchaine(
                 Compare.texte((client: Client) => TexteEtatClient(client.etat)),
                 Compare.date((client: Client) => client.dateEtat)
-            )
+            ),
+            largeur: LargeurColonne.client_état
         };
     }
 
     date(): IKfVueTableColonneDef<Client> {
         return {
             nom: 'date',
-            enTeteDef: { titreDef: 'Date' },
+            enTeteDef: { titreDef: 'Depuis' },
             créeContenu: (client: Client) => () => TexteOutils.date.en_chiffres(client.dateEtat),
-            classeDefs: ['date'],
+            largeur: LargeurColonne.date,
             compare: Compare.date((client: Client) => client.dateEtat)
-        };
-    }
-
-    connection(): IKfVueTableColonneDef<Client> {
-        return {
-            nom: 'connection',
-            enTeteDef: { titreDef: 'Avec compte' },
-            créeContenu: (client: Client) => client.compte === 'O' ? 'Oui' : 'Non',
-            compare: Compare.texte((client: Client) => client.compte)
         };
     }
 
     invite(): IKfVueTableColonneDef<Client> {
         return {
             nom: 'invite',
-            enTeteDef: { titreDef: 'Avec compte' },
+            enTeteDef: { titreDef: 'Invitation' },
             créeContenu: (client: Client) => {
-                if (client.compte === 'O') {
-                    const texte = new KfTexte('', 'Oui');
-                    texte.ajouteClasse('btn texte-sous-icone'); // pour centrer
+                if (client.email) {
+                    const texte = new KfTexte('', client.email);
                     return texte;
                 }
-                const lien = client.compte === 'I' ? this.utile.lien.invité(client) : this.utile.lien.invite(client);
+                const lien = client.invitation ? this.utile.lien.invité(client) : this.utile.lien.invite(client);
                 lien.inactivité = client.etat !== EtatClient.actif;
                 return lien;
             },
-            classeDefs: ['client-compte'],
-            compare: Compare.texte((client: Client) => client.compte),
+            largeur: LargeurColonne.client_compte,
+            compare: Compare.texte((client: Client) => client.email
+                ? 'A@' + client.email
+                : (client.invitation ? 'I@' : 'Z@') + client.nom),
             afficherSi: this.utile.conditionTable.edition,
         };
     }
 
-    edite(): IKfVueTableColonneDef<Client> {
+    /**
+     * Si géré par le client et nouveau, activation.
+     * Si géré par le client et actif, edition inactif ou rien?.
+     * Si géré par le fournisseur et actif, edition actif.
+     * Si géré par le fournisseur et fermé, edition inactif.
+     */
+    action1(): IKfVueTableColonneDef<Client> {
         return {
-            nom: 'edite',
+            nom: 'action1',
             créeContenu: (client: Client) => {
                 if (client.etat === EtatClient.nouveau) {
-                    return this.utile.lien.accepte(client);
+                    return this.utile.bouton.active(client);
                 }
                 const lien = this.utile.lien.edite(client);
-                lien.inactivité = client.compte !== 'N' || client.etat !== EtatClient.actif;
+                lien.inactivité = !!client.email || client.etat !== EtatClient.actif;
                 return lien;
             },
-            classeDefs: ['action'],
+            largeur: LargeurColonne.action,
             afficherSi: this.utile.conditionTable.edition,
         };
     }
 
-    exclut(): IKfVueTableColonneDef<Client> {
+    /**
+     * Si géré par le client et nouveau, suppression.
+     * Si géré par le client et actif, inactivation.
+     * Si géré par le client et inactif ou fermé, activation.
+     * Si géré par le fournisseur et actif, si vide suppression, sinon fermeture.
+     * Si géré par le fournisseur et fermé, activation.
+     */
+    action2(rafraichitComponent?: (rétabli?) => void): IKfVueTableColonneDef<Client> {
         return {
-            nom: 'exclut',
+            nom: 'action2',
             créeContenu: (client: Client) => {
-                if (client.etat === EtatClient.inactif) {
-                    return this.utile.lien.accepte(client);
+                switch (client.etat) {
+                    case EtatClient.nouveau:
+                        return this.utile.bouton.supprime(client, rafraichitComponent);
+                    case EtatClient.actif:
+                        if (!client.email && !client.avecDocuments) {
+                            return this.utile.bouton.supprime(client, rafraichitComponent);
+                        }
+                        return this.utile.bouton.inactive(client);
+                    case EtatClient.inactif:
+                    case EtatClient.fermé:
+                        return this.utile.bouton.active(client);
                 }
-                if (client.etat === EtatClient.actif && !client.compte && !client.avecCommandes) {
-                    return this.utile.lien.supprime(client);
-                }
-                const lien = this.utile.lien.exclut(client);
-                lien.inactivité = client.etat === EtatClient.exclu;
-                return lien;
             },
-            classeDefs: ['action'],
+            largeur: LargeurColonne.action,
             afficherSi: this.utile.conditionTable.edition,
         };
     }
@@ -131,17 +152,11 @@ export class ClientUtileColonne extends DataUtileColonne {
         ];
     }
 
-    colonnesLivraison(): IKfVueTableColonneDef<Client>[] {
-        return this.colonnesBase().concat([
-            this.connection(),
-        ]);
-    }
-
     colonnes(): IKfVueTableColonneDef<Client>[] {
         return this.colonnesBase().concat([
             this.invite(),
-            this.edite(),
-            this.exclut(),
+            this.action1(),
+            this.action2(),
         ]);
     }
 

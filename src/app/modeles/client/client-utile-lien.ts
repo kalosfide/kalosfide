@@ -3,7 +3,11 @@ import { Client } from './client';
 import { DataUtileLien } from 'src/app/commun/data-par-key/data-utile-lien';
 import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
-import { FournisseurClientPages } from 'src/app/fournisseur/clients/client-pages';
+import { Invitation } from './invitation';
+import { ILienDef } from 'src/app/disposition/fabrique/fabrique-lien';
+import { IContenuPhraseDef } from 'src/app/disposition/fabrique/fabrique-contenu-phrase';
+import { Couleur } from 'src/app/disposition/fabrique/fabrique-couleurs';
+import { IUrlDef } from 'src/app/disposition/fabrique/fabrique-url';
 
 export class ClientUtileLien extends DataUtileLien {
     constructor(utile: ClientUtile) {
@@ -14,23 +18,6 @@ export class ClientUtileLien extends DataUtileLien {
         return this.parent as ClientUtile;
     }
 
-    // liens de barre
-    accueil(): KfLien {
-        return Fabrique.lien.deBarre(
-            this.utile.urlKey.dePageDef(FournisseurClientPages.accueil),
-            Fabrique.icone.def.info);
-    }
-    clients(): KfLien {
-        return Fabrique.lien.deBarre(
-            this.utile.urlKey.dePageDef(FournisseurClientPages.index),
-            Fabrique.icone.def.personnes,
-            'Liste');
-    }
-    invitations(): KfLien {
-        return Fabrique.lien.deBarre(
-            this.utile.urlKey.dePageDef(FournisseurClientPages.invitations),
-            Fabrique.icone.def.envelope);
-    }
     index(): KfLien {
         return this.utile.lienKey.index();
     }
@@ -41,31 +28,86 @@ export class ClientUtileLien extends DataUtileLien {
         return this.utile.lienKey.ajoute();
     }
 
+    accepte(client?: Client): KfLien {
+        const urlDef = client ? this.utile.url.accepte(client) : undefined;
+        return Fabrique.lien.bouton(this.def('', urlDef, Fabrique.contenu.activer));
+    }
+
+    exclut(client?: Client): KfLien {
+        const urlDef = client ? this.utile.url.exclut(client) : undefined;
+        return Fabrique.lien.bouton(this.def('', urlDef, Fabrique.contenu.fermer));
+    }
+
+    supprime(client?: Client): KfLien {
+        const urlDef = client ? this.utile.url.exclut(client) : undefined;
+        return Fabrique.lien.bouton(this.def('', urlDef, Fabrique.contenu.supprime));
+    }
+
     // liens de table
-    edite(t: Client): KfLien {
-        return this.utile.lienKey.edite(t);
+    edite(client?: Client): KfLien {
+        return this.utile.lienKey.edite(client);
     }
     aperçu(t: Client): KfLien {
         return this.utile.lienKey.edite(t);
     }
 
-    invite(client: Client): KfLien {
-        return Fabrique.lien.lien(this.def('', this.utile.url.invite(client), Fabrique.contenu.invite));
+    invitations(): KfLien {
+        return Fabrique.lien.retour(this.utile.url.invitations());
+    }
+    retourInvitation(invitation?: Invitation): KfLien {
+        return Fabrique.lien.retour(invitation
+            ? this.utile.url.retourInvitations(invitation)
+            : this.utile.url.invitations()
+        );
+    }
+    ajouteInvitationDef(): ILienDef {
+        return Fabrique.lien.ajouteDef(this.utile.url.invite(), `Ajouter une invitation`);
+    }
+    ajouteInvitation(): KfLien {
+        return Fabrique.lien.ajoute(this.utile.url.invite(), `Ajouter une invitation`);
     }
 
-    invité(client: Client): KfLien {
-        return Fabrique.lien.lien(this.def('', this.utile.url.invite(client), Fabrique.contenu.invité));
+    réenvoie(invitation?: Invitation): KfLien {
+        const urlDef = invitation ? this.utile.url.réinvite(invitation) : undefined;
+        const contenu: IContenuPhraseDef = {
+            iconeDef: Fabrique.icone.def.envelope,
+            couleurIcone: Couleur.dark,
+            texte: 'Réinviter',
+            positionTexte: 'bas'
+        };
+        return Fabrique.lien.bouton(this.def('', urlDef, contenu));
     }
 
-    accepte(client: Client): KfLien {
-        return Fabrique.lien.lien(this.def('', this.utile.url.accepte(client), Fabrique.contenu.accepter));
+    retourInvitations(invitation: Invitation): KfLien {
+        return Fabrique.lien.retour(this.utile.url.retourInvitations(invitation));
+    }
+    
+    invite(client?: Client): KfLien {
+        const urlDef = client ? this.utile.url.inviteClient(client) : undefined;
+        const contenu: IContenuPhraseDef = {
+            iconeDef: Fabrique.icone.def.envelope_pleine,
+            couleurIcone: Couleur.dark,
+            texte: 'Inviter',
+            positionTexte: 'bas'
+        };
+        return Fabrique.lien.bouton(this.def('', urlDef, contenu));
     }
 
-    exclut(client: Client): KfLien {
-        return Fabrique.lien.lien(this.def('', this.utile.url.exclut(client), Fabrique.contenu.exclure));
-    }
-
-    supprime(client: Client): KfLien {
-        return Fabrique.lien.lien(this.def('', this.utile.url.exclut(client), Fabrique.contenu.supprime));
+    invité(clientOuEmail: Client | string): KfLien {
+        let urlDef: IUrlDef;
+        let email: string;
+        if (typeof(clientOuEmail) === 'string') {
+            email = clientOuEmail;
+        } else {
+            urlDef = this.utile.url.inviteClient(clientOuEmail);
+            email = clientOuEmail.invitation.email;
+        }
+        const contenu: IContenuPhraseDef = {
+            iconeDef: Fabrique.icone.def.envelope,
+            couleurIcone: Couleur.dark,
+            texte: email,
+            positionTexte: 'bas'
+        };
+        return Fabrique.lien.bouton(this.def('', urlDef, contenu));
     }
 }

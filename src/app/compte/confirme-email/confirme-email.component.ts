@@ -6,7 +6,7 @@ import { ConfirmeEmailModel } from './confirme-email.model';
 import { CompteService } from '../compte.service';
 import { Observable } from 'rxjs';
 import { ConfirmeEmailBaseComponent } from './confirme-email-base.component';
-import { DefTexte } from 'src/app/disposition/fabrique/fabrique-texte';
+import { KfstringDef } from 'src/app/commun/kf-composants/kf-elements/kf-texte/kf-textes';
 import { ApiResult } from 'src/app/api/api-results/api-result';
 
 @Component({
@@ -22,7 +22,7 @@ export class ConfirmeEmailComponent extends ConfirmeEmailBaseComponent implement
         return `Vous devrez utiliser votre adresse ${confirmeEmail.email} pour vous connecter`;
     }
 
-    defAvant(confirmeEmail: ConfirmeEmailModel): DefTexte[] {
+    defAvant(confirmeEmail: ConfirmeEmailModel): KfstringDef[] {
         return [
             `Votre adresse email ${confirmeEmail.email} est en cours de confirmation.`
         ];

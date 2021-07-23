@@ -2,13 +2,13 @@ import { KfTypeDeComposant } from '../../kf-composants-types';
 import { KfComposant } from '../../kf-composant/kf-composant';
 import { KfEntrée } from '../kf-entree/kf-entree';
 import { KfGereTabIndex } from '../../kf-composant/kf-composant-gere-tabindex';
-import { KfTexteDef } from '../../kf-partages/kf-texte-def';
+import { KfStringDef } from '../../kf-partages/kf-string-def';
 
 export class KfRadios extends KfEntrée {
 
     avecNgBootstrap: boolean;
 
-    constructor(nom: string, texteLabel?: KfTexteDef) {
+    constructor(nom: string, texteLabel?: KfStringDef) {
         super(nom, KfTypeDeComposant.radios, texteLabel);
     }
 

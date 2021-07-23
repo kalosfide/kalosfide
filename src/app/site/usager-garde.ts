@@ -2,33 +2,38 @@ import { Injectable } from '@angular/core';
 import { CanActivate, CanActivateChild } from '@angular/router';
 import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
-import { AppPages } from '../app-pages';
-import { IdentificationService } from '../securite/identification.service';
-import { NavigationService } from '../services/navigation.service';
-import { RouteurService } from '../services/routeur.service';
-import { SiteRoutes } from './site-pages';
+import { ApiResult404NotFound } from '../api/api-results/api-result-404-not-found';
+import { SiteService } from '../modeles/site/site.service';
 
-@Injectable({
+/**
+ * Si l'utilisateur est identifié et si son identifiant possède le site dont l'url est le paramétre de la route, fixe
+ * le site en cours du NavigationService et laisse passer. Sinon, redirige vers la page erreur 404.
+ * Les Resolver et Gardes suivants peuvent obtenir le site par le NavigationService.
+ */
+ @Injectable({
     providedIn: 'root',
 })
 export class UsagerGarde implements CanActivate, CanActivateChild {
 
     constructor(
-        private routeur: RouteurService,
-        private identification: IdentificationService,
+        private siteService: SiteService
     ) {
     }
 
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | boolean {
-        if (this.identification.estIdentifié) {
-            const identifiant = this.identification.litIdentifiant();
-            const urlSite = SiteRoutes.urlSite(state.url);
-            if (identifiant.estUsagerDeSiteParUrl(urlSite)) {
-                return true;
+        const urlSite = route.paramMap.get('urlSite');
+        if (urlSite) {
+            const identifiant = this.siteService.identification.litIdentifiant();
+            if (identifiant) {
+                const site = identifiant.sites.find(s => s.url === urlSite);
+                if (site) {
+                    this.siteService.navigation.fixeSiteEnCours(site);
+                    return true;
+                }
             }
         }
         // navigue vers introuvable car interdit informerait de l'existence du site
-        this.routeur.navigue([AppPages.introuvable.urlSegment]);
+            this.siteService.routeur.navigueVersPageErreur(new ApiResult404NotFound());
         return false;
     }
     canActivateChild(childRoute: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | Observable<boolean> | Promise<boolean> {

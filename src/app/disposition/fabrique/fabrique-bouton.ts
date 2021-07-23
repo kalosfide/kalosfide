@@ -1,82 +1,160 @@
 import { KfBouton } from 'src/app/commun/kf-composants/kf-elements/kf-bouton/kf-bouton';
 import { KfEvenement, KfTypeDEvenement, KfStatutDEvenement, KfTypeDHTMLEvents } from 'src/app/commun/kf-composants/kf-partages/kf-evenements';
-import { ILienDef } from './fabrique-lien';
-import { RouteurService } from 'src/app/services/routeur.service';
-import { ValeurTexteDef, KfTexteDef } from 'src/app/commun/kf-composants/kf-partages/kf-texte-def';
-import { KfSuperGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-super-groupe';
-import { KfTypeDeBouton, KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
+import { KfStringDef } from 'src/app/commun/kf-composants/kf-partages/kf-string-def';
+import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
 import { IKfNgbPopoverDef } from 'src/app/commun/kf-composants/kf-elements/kf-bouton/kf-ngb-popover';
 import { IContenuPhraseDef } from './fabrique-contenu-phrase';
 import { FabriqueClasse } from './fabrique';
-import { BootstrapType, BootstrapNom, KfBootstrap } from '../../commun/kf-composants/kf-partages/kf-bootstrap';
+import { BootstrapTypeBouton, KfBootstrap } from '../../commun/kf-composants/kf-partages/kf-bootstrap';
 import { FabriqueMembre } from './fabrique-membre';
 import { DataService } from 'src/app/services/data.service';
 import { ApiRequêteAction } from 'src/app/api/api-requete-action';
-import { IUrlDef } from './fabrique-url';
 import { IKfIconeDef } from 'src/app/commun/kf-composants/kf-partages/kf-icone-def';
 import { Observable, of } from 'rxjs';
-import { concatMap } from 'rxjs/operators';
+import { concatMap, map, tap } from 'rxjs/operators';
 import { KfNgbModal } from 'src/app/commun/kf-composants/kf-ngb-modal/kf-ngb-modal';
 import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 
 export interface IPopoverDef { titreDef: string | KfEtiquette; contenusDef: (string | KfComposant)[]; }
 
+export interface IBoutonActionDef {
+    /**
+     * Si présent l'action est annulée quand le bouton est actif.
+     */
+    active?: () => boolean;
+    /**
+     * Pour confirmer le lancement de l'action ou pour afficher des infos s'il n'y a pas d'action.
+     */
+    modalAvant?: KfNgbModal;
+    /**
+     * Action sans requête Api. Si présent, apiAction est ignoré.
+     */
+    action?: () => void;
+    /**
+     * Requête action à demander à l'Api.
+     */
+    apiAction?: ApiRequêteAction,
+    /**
+     * Pour indiquer que l'action a réussi. Utilisé seulement si action est absent et apiAction est présent.
+     */
+    modalAprès?: KfNgbModal;
+
+}
 export interface IBoutonDef {
     nom: string;
     contenu?: IContenuPhraseDef;
     bootstrap?: {
-        type: BootstrapType,
+        type: BootstrapTypeBouton,
         outline?: 'outline',
     };
-    action?: (evenement?: KfEvenement) => void;
+    action?: (() => void) | IBoutonActionDef;
     popoverDef?: IPopoverDef;
 }
 
 export class FabriqueBouton extends FabriqueMembre {
     constructor(fabrique: FabriqueClasse) { super(fabrique); }
 
-    fixeActionBouton(bouton: KfBouton, action: (evenement: KfEvenement) => void) {
+    fixeActionBouton(bouton: KfBouton, actionOuDef: ((evenement: KfEvenement) => void) | IBoutonActionDef, service?: DataService) {
         this.supprimePopover(bouton);
         bouton.gereHtml.ajouteEvenementASuivre(KfTypeDHTMLEvents.click);
         bouton.gereHtml.supprimeTraiteurs(KfTypeDEvenement.click);
-        bouton.gereHtml.fixeTraiteur(KfTypeDEvenement.click,
-            (evenement: KfEvenement) => {
-                action(evenement);
+        let action: (evenement: KfEvenement) => void;
+        if (typeof (actionOuDef) === 'function') {
+            action = (evenement: KfEvenement) => {
+                actionOuDef(evenement);
                 evenement.statut = KfStatutDEvenement.fini;
-            });
+            };
+        } else {
+            action = (evenement: KfEvenement) => {
+                this.action(actionOuDef, service)(evenement);
+                evenement.statut = KfStatutDEvenement.fini;
+            }
+        }
+        bouton.gereHtml.fixeTraiteur(KfTypeDEvenement.click, action);
+    }
+
+    action(actionDef: IBoutonActionDef, service: DataService): (evenement: KfEvenement) => void {
+        return (evenement: KfEvenement) => {
+            if (actionDef.active && actionDef.active()) {
+                evenement.statut = KfStatutDEvenement.fini;
+                return;
+            }
+            let observable: Observable<boolean>;
+            if (actionDef.modalAvant) {
+                observable = service.modalService.confirme(actionDef.modalAvant);
+            }
+            if (actionDef.action) {
+                if (observable) {
+                    observable = observable.pipe(map((ok: boolean) => {
+                        if (ok) {
+                            actionDef.action();
+                        }
+                        return ok;
+                    }));
+                }
+            }
+            if (actionDef.apiAction) {
+                const actionObs = service.actionObs(actionDef.apiAction);
+                observable = observable
+                    ? observable.pipe(concatMap((ok: boolean) => {
+                        if (ok) {
+                            return actionObs;
+                        } else {
+                            return of(false);
+                        }
+                    }))
+                    : actionObs;
+                if (actionDef.modalAprès) {
+                    observable = observable.pipe(concatMap((ok: boolean) => service.modalService.confirme(actionDef.modalAprès)));
+                }
+            }
+
+            if (observable) {
+                const subscription = observable.subscribe(() => {
+                    evenement.statut = KfStatutDEvenement.fini;
+                    subscription.unsubscribe();
+                });
+            } else {
+                if (actionDef.action) {
+                    actionDef.action();
+                }
+                evenement.statut = KfStatutDEvenement.fini;
+            }
+        };
+
     }
 
     private supprimeActionBouton(bouton: KfBouton) {
         bouton.gereHtml.supprimeTraiteurs(KfTypeDEvenement.click);
     }
 
-    fixeDef(bouton: KfBouton, def: IBoutonDef) {
+    fixeDef(bouton: KfBouton, def: IBoutonDef, service?: DataService) {
         if (def.contenu) {
             this.fabrique.contenu.fixeDef(bouton, def.contenu);
         }
         if (def.bootstrap) {
-            KfBootstrap.ajouteClasse(bouton, 'btn', def.bootstrap.type, def.bootstrap.outline);
+            KfBootstrap.ajouteClasseBouton(bouton, def.bootstrap.type, def.bootstrap.outline);
         }
         if (def.action) {
-            this.fixeActionBouton(bouton, def.action);
+            this.fixeActionBouton(bouton, def.action, service);
         }
         return bouton;
     }
 
-    bouton(def: IBoutonDef): KfBouton {
+    bouton(def: IBoutonDef, service?: DataService): KfBouton {
         const bouton = new KfBouton(def.nom);
-        this.fixeDef(bouton, def);
+        this.fixeDef(bouton, def, service);
         return bouton;
     }
 
     nomBoutonSoumettre(formulaire: KfGroupe): string {
         return formulaire.nom + '_soumettre';
     }
-    soumettre(formulaire: KfGroupe, texte?: KfTexteDef): KfBouton {
+    soumettre(formulaire: KfGroupe, texte?: KfStringDef): KfBouton {
         const bouton = new KfBouton(this.nomBoutonSoumettre(formulaire), texte);
-        KfBootstrap.ajouteClasse(bouton, 'btn', BootstrapNom.primary);
+        KfBootstrap.ajouteClasseBouton(bouton, 'primary');
         bouton.fixeTypeDeBouton('submit', formulaire);
         return bouton;
     }
@@ -169,19 +247,13 @@ export class FabriqueBouton extends FabriqueMembre {
         contenus: KfComposant[],
         dataService: DataService,
     ) {
+        const modal = this.fabrique.infoModal(titreModal, contenus);
         const boutonDef: IBoutonDef = {
             nom,
-            contenu: this.fabrique.contenu.info(titre)
+            contenu: this.fabrique.contenu.info(titre),
+            action: { modalAvant: modal }
         };
-        const bouton = this.bouton(boutonDef);
-        const modal = this.fabrique.infoModal(titreModal, contenus);
-        bouton.gereHtml.ajouteTraiteur(KfTypeDEvenement.click,
-            (evenement: KfEvenement) => {
-                const subscription = dataService.modalService.confirme(modal).subscribe(() => {
-                    subscription.unsubscribe();
-                    evenement.statut = KfStatutDEvenement.fini;
-                });
-            });
+        const bouton = this.bouton(boutonDef, dataService);
         return bouton;
     }
 
@@ -200,31 +272,15 @@ export class FabriqueBouton extends FabriqueMembre {
         dataService: DataService,
         confirme?: KfNgbModal
     ): KfBouton {
-        const action = (evenement: KfEvenement) => {
-            let obs: Observable<boolean>;
-            if (confirme) {
-                obs = dataService.modalService.confirme(confirme).pipe(
-                    concatMap(ok => {
-                        if (ok) {
-                            return dataService.actionObs(apiAction);
-                        }
-                        return of(false);
-                    })
-                );
-            } else {
-                obs = dataService.actionObs(apiAction);
-            }
-            evenement.statut = KfStatutDEvenement.fini;
-            const subscription = obs.subscribe(() => {
-                subscription.unsubscribe();
-                evenement.statut = KfStatutDEvenement.fini;
-            });
-        };
         const bouton = this.bouton({
             nom,
             contenu,
-            action
-        });
+            action: {
+                modalAvant: confirme,
+                apiAction
+            }
+        },
+        dataService);
         const kfIcone = bouton.contenuPhrase.kfIcone;
         if (kfIcone) {
             kfIcone.fondVisible = true;

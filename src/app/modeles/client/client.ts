@@ -1,4 +1,4 @@
-import { KeyUidRno } from '../../commun/data-par-key/key-uid-rno/key-uid-rno';
+import { InvitationDeApi } from './invitation';
 import { Role } from '../role/role';
 
 export interface IClientData {
@@ -14,26 +14,18 @@ export class ClientData implements IClientData {
         this.nom = data.nom;
         this.adresse = data.adresse;
     }
-
-    get model(): ClientData {
-        const model = new ClientData();
-        model.nom = this.nom;
-        model.adresse = this.adresse;
-        return model;
-    }
-    set model(model: ClientData) {
-        this.nom = model.nom;
-        this.adresse = model.adresse;
-    }
 }
 
 /**
  * Si dans liste ne contient que
  */
 export class Client extends Role implements IClientData {
-    // key du client
-    compte: string;
-    avecCommandes: boolean;
+    email: string;
+    /**
+     * Fixé lors des lectures mais pas stocké
+     */
+    invitation?: InvitationDeApi;
+    avecDocuments: boolean;
 
     /**
      * recopie les champs hors clé qui sont définis

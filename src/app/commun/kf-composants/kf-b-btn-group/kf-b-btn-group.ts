@@ -10,6 +10,7 @@ export type KfBBtnGroupElement = KfBouton | KfCaseACocher | KfLien | KfEtiquette
 export class KfBBtnGroup extends KfComposant {
     private pTaille: 'lg' | 'sm';
     vertical: boolean;
+    nePasAfficherSiPasDeContenuAAfficher: boolean;
 
     constructor(nom: string) {
         super(nom, KfTypeDeComposant.b_btn_group);
@@ -62,6 +63,9 @@ export class KfBBtnGroup extends KfComposant {
     }
 
     get estNonVide(): boolean {
+        if (!this.nePasAfficherSiPasDeContenuAAfficher) {
+            return true;
+        }
         const premierAAfficher = this.contenus.find(c => !c.nePasAfficher)
         return premierAAfficher !== undefined;
     }

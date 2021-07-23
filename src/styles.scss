@@ -28,7 +28,8 @@ table .date {
 }
 
 table .client-compte {
-    width: $table-client-compte;
+    max-width: $table-client-compte;
+    overflow: hidden;
 }
 
 table .nombre {
@@ -45,6 +46,7 @@ table .unite {
 
 table .action {
     width: $table-action;
+    text-align: center;
 }
 
 table .action .texte-sous-icone {
@@ -67,6 +69,6 @@ table .action .texte-sous-icone {
     width: 60px;
 }
 
-.titre-page .btn-light:not(:disabled):not(.disabled).active {
-    color: darkcyan;
+.titre-page .btn:not(:disabled):not(.disabled).active {
+    color: rgb(0, 139, 42);
 }

@@ -10,7 +10,7 @@ import { TypeMesure } from '../type-mesure';
 import { CLFLigne } from './c-l-f-ligne';
 import { CoûtDef, LigneDocumentCoût } from './cout';
 import { CLFDoc } from './c-l-f-doc';
-import { KfInitialObservable } from 'src/app/commun/kf-composants/kf-partages/kf-initial-observable';
+import { ValeurEtObservable } from 'src/app/commun/outils/valeur-et-observable';
 import { TexteOutils } from 'src/app/commun/outils/texte-outils';
 import { KfBBtnGroup, KfBBtnGroupElement } from 'src/app/commun/kf-composants/kf-b-btn-group/kf-b-btn-group';
 import { CLFDocs } from './c-l-f-docs';
@@ -199,7 +199,7 @@ export class CLFUtileColonneLigne {
                 Compare.nombre((ligne: CLFLigne) => coûtDef.iCoût(ligne).valeur),
                 Compare.booléenDesc((ligne: CLFLigne) => coûtDef.iCoût(ligne).complet)
             ),
-            classeDefs: ['prix'],
+            classesItem: ['prix'],
             enTeteDef: { titreDef: 'Coût' },
             bilanDef: {
                 texteAgrégé: (lignes: CLFLigne[]) => coûtDef.texteAgrégé(lignes),
@@ -233,14 +233,14 @@ export class CLFUtileColonneLigne {
         const btnGroup = new KfBBtnGroup('action');
         let bouton: KfBBtnGroupElement;
         bouton = this.utile.bouton.copieDoc(clfDoc);
-        bouton.inactivitéIO = KfInitialObservable.transforme(
+        bouton.inactivitéIO = ValeurEtObservable.transforme(
             this.utile.service.clsBilanIO,
             () => !clfDoc.lignes || clfDoc.nbCopiablesPasPréparés === 0
         );
         btnGroup.ajoute(bouton);
         if (clfDoc.type === 'livraison' || clfDoc.crééParLeClient) {
             bouton = this.utile.bouton.annuleDoc(clfDoc);
-            bouton.inactivitéIO = KfInitialObservable.transforme(
+            bouton.inactivitéIO = ValeurEtObservable.transforme(
                 this.utile.service.clsBilanIO,
                 () => !clfDoc.lignes || clfDoc.lignes.filter(l => l.préparé).length > 0
             );
@@ -252,10 +252,10 @@ export class CLFUtileColonneLigne {
     }
 
     private btnGroupLigne(ligne: CLFLigne, boutonAnnuleOuSupprime: (ligne: CLFLigne) => KfBBtnGroupElement): KfBBtnGroup {
-        const btnGroup = new KfBBtnGroup('action');
+        const btnGroup = new KfBBtnGroup('action' + ligne.no2);
         let bouton: KfBBtnGroupElement;
         bouton = this.utile.bouton.copieLigne(ligne);
-        bouton.inactivitéIO = KfInitialObservable.transforme(
+        bouton.inactivitéIO = ValeurEtObservable.transforme(
             this.utile.service.clsBilanIO,
             () => !ligne.copiable || ligne.préparé
         );
@@ -270,7 +270,7 @@ export class CLFUtileColonneLigne {
         if (clfDoc.type === 'livraison' || clfDoc.crééParLeClient) {
             boutonAnnuleOuSupprime = (ligne: CLFLigne) => {
                 const bouton = this.utile.bouton.annuleLigne(ligne);
-                bouton.inactivitéIO = KfInitialObservable.transforme(
+                bouton.inactivitéIO = ValeurEtObservable.transforme(
                     this.utile.service.clsBilanIO,
                     () => ligne.préparé
                 );
@@ -289,7 +289,7 @@ export class CLFUtileColonneLigne {
                 classeDefs: ['colonne-btn-group-2'],
             },
             créeContenu: (ligne: CLFLigne) => this.btnGroupLigne(ligne, boutonAnnuleOuSupprime),
-            classeDefs: ['colonne-btn-group-2'],
+            classesItem: ['colonne-btn-group-2'],
             afficherSi: this.utile.conditionTable.edition,
         };
     }

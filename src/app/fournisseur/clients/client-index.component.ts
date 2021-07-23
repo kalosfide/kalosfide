@@ -10,13 +10,13 @@ import { KeyUidRnoIndexComponent } from 'src/app/commun/data-par-key/key-uid-rno
 import { ClientService } from 'src/app/modeles/client/client.service';
 import { IGroupeTableDef } from 'src/app/disposition/page-table/groupe-table';
 import { ModeTable } from 'src/app/commun/data-par-key/condition-table';
-import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
 import { EtatTable } from 'src/app/disposition/fabrique/etat-table';
 import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
 import { KfGéreCss } from 'src/app/commun/kf-composants/kf-partages/kf-gere-css';
 import { KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
 import { EtatClient } from 'src/app/modeles/client/etat-client';
 import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
+import { Invitation } from 'src/app/modeles/client/invitation';
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
@@ -34,7 +34,7 @@ export class ClientIndexComponent extends KeyUidRnoIndexComponent<Client> implem
 
     site: Site;
     identifiant: Identifiant;
-    clients: Client[];
+    invitations: Invitation[];
 
     constructor(
         protected route: ActivatedRoute,
@@ -70,7 +70,7 @@ export class ClientIndexComponent extends KeyUidRnoIndexComponent<Client> implem
                 gereCssLigne: (t: Client) => {
                     const gereCss = new KfGéreCss();
                     gereCss.ajouteClasse({
-                        nom: KfBootstrap.classe('text', 'danger'),
+                        nom: this.service.utile.classeNouveau,
                         active: () => t.etat === EtatClient.nouveau
                     });
                     return gereCss;
@@ -93,6 +93,14 @@ export class ClientIndexComponent extends KeyUidRnoIndexComponent<Client> implem
     avantChargeData() {
         this.site = this.service.navigation.litSiteEnCours();
         this.identifiant = this.service.identification.litIdentifiant();
+    }
+
+    chargeData(data: Data) {
+        this.liste = data.liste;
+        const invitations: Invitation[] = data.invitations;
+        invitations.forEach(i => {
+            
+        })
     }
 
     créePageTableDef(): IPageTableDef {

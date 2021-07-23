@@ -1,4 +1,4 @@
-import { OnInit, OnDestroy, Directive } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 
 import { AttenteService } from '../services/attente.service';
@@ -10,7 +10,7 @@ import { Site } from '../modeles/site/site';
 import { AlerteService } from '../disposition/alerte/alerte-service';
 import { Identifiant } from '../securite/identifiant';
 
-@Directive()
+@Component({ template: '' })
 export abstract class SiteRacineComponent extends RacineComponent implements OnInit, OnDestroy {
 
     constructor(

@@ -3,7 +3,7 @@ import { Site } from '../modeles/site/site';
 import { NavigationService } from '../services/navigation.service';
 import { PageDef } from '../commun/page-def';
 import { FournisseurPages, FournisseurRoutes, FournisseurSiteRoutes } from './fournisseur-pages';
-import { BarreTitre } from '../disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
+import { IBarreTitre } from '../disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { Fabrique } from '../disposition/fabrique/fabrique';
 import { KfComposant } from '../commun/kf-composants/kf-composant/kf-composant';
 import { KfEtiquette } from '../commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
@@ -41,14 +41,12 @@ export class FAccueilComponent extends PageBaseComponent implements OnInit {
         return this.site.titre;
     }
 
-    créeBarreTitre = (): BarreTitre => {
+    créeBarreTitre = (): IBarreTitre => {
         const barre = Fabrique.titrePage.barreTitre({
             pageDef: this.pageDef,
             contenuAidePage: this.contenuAidePage(),
+            groupesDeBoutons: [Fabrique.titrePage.groupeDefAccès()]
         });
-
-        barre.ajoute(Fabrique.titrePage.groupeDefAccès());
-
         this.barre = barre;
         return barre;
     }
@@ -59,7 +57,7 @@ export class FAccueilComponent extends PageBaseComponent implements OnInit {
         let etiquette: KfEtiquette;
 
         etiquette = Fabrique.ajouteEtiquetteP(infos);
-        Fabrique.ajouteTexte(etiquette,
+        etiquette.ajouteTextes(
             `Ceci est `,
             { texte: 'à faire', balise: KfTypeDeBaliseHTML.b },
             '.'
@@ -79,13 +77,13 @@ export class FAccueilComponent extends PageBaseComponent implements OnInit {
         if (this.site.etat !== IdEtatSite.ouvert) {
             const étatSite = Fabrique.etatSite.état(this.site.etat);
             const grAlerte = new KfGroupe('');
-            KfBootstrap.ajouteClasse(grAlerte, 'alert', 'danger');
+            KfBootstrap.ajouteClasseAlerte(grAlerte, 'danger');
             grAlerte.créeDivTable();
             const ligne = grAlerte.divTable.ajoute();
-            ligne.ajouteClasse('row');
+            ligne.géreCss.ajouteClasse('row');
 
             etiquette = new KfEtiquette('');
-            Fabrique.ajouteTexte(etiquette,
+            etiquette.ajouteTextes(
                 `Etat du site: `,
                 { texte: étatSite.nom, balise: KfTypeDeBaliseHTML.b }
             );
@@ -93,17 +91,17 @@ export class FAccueilComponent extends PageBaseComponent implements OnInit {
             col.ajouteClasse('col');
 
             etiquette = new KfEtiquette('');
-            Fabrique.ajouteTexte(etiquette,
+            etiquette.ajouteTextes(
                 ` Pour arrêter ${étatSite.article_titre},`
             );
-            const lien = Fabrique.lien.lienEnLigne({
+            const lien = Fabrique.lien.enLigne({
                 urlDef: {
                     pageDef: étatSite.pageDef,
                     routes: FournisseurSiteRoutes,
                     urlSite: this.site.url
                 }
-            });
-            etiquette.contenuPhrase.ajoute(lien);
+            }, 'dansAlerte');
+            etiquette.contenuPhrase.ajouteContenus(lien);
             col = ligne.ajoute([etiquette]);
             col.ajouteClasse('col');
 

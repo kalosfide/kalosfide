@@ -6,7 +6,7 @@ import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { CLFDoc } from './c-l-f-doc';
 import { Compare } from '../../commun/outils/tri';
 import { TexteOutils } from 'src/app/commun/outils/texte-outils';
-import { KfInitialObservable } from 'src/app/commun/kf-composants/kf-partages/kf-initial-observable';
+import { ValeurEtObservable } from 'src/app/commun/outils/valeur-et-observable';
 import { KfBBtnGroup, KfBBtnGroupElement } from 'src/app/commun/kf-composants/kf-b-btn-group/kf-b-btn-group';
 
 export class CLFUtileColonneDocCLF {
@@ -49,7 +49,7 @@ export class CLFUtileColonneDocCLF {
             nom: 'date',
             créeContenu: (clfDoc: CLFDoc) => clfDoc.no === 0 ? '' : TexteOutils.date.en_chiffres(clfDoc.date),
             compare: Compare.date((clfDoc: CLFDoc) => clfDoc.date),
-            classeDefs: ['date'],
+            classesItem: ['date'],
             enTeteDef: { titreDef: 'Date' },
         };
     }
@@ -116,7 +116,7 @@ export class CLFUtileColonneDocCLF {
      * @param synthèse document de synthèse
      */
     private btnGroupSynthèse(synthèse: CLFDoc): KfBBtnGroup {
-        const btnGroup = new KfBBtnGroup('action');
+        const btnGroup = new KfBBtnGroup('actionSynthèse');
         let bouton: KfBBtnGroupElement;
         // pour aligner avec les boutons des lignes
         bouton = Fabrique.bouton.fauxTexteSousIcone();
@@ -180,19 +180,19 @@ export class CLFUtileColonneDocCLF {
                 classeDefs: ['colonne-btn-group-3'],
             },
             créeContenu: (clfDoc: CLFDoc) => this.btnGroupDoc(clfDoc),
-            classeDefs: ['colonne-btn-group-3'],
+            classesItem: ['colonne-btn-group-3'],
             afficherSi: this.utile.conditionTable.edition,
         };
     }
 
     copier(synthèse: CLFDoc): IKfVueTableColonneDef<CLFDoc> {
-        const peutCopier = KfInitialObservable.transforme(this.utile.service.clsBilanIO,
+        const peutCopier = ValeurEtObservable.transforme(this.utile.service.clsBilanIO,
             () => {
                 return synthèse.nbCopiables > 0;
             });
-        const afficherSi = KfInitialObservable.et(peutCopier, this.utile.conditionTable.edition);
+        const afficherSi = ValeurEtObservable.et(peutCopier, this.utile.conditionTable.edition);
         const enTête = this.utile.bouton.copieDocs(synthèse);
-        enTête.inactivitéIO = KfInitialObservable.transforme(
+        enTête.inactivitéIO = ValeurEtObservable.transforme(
             this.utile.service.clsBilanIO,
             () => synthèse.nbCopiablesPasPréparés === 0
         );
@@ -201,7 +201,7 @@ export class CLFUtileColonneDocCLF {
             enTeteDef: { titreDef: enTête },
             créeContenu: (clfDoc: CLFDoc) => {
                 const bouton = this.utile.bouton.copieDoc(clfDoc);
-                bouton.inactivitéIO = KfInitialObservable.transforme(
+                bouton.inactivitéIO = ValeurEtObservable.transforme(
                     this.utile.service.clsBilanIO,
                     () => clfDoc.nbCopiablesPasPréparés === 0
                 );
@@ -212,13 +212,13 @@ export class CLFUtileColonneDocCLF {
     }
 
     annuler(synthèse: CLFDoc): IKfVueTableColonneDef<CLFDoc> {
-        const peutAnnuler = KfInitialObservable.transforme(this.utile.service.clsBilanIO,
+        const peutAnnuler = ValeurEtObservable.transforme(this.utile.service.clsBilanIO,
             () => {
                 return synthèse.àSynthétiser.length > 0;
             });
-        const nePasAfficherSi = KfInitialObservable.et(peutAnnuler, this.utile.conditionTable.edition);
+        const nePasAfficherSi = ValeurEtObservable.et(peutAnnuler, this.utile.conditionTable.edition);
         const enTête = this.utile.bouton.annuleDoc(synthèse);
-        enTête.inactivitéIO = KfInitialObservable.transforme(
+        enTête.inactivitéIO = ValeurEtObservable.transforme(
             this.utile.service.clsBilanIO,
             () => synthèse.préparé
         );
@@ -227,7 +227,7 @@ export class CLFUtileColonneDocCLF {
             enTeteDef: { titreDef: enTête },
             créeContenu: (clfDoc: CLFDoc) => {
                 const bouton = this.utile.bouton.annuleDoc(clfDoc);
-                bouton.inactivitéIO = KfInitialObservable.transforme(
+                bouton.inactivitéIO = ValeurEtObservable.transforme(
                     this.utile.service.clsBilanIO,
                     () => clfDoc.préparé
                 );

@@ -98,8 +98,10 @@ export class Catalogue implements ICatalogue {
         return catalogue;
     }
 
-    /** */
-    static deDate(date: Date): Catalogue {
+    /**
+     * Retourne un objet Catalogue ne contenant que la date.
+     */
+    static deDate(date?: Date): Catalogue {
         const catalogue = new Catalogue();
         catalogue.date = date;
         return catalogue;

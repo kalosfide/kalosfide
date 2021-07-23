@@ -4,11 +4,10 @@ import { CommandeAccueilComponent } from './commande-accueil.component';
 import { CommandeChoixProduitComponent } from './commande-choix-produit.component';
 import { CommandeLigneAjouteComponent } from './commande-ligne-ajoute.component';
 import { CommandeBonResolverService } from './commande-bon-resolver.service';
-import { RedirigeSiContexteChangé, RedirigeSiPasContexte } from './contexte-change-garde';
+import { RedirigeSiContexteChangé } from './contexte-change-garde';
 import { CommandePages } from './commande-pages';
 import { CommandeBonComponent } from './commande-bon.component';
 import { CommandeAnnuleComponent } from './commande-annule.component';
-import { CommandeContexteComponent } from './commande-contexte.component';
 import { CommandeDoitCréerGardeService } from './commande-doit-creer-garde.service';
 import { CommandeBonExisteGardeService } from './commande-bon-existe-garde.service';
 import { CommandeEnvoiGardeService } from './commande-envoi-garde.service';
@@ -17,7 +16,6 @@ import { CommandeLigneResolverService } from './commande-ligne-resolver.service'
 import { CLFPages } from 'src/app/modeles/c-l-f/c-l-f-pages';
 import { CommandeEnvoiComponent } from './commande-envoi.component';
 import { CommandeProduitPasDansBonGardeService } from './commande-produit-pas-dans-bon-garde.service';
-import { CommandeContexteResolverService } from './commande-contexte-resolver.service';
 
 const routes: Routes = [
     {
@@ -144,20 +142,6 @@ const routes: Routes = [
                 resolve: {
                     // Lit le stock. Crée le cflDoc.
                     clfDoc: CommandeBonResolverService,
-                },
-            },
-            {
-                path: CommandePages.contexte.urlSegment,
-                data: { pageDef: CommandePages.contexte },
-                component: CommandeContexteComponent,
-                canActivate: [
-                    // Lit le stock.
-                    // Si le stock n'existe pas ou n'est pas un contexte, redirige vers .bon
-                    RedirigeSiPasContexte,
-                ],
-                resolve: {
-                    // Lit le stock.
-                    contexte: CommandeContexteResolverService,
                 },
             },
         ]

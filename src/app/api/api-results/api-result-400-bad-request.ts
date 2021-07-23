@@ -13,19 +13,19 @@ export class ApiResult400BadRequest extends ApiResultErreur {
         validationErrors: { [keys: string]: string[] }
     ) {
         super(400);
-        this. titre = 'Données invalides';
+        this.titre = 'Données invalides';
         this.apiErreurs = validationErrors
-        ? Object.keys(validationErrors).map(key => {
-            const v = validationErrors[key];
-            return {
-                champ: key,
-                code: validationErrors[key][0]
-            };
-        })
-        : [{
-            champ: '2',
-            code: '400 bad Request'
-        }];
+            ? Object.keys(validationErrors).map(key => {
+                const v = validationErrors[key];
+                return {
+                    champ: key,
+                    code: validationErrors[key][0]
+                };
+            })
+            : [{
+                champ: '2',
+                code: '400 bad Request'
+            }];
     }
 
     créeMessages(
@@ -70,10 +70,11 @@ export class ApiResult400BadRequest extends ApiResultErreur {
                 details = details.concat(erreursDuFormulaire.map(e => e.code));
                 apiErreurs = apiErreurs.filter(e => e.champ !== '2');
             }
-            // erreurs qui ne devraient pas exister
-            details = details.concat(apiErreurs.map(e => {
-                return `Erreur: { champ: ${e.champ}, code: ${e.code}}`;
-            }));
         }
+        // erreurs qui ne devraient pas exister
+        details = details.concat(apiErreurs.map(e => {
+            return `Erreur: { champ: ${e.champ}, code: ${e.code}}`;
+        }));
+        this.messages = details;
     }
 }

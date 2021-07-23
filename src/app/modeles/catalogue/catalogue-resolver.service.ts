@@ -2,9 +2,11 @@ import { Injectable } from '@angular/core';
 import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
 import { Catalogue } from './catalogue';
-import { DataResolverService } from 'src/app/services/data-resolver.service';
 import { CatalogueService } from './catalogue.service';
 
+/**
+ * Charge le catalogue ou le lit s'il est déjà dans le stock.
+ */
 @Injectable()
 export class CatalogueResolverService implements Resolve<Catalogue> {
 

@@ -3,9 +3,9 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { KeyUidRnoNoService } from './key-uid-rno-no.service';
 import { DataKeyIndexComponent } from '../data-key-index.component';
 import { KeyUidRnoNo } from './key-uid-rno-no';
-import { Directive } from "@angular/core";
+import { Component,} from '@angular/core';
 
-@Directive()
+@Component({ template: '' })
 export abstract class KeyUidRnoNoIndexComponent<T extends KeyUidRnoNo> extends DataKeyIndexComponent<T>  {
 
     constructor(

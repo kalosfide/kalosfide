@@ -1,9 +1,8 @@
-import { FabriqueClasse, Fabrique } from './fabrique';
+import { FabriqueClasse } from './fabrique';
 import { KfVueTable } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table';
 import { KfTypeDEvenement } from 'src/app/commun/kf-composants/kf-partages/kf-evenements';
 import { FabriqueMembre } from './fabrique-membre';
 import { KfVueTableOutils } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-outils';
-import { KfVueTableFiltreBase } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-filtre-base';
 import { KfVueTableFiltreTexte } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-filtre-texte';
 import { KfVueTableFiltreNombre } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-filtre-nombre';
 import { KfVueTableFiltreCherche } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-filtre-cherche';
@@ -16,9 +15,9 @@ import { GroupeBoutonsMessages } from './fabrique-formulaire';
 import { KfBouton } from 'src/app/commun/kf-composants/kf-elements/kf-bouton/kf-bouton';
 import { IKfVueTablePaginationDef, KfVueTablePagination } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-pagination';
 import { IKfIconeDef } from 'src/app/commun/kf-composants/kf-partages/kf-icone-def';
-import { KfIcone } from 'src/app/commun/kf-composants/kf-elements/kf-icone/kf-icone';
 import { KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
+import { LargeurColonne } from '../largeur-colonne';
 
 export class FabriqueVueTable extends FabriqueMembre {
 
@@ -37,7 +36,7 @@ export class FabriqueVueTable extends FabriqueMembre {
     vueTable<T>(nom: string, vueTableDef: IKfVueTableDef<T>): KfVueTable<T> {
         vueTableDef.nePasMontrerIconeDeTriSiPasTrié = true;
         vueTableDef.colonneNoLigneDef = {
-            classeDefs: ['no-ligne'],
+            largeur: LargeurColonne.no_ligne,
         };
         const vueTable = new KfVueTable<T>(nom + '_table', vueTableDef);
         vueTable.ajouteClasse('table-sm table-hover table-borderless');
@@ -60,7 +59,7 @@ export class FabriqueVueTable extends FabriqueMembre {
         if (vueTable.outils) {
             vueTable.fixeClassesFiltre(this.classeFondFiltre);
             vueTable.outils.ajouteClasse('border border-rounded p-1 mb-2');
-            vueTable.outils.fixeClassesFiltre(this.classeFondFiltre, this.classeFondFiltreInactif);
+            vueTable.outils.fixeClassesFiltre(this.classeFondFiltre);
         }
 
         return vueTable;
@@ -82,7 +81,7 @@ export class FabriqueVueTable extends FabriqueMembre {
             }
         )
         const étiquette = new KfEtiquette('');
-        étiquette.contenuPhrase.ajoute(icone);
+        étiquette.contenuPhrase.ajouteContenus(icone);
         return étiquette;
     }
 
@@ -114,7 +113,7 @@ export class FabriqueVueTable extends FabriqueMembre {
     }
 
     cherche<T>(nom: string, titre: string, colonne: string, placeholder?: string): KfVueTableFiltreCherche<T> {
-        const filtre = new KfVueTableFiltreCherche<T>(nom, colonne);
+        const filtre = new KfVueTableFiltreCherche<T>(nom, colonne, KfBootstrap.classeFond('warning'));
         filtre.composant.ajouteClasse('form-control');
         const inactif: () => boolean = () => !filtre.texte.valeur || filtre.texte.valeur === ''
         const fauxBouton = this.iconeAvant(this.fabrique.icone.def.cherche, inactif);
@@ -158,7 +157,7 @@ export class FabriqueVueTable extends FabriqueMembre {
         }
         let boutons: (KfBouton | KfLien)[];
         if (def.avecSolution) {
-            const bouton = this.fabrique.lien.lien('solution');
+            const bouton = this.fabrique.lien.bouton('solution');
             boutons = [bouton];
         }
         const groupe = new GroupeBoutonsMessages('etat', { messages, boutons });

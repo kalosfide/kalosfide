@@ -27,6 +27,7 @@ export class Role extends KeyUidRno implements IRoleData, IRolePréférences {
     formatNomFichierLivraison: string;
     formatNomFichierFacture: string;
     etat: string;
+    date0: Date;
     dateEtat: Date;
 
     site: Site;
@@ -52,14 +53,11 @@ export class Role extends KeyUidRno implements IRoleData, IRolePréférences {
     }
 
     static copie(de: Role, vers: Role) {
-        vers.uid = de.uid;
-        vers.rno = de.rno;
-        vers.nom = de.nom;
-        vers.adresse = de.adresse;
-        vers.ville = de.ville;
-        vers.formatNomFichierCommande = de.formatNomFichierCommande;
-        vers.formatNomFichierLivraison = de.formatNomFichierLivraison;
-        vers.formatNomFichierFacture = de.formatNomFichierFacture;
+        KeyUidRno.copieKey(de, vers);
+        Role.copieData(de, vers);
+        Role.copiePréférences(de, vers);
+        vers.date0 = de.date0;
+        vers.dateEtat = de.dateEtat;
     }
 
     static nomFichier(role: Role, type: TypeCLF, no: number, nom: string): string {

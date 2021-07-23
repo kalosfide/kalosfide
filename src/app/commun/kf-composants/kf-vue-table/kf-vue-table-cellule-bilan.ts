@@ -26,8 +26,8 @@ export class KfVueTableCelluleBilan<T> extends KfVueTableCelluleBase<T> implemen
                 if (texteAgrégé) {
                     const lignesAAgréger = (this.pLigne as KfVueTableLigneBilan<T>).estBilanDesVisibles
                         ? this.vueTable.corps.lignesVisibles : this.vueTable.corps.lignes;
-                    const texteDef = () => texteAgrégé(lignesAAgréger.map(l => l.item));
-                    this.pContenu.fixeTexte(texteDef);
+                    const stringDef = () => texteAgrégé(lignesAAgréger.map(l => l.item));
+                    this.pContenu.fixeTexte(stringDef);
                 }
             }
             return;

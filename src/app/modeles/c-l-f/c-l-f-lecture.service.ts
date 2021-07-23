@@ -2,7 +2,7 @@ import { KeyUidRnoNoService } from 'src/app/commun/data-par-key/key-uid-rno-no/k
 import { Observable, of, Subject } from 'rxjs';
 import { ApiRequêteService } from 'src/app/api/api-requete.service';
 import { Site } from '../site/site';
-import { KfInitialObservable } from 'src/app/commun/kf-composants/kf-partages/kf-initial-observable';
+import { ValeurEtObservable } from 'src/app/commun/outils/valeur-et-observable';
 import { ApiDocument } from './api-document';
 import { CatalogueService } from '../catalogue/catalogue.service';
 import { StockageService } from 'src/app/services/stockage/stockage.service';
@@ -24,7 +24,7 @@ export abstract class CLFLectureService extends KeyUidRnoNoService<ApiDocument> 
 
     private pStockage: Stockage<CLFDocs>;
 
-    private pClsBilanIO?: KfInitialObservable<CLFBilan>;
+    private pClsBilanIO?: ValeurEtObservable<CLFBilan>;
 
     protected pFiltre: CLFFiltre;
 
@@ -37,17 +37,18 @@ export abstract class CLFLectureService extends KeyUidRnoNoService<ApiDocument> 
     caseToutSélectionner: KfCaseACocher;
 
     constructor(
+        nomStockage: string,
         protected catalogueService: CatalogueService,
         protected stockageService: StockageService,
         protected clientService: ClientService,
         protected apiRequeteService: ApiRequêteService
     ) {
         super(apiRequeteService);
-        this.pStockage = stockageService.nouveau<CLFDocs>('Documents', {
+        this.pStockage = stockageService.nouveau<CLFDocs>(nomStockage, {
             // Le stockage sera réinitialisé à chaque changement de site ou d'identifiant
             rafraichi: true,
         });
-        this.pClsBilanIO = KfInitialObservable.nouveau(CLFBilan.bilanVide());
+        this.pClsBilanIO = ValeurEtObservable.nouveau(CLFBilan.bilanVide());
     }
 
     controller(type: TypeCLF): string {
@@ -97,7 +98,7 @@ export abstract class CLFLectureService extends KeyUidRnoNoService<ApiDocument> 
         this.fixeStock(clfDocs);
     }
 
-    get clsBilanIO(): KfInitialObservable<CLFBilan> {
+    get clsBilanIO(): ValeurEtObservable<CLFBilan> {
         return this.pClsBilanIO;
     }
 
@@ -156,8 +157,8 @@ export abstract class CLFLectureService extends KeyUidRnoNoService<ApiDocument> 
         }).pipe(
             map(datas => {
                 const clfDocs = new CLFDocs();
-                clfDocs.charge(datas);
                 clfDocs.site = site;
+                clfDocs.charge(datas);
                 return clfDocs;
             })
         );

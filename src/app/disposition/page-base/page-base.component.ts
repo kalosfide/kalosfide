@@ -3,13 +3,14 @@ import { Subscription } from 'rxjs';
 
 import { KfSuperGroupe } from '../../commun/kf-composants/kf-groupe/kf-super-groupe';
 import { PageDef } from 'src/app/commun/page-def';
-import { OnDestroy } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { KfEvenement } from 'src/app/commun/kf-composants/kf-partages/kf-evenements';
-import { BarreTitre } from '../fabrique/fabrique-titre-page/fabrique-titre-page';
-import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
+import { IBarreTitre } from '../fabrique/fabrique-titre-page/fabrique-titre-page';
 import { Fabrique } from '../fabrique/fabrique';
 
-// TODO: Add Angular decorator.
+@Component({
+    template: ''
+})
 export abstract class PageBaseComponent implements OnDestroy {
 
     subscriptions: Subscription[] = [];
@@ -33,10 +34,10 @@ export abstract class PageBaseComponent implements OnDestroy {
     }
 
     titrePage: KfSuperGroupe;
-    barre: BarreTitre;
+    barre: IBarreTitre;
 
     niveauTitre: number;
-    protected créeBarreTitre = (): BarreTitre => {
+    protected créeBarreTitre = (): IBarreTitre => {
         const barre = Fabrique.titrePage.barreTitre({
             pageDef: this.pageDef,
         });

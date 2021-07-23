@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { Catalogue, CatalogueApi } from './catalogue';
-import { map, take, tap } from 'rxjs/operators';
+import { concatMap, map, take, tap } from 'rxjs/operators';
 import { KeyUidRno } from '../../commun/data-par-key/key-uid-rno/key-uid-rno';
 import { DataService } from '../../services/data.service';
 import { ApiController, ApiAction } from 'src/app/api/api-route';
@@ -13,6 +13,9 @@ import { SiteService } from '../site/site.service';
 import { IdEtatSite } from '../etat-site';
 import { Stockage } from 'src/app/services/stockage/stockage';
 import { StockageService } from 'src/app/services/stockage/stockage.service';
+import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
+import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
+import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
 
 @Injectable({
     providedIn: 'root'
@@ -118,5 +121,43 @@ export class CatalogueService extends DataService {
     }
     termineModificationOk(site: Site) {
         this.siteService.changeEtatOk(site, IdEtatSite.ouvert);
+    }
+
+    private actionModification(
+        apiAction: string,
+        étatCatalogue: IdEtatSite,
+        titre: string,
+        infos: KfEtiquette[]
+    ): Observable<boolean> {
+        const site = this.navigation.litSiteEnCours();
+        const modal = Fabrique.infoModal(titre, infos);
+        return this.actionObs({
+            demandeApi: () => this.post(ApiController.catalogue, apiAction, null, KeyUidRno.créeParams(site)),
+            actionSiOk: () => this.siteService.changeEtatOk(site, étatCatalogue)
+        }).pipe(
+            concatMap((ok: boolean) => {
+                if (ok) {
+                    return this.modalService.confirme(modal);
+                }
+                return of(false);
+            })
+        )
+    }
+    commence(): Observable<boolean> {
+        const titre = 'Modification du catalogue';
+        const infos: KfEtiquette[] = [];
+        let étiquette: KfEtiquette;
+        étiquette = Fabrique.ajouteEtiquetteP(infos);
+        étiquette.ajouteTextes(
+            `Pendant la modification du catalogue`,
+            { texte: `votre site est fermé`, balise: KfTypeDeBaliseHTML.b },
+            `et vos clients ne peuvent pas commander.`
+        );
+        étiquette = Fabrique.ajouteEtiquetteP(infos);
+        étiquette.ajouteTextes(
+            `Il faut quitter les pages du catalogue ou vous déconnecter pour réouvrir votre site.`
+        );
+        const modal = Fabrique.infoModal(titre, infos);
+        return this.actionModification(ApiAction.catalogue.commence, IdEtatSite.catalogue, titre, infos)
     }
 }

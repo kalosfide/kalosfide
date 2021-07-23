@@ -1,8 +1,8 @@
-import { KfTexteDef } from './kf-texte-def';
+import { KfStringDef } from './kf-string-def';
 import { KfNombreDef } from './kf-nombre-def';
 
 export interface KfImageDef {
-    urlDef: KfTexteDef;
+    urlDef: KfStringDef;
     largeurDef?: KfNombreDef;
     hauteurDef?: KfNombreDef;
 }

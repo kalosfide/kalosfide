@@ -3,7 +3,6 @@ import { DataResolverService } from 'src/app/services/data-resolver.service';
 import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { CLFDoc } from '../c-l-f-doc';
 import { IUrlDef } from 'src/app/disposition/fabrique/fabrique-url';
-import { DATE_EST_NULLE } from '../../date-nulle';
 import { CLFPages } from '../c-l-f-pages';
 import { CLFDocs } from '../c-l-f-docs';
 import { ApiResult404NotFound } from 'src/app/api/api-results/api-result-404-not-found';
@@ -32,10 +31,9 @@ export class CLFGardeService extends DataResolverService {
     /**
      * Retourne vrai si le bon est le bon virtuel (de no égal à 0) et si ce bon
      * n'existe pas dans l'Api (pas de lignes si jamais de livraison, date non nulle si lignes à copier de la dernière livraison)
-     * @param route route à garder
      */
     bonEstVirtuelEtNExistePasOuEstEnvoyé(bon: CLFDoc): boolean {
-        return bon.no === 0 && (!bon.lignes || !DATE_EST_NULLE(bon.date));
+        return bon.no === 0 && (!bon.lignes || !bon.date);
     }
 
     /**
@@ -52,7 +50,7 @@ export class CLFGardeService extends DataResolverService {
      * @param route route à garder
      */
     commandeEstVirtuelleEtOuverte(clfDoc: CLFDoc): boolean {
-        return clfDoc.no === 0 && DATE_EST_NULLE(clfDoc.date);
+        return clfDoc.no === 0 && !clfDoc.date;
     }
 
     /**
@@ -60,7 +58,7 @@ export class CLFGardeService extends DataResolverService {
      * Redirige si le bon créé à partir de ces params ne satisfait pas la condition.
      * @param route route à garder
      */
-    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
+     peutActiver(route: ActivatedRouteSnapshot): boolean {
         const clfDocs: CLFDocs = this.service.litStock();
         if (!clfDocs) {
             throw new Error('CLFGarde: La garde précédente doit avoir déjà résolu le clfDocs');
@@ -87,8 +85,5 @@ export class CLFGardeService extends DataResolverService {
             }
         }
         return true;
-    }
-    canActivateChild(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | Observable<boolean> | Promise<boolean> {
-        return this.canActivate(route, state);
     }
 }

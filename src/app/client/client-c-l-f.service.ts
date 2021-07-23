@@ -2,13 +2,9 @@ import { Injectable } from '@angular/core';
 import { Observable, of, Subject } from 'rxjs';
 import { ApiAction, ApiController } from 'src/app/api/api-route';
 import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
-import { mergeMap, switchMap, concatMap, tap, map } from 'rxjs/operators';
-import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
-import { IKeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/i-key-uid-rno';
+import { concatMap, tap, map, switchMap } from 'rxjs/operators';
 import { ApiRequêteService } from 'src/app/api/api-requete.service';
 import { Site } from 'src/app/modeles/site/site';
-import { ClientPages, ClientRoutes } from './client-pages';
-import { Stockage } from 'src/app/services/stockage/stockage';
 import { StockageService } from 'src/app/services/stockage/stockage.service';
 import { Produit } from 'src/app/modeles/catalogue/produit';
 import { CLFService } from 'src/app/modeles/c-l-f/c-l-f.service';
@@ -17,15 +13,19 @@ import { CatalogueService } from 'src/app/modeles/catalogue/catalogue.service';
 import { ClientService } from 'src/app/modeles/client/client.service';
 import { CLFDoc } from '../modeles/c-l-f/c-l-f-doc';
 import { IdEtatSite } from '../modeles/etat-site';
-import { DATE_EST_NULLE } from '../modeles/date-nulle';
 import { ApiResult } from '../api/api-results/api-result';
 import { ApiResult409Conflict } from '../api/api-results/api-result-409-conflict';
 import { ApiDocumentsData } from '../modeles/c-l-f/api-documents-client-data';
 import { Identifiant } from '../securite/identifiant';
 import { Client } from '../modeles/client/client';
-import { ContexteCatalogue } from './commandes/contexte';
+import { ContexteCatalogue } from './contexte-catalogue';
 import { Catalogue } from '../modeles/catalogue/catalogue';
 import { CLFFiltre } from '../modeles/c-l-f/c-l-f-filtre';
+import { SiteService } from '../modeles/site/site.service';
+import { Fabrique } from '../disposition/fabrique/fabrique';
+import { KfComposant } from '../commun/kf-composants/kf-composant/kf-composant';
+import { KfEtiquette } from '../commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
+import { ClientUtile } from '../modeles/client/client-utile';
 
 @Injectable({
     providedIn: 'root'
@@ -36,17 +36,21 @@ export class ClientCLFService extends CLFService {
 
     private pStockChargéSubject: Subject<CLFDocs>;
 
-
     constructor(
         protected catalogueService: CatalogueService,
         protected stockageService: StockageService,
         protected clientService: ClientService,
-        protected apiRequeteService: ApiRequêteService
+        protected apiRequeteService: ApiRequêteService,
+        private siteService: SiteService
     ) {
-        super(catalogueService, stockageService, clientService, apiRequeteService);
+        super('CLFClient', catalogueService, stockageService, clientService, apiRequeteService);
         this.utile.utilisateurEstLeClient = true;
         this.pStockChargéSubject = new Subject<CLFDocs>();
         this.traiteErreur = this.traiteErreur409.bind(this);
+    }
+
+    get clientUtile(): ClientUtile {
+        return this.clientService.utile;
     }
 
     /// SECTION Observables du stock
@@ -115,7 +119,7 @@ export class ClientCLFService extends CLFService {
             clfDocs.site = site;
             clfDocs.catalogue = Catalogue.deDate(contexte.dateCatalogue);
             this.fixeStock(clfDocs);
-            const urlDef = this.utile.url.contexte();
+            const urlDef = this.utile.url.sitePasOuvert();
             urlDef.params = [{ nom: 'err', valeur: '409' }];
             this.routeur.navigueUrlDef(urlDef);
             return true;
@@ -170,7 +174,7 @@ export class ClientCLFService extends CLFService {
             params.dateCatalogue = '' + stock.catalogue.date;
         }
         // Si le site est d'état Catalogue
-        //  retourne l'erreur 409 avec contexte Catalogue: état site = Catalogue, date catalogue = DateNulle.
+        //  retourne l'erreur 409 avec contexte Catalogue: état site = Catalogue, date catalogue = null.
         // Sinon,
         //  si le stock existe, la date du catalogue du stock est passée en paramètre
         //      si la date du catalogue du stock est antérieure à celle du catalogue de la bdd
@@ -179,7 +183,7 @@ export class ClientCLFService extends CLFService {
         //          retourne un ClfDocs vide
         // sinon
         //      retourne un CLFDocs dont le champ Documents contient les données pour client de la dernière commande du client
-        // Si le site est d'état Catalogue, retourne un contexte Catalogue: état site = Catalogue, date catalogue = DateNulle.
+        // Si le site est d'état Catalogue, retourne un contexte Catalogue: état site = Catalogue, date catalogue = null.
         // Si le site est ouvert et si l'utilisateur a passé la date de son catalogue
         // et si la date du catalogue utilisateur est postérieure à celle du catalogue de la bdd, les données utilisateur sont à jour,
         // retourne un contexte Ok: état site = ouvert, date catalogue = DataNulle.
@@ -189,7 +193,7 @@ export class ClientCLFService extends CLFService {
         // Si le site est ouvert et si l'utilisateur n'a pas passé la date de son catalogue, il n'y pas de données utilisateur,
         // retourne un CLFDocs dont le champ Documents contient les données pour client de la dernière commande du client
         return this.lectureObs<ApiDocumentsData>({
-            demandeApi: () => this.get<ApiDocumentsData>(ApiController.commande, ApiAction.commande.encours, params),
+            demandeApi: () => this.get<ApiDocumentsData>(ApiController.commande, ApiAction.bon.encours, params),
             traiteErreur: this.traiteErreur409
         }).pipe(
             concatMap(datas => {
@@ -210,6 +214,44 @@ export class ClientCLFService extends CLFService {
                         return clfDocs;
                     })
                 );
+            })
+        );
+    }
+
+    /**
+     * Lit l'état du site en cours dans la bdd et si changé, met à jour les stockages du site
+     * et si le site a fermé, vide le stockage du catalogue et met un contexte dans le stockage des docs
+     * et si le site a réouvert, affiche une fenêtre modale  d'information.
+     * @returns of(true)
+     */
+    litEtatSiteEtRetourneTrue(): boolean | Observable<boolean> {
+        const site = this.navigation.litSiteEnCours();
+        return this.siteService.litEtat().pipe(
+            switchMap(état => {
+                if (état === site.etat) {
+                    // site n'a pas changé même si le stockage a été mis à jour
+                    return of(true);
+                }
+                if (état === IdEtatSite.ouvert) {
+                    const defs: { titre: string, textes: string[] } = this.clientUtile.textesEtatSite(IdEtatSite.ouvert)
+                    const infos: KfComposant[] = [];
+                    let étiquette: KfEtiquette;
+                    defs.textes.forEach(texte => {
+                        étiquette = Fabrique.ajouteEtiquetteP(infos);
+                        étiquette.ajouteTextes(texte);
+                    });
+                    const modal = Fabrique.infoModal(defs.titre, infos);
+                    return this.modalService.confirme(modal);
+                } else {
+                    this.catalogueService.fixeStock(null);
+                    const clfDocs = new CLFDocs();
+                    clfDocs.type = 'commande';
+                    clfDocs.site = site;
+                    clfDocs.catalogue = Catalogue.deDate();
+                    this.fixeStock(clfDocs);
+                    this.routeur.navigueUrlDef(this.utile.url.sitePasOuvert());
+                }
+                return of(true);
             })
         );
     }

@@ -48,12 +48,6 @@ export class KfGroupe extends KfComposant {
         this.pAvecInvalidFeedback = avecInvalidFeedback;
     }
 
-    /**
-     * si existe, gére le css d'une div créée autour des contenus
-     */
-    private géreCssSousDiv: KfGéreCss;
-
-    private masqué: boolean;
     legende: KfEtiquette;
 
     private pDivTable: KfDivTable;
@@ -71,24 +65,11 @@ export class KfGroupe extends KfComposant {
         return this.formGroup && (!(this.comportementFormulaire.neSoumetPasSiPristine && this.formGroup.pristine) && this.formGroup.valid);
     }
 
-    /**
-     * crée le gestionnaire css d'une div à ajouter autour des contenus
-     */
-    contenusDansDiv(classe: string) {
-        this.géreCssSousDiv = new KfGéreCss();
-        this.géreCssSousDiv.ajouteClasse(classe);
-    }
-    get classeSousDiv(): KfNgClasse {
-        if (this.géreCssSousDiv) {
-            return this.géreCssSousDiv.classe;
-        }
-    }
-
     get divTable(): KfDivTable {
         return this.pDivTable;
     }
     créeDivTable() {
-        this.pDivTable = new KfDivTable();
+        this.pDivTable = new KfDivTable(this);
     }
 
     get divLigne(): KfDivTableLigne {
@@ -96,22 +77,6 @@ export class KfGroupe extends KfComposant {
     }
     créeDivLigne() {
         this.pDivLigne = new KfDivTableLigne();
-    }
-
-    masquable(masqueInitial: boolean) {
-        this.masqué = masqueInitial;
-    }
-
-    get estMasquable(): boolean {
-        return this.masqué !== undefined;
-    }
-
-    get masque(): boolean {
-        return this.masqué === true;
-    }
-
-    basculeMasque() {
-        this.masqué = !this.masqué;
     }
 
     get valeur(): any {

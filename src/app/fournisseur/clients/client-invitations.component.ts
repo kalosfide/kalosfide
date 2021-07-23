@@ -1,20 +1,21 @@
 import { Component, OnInit } from '@angular/core';
-import { BarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
+import { IBarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { Identifiant } from 'src/app/securite/identifiant';
 import { ActivatedRoute, Data } from '@angular/router';
 import { FournisseurClientPages } from './client-pages';
 import { Site } from 'src/app/modeles/site/site';
 import { PageTableComponent } from 'src/app/disposition/page-table/page-table.component';
-import { Invitation } from 'src/app/modeles/invitation/invitation';
+import { Invitation } from 'src/app/modeles/client/invitation';
 import { IGroupeTableDef } from 'src/app/disposition/page-table/groupe-table';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { EtatTable } from 'src/app/disposition/fabrique/etat-table';
 import { IKfVueTableColonneDef } from 'src/app/commun/kf-composants/kf-vue-table/i-kf-vue-table-colonne-def';
 import { TexteOutils } from 'src/app/commun/outils/texte-outils';
-import { InvitationService } from 'src/app/modeles/invitation/invitation.service';
 import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
 import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
 import { Compare } from 'src/app/commun/outils/tri';
+import { ClientService } from 'src/app/modeles/client/client.service';
+import { LargeurColonne } from 'src/app/disposition/largeur-colonne';
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
@@ -33,7 +34,7 @@ export class ClientInvitationsComponent extends PageTableComponent<Invitation> i
 
     constructor(
         protected route: ActivatedRoute,
-        protected service: InvitationService
+        protected service: ClientService
     ) {
         super(route, service);
     }
@@ -45,7 +46,7 @@ export class ClientInvitationsComponent extends PageTableComponent<Invitation> i
 
     créeGroupeTableDef(): IGroupeTableDef<Invitation> {
         const outils = Fabrique.vueTable.outils<Invitation>();
-        outils.ajoute(this.service.utile.outils.ajoute());
+        outils.ajoute(this.service.utile.lien.ajouteInvitation());
         const etatTable = Fabrique.vueTable.etatTable({
             nePasAfficherSiPasVide: true,
             nbMessages: 1,
@@ -53,13 +54,16 @@ export class ClientInvitationsComponent extends PageTableComponent<Invitation> i
             charge: ((etat: EtatTable) => {
                 etat.grBtnsMsgs.messages[0].fixeTexte(`Il n'y a pas d'invitation en attente de réponse.`);
                 Fabrique.lien.fixeDef(etat.grBtnsMsgs.boutons[0] as KfLien,
-                    this.service.utile.lien.ajouteDef(this.pageDef.urlSegment));
+                    this.service.utile.lien.ajouteInvitationDef());
                 etat.grBtnsMsgs.alerte('warning');
             }).bind(this)
         });
-        const rafraichitQuandSupprime = () => {
-            this.liste = this.service.litInvitations();
-            this.chargeGroupe();
+        const rafraichitQuandSupprime = (invitation: Invitation) => {
+            return (() => {
+                const index = this.liste.findIndex(i => i.email === invitation.email);
+                this.liste.splice(index)
+                this.vueTable.supprimeItem(index);
+            }).bind(this);
         };
         const email = (invitation: Invitation) => invitation.email;
         const colonnesDef: IKfVueTableColonneDef<Invitation>[] = [
@@ -73,27 +77,30 @@ export class ClientInvitationsComponent extends PageTableComponent<Invitation> i
                 nom: 'date',
                 enTeteDef: { titreDef: 'Date' },
                 créeContenu: (invitation: Invitation) => () => TexteOutils.date.en_chiffres(invitation.date),
-                classeDefs: ['date'],
-                compare: Compare.date((invitation: Invitation) => invitation.date)
+                compare: Compare.date((invitation: Invitation) => invitation.date),
+                largeur: LargeurColonne.date,
             },
             {
                 nom: 'client',
-                enTeteDef: { titreDef: 'Client éventuel' },
+                enTeteDef: { titreDef: 'Compte existant' },
                 créeContenu: (invitation: Invitation) => invitation.client ? invitation.client.nom : ''
             },
             {
                 nom: 'réenvoie',
-                créeContenu: (invitation: Invitation) => this.service.utile.lien.réenvoie(invitation)
+                créeContenu: (invitation: Invitation) => this.service.utile.lien.réenvoie(invitation),
+                largeur: LargeurColonne.action,
             },
             {
                 nom: 'supprime',
-                créeContenu: (invitation: Invitation) => this.service.utile.bouton.supprime(invitation, rafraichitQuandSupprime.bind(this))
+                créeContenu: (invitation: Invitation) => this.service.utile.bouton.supprimeInvitation(invitation, rafraichitQuandSupprime(invitation)),
+                largeur: LargeurColonne.action,
             }
         ];
         return {
             vueTableDef: {
                 colonnesDef,
                 outils,
+                id: (invitation: Invitation) => invitation.email
             },
             etatTable
         };

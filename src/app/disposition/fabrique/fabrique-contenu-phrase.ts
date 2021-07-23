@@ -1,18 +1,19 @@
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
 import { KfIcone } from 'src/app/commun/kf-composants/kf-elements/kf-icone/kf-icone';
-import { KfTexteDef } from 'src/app/commun/kf-composants/kf-partages/kf-texte-def';
+import { KfStringDef } from 'src/app/commun/kf-composants/kf-partages/kf-string-def';
 import { FabriqueMembre } from './fabrique-membre';
 import { FabriqueClasse } from './fabrique';
 import { IKfIconeDef } from 'src/app/commun/kf-composants/kf-partages/kf-icone-def';
 import { Couleur } from './fabrique-couleurs';
 import { KfIconePositionTexte } from 'src/app/commun/kf-composants/kf-elements/kf-icone/kf-icone-types';
 import { KfContenuPhrase } from 'src/app/commun/kf-composants/kf-partages/kf-contenu-phrase/kf-contenu-phrase';
+import { KfTypeDeComposant } from 'src/app/commun/kf-composants/kf-composants-types';
 
 export interface IContenuPhraseDef {
     icone?: KfIcone;
     iconeDef?: IKfIconeDef;
     couleurIcone?: Couleur;
-    texte?: KfTexteDef;
+    texte?: KfStringDef;
     positionTexte?: KfIconePositionTexte;
     couleurTexte?: Couleur;
 }
@@ -20,10 +21,10 @@ export interface IContenuPhraseDef {
 export class FabriqueContenuPhrase extends FabriqueMembre {
     constructor(fabrique: FabriqueClasse) { super(fabrique); }
 
-    accepter: IContenuPhraseDef = {
+    activer: IContenuPhraseDef = {
         iconeDef: this.fabrique.icone.def.accepter,
         couleurIcone: Couleur.success,
-        texte: 'Accepter',
+        texte: 'Activer',
         positionTexte: 'bas'
     };
     choisit: IContenuPhraseDef = {
@@ -38,34 +39,16 @@ export class FabriqueContenuPhrase extends FabriqueMembre {
         texte: 'Modifier',
         positionTexte: 'bas'
     };
-    invite: IContenuPhraseDef = {
-        iconeDef: this.fabrique.icone.def.envelope_pleine,
-        couleurIcone: Couleur.dark,
-        texte: 'Inviter',
-        positionTexte: 'bas'
-    };
-    réinvite: IContenuPhraseDef = {
-        iconeDef: this.fabrique.icone.def.envelope,
-        couleurIcone: Couleur.dark,
-        texte: 'Réinviter',
-        positionTexte: 'bas'
-    };
-    invité: IContenuPhraseDef = {
-        iconeDef: this.fabrique.icone.def.envelope,
-        couleurIcone: Couleur.dark,
-        texte: 'Invité',
-        positionTexte: 'bas'
-    };
     supprime: IContenuPhraseDef = {
         iconeDef: this.fabrique.icone.def.supprimer,
         couleurIcone: Couleur.dark,
         texte: 'Supprimer',
         positionTexte: 'bas'
     };
-    exclure: IContenuPhraseDef = {
+    fermer: IContenuPhraseDef = {
         iconeDef: this.fabrique.icone.def.refuser,
         couleurIcone: Couleur.danger,
-        texte: 'Exclure',
+        texte: 'Fermer',
         positionTexte: 'bas'
     };
     copier: IContenuPhraseDef = {
@@ -167,7 +150,7 @@ export class FabriqueContenuPhrase extends FabriqueMembre {
             }
         }
         if (icone) {
-            contenuPhrase.ajoute(icone);
+            contenuPhrase.ajouteContenus(icone);
             if (def.couleurIcone) {
                 this.fabrique.couleur.ajouteClasseCouleur(icone, def.couleurIcone, () => {
                     return !composant.inactif;
@@ -206,6 +189,10 @@ export class FabriqueContenuPhrase extends FabriqueMembre {
             }
         }
         composant.contenuPhrase = contenuPhrase;
+    }
+
+    kfIcone(composant: KfComposant): KfIcone {
+        return composant.contenuPhrase.contenus.find(c => c.type === KfTypeDeComposant.icone) as KfIcone;
     }
 
 }

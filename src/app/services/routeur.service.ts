@@ -9,7 +9,7 @@ import { PageDef } from '../commun/page-def';
 import { Identifiant } from '../securite/identifiant';
 import { FournisseurRoutes } from '../fournisseur/fournisseur-pages';
 import { ClientRoutes } from '../client/client-pages';
-import { ValeurTexteDef } from '../commun/kf-composants/kf-partages/kf-texte-def';
+import { ValeurStringDef } from '../commun/kf-composants/kf-partages/kf-string-def';
 import { IUrlDef } from '../disposition/fabrique/fabrique-url';
 import { ApiResultErreur, ApiResultErreurSpéciale } from '../api/api-results/api-result-erreur';
 import { AppPages } from '../app-pages';
@@ -112,7 +112,7 @@ export class RouteurService {
             segments = segments.concat(def.keys);
         }
         return  def.urlSite
-            ? def.routes.url(ValeurTexteDef(def.urlSite), segments)
+            ? def.routes.url(ValeurStringDef(def.urlSite), segments)
             : AppSiteRoutes.url(segments);
     }
 

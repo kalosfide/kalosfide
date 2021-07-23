@@ -3,12 +3,12 @@ export enum EtatClient {
     /**
      * état d'un client qui a créé son compte et n'est pas encore été validé par le fournisseur
      * le client peut commander et accèder à ses documents
+     * Le Fournisseur ne peut pas créer de documents
      */
     nouveau = 'N',
 
     /**
      * état d'un client qui a créé son compte et a été validé par le fournisseur ou qui a été créé par le fournisseur
-     * les commandes de ce client n'ont pas besoin d'être validées lors de la réception par le fournisseur
      */
     actif = 'A',
 
@@ -20,34 +20,19 @@ export enum EtatClient {
 
     /**
      * état d'un client qui a des données et qui a quitté le site
-     * ses données personnelles ont été rendues anonymes mais les données de ses commandes sont conservées
      */
-    exclu = 'X',
+    fermé = 'F',
 }
 export function TexteEtatClient(type: string): string {
     switch (type) {
-        case 'N':
+        case EtatClient.nouveau:
             return 'nouveau';
-        case 'A':
+        case EtatClient.actif:
             return 'actif';
-        case 'I':
+        case EtatClient.inactif:
             return 'inactif';
-        case 'X':
-            return 'exclu';
-        default:
-            break;
-    }
-}
-export function DescriptionEtatClient(type: string): string {
-    switch (type) {
-        case 'N':
-            return ``;
-        case 'A':
-            return ``;
-        case 'I':
-            return ``;
-        case 'X':
-            return ``;
+        case EtatClient.fermé:
+            return 'fermé';
         default:
             break;
     }

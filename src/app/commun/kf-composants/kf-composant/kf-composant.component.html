@@ -14,8 +14,11 @@
         <app-kf-b-btn-group *ngSwitchCase="type.b_btn_group" [composant]="composant">
         </app-kf-b-btn-group>
 
-        <app-kf-ul *ngSwitchCase="type.ul" [composant]="composant">
-        </app-kf-ul>
+        <app-kf-ul-ol *ngSwitchCase="type.ulol" [composant]="composant">
+        </app-kf-ul-ol>
+
+        <app-kf-description *ngSwitchCase="type.description" [composant]="composant">
+        </app-kf-description>
 
         <ng-container *ngSwitchDefault>
 

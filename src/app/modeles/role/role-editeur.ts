@@ -33,7 +33,7 @@ export class RoleEditeur extends KeyUidRnoEditeur<Role> {
 
     ajouteAideNom(usager: 'client' | 'fournisseur', complément?: string): KfEtiquette {
         const étiquette = Fabrique.ajouteEtiquetteP();
-        Fabrique.ajouteTexte(étiquette,
+        étiquette.ajouteTextes(
             `Le nom du ${usager} est utilisé dans l'en-tête des documents${complément ? ' ' + complément : ''}.`
         );
         this.kfDeData.push(étiquette);
@@ -63,7 +63,7 @@ export class RoleEditeur extends KeyUidRnoEditeur<Role> {
 
     ajouteAideAdresse(usager: 'client' | 'fournisseur'): KfEtiquette {
         const étiquette = Fabrique.ajouteEtiquetteP();
-        Fabrique.ajouteTexte(étiquette,
+        étiquette.ajouteTextes(
             `L'adresse du ${usager} est utilisée dans l'en-tête des documents.`
         );
         this.kfDeData.push(étiquette);

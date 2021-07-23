@@ -34,7 +34,7 @@ export class CDocumentDocumentsComponent extends CLFDocsComponent implements OnI
         let etiquette: KfEtiquette;
 
         etiquette = Fabrique.ajouteEtiquetteP(infos);
-        Fabrique.ajouteTexte(etiquette,
+        etiquette.ajouteTextes(
             `Ceci est `,
             { texte: 'à faire', balise: KfTypeDeBaliseHTML.b},
             '.'

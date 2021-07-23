@@ -53,10 +53,9 @@ export class ProduitIndexComponent extends ProduitIndexBaseComponent implements 
             urlSite: this.site.url
         };
         const def = this._barreTitreDef;
-        const groupe = Fabrique.titrePage.bbtnGroup('boutons');
-        groupe.ajoute(Fabrique.lien.retour(urlDef));
-        groupe.afficherSi(this.service.navigation.conditionSite.catalogue);
-        def.groupesDeBoutons = [groupe];
+        const groupeDef = Fabrique.titrePage.groupeRetour(Fabrique.lien.retour(urlDef));
+        groupeDef.groupe.afficherSi(this.service.navigation.conditionSite.catalogue);
+        def.groupesDeBoutons = [groupeDef];
         return def;
     }
 
@@ -66,7 +65,7 @@ export class ProduitIndexComponent extends ProduitIndexBaseComponent implements 
         let etiquette: KfEtiquette;
 
         etiquette = Fabrique.ajouteEtiquetteP(infos);
-        Fabrique.ajouteTexte(etiquette,
+        etiquette.ajouteTextes(
             `Ceci est `,
             { texte: 'à faire', balise: KfTypeDeBaliseHTML.b },
             '.'

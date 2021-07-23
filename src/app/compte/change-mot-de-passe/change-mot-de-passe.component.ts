@@ -10,7 +10,7 @@ import { ComptePages, CompteRoutes } from '../compte-pages';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { ApiResult } from 'src/app/api/api-results/api-result';
 import { CompteService } from '../compte.service';
-import { BarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
+import { IBarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { KfTexte } from 'src/app/commun/kf-composants/kf-elements/kf-texte/kf-texte';
 import { ILienDef } from 'src/app/disposition/fabrique/fabrique-lien';
 import { Identifiant } from 'src/app/securite/identifiant';
@@ -56,7 +56,7 @@ export class ChangeMotDePasseComponent extends FormulaireComponent implements On
                 },
                 contenu: { texte: 'Connection' },
             };
-            const lien = Fabrique.lien.lien(def);
+            const lien = Fabrique.lien.bouton(def);
             this.afficheResultat.fixeDétails([texte, lien]);
         }
     }

@@ -2,12 +2,11 @@ import { ApiDocument } from './api-document';
 import { IKeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/i-key-uid-rno';
 import { Catalogue } from '../catalogue/catalogue';
 import { Client } from '../client/client';
-import { ApiDocumentsData, ApiDocumentsSynthèse } from './api-documents-client-data';
+import { ApiDocumentsData } from './api-documents-client-data';
 import { CLFLigne } from './c-l-f-ligne';
 import { CLFDoc } from './c-l-f-doc';
 import { Produit } from '../catalogue/produit';
 import { Site } from '../site/site';
-import { DATE_EST_NULLE, DATE_NULLE } from '../date-nulle';
 import { IdEtatProduit } from '../catalogue/etat-produit';
 import { IKeyUidRnoNo } from 'src/app/commun/data-par-key/key-uid-rno-no/i-key-uid-rno-no';
 import { CLFBilan } from './c-l-f-bilan';
@@ -106,14 +105,7 @@ export class CLFDocs {
 
     get apiBonVirtuel(): ApiDocument {
         const apiDoc = this.documents.find(d => d.no === 0);
-        if (apiDoc) {
-            if (DATE_EST_NULLE(apiDoc.date)) {
-                // c'est le bon virtuel
-                return apiDoc;
-            } else {
-                // c'est la transformation de la dernière livraison en fixant le type à 'commande' et le no à 0
-            }
-        }
+        return apiDoc;
     }
 
     /**
@@ -226,10 +218,9 @@ export class CLFDocs {
             type = this.type === 'livraison' ? 'commande' : this.type === 'facture' ? 'livraison' : undefined;
             apiDoc = this.documents.find(ad => ad.no === no);
             if (!apiDoc) {
-                if (this.type === 'livraison' && no === 0) {
+                if (no === 0) {
                     apiDoc = new ApiDocument();
-                    apiDoc.no = no;
-                    apiDoc.date = DATE_NULLE;
+                    apiDoc.no = 0;
                 } else {
                     return null;
                 }
@@ -312,7 +303,7 @@ export class CLFDocs {
     quandLigneEditée(ligne: CLFLigne) {
         const apiDocument = this.type === 'commande'
             ? this.documents[0]
-            : this.documents.find(d => DATE_EST_NULLE(d.date));
+            : this.documents.find(d => d.no === 0);
         const index = apiDocument.lignes.findIndex(l => l.no === ligne.no2);
         if (index === -1) {
             apiDocument.lignes.push(ligne.apiLigneDataAStocker());
@@ -324,7 +315,7 @@ export class CLFDocs {
     quandLigneSupprimée(ligne: CLFLigne) {
         const apiDocument = this.type === 'commande'
             ? this.documents[0]
-            : this.documents.find(d => DATE_EST_NULLE(d.date));
+            : this.documents.find(d => d.no === 0);
         const index = apiDocument.lignes.findIndex(l => l.no === ligne.no2);
         apiDocument.lignes.splice(index, 1);
     }
@@ -382,11 +373,11 @@ export class CLFDocs {
     }
 
     /**
-     * Met à jour les documents après qu'une nouvelle commande a été créée.
+     * Met à jour les documents après qu'un nouveau bon de commande ou un nouvaue bon de livraison virtuel a été créé.
      * @param créé retour de Post
      * @param copie présent et vrai si copie
      */
-    quandCommandeCréée(créé: ApiDocument, copie?: boolean) {
+    quandBonCréé(créé: ApiDocument, copie?: boolean) {
         let apiDoc: ApiDocument;
         if (copie) {
             if (this.type === 'commande') {
@@ -395,10 +386,10 @@ export class CLFDocs {
                 apiDoc.date = undefined;
             } else {
                 apiDoc = this.documents.find(d => d.no === 0);
-                // àCopier est une commande virtuelle créée à partir de la dernière livraison
-                // àCopier.date est la date de  la dernière livraison
-                // Pour en faire un bon de commande virtuel actif, il suffit d'annuler sa date
-                apiDoc.date = DATE_NULLE;
+                // apiDoc est un bon virtuel créé à partir de la dernière synthèse
+                // àCopier.date est la date de la dernière synthèse
+                // Pour en faire un bon actif, il suffit d'annuler sa date
+                apiDoc.date = undefined;
                 apiDoc.lignes = apiDoc.lignes
                     .filter(l => {
                         const produit = this.produit(l.no);
@@ -413,7 +404,6 @@ export class CLFDocs {
             if (this.type === 'livraison') {
                 // L'utilisateur est le fournisseur.
                 keyClient = this.client;
-                apiDoc.date = DATE_NULLE;
                 const i = this.documents.findIndex(d => d.no === 0);
                 if (i === -1) {
                     this.documents.push(apiDoc);
@@ -446,10 +436,11 @@ export class CLFDocs {
             // L'utilisateur est le fournisseur.
             const index = this.documents.findIndex(d => d.no === ikeyCommande.no);
             const commande = this.documents[index];
-            if (DATE_EST_NULLE(commande.date)) {
-                // le fournisseur a créé la commande
+            if (ikeyCommande.no === 0) {
+                // le fournisseur a créé la commande, c'est une suppression
                 this.documents.splice(index, 1);
             } else {
+                // le client a créé la commande, c'est un refus
                 commande.lignes.forEach(l => l.aFixer = 0);
             }
         }

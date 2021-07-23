@@ -4,10 +4,10 @@ import { Observable } from 'rxjs';
 import { RouteurService } from 'src/app/services/routeur.service';
 import { Client } from './client';
 import { ClientService } from './client.service';
-import { DataResolverService } from '../../services/data-resolver.service';
 
 /**
- * résoud la liste des clients du site en cours
+ * Résoud la liste des clients.
+ * Doit être protégé par ClientChargeEtLaissePasserGardeService.
  */
 @Injectable()
 export class ClientsResolverService implements Resolve<Client[]> {
@@ -20,15 +20,8 @@ export class ClientsResolverService implements Resolve<Client[]> {
 
     get routeur(): RouteurService { return this.router; }
 
-    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<never> | Observable<Client[]> {
-        return this.service.clients$();
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<never> | Client[] | Observable<Client[]> {
+        return this.service.litClients();
     }
 
-}
-
-@Injectable()
-export class ClientsRésoluResolverService extends DataResolverService implements Resolve<Client[]> {
-    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Client[]> {
-        return this.résolu(route, 'clients');
-    }
 }

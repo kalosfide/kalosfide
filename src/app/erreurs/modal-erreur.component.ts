@@ -5,6 +5,7 @@ import { ApiResult401Unauthorized } from '../api/api-results/api-result-401-unau
 import { ApiResultErreur, ApiResultErreurSpéciale } from '../api/api-results/api-result-erreur';
 import { AppPages } from '../app-pages';
 import { AppSiteRoutes, AppSitePages } from '../app-site/app-site-pages';
+import { KfEtiquette } from '../commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 import { KfGroupe } from '../commun/kf-composants/kf-groupe/kf-groupe';
 import { PageDef } from '../commun/page-def';
 import { Fabrique } from '../disposition/fabrique/fabrique';
@@ -31,9 +32,16 @@ export class ModalErreurComponent extends ModalComponent implements OnInit, OnDe
             ? this.apiService.routeur.apiErreur
             : new ApiResultErreurSpéciale(0, 'Erreur inconnue', `Une erreur s'est produite.`);
         const corps = new KfGroupe('');
+        let étiquette: KfEtiquette;
+        if (apiErreur.action) {
+            étiquette = Fabrique.ajouteEtiquetteP();
+            étiquette.ajouteTextes(apiErreur.action);
+            étiquette.ajouteClasse('fw-bold');
+            corps.ajoute(étiquette);
+        }
         apiErreur.messages.forEach(message => {
-            const étiquette = Fabrique.ajouteEtiquetteP();
-            Fabrique.ajouteTexte(étiquette, message);
+            étiquette = Fabrique.ajouteEtiquetteP();
+            étiquette.ajouteTextes(message);
             corps.ajoute(étiquette);
         });
         const boutonDefs: IBoutonDef[] = [];

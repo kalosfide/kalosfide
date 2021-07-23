@@ -27,7 +27,7 @@ export class FournisseurCLFService extends CLFService {
         protected clientService: ClientService,
         protected apiRequeteService: ApiRequêteService
     ) {
-        super(catalogueService, stockageService, clientService, apiRequeteService);
+        super('CLFFournisseur', catalogueService, stockageService, clientService, apiRequeteService);
         this.utile.utilisateurEstLeClient = false;
     }
 
@@ -36,6 +36,7 @@ export class FournisseurCLFService extends CLFService {
      */
     private _fixeClients$(clfDocs$: Observable<CLFDocs>): Observable<CLFDocs> {
         clfDocs$ = clfDocs$.pipe(
+            tap(clfDocs => clfDocs.clients = this.clientService.litClients()),
             concatMap(clfDocs => {
                 return this.clientService.clients$().pipe(
                     mergeMap(clients => {
@@ -123,6 +124,7 @@ export class FournisseurCLFService extends CLFService {
 
         clfDocs$ = clfDocs$.pipe(
             concatMap(clfDocs => {
+                clfDocs.site = site;
                 const tarifs = clfDocs.documents.filter(d => !!d.tarif).map(d => d.tarif);
                 return this.catalogueService.disponiblesAvecPrixDatés(clfDocs.site, tarifs).pipe(
                     mergeMap((catalogue?: Catalogue) => {

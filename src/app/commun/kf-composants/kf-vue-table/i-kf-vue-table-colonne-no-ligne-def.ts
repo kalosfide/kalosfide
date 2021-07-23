@@ -20,4 +20,10 @@ export interface IKfVueTableColonneNoLigneDef {
      * Présent et vrai pour associer un tri à la colonne
      */
     avecTri?: boolean;
+
+    /**
+     * Valeur de la propriété css width d'un htmlElement col.
+     * Si présent dans une colonne, le style table-layout: fixed est appliqué à la table.
+     */
+    largeur?: string;
 }

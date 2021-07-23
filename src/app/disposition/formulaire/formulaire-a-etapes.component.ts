@@ -1,4 +1,4 @@
-import { OnDestroy } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 
 
 import { KfSuperGroupe } from '../../commun/kf-composants/kf-groupe/kf-super-groupe';
@@ -27,7 +27,9 @@ export interface IFormulaireAEtapes {
     fixeIndex: (index: number) => void;
 }
 
-// TODO: Add Angular decorator.
+@Component({
+    template: ''
+})
 export abstract class FormulaireAEtapesComponent extends FormulaireBaseComponent implements IFormulaireAEtapes, OnDestroy {
     titrePage: KfSuperGroupe;
 
@@ -106,7 +108,7 @@ export abstract class FormulaireAEtapesComponent extends FormulaireBaseComponent
         const def: IBoutonDef = {
             nom: this.nomPrecedent + index,
             contenu: { texte: this.textePrecedent },
-            action: (evenement: KfEvenement) => evenement.parametres = index - 1
+            action: () => this.routeur.navigate([this.url(this.etapes[index - 1])])
         };
         const bouton = Fabrique.bouton.bouton(def);
         return bouton;

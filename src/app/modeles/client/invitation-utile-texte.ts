@@ -1,36 +1,34 @@
 import { AppSite } from 'src/app/app-site/app-site';
 import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
-import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
-import { DefTexte } from 'src/app/disposition/fabrique/fabrique-texte';
-import { Client } from '../client/client';
-import { InvitationUtile } from './invitation-utile';
+import { KfstringDef } from 'src/app/commun/kf-composants/kf-elements/kf-texte/kf-textes';
+import { Client } from './client';
 
 export class InvitationUtileTexte {
 
-    static invitationEnGras: DefTexte = {
-        texte: `Ìnvitation `,
+    static invitationEnGras: KfstringDef = {
+        texte: `Invitation `,
         balise: KfTypeDeBaliseHTML.b
     };
 
     static défInvifation = `un message email envoyé par le serveur de ${AppSite.titre} invitant à cliquer sur un lien
             pour accèder sur ${AppSite.texte} à la page d'enregistrement d'un client.`;
 
-    static invitation: DefTexte[] = [
+    static invitation: KfstringDef[] = [
         `Une `,
         InvitationUtileTexte.invitationEnGras,
         ` est ` + InvitationUtileTexte.défInvifation
     ];
 
 
-    static définitions: { [key: string]: DefTexte[] } = {
+    static définitions: { [key: string]: KfstringDef[] } = {
         client: [],
         invitation: [
         ]
     };
 
-    static avertissementEmailExiste: DefTexte = {
+    static avertissementEmailExiste: KfstringDef = {
         texte: `Attention! Vous devez connaître l'adresse email d'un client pour lui envoyer une invitation.`,
         balise: KfTypeDeBaliseHTML.small,
         classe: KfBootstrap.classe('text', 'danger')
@@ -53,7 +51,7 @@ export class InvitationUtileTexte {
         }
     }
 
-    static résultatEnregistrementAAjouter(client: Client): DefTexte[] {
+    static résultatEnregistrementAAjouter(client: Client): KfstringDef[] {
         if (client) {
             return [
                 InvitationUtileTexte.résultatEnregistrementDefs.client[0],
@@ -71,7 +69,7 @@ export class InvitationUtileTexte {
     }
 
     ajouteAvertissementEmailExiste(étiquette: KfEtiquette) {
-        Fabrique.ajouteTexte(étiquette,
+        étiquette.ajouteTextes(
             {
                 texte: `Attention! Vous devez connaître l'adresse email d'un client pour lui envoyer une invitation.`,
                 balise: KfTypeDeBaliseHTML.small,

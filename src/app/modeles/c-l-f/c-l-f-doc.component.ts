@@ -1,11 +1,11 @@
-import { OnInit, OnDestroy, Directive } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 
 import { ActivatedRoute, Data } from '@angular/router';
 import { IKfVueTableColonneDef } from 'src/app/commun/kf-composants/kf-vue-table/i-kf-vue-table-colonne-def';
 import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { IBoutonDef } from 'src/app/disposition/fabrique/fabrique-bouton';
-import { BootstrapNom, KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
+import { KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
 import { PageTableComponent } from 'src/app/disposition/page-table/page-table.component';
 import { CLFLigne } from 'src/app/modeles/c-l-f/c-l-f-ligne';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
@@ -28,7 +28,6 @@ import { CLFUtile } from './c-l-f-utile';
 import { IKfTableLigne, IKfTableCellule, KfTable } from 'src/app/commun/kf-composants/kf-table/kf-table-composant';
 import { KfGéreCss } from 'src/app/commun/kf-composants/kf-partages/kf-gere-css';
 import { ModeAction } from './condition-action';
-import { BarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { JsPdfTs } from 'src/app/commun/outils/jspdf-ts';
 import { TexteOutils } from 'src/app/commun/outils/texte-outils';
 import { LigneDocumentCoût } from './cout';
@@ -39,7 +38,7 @@ import { Role } from '../role/role';
 import { CLFDocs } from './c-l-f-docs';
 import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
 
-@Directive()
+@Component({ template: '' })
 export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> implements OnInit, OnDestroy, IDataComponent {
 
     /**
@@ -143,9 +142,9 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
         const etiquette = new KfEtiquette('');
         let kftexte = new KfTexte('', this.clfDoc.client.nom);
         kftexte.suiviDeSaut = true;
-        etiquette.contenuPhrase.ajoute(kftexte);
+        etiquette.contenuPhrase.ajouteContenus(kftexte);
         kftexte = new KfTexte('', this.clfDoc.client.adresse);
-        etiquette.contenuPhrase.ajoute(kftexte);
+        etiquette.contenuPhrase.ajouteContenus(kftexte);
         cellule = { composant: etiquette, géreCss: new KfGéreCss() };
         cellule.géreCss.ajouteClasse('doc-titre-texte');
         ligne.cellules.push(cellule);
@@ -348,9 +347,9 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
     private ajouteGroupeTélécharger() {
         const nom = 'download';
         const groupe = new KfGroupe(nom);
-        KfBootstrap.ajouteClasse(groupe, 'alert', BootstrapNom.primary);
+        KfBootstrap.ajouteClasseAlerte(groupe, 'primary');
         const kfNom = Fabrique.input.texte('filename', 'Nom du fichier');
-        KfBootstrap.prépare(kfNom, Fabrique.optionsBootstrap.formulaire);
+        Fabrique.formulaire.préparePourPage(kfNom);
         const identifiant = this.service.identification.litIdentifiant();
         const site = this.service.navigation.litSiteEnCours();
         const role = identifiant.roleParUrl(site.url);
@@ -362,7 +361,7 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
             nom: 'btDownload',
             contenu: { texte: 'Télécharger le pdf' },
             action: (() => this.télécharge(kfNom.valeur)).bind(this),
-            bootstrap: { type: BootstrapNom.primary }
+            bootstrap: { type: 'primary' }
         };
         groupe.ajoute(Fabrique.bouton.bouton(def));
         this.superGroupe.ajoute(groupe);
@@ -375,30 +374,30 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
         if (this.clfDoc.no === 0) {
             // bon virtuel: le modèle est la dernière synthèse
             etiquette = Fabrique.ajouteEtiquetteP();
-            Fabrique.ajouteTexte(etiquette,
+            etiquette.ajouteTextes(
                 `${this.texteUtileDoc.Le_dernier_doc} à ${this.clfDoc.client} (${this.clfDoc.no_du_date}) comprenait les lignes ci-dessous.`
             );
             groupe.ajoute(etiquette);
         } else {
             etiquette = Fabrique.ajouteEtiquetteP();
             if (this.clfDoc.terminé) {
-                Fabrique.ajouteTexte(etiquette, `La commande ${this.clfDoc.no_du_date} a été `);
+                etiquette.ajouteTextes(`La commande ${this.clfDoc.no_du_date} a été `);
                 if (this.clfDoc.annulé) {
-                    Fabrique.ajouteTexte(etiquette,
+                    etiquette.ajouteTextes(
                         {
                             texte: 'refusée',
                             classe: 'text-danger'
                         });
                 } else {
-                    Fabrique.ajouteTexte(etiquette, 'traitée');
+                    etiquette.ajouteTextes('traitée');
                 }
-                Fabrique.ajouteTexte(etiquette, ` dans le bon de livraison n° ${this.clfDoc.apiDoc.noGroupe}. `);
+                etiquette.ajouteTextes(` dans le bon de livraison n° ${this.clfDoc.apiDoc.noGroupe}. `);
             } else {
                 etiquette.fixeTexte(`Le bon de commande ${this.clfDoc.no_du_date} est en cours de préparation.`);
             }
             groupe.ajoute(etiquette);
             etiquette = Fabrique.ajouteEtiquetteP();
-            Fabrique.ajouteTexte(etiquette, `Ce bon de commande comprenait les lignes ci-dessous.`);
+            etiquette.ajouteTextes(`Ce bon de commande comprenait les lignes ci-dessous.`);
             groupe.ajoute(etiquette);
         }
         this.superGroupe.ajoute(groupe);
@@ -409,7 +408,7 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
         const groupe = new KfGroupe('catalogueChangé');
         groupe.ajouteClasse('alert alert-warning');
         const etiquette = new KfEtiquette('');
-        Fabrique.ajouteTexte(etiquette,
+        etiquette.ajouteTextes(
             {
                 texte: `Le catalogue a changé depuis l'enregistrement de ${this.texteUtileBon.ce_doc} `
                     + `et les détails ci-dessus peuvent différer de l'original `
@@ -441,13 +440,13 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
         }
         Fabrique.ajouteEtiquetteP(messages).fixeTexte(`Il n'y a pas de ${texteOuvert}.`);
         boutons.push(Fabrique.bouton.boutonAction('vide', 'Créer',
-            this.service.apiRequêteCrée(this.clfDoc.clfDocs.keyClient), this.service));
+            this.service.apiRequêteCrée(this.clfDoc.type, this.clfDoc.clfDocs.keyClient), this.service));
         if (this.bonCopiable) {
             Fabrique.ajouteEtiquetteP(messages).fixeTexte(
                 `Vous pouvez choisir que les lignes ${texteACopier} soient automatiquement copiées dans le ${texteACréer}`
                 + ` en cliquant sur Créer et copier.`);
             const btCopier = Fabrique.bouton.boutonAction('copier', 'Créer et copier',
-                this.service.apiRequêteCréeCopie(this.clfDoc.clfDocs.keyClient), this.service);
+                this.service.apiRequêteCréeCopie(this.clfDoc.type, this.clfDoc.clfDocs.keyClient), this.service);
             boutons.push(btCopier);
         }
         const groupe = new GroupeBoutonsMessages('creer', { messages, boutons });
@@ -471,7 +470,7 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
         const def: IBoutonDef = {
             nom: '',
             contenu: { texte: 'Annuler' },
-            bootstrap: { type: BootstrapNom.dark },
+            bootstrap: { type: 'dark' },
             action: () => {
                 this.service.routeur.navigueUrlDef(this.utile.url.bon());
             }
@@ -490,9 +489,9 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
         let etiquette: KfEtiquette;
 
         etiquette = Fabrique.ajouteEtiquetteP(messages);
-        Fabrique.ajouteTexte(etiquette, 'Les lignes ne pourront plus être modifiées.');
+        etiquette.ajouteTextes('Les lignes ne pourront plus être modifiées.');
         etiquette = Fabrique.ajouteEtiquetteP(messages);
-        Fabrique.ajouteTexte(etiquette, 'Cette action ne pourra pas être annulée.');
+        etiquette.ajouteTextes('Cette action ne pourra pas être annulée.');
 
         const boutons = [
             this.utile.bouton.annulerEnvoiBon(),
@@ -519,12 +518,12 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
             + `Pour le consulter, le télécharger, l'imprimer, suivez le lien ci-dessous.`);
 
         etiquette = Fabrique.ajouteEtiquetteP(messages);
-        etiquette.contenuPhrase.ajoute(this.utile.lien.document(this.clfDoc));
+        etiquette.contenuPhrase.ajouteContenus(this.utile.lien.document(this.clfDoc));
 
         if (this.clfDoc.type === 'commande') {
             etiquette = Fabrique.ajouteEtiquetteP(messages);
             etiquette.fixeTexte('Si vous avez terminé, pensez à vous ');
-            etiquette.contenuPhrase.ajoute(this.utile.lien.déconnection());
+            etiquette.contenuPhrase.ajouteContenus(this.utile.lien.déconnection());
         }
 
         const groupe = new GroupeBoutonsMessages('envoye', { messages });
@@ -631,11 +630,11 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
     protected chargeGroupe() {
         if (this.groupeTable) {
         }
-            this.groupeTable.etat.charge();
-            if (this.clfDoc.lignes) {
-                this.utile.outils.chargeCatégories(this.vueTable, this.clfDoc.clfDocs.catalogue.catégories);
-                this._chargeVueTable(this.clfDoc.lignes);
-            }
+        this.groupeTable.etat.charge();
+        if (this.clfDoc.lignes) {
+            this.utile.outils.chargeCatégories(this.vueTable, this.clfDoc.clfDocs.catalogue.catégories);
+            this._chargeVueTable(this.clfDoc.lignes);
+        }
         this.rafraichit();
     }
 

@@ -1,18 +1,18 @@
-import { OnInit, OnDestroy, Directive } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 
 import { ActivatedRoute } from '@angular/router';
 import { ClientCLFService } from '../client-c-l-f.service';
 import { IKfVueTableColonneDef } from 'src/app/commun/kf-composants/kf-vue-table/i-kf-vue-table-colonne-def';
 import { CLFLigne } from 'src/app/modeles/c-l-f/c-l-f-ligne';
 import { CLFDocComponent } from 'src/app/modeles/c-l-f/c-l-f-doc.component';
-import { BarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
+import { IBarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
 
 
-@Directive()
+@Component({ template: '' })
 export abstract class CommandeComponent extends CLFDocComponent implements OnInit, OnDestroy {
 
     constructor(
@@ -22,7 +22,7 @@ export abstract class CommandeComponent extends CLFDocComponent implements OnIni
         super(route, service);
     }
 
-    créeBarreTitre = (): BarreTitre => {
+    créeBarreTitre = (): IBarreTitre => {
         const barre = Fabrique.titrePage.barreTitre({
             pageDef: this.pageDef,
             contenuAidePage: this.contenuAidePage(),
@@ -37,7 +37,7 @@ export abstract class CommandeComponent extends CLFDocComponent implements OnIni
         let etiquette: KfEtiquette;
 
         etiquette = Fabrique.ajouteEtiquetteP(infos);
-        Fabrique.ajouteTexte(etiquette,
+        etiquette.ajouteTextes(
             `Ceci est `,
             { texte: 'à faire', balise: KfTypeDeBaliseHTML.b},
             '.'

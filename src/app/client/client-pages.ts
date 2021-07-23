@@ -3,7 +3,7 @@ import { PageDef, BaseRoutes } from '../commun/page-def';
 
 export class ClientPages  {
     static accueil: PageDef = SitePages.accueil;
-    static produits: PageDef = SitePages.catalogue;
+    static catalogue: PageDef = SitePages.catalogue;
     static commandes: PageDef = {
         urlSegment: 'commandes',
         lien: 'Commandes',
@@ -20,6 +20,12 @@ export class ClientPages  {
         urlSegment: 'contact',
         lien: 'Contact',
         title: 'Contact',
+    };
+    static pasOuvert: PageDef = {
+        urlSegment: 'pasOuvert',
+        lien: '',
+        title: 'Fermé',
+        titre: 'Site fermé'
     };
 }
 

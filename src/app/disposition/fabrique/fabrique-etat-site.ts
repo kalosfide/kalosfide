@@ -92,16 +92,15 @@ export class FabriqueEtatSite extends FabriqueMembre {
         état.description = () => {
             const description: KfComposant[] = [];
             let etiquette: KfEtiquette;
-            etiquette = new KfEtiquette('');
             etiquette = this.fabrique.ajouteEtiquetteP(description);
-            this.fabrique.ajouteTexte(etiquette,
+            etiquette.ajouteTextes(
                 `La `,
                 { texte: this.catalogue.titre, balise: KfTypeDeBaliseHTML.i },
                 ` ne peut commencer que s'il n'y a pas de commande en attente ou en cours de traitement ou non facturées.`
             );
 
             etiquette = this.fabrique.ajouteEtiquetteP(description);
-            this.fabrique.ajouteTexte(etiquette,
+            etiquette.ajouteTextes(
                 `Pendant la `,
                 { texte: this.catalogue.titre, balise: KfTypeDeBaliseHTML.i },
                 `, les commandes sont arrétées.`
@@ -122,14 +121,14 @@ export class FabriqueEtatSite extends FabriqueMembre {
             const description: KfComposant[] = [];
             let etiquette: KfEtiquette;
             etiquette = this.fabrique.ajouteEtiquetteP(description);
-            this.fabrique.ajouteTexte(etiquette,
+            etiquette.ajouteTextes(
                 `Le site est dans cet état quand il n'y a pas `,
                 { texte: this.catalogue.titre, balise: KfTypeDeBaliseHTML.i },
                 ` en cours.`
             );
 
             etiquette = this.fabrique.ajouteEtiquetteP(description);
-            this.fabrique.ajouteTexte(etiquette,
+            etiquette.ajouteTextes(
                 `Les clients qui se connectent peuvent commander. Le fournisseur peut commander pour un client qui n'a pas de compte.`);
 
             return description;

@@ -5,7 +5,6 @@ import { DataUtileBouton } from 'src/app/commun/data-par-key/data-utile-bouton';
 import { CLFLigne } from './c-l-f-ligne';
 import { CLFDoc } from './c-l-f-doc';
 import { CLFService } from './c-l-f.service';
-import { IContenuPhraseDef } from 'src/app/disposition/fabrique/fabrique-contenu-phrase';
 import { Observable } from 'rxjs';
 import { ApiResult } from 'src/app/api/api-results/api-result';
 import { KfBouton } from 'src/app/commun/kf-composants/kf-elements/kf-bouton/kf-bouton';
@@ -14,12 +13,11 @@ import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { KfSuperGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-super-groupe';
 import { ModeAction } from './condition-action';
 import { IBoutonDef } from 'src/app/disposition/fabrique/fabrique-bouton';
-import { BootstrapNom } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
 import { Couleur } from 'src/app/disposition/fabrique/fabrique-couleurs';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
-import { IBtnGroupeDef, BarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
+import { IBtnGroupeDef, IBarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { ApiDocument } from './api-document';
 import { AfficheResultat } from 'src/app/disposition/affiche-resultat/affiche-resultat';
 import { CLFDocs } from './c-l-f-docs';
@@ -56,7 +54,7 @@ export class CLFUtileBouton extends DataUtileBouton {
         const titre = `Suppression d'une ligne`;
         const description = new KfEtiquette('');
         description.baliseHtml = KfTypeDeBaliseHTML.p;
-        Fabrique.ajouteTexte(description,
+        description.ajouteTextes(
             `La ${texteUtile.def.action} de `,
             {
                 texte: `${ligne.no === 0
@@ -169,7 +167,7 @@ export class CLFUtileBouton extends DataUtileBouton {
         const def: IBoutonDef = {
             nom: 'annuler',
             contenu: { texte: this.utile.texte.textes(clfDocs.type).bouton.annulerVérifier },
-            bootstrap: { type: BootstrapNom.dark },
+            bootstrap: { type: 'dark' },
             action: () => {
                 this.service.routeur.navigueUrlDef(this.service.utile.url.retourDEnvoi(client));
             }
@@ -194,16 +192,16 @@ export class CLFUtileBouton extends DataUtileBouton {
                 : clfDocs.clfBilan.nbSélectionnés > 0;
             if (prêt) {
                 etiquette = Fabrique.ajouteEtiquetteP(infos);
-                Fabrique.ajouteTexte(etiquette, texteUtile.bilanNbAVérifier(clfDocs.clfBilan));
+                etiquette.ajouteTextes(texteUtile.bilanNbAVérifier(clfDocs.clfBilan));
                 etiquette = Fabrique.ajouteEtiquetteP(infos);
-                Fabrique.ajouteTexte(etiquette, texteUtile.vérificationPossible());
+                etiquette.ajouteTextes(texteUtile.vérificationPossible());
                 etiquette.ajouteClasse('alert-success');
                 couleur = Couleur.green;
             } else {
                 etiquette = Fabrique.ajouteEtiquetteP(infos);
-                Fabrique.ajouteTexte(etiquette, texteUtile.bilanRienAVérifier(clfDocs.clfBilan));
+                etiquette.ajouteTextes(texteUtile.bilanRienAVérifier(clfDocs.clfBilan));
                 etiquette = Fabrique.ajouteEtiquetteP(infos);
-                Fabrique.ajouteTexte(etiquette, texteUtile.vérificationImpossible());
+                etiquette.ajouteTextes(texteUtile.vérificationImpossible());
                 etiquette.ajouteClasse('alert-warning');
                 couleur = Couleur.warning;
             }
@@ -238,7 +236,7 @@ export class CLFUtileBouton extends DataUtileBouton {
             const infos: KfComposant[] = [];
 
             const etiquette = Fabrique.ajouteEtiquetteP(infos);
-            Fabrique.ajouteTexte(etiquette,
+            etiquette.ajouteTextes(
                 `Le bouton `,
                 { texte: texteUtile.bouton.terminer, balise: KfTypeDeBaliseHTML.b },
                 ` est en bas de la page.`
@@ -269,7 +267,7 @@ export class CLFUtileBouton extends DataUtileBouton {
         const groupe = Fabrique.titrePage.bbtnGroup('action');
         groupe.ajoute(info);
         groupe.ajoute(vérifier);
-        let rafraichit: (barre: BarreTitre) => void;
+        let rafraichit: (barre: IBarreTitre) => void;
         if (action === 'annuler') {
             groupe.afficherSi(this.utile.conditionAction.envoi);
             rafraichit = this.rafraichitAnnulerVérifier(info, vérifier);

@@ -11,21 +11,50 @@ import { KfListeDeroulanteBase } from '../kf-elements/kf-liste-deroulante/kf-lis
 import { KfRadio } from '../kf-elements/kf-radios/kf-radio';
 import { KfRadios } from '../kf-elements/kf-radios/kf-radios';
 import { KfGroupe } from '../kf-groupe/kf-groupe';
+import { KfOnglets } from '../kf-ul-ol/kf-onglets';
 import { IKfVueTable } from '../kf-vue-table/kf-vue-table';
 import { KfTypeDHTMLEvents, KfTypeDEvenement, KfEvenement, KfStatutDEvenement } from './kf-evenements';
 
-export type BootstrapType = 'success' | 'info' | 'warning' | 'danger' | 'primary' | 'secondary' | 'light' | 'dark' | 'link';
-export enum BootstrapNom {
-    success = 'success',
-    info = 'info',
-    warning = 'warning',
-    danger = 'danger',
-    primary = 'primary',
-    secondary = 'secondary',
-    light = 'light',
-    dark = 'dark',
-    link = 'link',
+export type BootstrapType = 'success' | 'info' | 'warning' | 'danger' | 'primary' | 'secondary' | 'light' | 'dark';
+const BootstrapTypes: string[] = ['success', 'info', 'warning', 'danger', 'primary', 'secondary', 'light', 'dark'];
+export type BootstrapTypeBouton = BootstrapType | 'link';
+const BootstrapTypesBouton: string[] = BootstrapTypes.concat(['link']);
+export type BootstrapTypeFond = BootstrapType | 'white' | 'body' | 'transparent' | 'gradient';
+const BootstrapTypesFond: string[] = BootstrapTypes.concat(['white', 'body', 'transparent']);
+export type BootstrapTypeTexte = BootstrapType | 'white' | 'body' | 'mute' | 'black-50' | 'white-50';
+const BootstrapTypesTexte: string[] = BootstrapTypes.concat(['white', 'body', 'mute', 'black-50', 'white-50']);
+
+export type BootstrapSpacingPropriété = 'margin' | 'padding';
+type BootstrapSpacingProperty = 'm' | 'p';
+function spacingProperty(propriété: BootstrapSpacingPropriété): BootstrapSpacingProperty {
+    switch (propriété) {
+        case 'margin':
+            return 'm';
+        case 'padding':
+            return 'p';
+    }
 }
+export type BootstrapSpacingCôtés = 'haut' | 'bas' | 'gauche' | 'droite' | 'gaucheEtDroite' | 'hautEtBas' | 'tous';
+type BootstrapSpacingSides = 't' | 'b' | 's' | 'e' | 'x' | 'y' | ''
+function spacingSizes(côtés: BootstrapSpacingCôtés): BootstrapSpacingSides {
+    switch (côtés) {
+        case 'haut':
+            return 't';
+        case 'bas':
+            return 'b';
+        case 'gauche':
+            return 's';
+        case 'droite':
+            return 'e';
+        case'gaucheEtDroite':
+            return 'x';
+        case 'hautEtBas':
+            return 'y';
+        case 'tous':
+            return '';
+    }
+}
+export type BootstrapSpacingSize = 0 | 1 | 2 | 3 | 4 | 5 | 'auto';
 
 export type KfBootstrapColOptions = {
     breakpoint?: 'sm' | 'md' | 'sg' | 'sm'
@@ -55,9 +84,9 @@ export interface IKfBootstrapOptions {
      * A un effet sur KfRadio, KfCaseACocher.
      */
     bouton?: {
-        nom: BootstrapType,
+        nom: BootstrapTypeBouton,
         outline?: 'outline',
-        nomChecked?: BootstrapType,
+        nomChecked?: BootstrapTypeBouton,
         outlineChecked?: 'outline',
     },
     /**
@@ -90,38 +119,60 @@ export interface IKfBootstrapOptions {
 }
 
 export class KfBootstrap {
-    static nom = {
-        success: 'success',
-        info: 'info',
-        warning: 'warning',
-        danger: 'danger',
-        primary: 'primary',
-        secondary: 'secondary',
-        light: 'light',
-        dark: 'dark',
-        link: 'link',
-    };
 
     private static _classe(préfixe: string, nom: string, outline?: 'outline'): string {
         return préfixe + '-' + (outline ? 'outline-' : '') + nom;
+    }
+
+    private static _ajouteClasse(géreCss: KfGéreCss, préfixe: string, suffixes: string[], type: string, outline?: 'outline' | null) {
+        géreCss.supprimeClasseAPréfixe(préfixe, suffixes);
+        géreCss.ajouteClasse(préfixe, KfBootstrap._classe(préfixe, type, outline));
     }
 
     static classe(préfixe: string, nom: BootstrapType, outline?: 'outline'): string {
         return KfBootstrap._classe(préfixe, nom, outline);
     }
 
-    static classes(préfixe: string): string[] {
-        const classes: string[] = [];
-        const noms = Object.keys(KfBootstrap.nom);
-        noms.forEach(nom => {
-            classes.push(this._classe(préfixe, nom), this._classe(préfixe, nom, 'outline'));
-        });
-        return classes;
+    static classeBouton(type: BootstrapTypeBouton, outline?: 'outline'): string {
+        return KfBootstrap._classe('btn', type, outline);
     }
 
-    static ajouteClasse(géreCss: KfGéreCss, préfixe: string, nom: BootstrapType, outline?: 'outline' | null) {
-        géreCss.supprimeClasseAPréfixe(préfixe);
-        géreCss.ajouteClasse(préfixe, KfBootstrap.classe(préfixe, nom, outline));
+    static classeTexte(def: {
+        color?: BootstrapTypeTexte,
+        poids?: 'bold' | 'bolder' | 'normal' | 'light' | 'lighter',
+        style?: 'italic' | 'normal',
+        taille?: number;
+    }): string {
+        const classes: string[] = [];
+        if (def.color) {
+            classes.push(`text-${def.color}`);
+        }
+        if (def.poids) {
+            classes.push(`fw-${def.poids}`);
+        }
+        if (def.style) {
+            classes.push(`fst-${def.style}`);
+        }
+        if (def.taille) {
+            classes.push(`fs-${def.taille}`);
+        }
+        return classes.join(' ');
+    }
+
+    static classeSpacing(propriété: BootstrapSpacingPropriété, côtés: BootstrapSpacingCôtés, taille: BootstrapSpacingSize): string {
+        return spacingProperty(propriété) + spacingSizes(côtés) + '-' + taille;
+    }
+
+    static classeFond(type: BootstrapTypeFond): string {
+        return `bg-${type}`;
+    }
+
+    static ajouteClasseAlerte(géreCss: KfGéreCss, type: BootstrapType) {
+        this._ajouteClasse(géreCss, 'alert', BootstrapTypes, type);
+    }
+
+    static ajouteClasseBouton(géreCss: KfGéreCss, type: BootstrapTypeBouton, outline?: 'outline' | null) {
+        this._ajouteClasse(géreCss, 'btn', BootstrapTypesBouton, type, outline);
     }
 
     private static classesColonnes(colonneLabel: {
@@ -174,7 +225,7 @@ export class KfBootstrap {
                     évenement.statut = KfStatutDEvenement.fini;
                     input.gereHtml.htmlElement.click();
                 });
-                const classe = KfBootstrap.classe('btn', options.bouton.nom, options.bouton.outline);
+            const classe = KfBootstrap.classeBouton(options.bouton.nom, options.bouton.outline);
             if (options.bouton.nomChecked) {
                 let coché: () => boolean;
                 if (input.type === KfTypeDeComposant.caseacocher) {
@@ -187,7 +238,7 @@ export class KfBootstrap {
                     nom: classe,
                     active: () => !coché()
                 }, {
-                    nom: KfBootstrap.classe('btn', options.bouton.nomChecked, options.bouton.outlineChecked),
+                    nom: KfBootstrap.classeBouton(options.bouton.nomChecked, options.bouton.outlineChecked),
                     active: () => coché()
                 })
             } else {
@@ -356,6 +407,15 @@ export class KfBootstrap {
         if (vueTable.pagination) {
             KfBootstrap.prépareToolbar(vueTable.pagination.groupe, 'pagination');
         }
+    }
+
+    static prépareOnglets(onglets: KfOnglets) {
+        onglets.ajouteClasse('nav nav-tabs');
+        onglets.gereCssLi.ajouteClasse('nav-item');
+    }
+
+    static prépareOnglet(déclencheur: KfComposant) {
+        déclencheur.ajouteClasse('nav-link');
     }
 
     static prépare(àPréparer: KfComposant | KfComposant[], options: IKfBootstrapOptions) {

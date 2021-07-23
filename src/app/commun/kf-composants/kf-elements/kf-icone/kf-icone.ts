@@ -1,6 +1,6 @@
 import { KfComposant } from '../../kf-composant/kf-composant';
 import { KfTypeDeComposant, KfTypeDeBaliseHTML } from '../../kf-composants-types';
-import { KfTexteDef, ValeurTexteDef } from '../../kf-partages/kf-texte-def';
+import { KfStringDef, ValeurStringDef } from '../../kf-partages/kf-string-def';
 import { IKfIconeDef } from '../../kf-partages/kf-icone-def';
 import { KfGéreCss } from '../../kf-partages/kf-gere-css';
 import { KfNgClasse } from '../../kf-partages/kf-gere-css-classe';
@@ -101,7 +101,7 @@ class KfIconeBase extends KfComposant implements IKfIcone {
 }
 
 export class KfIcone extends KfIconeBase implements IKfSurvole {
-    private pTexteDef: KfTexteDef;
+    private pstringDef: KfStringDef;
     private pGéreCssTexte: KfGéreCss;
     private pPositionTexte: KfIconePositionTexte;
 
@@ -117,9 +117,9 @@ export class KfIcone extends KfIconeBase implements IKfSurvole {
         super(nom, iconeDef);
     }
 
-    ajouteTexte(texteDef: KfTexteDef, position?: KfIconePositionTexte) {
+    ajouteTexte(stringDef: KfStringDef, position?: KfIconePositionTexte) {
         this.pPositionTexte = position ? position : 'droite';
-        this.pTexteDef = texteDef;
+        this.pstringDef = stringDef;
         if (this.pPositionTexte === 'haut' || this.pPositionTexte === 'bas' || this.pPositionTexte === 'dessus') {
             this.créeFond();
             this.fond.ajouteClasse('kf-texte-dans-icone-fond', 'kf-texte-dans-icone-' + this.pPositionTexte);
@@ -136,16 +136,16 @@ export class KfIcone extends KfIconeBase implements IKfSurvole {
         return this.pPositionTexte;
     }
 
-    get texteDef(): KfTexteDef {
-        return this.pTexteDef;
+    get stringDef(): KfStringDef {
+        return this.pstringDef;
     }
-    set texteDef(texteDef: KfTexteDef) {
-        this.pTexteDef = texteDef;
+    set stringDef(stringDef: KfStringDef) {
+        this.pstringDef = stringDef;
     }
 
     get texte(): string {
-        if (this.pTexteDef) {
-            return ValeurTexteDef(this.pTexteDef);
+        if (this.pstringDef) {
+            return ValeurStringDef(this.pstringDef);
         }
     }
 

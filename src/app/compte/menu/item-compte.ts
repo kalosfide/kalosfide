@@ -10,7 +10,7 @@ export class ItemCompte extends NavItemDropdown {
 
     constructor(parent: Menu) {
         super('compte', parent);
-        this.dropdown.estADroiteDansMenu = true;
+        this.dropdown.estADroiteDansMenu();
         this.dropdown.bouton.ajouteClasse('btn btn-sm btn-light');
 
         this.ajoute(new ItemConnection(this));

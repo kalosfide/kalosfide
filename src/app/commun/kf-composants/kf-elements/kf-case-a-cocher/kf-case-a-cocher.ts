@@ -1,6 +1,6 @@
 import { KfTypeDeComposant } from '../../kf-composants-types';
 import { KfEntrée, KfValeurEntrée } from '../kf-entree/kf-entree';
-import { KfTexteDef } from '../../kf-partages/kf-texte-def';
+import { KfStringDef } from '../../kf-partages/kf-string-def';
 import { KfNgClasse } from '../../kf-partages/kf-gere-css-classe';
 import { KfGéreCss } from '../../kf-partages/kf-gere-css';
 import { KfComposant } from '../../kf-composant/kf-composant';
@@ -22,7 +22,7 @@ export class KfCaseACocher extends KfEntrée {
      */
     changeAspect: () => void;
 
-    constructor(nom: string, texteLabel?: KfTexteDef) {
+    constructor(nom: string, texteLabel?: KfStringDef) {
         super(nom, KfTypeDeComposant.caseacocher, texteLabel);
         // position par défaut
         this.positionLabel = 'après';

@@ -11,13 +11,13 @@
             <app-kf-etiquette *ngIf="bouton.ngbPopover.titre" [composant]="bouton.ngbPopover.titre">
             </app-kf-etiquette>
         </ng-template>
-    
-        <button #htmlElement type="button" [name]="bouton.nom" [ngClass]="bouton.classe" [ngStyle]="bouton.style"
+
+        <button type="button" [name]="bouton.nom" [ngClass]="bouton.classe" [ngStyle]="bouton.style"
             [disabled]="bouton.inactif" [ngbPopover]="popContent" [popoverTitle]="popTitle"
             [placement]="bouton.ngbPopover.placement ? bouton.ngbPopover.placement : 'auto'" container="body">
             <app-kf-contenu-phrase [contenuPhrase]="bouton.contenuAAfficher"></app-kf-contenu-phrase>
         </button>
-        </ng-container>
+    </ng-container>
     <ng-template #boutonNormalTemplate>
         <!-- bouton normal -->
         <button [type]="bouton.typeDeBouton" [name]="bouton.nom" [disabled]="bouton.inactif" [ngClass]="bouton.classe"
@@ -28,10 +28,18 @@
 </ng-template>
 
 <ng-template #lienTemplate let-lien>
-    <a [routerLink]="lien.route" routerLinkActive="active" [queryParams]="lien.queryParams" [fragment]="lien.fragment"
-        [ngClass]="lien.classe" [ngStyle]="lien.style" [attr.title]="lien.titleHtml">
-        <app-kf-contenu-phrase [contenuPhrase]="lien.contenuPhrase"></app-kf-contenu-phrase>
-    </a>
+    <ng-container *ngIf="!lien.routerLinkActive; else routerLinkActiveTemplate">
+        <a #baliseElement [routerLink]="lien.route" [queryParams]="lien.queryParams" [fragment]="lien.fragment"
+            [ngClass]="lien.classe" [ngStyle]="lien.style">
+            <app-kf-contenu-phrase [contenuPhrase]="lien.contenuPhrase"></app-kf-contenu-phrase>
+        </a>
+    </ng-container>
+    <ng-template #routerLinkActiveTemplate>
+        <a #baliseElement [routerLink]="lien.route" [routerLinkActive]="lien.routerLinkActive"
+            [queryParams]="lien.queryParams" [fragment]="lien.fragment" [ngClass]="lien.classe" [ngStyle]="lien.style">
+            <app-kf-contenu-phrase [contenuPhrase]="lien.contenuPhrase"></app-kf-contenu-phrase>
+        </a>
+    </ng-template>
 </ng-template>
 
 <ng-template #etiquetteTemplate let-etiquette>
@@ -45,6 +53,7 @@
         <app-kf-contenu-phrase [contenuPhrase]="avecLabel.label.contenuPhrase"></app-kf-contenu-phrase>
     </label>
 </ng-template>
+
 <ng-template #caseACocherTemplate let-case>
     <ng-container *ngIf="case.classeEntree; else caseTemplate">
         <div [ngClass]="case.classeEntree" [id]="case.nom + '_Entrée'">
@@ -57,12 +66,12 @@
         </ng-container>
 
         <ng-container *ngIf="case.aspect; else caseNormaleTemplate">
-            <input type='checkbox' #inputElement [name]="case.nom" class="kf-invisible" [formControl]="case.formControl"
+            <input type='checkbox' [name]="case.nom" class="kf-invisible" [formControl]="case.formControl"
                 [attr.disabled]="case.inactif" />
             <app-kf-composant [composant]="case.aspect"></app-kf-composant>
         </ng-container>
         <ng-template #caseNormaleTemplate>
-            <input type='checkbox' #inputElement [name]="case.nom" [ngClass]="case.classe"
+            <input type='checkbox' [name]="case.nom" [ngClass]="case.classe"
                 [formControl]="case.formControl" [attr.disabled]="case.inactif" />
         </ng-template>
         <ng-container *ngIf="case.avecLabelApres">

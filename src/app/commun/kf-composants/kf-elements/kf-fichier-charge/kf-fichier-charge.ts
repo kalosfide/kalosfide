@@ -2,7 +2,7 @@ import { KfTypeDeComposant } from '../../kf-composants-types';
 import { KfSuperGroupe } from '../../kf-groupe/kf-super-groupe';
 import { KfParametres } from '../../kf-composants-parametres';
 import { KfFichier } from '../kf-fichier/kf-fichier';
-import { KfTexteDef } from '../../kf-partages/kf-texte-def';
+import { KfStringDef } from '../../kf-partages/kf-string-def';
 import { litFichierTexte } from 'src/app/commun/outils/lit-fichier-texte';
 import { KfEvenement } from '../../kf-partages/kf-evenements';
 
@@ -27,7 +27,7 @@ export class KfFichierCharge extends KfFichier {
      * @param imageAvant image du bouton
      * @param imageApres image du bouton
      */
-    constructor(nom: string, extension?: string, texte?: KfTexteDef, ) {
+    constructor(nom: string, extension?: string, texte?: KfStringDef, ) {
         super(nom, KfTypeDeComposant.fichierCharge);
         this.typesExtension.push(extension ? extension : KfParametres.fichierParDefaut.extension);
         this.multiple = false;

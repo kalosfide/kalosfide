@@ -30,7 +30,7 @@ export class ProduitUtileBouton extends DataUtileBouton {
         const titre = `Suppression d'un produit`;
         const description = new KfEtiquette('');
         description.baliseHtml = KfTypeDeBaliseHTML.p;
-        Fabrique.ajouteTexte(description,
+        description.ajouteTextes(
             `Le produit `,
             {
                 texte: produit.nom,

@@ -1,5 +1,5 @@
 import { KfIcone } from 'src/app/commun/kf-composants/kf-elements/kf-icone/kf-icone';
-import { KfTexteDef } from 'src/app/commun/kf-composants/kf-partages/kf-texte-def';
+import { KfStringDef } from 'src/app/commun/kf-composants/kf-partages/kf-string-def';
 import { Couleur } from './fabrique-couleurs';
 import { BootstrapIcones, FontAwesomeIcones, FontAwesomeRegularIcones, IKfIconeDef } from 'src/app/commun/kf-composants/kf-partages/kf-icone-def';
 import { FabriqueMembre } from './fabrique-membre';
@@ -129,10 +129,10 @@ export class FabriqueIcone extends FabriqueMembre {
             verrou_fermé: def('lock-fill'),
             envelope: def('envelope'),
             envelope_pleine: def('envelope-fill'),
-            retour: def('arrow-left-circle-fill'),
+            retour: def('arrow-left-circle'),
             ajoute: def('plus-lg'),
             rafraichit: def('cloud-arrow-down-fill'),
-            personnes: def('people'),
+            personnes: def('people-fill'),
             prix: def('currency-euro'),
             case_vide: def('square'),//
             case_cochée: def('check-square'),//
@@ -160,7 +160,7 @@ export class FabriqueIcone extends FabriqueMembre {
         this.pAvecFontawsome = false;
     }
 
-    ajouteTexte(icone: KfIcone, texte: KfTexteDef, position: KfIconePositionTexte) {
+    ajouteTexte(icone: KfIcone, texte: KfStringDef, position: KfIconePositionTexte) {
         icone.ajouteTexte(texte, position);
     }
 

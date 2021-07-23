@@ -3,7 +3,7 @@ import { Site } from '../../modeles/site/site';
 import { RouteurService } from '../../services/routeur.service';
 import { ConditionEtatSite } from './condition-etat-site';
 import { ConditionTable, ModeTable } from './condition-table';
-import { KfInitialObservable } from '../kf-composants/kf-partages/kf-initial-observable';
+import { ValeurEtObservable } from '../outils/valeur-et-observable';
 import { DataUtileUrl } from './data-utile-url';
 import { DataUtileLien } from './data-utile-lien';
 import { DataUtileColonne } from './data-utile-colonne';
@@ -47,7 +47,7 @@ export class DataUtile {
         return this.pService.routeur;
     }
 
-    observeModeTable(modeTableIo: KfInitialObservable<ModeTable>) {
+    observeModeTable(modeTableIo: ValeurEtObservable<ModeTable>) {
         this.pConditionTable = new ConditionTable(modeTableIo);
     }
 

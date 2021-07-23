@@ -8,8 +8,6 @@ import { PageDef } from 'src/app/commun/page-def';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { CompteService } from 'src/app/compte/compte.service';
 import { FormulaireComponent } from 'src/app/disposition/formulaire/formulaire.component';
-import { BarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
-import { KfSuperGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-super-groupe';
 import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 import { ClientEditeur } from '../../modeles/client/client-editeur';
 import { KfEtiquette } from '../../commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
@@ -43,7 +41,7 @@ export class DevenirClientComponent extends FormulaireComponent implements OnIni
     }
 
     actionSiOk = (): void => {
-        this.routeur.naviguePageDef(ClientPages.accueil, ClientRoutes, this.invitation.urlSite);
+        this.routeur.naviguePageDef(ClientPages.accueil, ClientRoutes, this.invitation.url);
     }
 
     constructor(
@@ -75,7 +73,7 @@ export class DevenirClientComponent extends FormulaireComponent implements OnIni
             texte = `créer votre compte client.`;
             this.texteBoutonSoumettre = () => `Créer votre compte client`;
         }
-        Fabrique.ajouteTexte(étiquette, texte);
+        étiquette.ajouteTextes(texte);
         groupe.ajoute(étiquette);
         defClient.forEach(c => groupe.ajoute(c));
 
@@ -83,7 +81,7 @@ export class DevenirClientComponent extends FormulaireComponent implements OnIni
         groupe.ajoute(code);
 
         étiquette = Fabrique.ajouteEtiquetteP();
-        Fabrique.ajouteTexte(étiquette,
+        étiquette.ajouteTextes(
             `Entrez vos coordonnées de connection.`
         );
         groupe.ajoute(étiquette);
