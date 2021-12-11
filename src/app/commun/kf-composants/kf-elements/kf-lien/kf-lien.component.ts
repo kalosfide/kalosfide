@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, ElementRef, ViewEncapsulation } from '@angular/core';
 import { KfComposantComponent } from '../../kf-composant/kf-composant.component';
 import { KfLien } from './kf-lien';
 import { TraiteKeydownService } from '../../../traite-keydown/traite-keydown.service';
@@ -6,7 +6,8 @@ import { TraiteKeydownService } from '../../../traite-keydown/traite-keydown.ser
 @Component({
     selector: 'app-kf-lien',
     templateUrl: 'kf-lien.component.html',
-    styleUrls: ['../../kf-composants.scss']
+    styleUrls: ['../../kf-composants.scss'],
+    encapsulation: ViewEncapsulation.None
 })
 export class KfLienComponent extends KfComposantComponent implements OnInit, AfterViewInit {
     @ViewChild('baliseElement', {static: false}) baliseElementRef: ElementRef;

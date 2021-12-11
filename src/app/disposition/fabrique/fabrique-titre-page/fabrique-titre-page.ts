@@ -1,18 +1,16 @@
 import { FabriqueMembre } from '../fabrique-membre';
-import { Fabrique, FabriqueClasse } from '../fabrique';
+import { FabriqueClasse } from '../fabrique';
 import { PageDef } from 'src/app/commun/page-def';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
 import { KfBouton } from 'src/app/commun/kf-composants/kf-elements/kf-bouton/kf-bouton';
-import { KfBBtnGroup, KfBBtnGroupElement } from 'src/app/commun/kf-composants/kf-b-btn-group/kf-b-btn-group';
+import { KfBBtnGroup } from 'src/app/commun/kf-composants/kf-b-btn-group/kf-b-btn-group';
 import { IBoutonDef } from '../fabrique-bouton';
-import { IContenuPhraseDef } from '../fabrique-contenu-phrase';
-import { Couleur } from '../fabrique-couleurs';
+import { IContenuPhraséDef } from '../fabrique-contenu-phrase';
 import { Site } from 'src/app/modeles/site/site';
-import { BootstrapTypeBouton, BootstrapTypeFond, BootstrapTypeTexte, KfBootstrap } from '../../../commun/kf-composants/kf-partages/kf-bootstrap';
+import { BootstrapTypeBouton, BootstrapTypeFond, BootstrapTypeTexteCouleur, BootstrapTypeTexteTaille, KfBootstrap } from '../../../commun/kf-composants/kf-partages/kf-bootstrap';
 import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 import { KfDivTableColonne } from 'src/app/commun/kf-composants/kf-groupe/kf-div-table';
-import { IdEtatSite } from 'src/app/modeles/etat-site';
 import { KfSuperGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-super-groupe';
 import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
 import { IKfIconeDef } from 'src/app/commun/kf-composants/kf-partages/kf-icone-def';
@@ -58,7 +56,7 @@ export interface IBarreDef {
 
     constructor(pageDef: PageDef) {
         this.pageDef = pageDef;
-        this.toolbar = new KfGroupe(pageDef.urlSegment);
+        this.toolbar = new KfGroupe(pageDef.path);
         KfBootstrap.prépareToolbar(this.toolbar, 'titre');
         this.toolbar.ajouteClasse('justify-content-between');
         this.rafraichissements = [];
@@ -86,12 +84,12 @@ export class FabriqueTitrePage extends FabriqueMembre {
     private bsType: {
         barre: {
             fond: BootstrapTypeFond,
-            texte: BootstrapTypeTexte
+            texte: BootstrapTypeTexteCouleur
         }
         bouton: BootstrapTypeBouton,
         retour: {
             fond: BootstrapTypeFond,
-            texte: BootstrapTypeTexte,
+            texte: BootstrapTypeTexteCouleur,
             bouton: BootstrapTypeBouton
         }
     }
@@ -152,7 +150,7 @@ export class FabriqueTitrePage extends FabriqueMembre {
         return groupe;
     }
 
-    boutonDef(nom: string, contenu?: IContenuPhraseDef): IBoutonDef {
+    boutonDef(nom: string, contenu?: IContenuPhraséDef): IBoutonDef {
         if (contenu && (contenu.icone || contenu.iconeDef)) {
             contenu.positionTexte = 'droite';
         }
@@ -165,35 +163,19 @@ export class FabriqueTitrePage extends FabriqueMembre {
     }
 
     boutonInfo(nom: string, titre?: string): KfBouton {
-        const contenu: IContenuPhraseDef = {
-            iconeDef: this.fabrique.icone.def.info,
-            couleurIcone: Couleur.blue,
-            texte: titre,
-            positionTexte: 'droite',
-        };
-        return this.fabrique.bouton.bouton(this.boutonDef(nom, contenu));
+        return this.fabrique.bouton.bouton(this.boutonDef(nom, this.fabrique.contenu.aide(titre)));
     }
 
     boutonAide(nom: string, titre?: string): KfBouton {
         return this.fabrique.bouton.bouton(this.boutonDef(nom, this.fabrique.contenu.aide(titre)));
     }
 
-    contenuBoutonRafraichit(titre?: string): IContenuPhraseDef {
-        const contenu: IContenuPhraseDef = {
-            iconeDef: this.fabrique.icone.def.rafraichit,
-            couleurIcone: Couleur.blue,
-            texte: titre,
-            positionTexte: 'droite',
-        };
-        return contenu;
-    }
-
     boutonRafraichit(nom: string, titre?: string): KfBouton {
-        return this.fabrique.bouton.bouton(this.boutonDef(nom, this.contenuBoutonRafraichit(titre)));
+        return this.fabrique.bouton.bouton(this.boutonDef(nom, this.fabrique.contenu.rafraichit(titre)));
     }
 
     boutonAction(nom: string, texte?: string): KfBouton {
-        let contenu: IContenuPhraseDef;
+        let contenu: IContenuPhraséDef;
         if (texte) {
             contenu = {
                 texte: texte,
@@ -222,7 +204,7 @@ export class FabriqueTitrePage extends FabriqueMembre {
             throw new Error('Fabrique.titrePage.lien: Si urlDef ne contient pas de pageDef, nom et texte doivent être définis.')
         }
         return this.fabrique.lien.bouton({
-            nom: nom ? nom : urlDef.pageDef.urlSegment,
+            nom: nom ? nom : urlDef.pageDef.path,
             urlDef,
             contenu: {
                 iconeDef,
@@ -254,7 +236,7 @@ export class FabriqueTitrePage extends FabriqueMembre {
             }
         });
         const etiquetteTitreVerrou = new KfEtiquette('titre_verrou', 'Site fermé');
-        const etat = this.fabrique.etatSite.état(IdEtatSite.catalogue);
+        const etat = this.fabrique.etatSite.catalogue;
         const infos: KfComposant[] = [];
 
         let etiquette: KfEtiquette;
@@ -283,11 +265,11 @@ export class FabriqueTitrePage extends FabriqueMembre {
         ? (barre: IBarreTitre) => {
                 groupe.ajouteClasse({
                     nom: 'invisible',
-                    active: () => barre.site.etat !== IdEtatSite.catalogue
+                    active: () => barre.site.ouvert
                 });
             }
         : (barre: IBarreTitre) => {
-                groupe.nePasAfficher = barre.site.etat !== IdEtatSite.catalogue;
+                groupe.nePasAfficher = barre.site.ouvert;
             };
         const def: IBtnGroupeDef = {
             groupe,
@@ -304,7 +286,7 @@ export class FabriqueTitrePage extends FabriqueMembre {
         return { groupe , alignéADroite: true };
     }
 
-    titrePage(titre: string, niveau: number, créeBarreTitre?: () => IBarreTitre): KfSuperGroupe {
+    titrePage(titre: string, niveau: 0 | 1, créeBarreTitre?: () => IBarreTitre): KfSuperGroupe {
         const groupe = new KfSuperGroupe('titre');
         groupe.créeDivLigne();
         groupe.ajouteClasse('titre-page', 'row', 'align-items-center',
@@ -314,12 +296,14 @@ export class FabriqueTitrePage extends FabriqueMembre {
 
         let col: KfDivTableColonne;
 
-        let niveauH = 5 + (niveau ? niveau : 0);
-        if (niveauH > 6) {
-            niveauH = 6;
+        let taille: BootstrapTypeTexteTaille;
+        if (niveau === 0) {
+            taille = 5;
+        } else {
+            taille = 6;
         }
         col = groupe.divLigne.ajoute(titre);
-        col.ajouteClasse('col', KfBootstrap.classeTexte({ taille: niveauH }));
+        col.ajouteClasse('col', KfBootstrap.classeTexte({ taille: taille }));
 
         if (créeBarreTitre) {
             col = groupe.divLigne.ajoute([créeBarreTitre().barre]);

@@ -6,8 +6,9 @@ import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { CLFDoc } from './c-l-f-doc';
 import { Compare } from '../../commun/outils/tri';
 import { TexteOutils } from 'src/app/commun/outils/texte-outils';
-import { ValeurEtObservable } from 'src/app/commun/outils/valeur-et-observable';
-import { KfBBtnGroup, KfBBtnGroupElement } from 'src/app/commun/kf-composants/kf-b-btn-group/kf-b-btn-group';
+import { KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
+import { LargeurColonne } from 'src/app/disposition/largeur-colonne';
+import { KfVueTableCellule } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-cellule';
 
 export class CLFUtileColonneDocCLF {
     protected utile: CLFUtile;
@@ -34,22 +35,12 @@ export class CLFUtileColonneDocCLF {
         };
     }
 
-    code(titre: string): IKfVueTableColonneDef<CLFDoc> {
-        const créeContenu = (doc: CLFDoc) => doc.titreCode;
-        return {
-            nom: 'code',
-            créeContenu,
-            compare: Compare.texte(créeContenu),
-            enTeteDef: { titreDef: titre },
-        };
-    }
-
     date(): IKfVueTableColonneDef<CLFDoc> {
         return {
             nom: 'date',
             créeContenu: (clfDoc: CLFDoc) => clfDoc.no === 0 ? '' : TexteOutils.date.en_chiffres(clfDoc.date),
             compare: Compare.date((clfDoc: CLFDoc) => clfDoc.date),
-            classesItem: ['date'],
+            classesTd: ['date'],
             enTeteDef: { titreDef: 'Date' },
         };
     }
@@ -57,25 +48,29 @@ export class CLFUtileColonneDocCLF {
     no(): IKfVueTableColonneDef<CLFDoc> {
         return {
             nom: 'no',
-            créeContenu: (clfDoc: CLFDoc) => `${clfDoc.no}`,
+            créeContenu: (clfDoc: CLFDoc) => `${clfDoc.no === 0 ? 'virtuel' : clfDoc.no}`,
             compare: Compare.nombre((clfDoc: CLFDoc) => clfDoc.no),
             enTeteDef: { titreDef: 'No' },
         };
     }
 
     préparés(): IKfVueTableColonneDef<CLFDoc> {
+        const créeContenu = (doc: CLFDoc) => `${doc.nbPréparés} / ${doc.nbAPréparer}`;
         return {
             nom: 'préparés',
-            créeContenu: (doc: CLFDoc) => `${doc.nbPréparés} / ${doc.nbAPréparer}`,
+            créeContenu,
+            quandItemModifié: 'rafraichit',
             compare: Compare.nombre((clfDoc: CLFDoc) => clfDoc.nbPréparés),
             enTeteDef: { titreDef: 'préparées', chapeauDef: 'Lignes', longueurChapeau: 2 },
         };
     }
 
     annulés(): IKfVueTableColonneDef<CLFDoc> {
+        const créeContenu = (doc: CLFDoc) => `${doc.nbAnnulés} / ${doc.nbAPréparer}`;
         return {
             nom: 'annulés',
-            créeContenu: (doc: CLFDoc) => `${doc.nbAnnulés} / ${doc.nbAPréparer}`,
+            créeContenu,
+            quandItemModifié: 'rafraichit',
             compare: Compare.nombre((clfDoc: CLFDoc) => clfDoc.nbAnnulés),
             enTeteDef: { titreDef: 'annulées' },
         };
@@ -99,10 +94,13 @@ export class CLFUtileColonneDocCLF {
             enTeteDef: { titreDef: 'Montant' },
         };
     }
+
     montant(): IKfVueTableColonneDef<CLFDoc> {
+        const créeContenu = (clfDoc: CLFDoc) => Fabrique.texte.euros(clfDoc.calculeCoûtAgrégé());
         return {
             nom: 'montant',
-            créeContenu: (clfDoc: CLFDoc) => Fabrique.texte.euros(clfDoc.coûtAgrégé),
+            créeContenu,
+            quandItemModifié: 'rafraichit',
             compare: Compare.enchaine(
                 Compare.nombre((clfDoc: CLFDoc) => clfDoc.coûtAgrégé.valeur),
                 Compare.booléenDesc((clfDoc: CLFDoc) => clfDoc.coûtAgrégé.complet)
@@ -111,179 +109,149 @@ export class CLFUtileColonneDocCLF {
         };
     }
 
-    /**
-     * Boutons de la ligne d'en-tête
-     * @param synthèse document de synthèse
-     */
-    private btnGroupSynthèse(synthèse: CLFDoc): KfBBtnGroup {
-        const btnGroup = new KfBBtnGroup('actionSynthèse');
-        let bouton: KfBBtnGroupElement;
-        // pour aligner avec les boutons des lignes
-        bouton = Fabrique.bouton.fauxTexteSousIcone();
-        btnGroup.ajoute(bouton);
-        //
-        if (synthèse.àSynthétiser.filter(doc => doc.no !== 0).length === 0) {
-            // il n' y a pas que le bon virtuel: pas de copie
-        } else {
-            bouton = this.utile.bouton.copieDocs(synthèse);
-            /*
-            bouton.inactivitéIO = KfInitialObservable.transforme(
-                this.utile.service.clsBilanIO,
-                () => synthèse.nbCopiablesPasPréparés === 0
-            );
-            */
-            btnGroup.ajoute(bouton);
-        }
-        bouton = Fabrique.bouton.fauxTexteSousIcone();
-        btnGroup.ajoute(bouton);
-        return btnGroup;
-    }
-
-    private btnGroupDoc(clfDoc: CLFDoc): KfBBtnGroup {
-        const btnGroup = new KfBBtnGroup('action');
-        let bouton: KfBBtnGroupElement;
-        bouton = this.utile.lien.bon(clfDoc);
-        btnGroup.ajoute(bouton);
-        if (clfDoc.no === 0) {
-            if (clfDoc.synthèse.àSynthétiser.length > 1) {
-                // il n' y a pas que le bon virtuel
-                // pas de copie pour le bon virtuel mais on garde la place pour l'alignement
-                bouton = Fabrique.bouton.fauxTexteSousIcone();
-                btnGroup.ajoute(bouton);
-            }
-        } else {
-            bouton = this.utile.bouton.copieDoc(clfDoc);
-            /*
-            bouton.inactivitéIO = KfInitialObservable.transforme(
-                this.utile.service.clsBilanIO,
-                () => clfDoc.nbCopiablesPasPréparés === 0
-            );
-            */
-            btnGroup.ajoute(bouton);
-        }
-        bouton = this.utile.bouton.annuleDoc(clfDoc);
-        /*
-        bouton.inactivitéIO = KfInitialObservable.transforme(
-            this.utile.service.clsBilanIO,
-            () => clfDoc.préparé
-        );
-        */
-        btnGroup.ajoute(bouton);
-        return btnGroup;
-    }
-
-    action(synthèse: CLFDoc): IKfVueTableColonneDef<CLFDoc> {
+    édite(): IKfVueTableColonneDef<CLFDoc> {
         return {
-            nom: 'action',
+            nom: 'edite',
+            créeContenu: (clfDoc: CLFDoc) => {
+                const bouton = this.utile.lien.bon(clfDoc);
+                return bouton;
+            },
+            classesDiv: [KfBootstrap.classeTexte({ alignement: 'center' })],
+            largeur: LargeurColonne.action,
+            nePasAfficherSi: this.utile.conditionTable.aperçu
+        };
+    }
+
+    copie(synthèse: CLFDoc, quandBonModifié: (bon: CLFDoc) => void, quandBonsModifiés: () => void): IKfVueTableColonneDef<CLFDoc> {
+        const entête = this.utile.bouton.copieDocs(synthèse, quandBonsModifiés);
+        entête.inactivité = synthèse.àSynthétiser.filter(doc => doc.no !== 0).length === 0;
+        return {
+            nom: 'copie',
             enTeteDef: {
-                titreDef: this.btnGroupSynthèse(synthèse),
-                classeDefs: ['colonne-btn-group-3'],
+                titreDef: entête,
+                classesDiv: [KfBootstrap.classeTexte({ alignement: 'center' })],
             },
-            créeContenu: (clfDoc: CLFDoc) => this.btnGroupDoc(clfDoc),
-            classesItem: ['colonne-btn-group-3'],
-            afficherSi: this.utile.conditionTable.edition,
+            créeContenu: (clfDoc: CLFDoc) => {
+                const bouton = this.utile.bouton.copieDoc(clfDoc, quandBonModifié);
+                bouton.inactivité = clfDoc.estVirtuel;
+                return bouton;
+            },
+            classesDiv: [KfBootstrap.classeTexte({ alignement: 'center' })],
+            largeur: LargeurColonne.action,
+            nePasAfficherSi: this.utile.conditionTable.aperçu
         };
     }
 
-    copier(synthèse: CLFDoc): IKfVueTableColonneDef<CLFDoc> {
-        const peutCopier = ValeurEtObservable.transforme(this.utile.service.clsBilanIO,
-            () => {
-                return synthèse.nbCopiables > 0;
-            });
-        const afficherSi = ValeurEtObservable.et(peutCopier, this.utile.conditionTable.edition);
-        const enTête = this.utile.bouton.copieDocs(synthèse);
-        enTête.inactivitéIO = ValeurEtObservable.transforme(
-            this.utile.service.clsBilanIO,
-            () => synthèse.nbCopiablesPasPréparés === 0
-        );
+    annuleOuSupprimeBonVirtuel(quandBonVirtuelSupprimé: () => void, quandBonModifié: (bon: CLFDoc) => void): IKfVueTableColonneDef<CLFDoc> {
         return {
-            nom: 'copier',
-            enTeteDef: { titreDef: enTête },
+            nom: 'annule',
             créeContenu: (clfDoc: CLFDoc) => {
-                const bouton = this.utile.bouton.copieDoc(clfDoc);
-                bouton.inactivitéIO = ValeurEtObservable.transforme(
-                    this.utile.service.clsBilanIO,
-                    () => clfDoc.nbCopiablesPasPréparés === 0
-                );
+                const bouton = clfDoc.estVirtuel
+                    ? this.utile.bouton.supprimeBonVirtuel(clfDoc, quandBonVirtuelSupprimé)
+                    : this.utile.bouton.annuleDoc(clfDoc, quandBonModifié);
                 return bouton;
             },
-            afficherSi,
-        };
-    }
-
-    annuler(synthèse: CLFDoc): IKfVueTableColonneDef<CLFDoc> {
-        const peutAnnuler = ValeurEtObservable.transforme(this.utile.service.clsBilanIO,
-            () => {
-                return synthèse.àSynthétiser.length > 0;
-            });
-        const nePasAfficherSi = ValeurEtObservable.et(peutAnnuler, this.utile.conditionTable.edition);
-        const enTête = this.utile.bouton.annuleDoc(synthèse);
-        enTête.inactivitéIO = ValeurEtObservable.transforme(
-            this.utile.service.clsBilanIO,
-            () => synthèse.préparé
-        );
-        return {
-            nom: 'annuler',
-            enTeteDef: { titreDef: enTête },
-            créeContenu: (clfDoc: CLFDoc) => {
-                const bouton = this.utile.bouton.annuleDoc(clfDoc);
-                bouton.inactivitéIO = ValeurEtObservable.transforme(
-                    this.utile.service.clsBilanIO,
-                    () => clfDoc.préparé
-                );
-                return bouton;
-            },
-            nePasAfficherSi,
+            classesDiv: [KfBootstrap.classeTexte({ alignement: 'center' })],
+            largeur: LargeurColonne.action,
+            nePasAfficherSi: this.utile.conditionTable.aperçu
         };
     }
 
     état(): IKfVueTableColonneDef<CLFDoc> {
         const créeContenu = (clfDoc: CLFDoc) => clfDoc.préparation.texte;
+        const classeOpérateur = KfBootstrap.texteColor();
         return {
             nom: 'état',
             créeContenu,
+            classesTd: [(clfDoc: CLFDoc) => {
+                const préparation = clfDoc.préparation;
+                return classeOpérateur.classe(préparation.couleur);
+            }],
+            quandItemModifié: 'rafraichit',
             compare: Compare.texte(créeContenu),
-            enTeteDef: { titreDef: 'Prêt' },
+            classesDiv: [KfBootstrap.classeTexte({ alignement: 'center' })],
+            largeur: LargeurColonne.action,
+            enTeteDef: {
+                titreDef: 'Prêt',
+                classesDiv: [KfBootstrap.classeTexte({ alignement: 'center' })],
+            },
         };
     }
 
     sélection(synthèse: CLFDoc): IKfVueTableColonneDef<CLFDoc> {
         return {
             nom: 'sélection',
+            enTeteDef: {
+                titreDef: synthèse.caseToutSélectionner,
+                chapeauDef: 'Inclure',
+                longueurChapeau: 1,
+                classesTh: [KfBootstrap.classeTexte({ alignement: 'center' })]
+            },
             créeContenu: (bon: CLFDoc) => bon.éditeur.kfChoisi,
-            enTeteDef: { titreDef: synthèse.caseToutSélectionner, chapeauDef: 'Inclure', longueurChapeau: 1 },
+            quandItemModifié: (cellule: KfVueTableCellule<CLFDoc>) => {
+                const clfDoc = cellule.item;
+                clfDoc.éditeur.kfChoisi.inactivité = !clfDoc.préparé;
+            },
+            classesCol: [KfBootstrap.classeTexte({ alignement: 'center' })],
+            largeur: LargeurColonne.action,
         };
     }
 
-    defsSélectionDocuments(synthèse: CLFDoc): IKfVueTableColonneDef<CLFDoc>[] {
+    defsBons(synthèse: CLFDoc,
+        quandBonVirtuelSupprimé: () => void,
+        quandBonModifié: (bon: CLFDoc) => void,
+        quandBonsModifiés: () => void,
+    ): IKfVueTableColonneDef<CLFDoc>[] {
         return [
             this.no(),
             this.date(),
             this.préparés(),
             this.annulés(),
             this.montant(),
-            this.action(synthèse),
+            this.édite(),
+            this.copie(synthèse, quandBonModifié, quandBonsModifiés),
+            this.annuleOuSupprimeBonVirtuel(quandBonVirtuelSupprimé, quandBonModifié),
             this.état(),
             this.sélection(synthèse)
         ];
     }
 
+    type(): IKfVueTableColonneDef<CLFDoc> {
+        const créeContenu = (doc: CLFDoc) => doc.type;
+        return {
+            nom: 'type',
+            créeContenu,
+            compare: Compare.texte(créeContenu),
+            enTeteDef: { titreDef: 'Type' },
+        };
+    }
+
+    code(): IKfVueTableColonneDef<CLFDoc> {
+        const créeContenu = (doc: CLFDoc) => doc.code;
+        return {
+            nom: 'code',
+            créeContenu,
+            compare: Compare.texte(créeContenu),
+            enTeteDef: { titreDef: 'Code' },
+        };
+    }
+
     choisitDocument(): IKfVueTableColonneDef<CLFDoc> {
         return {
             nom: 'choisit',
-            créeContenu: (clfDoc: CLFDoc) => this.utile.lien.choixDocument(clfDoc),
+            créeContenu: () => Fabrique.étiquetteLien(Fabrique.contenu.choisit()),
         };
     }
 
     defsDocuments(): IKfVueTableColonneDef<CLFDoc>[] {
-        const defs = [
-            this.code('Code'),
+        return [
+            this.type(),
+            this.code(),
             this.date(),
             this.lignes(),
             this.total(),
             this.choisitDocument(),
         ];
-        return this.utile.utilisateurEstLeClient ? defs : [this.client()].concat(defs);
     }
 
 }

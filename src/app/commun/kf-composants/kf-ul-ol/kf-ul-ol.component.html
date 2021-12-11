@@ -1,16 +1,33 @@
+<ng-template #lisTemplate let-lis>
+    <ng-container *ngFor="let li of lis">
+        <li *ngIf="!li.item.nePasAfficher" [ngClass]="li.classe" [ngStyle]="li.style">
+            <ng-container *ngFor="let composant of li.composants">
+                <app-kf-composant [attr.nom]="composant.nom" [composant]="composant">
+                </app-kf-composant>
+            </ng-container>
+        </li>
+    </ng-container>
+</ng-template>
+
 <ng-template #ulTemplate>
     <ul #htmlElement [ngClass]="ul.classe" [ngStyle]="ul.style">
-        <ng-container *ngFor="let li of ul.lis">
-            <li *ngIf="!li.item.nePasAfficher" [ngClass]="li.classe" [ngStyle]="li.style">
-                <app-kf-composant [attr.nom]="li.item.nom" [composant]="li.item">
-                </app-kf-composant>
-            </li>
-        </ng-container>
+        <ng-container *ngTemplateOutlet="lisTemplate; context: { $implicit: ul.lis }"></ng-container>
     </ul>
 </ng-template>
 
-<ng-container *ngIf="ul.dansNav; else ulTemplate">
-    <nav #navElement [ngClass]="ul.classeNav" [ngStyle]="ul.styleNav">
-        <ng-container *ngTemplateOutlet="ulTemplate"></ng-container>
-    </nav>
+<ng-template #olTemplate>
+    <ol #htmlElement [ngClass]="ul.classe" [ngStyle]="ul.style">
+        <ng-container *ngTemplateOutlet="lisTemplate; context: { $implicit: ul.lis }"></ng-container>
+    </ol>
+</ng-template>
+
+<ng-container *ngIf="ul.avecUl; else olTemplate">
+    <ng-container *ngIf="ul.dansNav; else ulTemplate">
+        <nav #navElement [ngClass]="ul.classeNav" [ngStyle]="ul.styleNav">
+            <ng-container *ngTemplateOutlet="ulTemplate"></ng-container>
+        </nav>
+    </ng-container>
+</ng-container>
+<ng-container *ngIf="ul.avecRouterOutlet">
+    <router-outlet></router-outlet>
 </ng-container>

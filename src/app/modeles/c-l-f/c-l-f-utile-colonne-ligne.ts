@@ -12,8 +12,10 @@ import { CoûtDef, LigneDocumentCoût } from './cout';
 import { CLFDoc } from './c-l-f-doc';
 import { ValeurEtObservable } from 'src/app/commun/outils/valeur-et-observable';
 import { TexteOutils } from 'src/app/commun/outils/texte-outils';
-import { KfBBtnGroup, KfBBtnGroupElement } from 'src/app/commun/kf-composants/kf-b-btn-group/kf-b-btn-group';
 import { CLFDocs } from './c-l-f-docs';
+import { KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
+import { LargeurColonne } from 'src/app/disposition/largeur-colonne';
+import { KfBouton } from 'src/app/commun/kf-composants/kf-elements/kf-bouton/kf-bouton';
 
 export class CLFUtileColonneLigne {
     protected utile: CLFUtile;
@@ -37,10 +39,10 @@ export class CLFUtileColonneLigne {
     catégorie(): IKfVueTableColonneDef<CLFLigne> {
         const def: IKfVueTableColonneDef<CLFLigne> = {
             nom: this.utile.nom.catégorie,
-            créeContenu: (ligne: CLFLigne) => ligne.produit.nomCategorie,
+            créeContenu: (ligne: CLFLigne) => ligne.nomCategorie,
             compare: Compare.enchaine(
-                Compare.texte((ligne: CLFLigne) => ligne.produit.nomCategorie),
-                Compare.texte((ligne: CLFLigne) => ligne.produit.nom),
+                Compare.texte((ligne: CLFLigne) => ligne.nomCategorie),
+                Compare.texte((ligne: CLFLigne) => ligne.nomProduit),
             ),
             nePasAfficherTriSi: this.utile.conditionTable.aperçu,
             enTeteDef: { titreDef: 'Catégorie' },
@@ -199,7 +201,7 @@ export class CLFUtileColonneLigne {
                 Compare.nombre((ligne: CLFLigne) => coûtDef.iCoût(ligne).valeur),
                 Compare.booléenDesc((ligne: CLFLigne) => coûtDef.iCoût(ligne).complet)
             ),
-            classesItem: ['prix'],
+            classesTd: ['prix'],
             enTeteDef: { titreDef: 'Coût' },
             bilanDef: {
                 texteAgrégé: (lignes: CLFLigne[]) => coûtDef.texteAgrégé(lignes),
@@ -211,12 +213,12 @@ export class CLFUtileColonneLigne {
     choisit(): IKfVueTableColonneDef<CLFLigne> {
         return {
             nom: this.utile.nom.choisit,
-            créeContenu: (ligne: CLFLigne) => this.lien.choisit(ligne)
+            créeContenu: () => Fabrique.étiquetteLien(Fabrique.contenu.choisit()),
         };
     }
 
     supprime(
-        quandLigneSupprimée: (ligne: CLFLigne) => ((stock: CLFDocs) => void),
+        quandLigneSupprimée: (stock: CLFDocs, index: number) => void,
     ): IKfVueTableColonneDef<CLFLigne> {
         return {
             nom: 'supprime',
@@ -229,68 +231,92 @@ export class CLFUtileColonneLigne {
         };
     }
 
-    private btnGroupDoc(clfDoc: CLFDoc): KfBBtnGroup {
-        const btnGroup = new KfBBtnGroup('action');
-        let bouton: KfBBtnGroupElement;
-        bouton = this.utile.bouton.copieDoc(clfDoc);
-        bouton.inactivitéIO = ValeurEtObservable.transforme(
-            this.utile.service.clsBilanIO,
-            () => !clfDoc.lignes || clfDoc.nbCopiablesPasPréparés === 0
-        );
-        btnGroup.ajoute(bouton);
-        if (clfDoc.type === 'livraison' || clfDoc.crééParLeClient) {
-            bouton = this.utile.bouton.annuleDoc(clfDoc);
-            bouton.inactivitéIO = ValeurEtObservable.transforme(
-                this.utile.service.clsBilanIO,
-                () => !clfDoc.lignes || clfDoc.lignes.filter(l => l.préparé).length > 0
+    copie(clfDoc: CLFDoc): IKfVueTableColonneDef<CLFLigne> {
+        const entête = this.utile.bouton.copieDoc(clfDoc);
+        if (clfDoc.no === 0) {
+            entête.inactivité = true;
+        } else {
+            entête.inactivitéIO = ValeurEtObservable.transforme(
+                this.utile.service.clfBilanIO,
+                () => !clfDoc.lignes || clfDoc.nbCopiables === 0
             );
-        } else {
-            bouton = Fabrique.bouton.fauxTexteSousIcone();
-        }
-        btnGroup.ajoute(bouton);
-        return btnGroup;
-    }
-
-    private btnGroupLigne(ligne: CLFLigne, boutonAnnuleOuSupprime: (ligne: CLFLigne) => KfBBtnGroupElement): KfBBtnGroup {
-        const btnGroup = new KfBBtnGroup('action' + ligne.no2);
-        let bouton: KfBBtnGroupElement;
-        bouton = this.utile.bouton.copieLigne(ligne);
-        bouton.inactivitéIO = ValeurEtObservable.transforme(
-            this.utile.service.clsBilanIO,
-            () => !ligne.copiable || ligne.préparé
-        );
-        btnGroup.ajoute(bouton);
-        bouton = boutonAnnuleOuSupprime(ligne);
-        btnGroup.ajoute(bouton);
-        return btnGroup;
-    }
-
-    action(clfDoc: CLFDoc, quandLigneSupprimée: (ligne: CLFLigne) => ((stock: CLFDocs) => void)): IKfVueTableColonneDef<CLFLigne> {
-        let boutonAnnuleOuSupprime: (ligne: CLFLigne) => KfBBtnGroupElement;
-        if (clfDoc.type === 'livraison' || clfDoc.crééParLeClient) {
-            boutonAnnuleOuSupprime = (ligne: CLFLigne) => {
-                const bouton = this.utile.bouton.annuleLigne(ligne);
-                bouton.inactivitéIO = ValeurEtObservable.transforme(
-                    this.utile.service.clsBilanIO,
-                    () => ligne.préparé
-                );
-                return bouton;
-            };
-        } else {
-            boutonAnnuleOuSupprime = (ligne: CLFLigne) => {
-                const bouton = this.utile.bouton.supprime(ligne, quandLigneSupprimée);
-                return bouton;
-            };
         }
         return {
-            nom: 'action',
+            nom: 'copie',
             enTeteDef: {
-                titreDef: this.btnGroupDoc(clfDoc),
-                classeDefs: ['colonne-btn-group-2'],
+                titreDef: entête,
+                classesTh: [KfBootstrap.classeTexte({ alignement: 'center' })],
             },
-            créeContenu: (ligne: CLFLigne) => this.btnGroupLigne(ligne, boutonAnnuleOuSupprime),
-            classesItem: ['colonne-btn-group-2'],
-            afficherSi: this.utile.conditionTable.edition,
+            créeContenu: (ligne: CLFLigne) => {
+                const bouton = this.utile.bouton.copieLigne(ligne);
+                if (clfDoc.no === 0) {
+                    bouton.inactivité = true;
+                } else {
+                    bouton.inactivitéIO = ValeurEtObservable.transforme(
+                        this.utile.service.clfBilanIO,
+                        () => !ligne.copiable
+                    );
+                }
+                return bouton;
+            },
+            classesCol: [KfBootstrap.classeTexte({ alignement: 'center' })],
+            largeur: LargeurColonne.action,
+            nePasAfficherSi: this.utile.conditionTable.aperçu
+        };
+    }
+
+    annuleOuSupprime(clfDoc: CLFDoc, quandLigneSupprimée: (stock: CLFDocs, index: number) => void): IKfVueTableColonneDef<CLFLigne> {
+        let nom: string;
+        let def: {
+            enTête?: KfBouton,
+            conditionInactivitéEnTête?: () => boolean,
+            contenu: (ligne: CLFLigne) => KfBouton
+        };
+        if (clfDoc.type === 'livraison' || clfDoc.crééParLeClient) {
+            nom = 'annule';
+            def = {
+                enTête: this.utile.bouton.annuleDoc(clfDoc),
+                conditionInactivitéEnTête: () => !clfDoc.lignes,
+                contenu: (ligne: CLFLigne) => {
+                    const bouton = this.utile.bouton.annuleLigne(ligne);
+                    return bouton;
+                }
+            };
+        } else {
+            nom = 'supprime';
+            def = {
+                enTête: this.utile.bouton.supprimeBonVirtuel(clfDoc),
+                contenu: (ligne: CLFLigne) => {
+                    const bouton = this.utile.bouton.supprime(ligne, quandLigneSupprimée);
+                    return bouton;
+                }
+            };
+        }
+
+        if (def.enTête) {
+            if (def.conditionInactivitéEnTête) {
+                def.enTête.inactivitéIO = ValeurEtObservable.transforme(
+                    this.utile.service.clfBilanIO,
+                    def.conditionInactivitéEnTête
+                );
+            }
+            return {
+                nom,
+                enTeteDef: {
+                    titreDef: def.enTête,
+                    classesTh: [KfBootstrap.classeTexte({ alignement: 'center' })],
+                },
+                créeContenu: def.contenu,
+                classesCol: [KfBootstrap.classeTexte({ alignement: 'center' })],
+                largeur: LargeurColonne.action,
+            };
+        }
+
+        return {
+            nom,
+            créeContenu: def.contenu,
+            classesCol: [KfBootstrap.classeTexte({ alignement: 'center' })],
+            largeur: LargeurColonne.action,
         };
     }
 
@@ -305,7 +331,7 @@ export class CLFUtileColonneLigne {
     }
 
     defsClient(
-        quandLigneSupprimée: (ligne: CLFLigne) => ((stock: CLFDocs) => void),
+        quandLigneSupprimée: (stock: CLFDocs, index: number) => void,
     ): IKfVueTableColonneDef<CLFLigne>[] {
         const champ = this.utile.texte.commande.champ;
         const defs: IKfVueTableColonneDef<CLFLigne>[] = [
@@ -330,7 +356,7 @@ export class CLFUtileColonneLigne {
         return defs;
     }
 
-    defsFournisseur(doc: CLFDoc, quandLigneSupprimée: (ligne: CLFLigne) => ((stock: CLFDocs) => void)): IKfVueTableColonneDef<CLFLigne>[] {
+    defsFournisseur(doc: CLFDoc, quandLigneSupprimée: (stock: CLFDocs, index: number) => void): IKfVueTableColonneDef<CLFLigne>[] {
         const champ = this.utile.texte.textes(doc.clfDocs.type).champ;
         const defs: IKfVueTableColonneDef<CLFLigne>[] = [];
         defs.push(
@@ -346,7 +372,8 @@ export class CLFUtileColonneLigne {
             this.aFixer(champ.fixé),
             this.typeMesure(champ.typeMesure),
             this.coût(LigneDocumentCoût.aFixer()),
-            this.action(doc, quandLigneSupprimée),
+            this.copie(doc),
+            this.annuleOuSupprime(doc, quandLigneSupprimée),
         );
         return defs;
     }

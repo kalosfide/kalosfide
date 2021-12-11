@@ -1,7 +1,7 @@
 
 export const AppSite = {
     nom: 'kalosfide.fr',
-    urlSegment: 'kalosfide',
+    path: 'kalosfide',
     titre: 'Kalosfide',
     date: '2018',
 

@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { CanDeactivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree } from '@angular/router';
+import { CanDeactivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
 import { ComptePages } from 'src/app/compte/compte-pages';
 import { RouteurService } from 'src/app/services/routeur.service';
-import { AppPages } from 'src/app/app-pages';
+import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 
 export interface ComponentAAutoriserAQuitter {
     peutQuitter: (nextState?: RouterStateSnapshot) => Observable<boolean> | Promise<boolean> | boolean;
@@ -20,7 +20,7 @@ export class PeutQuitterGarde implements CanDeactivate<ComponentAAutoriserAQuitt
         currentState: RouterStateSnapshot,
         nextState?: RouterStateSnapshot
     ): boolean | Observable<boolean> | Promise<boolean> {
-        return (nextState && nextState.url === this.routeur.urlDansSite([AppPages.compte.urlSegment, ComptePages.deconnection.urlSegment]))
+        return (nextState && nextState.url === Fabrique.url.appRouteur.compte.url(ComptePages.deconnection.path))
             || (component.peutQuitter ? component.peutQuitter(nextState) : true);
     }
 }

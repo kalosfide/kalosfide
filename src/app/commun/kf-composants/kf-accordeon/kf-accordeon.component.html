@@ -1,0 +1,19 @@
+<div #htmlElement [ngClass]="accordeon.classe">
+    <ng-container *ngFor="let item of accordeon.items">
+        <div [ngClass]="item.classe">
+            <div [id]="item.nomEnTete" [ngClass]="item.classeEnTete">
+                <button [disabled]="item.bouton.inactif" [ngClass]="item.bouton.classe" [ngStyle]="item.bouton.style"
+                    [attr.aria-expanded]="item.ariaExpanded" [attr.aria-controls]="item.nomFermable">
+                    <app-kf-contenu-phrase [contenuPhrase]="item.bouton.contenuAAfficher"></app-kf-contenu-phrase>
+                </button>
+            </div>
+            <div [id]="item.nomFermable" [ngClass]="item.classeFermable" [attr.aria-labelledby]="item.nomEnTete">
+                <div [ngClass]="item.classeCorps">
+                    <ng-container *ngFor="let contenu of item.contenus">
+                        <app-kf-composant [composant]="contenu"></app-kf-composant>
+                    </ng-container>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+</div>

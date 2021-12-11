@@ -5,26 +5,22 @@ import { LivraisonPages } from './livraison-pages';
 import { LivraisonBonLignesComponent } from './livraison-bon-lignes.component';
 import { LivraisonClientsComponent } from './livraison-clients.component';
 
-import { LivraisonClientsResolverService } from './livraison-clients-resolver.service';
 import { LivraisonClientComponent } from './livraison-client.component';
 import { LivraisonChoixProduitComponent } from './livraison-choix-produit.component';
 import { LivraisonLigneAjouteComponent } from './livraison-ligne-ajoute.component';
-import { LivraisonBonSupprimeComponent } from './livraison-bon-supprime.component';
 import { LivraisonBonsComponent } from './livraison-bons.component';
-import { LivraisonBonsResolverService } from './livraison-bons-resolver.service';
-import { LivraisonBonResolverService } from './livraison-bon-resolver.service';
-import { LivraisonBonVirtuelGardeService } from './livraison-bon-virtuel-garde.service';
 import { LivraisonLigneResolverService } from './livraison-ligne-resolver.service';
-import { CLFPages } from 'src/app/modeles/c-l-f/c-l-f-pages';
 import { LivraisonEnvoiComponent } from './livraison-envoi.component';
 import { LivraisonSynthèseResolverService } from './livraison-synthese-resolver.service';
-import { LivraisonDoitCréerGardeService } from './livraison-doit-creer-garde.service';
-import { LivraisonBonExisteGardeService } from './livraison-bon-existe-garde.service';
-import { LivraisonAttenteBonsGardeService } from './livraison-attente-bons-garde.service';
-import { LivraisonEnvoiGardeService } from './livraison-envoi-garde.service';
 import { LivraisonBonNouveauComponent } from './livraison-bon-nouveau.component';
-import { LivraisonProduitPasDansBonGardeService } from './livraison-produit-pas-dans-bon-garde.service';
 import { LivraisonTitreComponent } from './livraison-titre.component';
+import { NomParam } from 'src/app/modeles/nom-param';
+import { LFClientsResolverService } from '../l-f-clients-resolver.service';
+import { LFBonsResolverService } from '../l-f-bons-resolver.service';
+import { LFBonResolverService } from '../l-f-bon-resolver.service';
+import { LFEnvoiGardeService } from '../l-f-envoi-garde.service';
+import { LFAttenteBonsGardeService } from '../l-f-attente-bons-garde.service';
+import { LFEnfantsDeBonGardeService } from '../l-f-enfants-de-bon-garde.service';
 
 const routes: Routes = [
     {
@@ -32,18 +28,14 @@ const routes: Routes = [
         children: [
             {
                 path: '',
-                redirectTo: LivraisonPages.choixClient.urlSegment,
+                redirectTo: LivraisonPages.choixClient.path,
                 pathMatch: 'full',
             },
             {
                 /**
                  * Page titre
                  */
-                path: LivraisonPages.choixClient.urlSegment,
-                data: {
-                    pageDef: LivraisonPages.choixClient,
-                    estEnfantPathVide: true
-                },
+                path: LivraisonPages.choixClient.path,
                 component: LivraisonTitreComponent,
                 children: [
                     {
@@ -52,10 +44,15 @@ const routes: Routes = [
                      * Table de tous les clients avec leurs nombres de bons à synthétiser et des liens vers ./client/:key.
                      */
                     path: '',
+                    data: {
+                        pageDef: LivraisonPages.choixClient,
+                        estEnfantPathVide: true,
+                        typeCLF: 'livraison'
+                    },
                     component: LivraisonClientsComponent,
                     resolve: {
                         // clients avec leurs nombres de bons envoyés
-                        clfDocs: LivraisonClientsResolverService,
+                        clfDocs: LFClientsResolverService,
                     },
                     }
                 ]
@@ -65,27 +62,27 @@ const routes: Routes = [
                  * Page titre contenant toutes les pages d'édition d'une synthèse d'un client.
                  * key: key du client
                  */
-                path: LivraisonPages.client.urlSegment + '/:' + CLFPages.nomParamKeyClient,
+                path: LivraisonPages.client.path + '/:' + NomParam.keyClient,
                 data: {
                     pageDef: LivraisonPages.client,
                     cheminDeTitre: ['clfDocs', 'client', 'nom'],
                     pageDefDescendantParDéfaut: LivraisonPages.bons,
+                    typeCLF: 'livraison'
                 },
                 component: LivraisonClientComponent,
                 canActivate: [
                     // Bloque la route tant que le stock n'est pas chargé
                     // Fixe le stock avec les bons à synthétiser du client
-                    // Redirige vers ./bon/0/nouveau s'il n'y a aucune commande
-                    LivraisonAttenteBonsGardeService,
+                    LFAttenteBonsGardeService,
                 ],
                 resolve: {
                     // Lit le stock
-                    clfDocs: LivraisonBonsResolverService,
+                    clfDocs: LFBonsResolverService,
                 },
                 children: [
                     {
                         path: '',
-                        redirectTo: LivraisonPages.bons.urlSegment,
+                        redirectTo: LivraisonPages.bons.path,
                         pathMatch: 'full',
                     },
                     {
@@ -94,22 +91,25 @@ const routes: Routes = [
                          * Table des bons du client avec leur état de préparation, lien vers ./bon/:no et case de sélection.
                          * Bouton: Créer synthèse.
                          */
-                        path: LivraisonPages.bons.urlSegment,
+                        path: LivraisonPages.bons.path,
                         data: {
                             pageDef: LivraisonPages.bons,
                             estEnfantPathVide: true
                         },
                         component: LivraisonBonsComponent,
                         resolve: {
-                            clfDocs: LivraisonBonsResolverService,
+                            clfDocs: LFBonsResolverService,
                         },
                     },
                     {
-                        path: LivraisonPages.envoi.urlSegment,
-                        data: { pageDef: LivraisonPages.envoi },
+                        path: LivraisonPages.envoi.path,
+                        data: {
+                            pageDef: LivraisonPages.envoi,
+                            typeCLF: 'livraison',
+                        },
                         component: LivraisonEnvoiComponent,
                         canActivate: [
-                            LivraisonEnvoiGardeService,
+                            LFEnvoiGardeService,
                         ],
                         resolve: {
                             clfDoc: LivraisonSynthèseResolverService,
@@ -119,7 +119,7 @@ const routes: Routes = [
                         /**
                          * Route sans page contenant toutes les pages d'édition d'un document.
                          */
-                        path: LivraisonPages.bon.urlSegment + '/:' + CLFPages.nomParamNoDoc,
+                        path: LivraisonPages.bon.path + '/:' + NomParam.noDoc,
                         data: {
                             pageDef: LivraisonPages.bon,
                             pageDefDescendantParDéfaut: LivraisonPages.lignes,
@@ -127,90 +127,57 @@ const routes: Routes = [
                         },
                         canActivateChild: [
                             // Si le stock n'existe pas ou si keyClient ou no a changé, charge et stocke le cflDocs
-                            // ,
+                            LFEnfantsDeBonGardeService
                         ],
                         resolve: {
                             // pour que les gardes des enfants aient accès au résolu de la route
                             // Lit le stock. Crée le cflDoc.
-                            clfDoc: LivraisonBonResolverService,
+                            clfDoc: LFBonResolverService,
                         },
                         children: [
                             {
                                 path: '',
-                                redirectTo: LivraisonPages.lignes.urlSegment,
+                                redirectTo: LivraisonPages.lignes.path,
                                 pathMatch: 'full',
                             },
                             {
-                                path: LivraisonPages.lignes.urlSegment,
+                                path: LivraisonPages.lignes.path,
                                 data: {
                                     pageDef: undefined,
                                     estEnfantPathVide: true
                                 },
                                 component: LivraisonBonLignesComponent,
-                                canActivate: [
-                                    // Lit le stock.
-                                    // Redirige vers ./nouveau si noDoc = 0 et la commande virtuelle n'existe pas ou est envoyée
-                                    LivraisonBonExisteGardeService,
-                                ],
                                 resolve: {
-                                    clfDoc: LivraisonBonResolverService,
+                                    clfDoc: LFBonResolverService,
                                 },
                             },
                             {
-                                path: LivraisonPages.nouveau.urlSegment,
+                                path: LivraisonPages.nouveau.path,
                                 data: { pageDef: LivraisonPages.nouveau },
                                 component: LivraisonBonNouveauComponent,
-                                canActivate: [
-                                    // Lit le stock.
-                                    // Redirige vers ./lignes si noDoc = 0 et la commande virtuelle existe et est ouverte
-                                    // ou si noDoc > 0.
-                                    // commandeEstVirtuelleEtNExistePasOuEstEnvoyée
-                                    LivraisonDoitCréerGardeService,
-                                ],
                                 resolve: {
                                     // Lit le stock. Crée le cflDoc.
-                                    clfDoc: LivraisonBonResolverService,
+                                    clfDoc: LFBonResolverService,
                                 },
                             },
                             {
-                                path: LivraisonPages.annule.urlSegment,
-                                data: { pageDef: LivraisonPages.annule },
-                                component: LivraisonBonSupprimeComponent,
-                                canActivate: [
-                                    // Redirige vers ./nouveau si noDoc = 0 et la commande virtuelle n'existe pas ou est envoyée
-                                    // Redirige vers ./lignes si noDoc != 0
-                                    // commandeEstVirtuelleEtExisteEtEstOuverte
-                                    LivraisonBonVirtuelGardeService
-                                ],
-                                resolve: {
-                                    clfDoc: LivraisonBonResolverService,
-                                },
-                            },
-                            {
-                                path: LivraisonPages.choixProduit.urlSegment,
+                                path: LivraisonPages.choixProduit.path,
                                 data: {
                                     pageDef: LivraisonPages.choixProduit,
                                     cheminDeKey: undefined
                                 },
                                 component: LivraisonChoixProduitComponent,
-                                canActivate: [
-                                    LivraisonBonVirtuelGardeService
-                                ],
                                 resolve: {
-                                    clfDoc: LivraisonBonResolverService,
+                                    clfDoc: LFBonResolverService,
                                 },
                             },
                             {
-                                path: LivraisonPages.ajoute.urlSegment + '/:' + CLFPages.nomParamNoLigne,
+                                path: LivraisonPages.ajoute.path + '/:' + NomParam.noLigne,
                                 data: {
                                     pageDef: LivraisonPages.ajoute,
                                     cheminDeKey: ['clfLigne', 'produit', 'nom']
                                 },
                                 component: LivraisonLigneAjouteComponent,
-                                canActivate: [
-                                    LivraisonBonVirtuelGardeService,
-                                    LivraisonProduitPasDansBonGardeService,
-                                ],
                                 resolve: {
                                     clfLigne: LivraisonLigneResolverService,
                                 },

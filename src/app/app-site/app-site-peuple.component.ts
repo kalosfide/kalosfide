@@ -44,14 +44,14 @@ export class AppSitePeupleComponent extends FormulaireComponent implements OnIni
         const info = (input: KfInputTexte)  => ({
             nom: input.nom,
             div: input.classeDiv,
-            composantAvant: input.classeComposantAvant,
+            composantAvant: input.composantAvant,
             entrée: input.classeEntree,
             input: input.classe,
             btIcone: input.ajouteCssDivBouton
         })
         const créeInput: (nom: string, options?: IKfBootstrapOptions) => KfInputTexte = (nom: string, options?: IKfBootstrapOptions) => {
             const input = Fabrique.input.texte(nom, `Label (${nom})`, `Placeholder (${nom})`);
-            input.valeur = '123456';
+            input.valeur = '123456 ' + nom;
             input.ajouteEffaceur(Fabrique.icone.def.croix);
             if (options) {
                 options.classeDiv = 'mb-3';
@@ -116,6 +116,19 @@ export class AppSitePeupleComponent extends FormulaireComponent implements OnIni
         });
         groupe.ajoute(grInput);
 
+        const grInput1 = new KfGroupe('inputGroup');
+        grInput1.ajouteClasse('mb-3');
+        const bouton = new KfEtiquette('icone2')
+        bouton.fixeIcone(Fabrique.icone.def.copier);
+        grInput1.ajoute(bouton);
+        grInput1.ajoute(créeInput(nom + '2'));
+        KfBootstrap.prépare(grInput, {
+//            label: 'nePasAfficherLabel',
+            taille: 'sm',
+            dansInputGroup: true
+        });
+        groupe.ajoute(grInput1);
+
         this.sansPeuple = Fabrique.caseACocher('sansPeuple');
         this.sansPeuple.visible = true;
 //        Fabrique.caseACocherAspect(this.sansPeuple, true);
@@ -147,7 +160,7 @@ export class AppSitePeupleComponent extends FormulaireComponent implements OnIni
         const test = new KfGroupe('');
         test.ajoute(Fabrique.bouton.bouton({
             nom: 'copie',
-            contenu: Fabrique.contenu.copier,
+            contenu: Fabrique.contenu.copier(),
             action: () => {
                 const def: IKfNgbModalDef = {
                     titre: 'Test',
@@ -156,14 +169,14 @@ export class AppSitePeupleComponent extends FormulaireComponent implements OnIni
                     boutonOk
                 };
                 const modal = new KfNgbModal(def);
-                modal.ajouteClasseEnTête(KfBootstrap.classe('alert', 'danger'));
+                modal.enTete.ajouteClasse(KfBootstrap.classe('alert', 'danger'));
                 this.modalService.confirme(Fabrique.erreurModal(new ApiResult500InternalServerError()));
             }
         }));
         etiquette = new KfEtiquette('', '0');
         etiquette.baliseHtml = KfTypeDeBaliseHTML.span;
         test.ajoute(etiquette);
-        test.ajoute(Fabrique.bouton.bouton({ nom: 'annule', contenu: Fabrique.contenu.annule }));
+        test.ajoute(Fabrique.bouton.bouton({ nom: 'annule', contenu: Fabrique.contenu.annule() }));
         return test;
     }
 

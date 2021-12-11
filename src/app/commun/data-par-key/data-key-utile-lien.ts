@@ -3,7 +3,7 @@ import { DataKeyUtile } from './data-key-utile';
 import { KfLien } from '../kf-composants/kf-elements/kf-lien/kf-lien';
 import { ILienDef } from 'src/app/disposition/fabrique/fabrique-lien';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
-import { IContenuPhraseDef } from 'src/app/disposition/fabrique/fabrique-contenu-phrase';
+import { IContenuPhraséDef } from 'src/app/disposition/fabrique/fabrique-contenu-phrase';
 import { IUrlDef } from 'src/app/disposition/fabrique/fabrique-url';
 
 export class DataKeyUtileLien<T extends IDataKey> {
@@ -13,7 +13,7 @@ export class DataKeyUtileLien<T extends IDataKey> {
         this.pUtile = utile;
     }
 
-    def(urlDef: IUrlDef, contenu?: IContenuPhraseDef): ILienDef {
+    def(urlDef: IUrlDef, contenu?: IContenuPhraséDef): ILienDef {
         return this.pUtile.lien.def('', urlDef, contenu);
     }
 
@@ -28,9 +28,9 @@ export class DataKeyUtileLien<T extends IDataKey> {
     }
     edite(t?: T): KfLien {
         const urlDef = t ? this.pUtile.urlKey.edite(t) : undefined;
-        return Fabrique.lien.bouton(this.def(urlDef, Fabrique.contenu.edite));
+        return Fabrique.lien.bouton(this.def(urlDef, Fabrique.contenu.édite()));
     }
     supprime(t: T): KfLien {
-        return Fabrique.lien.bouton(this.def(this.pUtile.urlKey.supprime(t), Fabrique.contenu.supprime));
+        return Fabrique.lien.bouton(this.def(this.pUtile.urlKey.supprime(t), Fabrique.contenu.supprime()));
     }
 }

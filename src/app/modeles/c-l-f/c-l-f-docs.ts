@@ -1,15 +1,14 @@
-import { ApiDocument } from './api-document';
+import { ApiDoc } from './api-doc';
 import { IKeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/i-key-uid-rno';
 import { Catalogue } from '../catalogue/catalogue';
 import { Client } from '../client/client';
-import { ApiDocumentsData } from './api-documents-client-data';
+import { ApiDocs } from './api-docs';
 import { CLFLigne } from './c-l-f-ligne';
 import { CLFDoc } from './c-l-f-doc';
 import { Produit } from '../catalogue/produit';
 import { Site } from '../site/site';
-import { IdEtatProduit } from '../catalogue/etat-produit';
 import { IKeyUidRnoNo } from 'src/app/commun/data-par-key/key-uid-rno-no/i-key-uid-rno-no';
-import { CLFBilan } from './c-l-f-bilan';
+import { CLFNbBons } from './c-l-f-nb-bons';
 import { typeCLF, TypeCLF } from './c-l-f-type';
 
 /**
@@ -61,14 +60,21 @@ export class CLFDocs {
      * Quand le fournisseur va créer ou éditer la facture d'un client, contient les livraisons de ce client
      * avec date sans numéro de facture
      */
-    documents: ApiDocument[];
+    apiDocs: ApiDoc[];
+
+    /**
+     * Catalogue contenant les produits et catégories avec date à utiliser pour les lignes ayant cette date.
+     * Présent quand les documents sont chargés pour une synthèse ou une vue s'il y a des lignes dont le produit
+     * ou sa catégorie a été modifié.
+     */
+    tarif: Catalogue;
 
     /**
      * Présent quand le fournisseur est en train d'éditer le bon de livraison ou la facture d'un client pour stocker les données éditées.
      */
-    private pClfBilan: CLFBilan;
+    private pClfBilan: CLFNbBons;
 
-    constructor() {}
+    constructor() { }
 
     /**
      * Copie tous les champs du ClfDocs stocké par le service
@@ -79,22 +85,9 @@ export class CLFDocs {
         this.keyIdentifiant = stocké.keyIdentifiant;
         this.site = stocké.site;
         this.client = stocké.client;
-        this.catalogue = stocké.catalogue;
-        this.documents = stocké.documents;
+        this.tarif = stocké.tarif;
+        this.apiDocs = stocké.apiDocs;
         this.pClfBilan = stocké.clfBilan;
-    }
-
-    charge(datas: ApiDocumentsData) {
-        this.site = datas.site;
-        this.catalogue = datas.catalogue;
-        this.client = datas.client;
-        this.documents = datas.documents;
-    }
-
-    initialise(typeDoc: TypeCLF, keyIdentifiant: IKeyUidRno, site: Site) {
-        this.type = typeDoc;
-        this.keyIdentifiant = keyIdentifiant;
-        this.site = site;
     }
 
     get typeASynthétiser(): TypeCLF {
@@ -103,16 +96,30 @@ export class CLFDocs {
 
     get keyClient(): IKeyUidRno { return this.client ? this.client : this.keyIdentifiant; }
 
-    get apiBonVirtuel(): ApiDocument {
-        const apiDoc = this.documents.find(d => d.no === 0);
-        return apiDoc;
+    get sansBonVirtuelOuvert(): boolean {
+        const apiDoc = this.apiDocs.find(d => d.no === 0 && !d.date);
+        return !apiDoc;
     }
 
     /**
-     * Un clfDocs est un contexte si son catalogue ne contient que la date
+     * Un clfDocs est un contexte s'il ne contient pas d'ApiDocs
      */
     get estContexte(): boolean {
-        return this.catalogue && !this.catalogue.produits;
+        return !this.apiDocs;
+    }
+
+    fixeCatalogue(catalogue: Catalogue) {
+        if (this.tarif) {
+            this.tarif.produits.forEach(p => p.nom = p.nom + ' (vieux)');
+            this.tarif.produits.forEach(produit => {
+                let catégorie = this.tarif.catégories.find(c => c.no === produit.categorieNo);
+                if (!catégorie) {
+                    catégorie = catalogue.catégories.find(c => c.no === produit.categorieNo);
+                }
+                produit.nomCategorie = catégorie.nom;
+            });
+        }
+        this.catalogue = catalogue;
     }
 
     /**
@@ -121,38 +128,40 @@ export class CLFDocs {
      * @param choisi true ou false
      */
     changeChoisi(noDoc: number, choisi: boolean) {
-        const apiDoc = this.documents.find(d => d.no === noDoc);
+        const apiDoc = this.apiDocs.find(d => d.no === noDoc);
         apiDoc.choisi = choisi;
     }
 
-    get clfBilan(): CLFBilan {
+    get clfBilan(): CLFNbBons {
         return this.pClfBilan;
     }
 
-    créeBilanBon(apiDoc: ApiDocument): CLFBilan {
-        const bilan: CLFBilan = {
-            nbAPréparer: apiDoc.lignes.length,
-            nbPréparés: apiDoc.lignes.filter(l => l.aFixer !== undefined && l.aFixer !== null).length,
-            nbAnnulés: apiDoc.lignes.filter(l => l.aFixer === 0).length,
+    créeBilanBon(apiDoc: ApiDoc): CLFNbBons {
+        const bilan: CLFNbBons = {
+            total: apiDoc.lignes.length,
+            préparés: apiDoc.lignes.filter(l => l.aFixer !== undefined && l.aFixer !== null).length,
+            annulés: apiDoc.lignes.filter(l => l.aFixer === 0).length,
         };
         return bilan;
     }
 
-    private créeBilanASynthétiser(): CLFBilan {
-        const bilan = CLFBilan.bilanVide();
-        for (const apiDoc of this.documents) {
-            bilan.nbAPréparer++;
+    private créeBilanASynthétiser(): CLFNbBons {
+        const bilan = CLFNbBons.bilanVide();
+        for (const apiDoc of this.apiDocs) {
             const bilanBon = this.créeBilanBon(apiDoc);
-            if (bilanBon.nbAPréparer > 0 && bilanBon.nbAPréparer === bilanBon.nbPréparés) {
-                bilan.nbPréparés++;
-                if (apiDoc.choisi) {
-                    bilan.nbSélectionnés++;
+            if (bilanBon.total > 0) {
+                bilan.total++;
+                if (bilanBon.total === bilanBon.préparés) {
+                    bilan.préparés++;
+                    if (apiDoc.choisi) {
+                        bilan.sélectionnés++;
+                    }
                 }
-            }
-            if (bilanBon.nbAPréparer > 0 && bilanBon.nbAPréparer === bilanBon.nbAnnulés) {
-                bilan.nbAnnulés++;
-                if (apiDoc.choisi) {
-                    bilan.nbAnnulésSélectionnés++;
+                if (bilanBon.total === bilanBon.annulés) {
+                    bilan.annulés++;
+                    if (apiDoc.choisi) {
+                        bilan.annulésSélectionnés++;
+                    }
                 }
             }
         }
@@ -160,108 +169,95 @@ export class CLFDocs {
         return bilan;
     }
 
-    créeBilan(): CLFBilan {
+    créeBilan(): CLFNbBons {
         this.pClfBilan = this.type === 'commande'
-            ? this.créeBilanBon(this.documents[0])
+            ? this.créeBilanBon(this.apiDocs[0])
             : this.créeBilanASynthétiser();
         return this.pClfBilan;
     }
 
-    private créeDocSansLignes(typeDoc: TypeCLF, apiDoc: ApiDocument, client: Client): CLFDoc {
-        const clfDoc = new CLFDoc(this, typeDoc);
-        clfDoc.apiDoc = apiDoc;
-        clfDoc.type = typeDoc;
-        if (clfDoc.apiDoc) {
-            clfDoc.apiDoc.uid = client.uid;
-            clfDoc.apiDoc.rno = client.rno;
-        }
-        clfDoc.client = client;
-        return clfDoc;
-    }
-
-    créeDocument(): CLFDoc {
+    créeASyntétiser(): CLFDoc {
         let clfDoc: CLFDoc;
         if (!this.typeASynthétiser) {
-            clfDoc = this.créeDocSansLignes('commande', this.documents[0], this.client);
-            clfDoc.créeLignes();
+            clfDoc = CLFDoc.avecLignes(this, 'commande', this.apiDocs[0]);
+            return clfDoc;
         } else {
-            clfDoc = this.créeDocSansLignes(this.type, new ApiDocument(), this.client);
-            clfDoc.àSynthétiser = this.documents
-                // il peut y avoir le dernier bon de livraison pour servir de modèle au bon virtuel
-                .filter(apiDoc => apiDoc.type !== 'L' || this.type !== 'livraison')
-                .map(apiDoc => {
-                    const bon = this.créeDocSansLignes(this.typeASynthétiser, apiDoc, this.client);
-                    bon.synthèse = clfDoc;
-                    bon.créeLignes();
-                    return bon;
-                });
+            const apiDoc = new ApiDoc();
+            apiDoc.uid = this.client.uid;
+            apiDoc.rno = this.client.rno;
+            clfDoc = CLFDoc.nouveau(this, this.type, apiDoc);
+
+            // Si la dernière synthèse a été créée à partir du seul bon virtuel et s'il n'y a pas de bons envoyés sans synthèse ni de bon virtuel,
+            // this.apiDocs contient seulement un modèle de bon virtuel créé à partir de la dernière synthèse.
+            // Ce modèle se distingue du bon virtuel ouvert par la présence des champs date et noGroupe qui ont pour valeur la date
+            // et le no de la dernière synthèse.
+            // Sinon this.apiDocs contient les bons envoyés sans synthèse s'il y en a et éventuellement un bon virtuel ouvert (sans date).
+            if (!this.apiDocs || this.apiDocs.length === 0) {
+                clfDoc.àSynthétiser = [];
+                return clfDoc;
+            }
+            if (this.apiDocs.length === 1) {
+                const apiDoc = this.apiDocs[0];
+                if (apiDoc.no === 0 && apiDoc.date) {
+                    clfDoc.àSynthétiser = [];
+                    return clfDoc;
+                }
+            }
+            clfDoc.àSynthétiser = this.apiDocs.map(apiDoc => CLFDoc.avecLignesEtSynthèse(this, this.typeASynthétiser, apiDoc, clfDoc));
+            return clfDoc;
         }
-        return clfDoc;
     }
 
     /**
-     * Crée un CLFDoc bon correspondant à l'ApiDocument stocké.
+     * Crée un CLFDoc bon.
+     * S'il n'y a pas un ApiDoc dans les Documents (avec le no correspondant si le type n'est pas 'commande'),
+     * le champ lignes du bon créé est indéfini.
      * @param no no du document, requis si le type n'est pas 'commande'
      */
     créeBon(no?: number): CLFDoc {
-        let clfDoc: CLFDoc;
-        let apiDoc: ApiDocument;
-        let type: TypeCLF;
+        let bon: CLFDoc;
+        let apiDoc: ApiDoc;
         if (this.type === 'commande') {
-            type = 'commande';
-            apiDoc = this.documents[0];
-            if (!apiDoc) {
-                apiDoc = new ApiDocument();
+            // l'utilisateur est le client
+            // le ApiDocs ne contient que la dernière commande du client
+            if (this.apiDocs.length === 0) {
+                // le client n'a jamais commandé
+                // on crée un ApiDoc sans lignes
+                apiDoc = new ApiDoc();
+                apiDoc.uid = this.client.uid;
+                apiDoc.rno = this.client.rno;
+            } else {
+                apiDoc = this.apiDocs[0];
             }
-            clfDoc = this.créeDocSansLignes(type, apiDoc, this.client);
+            bon = CLFDoc.avecLignes(this, 'commande', apiDoc);
         } else {
-            type = this.type === 'livraison' ? 'commande' : this.type === 'facture' ? 'livraison' : undefined;
-            apiDoc = this.documents.find(ad => ad.no === no);
+            // l'utilisateur est le fournisseur
+            apiDoc = this.apiDocs.find(ad => ad.no === no);
             if (!apiDoc) {
-                if (no === 0) {
-                    apiDoc = new ApiDocument();
-                    apiDoc.no = 0;
-                } else {
-                    return null;
-                }
+                // le fournisseur veut créer un bon virtuel et il n'a pas de synthèse modèle
+                apiDoc = new ApiDoc();
+                apiDoc.uid = this.client.uid;
+                apiDoc.rno = this.client.rno;
+                apiDoc.no = 0;
             }
-            clfDoc = this.créeDocSansLignes(type, apiDoc, this.client);
-            clfDoc.synthèse = new CLFDoc(this, this.type);
+            //            apiDoc.lignes.forEach(l => l.quantité = l.aFixer);
+            bon = CLFDoc.avecLignesDansSynthèse(this, apiDoc);
         }
         if (apiDoc.lignes) {
-            clfDoc.créeLignes();
+            bon.créeLignes();
         }
-        return clfDoc;
-    }
-
-    créeDocumentAEnvoyer(): CLFDoc {
-        let document: CLFDoc;
-        if (!this.typeASynthétiser) {
-            document = this.créeDocSansLignes('commande', this.documents[0], this.client);
-            document.créeLignes();
-        } else {
-            document = this.créeDocSansLignes(this.type, new ApiDocument(), this.client);
-            document.àSynthétiser = this.documents.map(apiDoc => {
-                const bon = this.créeDocSansLignes(this.typeASynthétiser, apiDoc, this.client);
-                bon.créeLignes();
-                bon.synthèse = document;
-                return bon;
-            });
-            document.créeSynthèse();
-        }
-        return document;
+        return bon;
     }
 
     /**
      * L'utilisateur est le client ou le fournisseur.
-     * Le CLFDocs contient les ApiDocument avec type dans .apiDocuments
+     * Le CLFDocs contient les ApiDoc avec type dans .apiDocs.
+     * @returns la liste de CLFDoc avec key, type et apiDoc
      */
-    créeVues(): CLFDoc[] {
-        return this.documents.map((apiDoc: ApiDocument) => {
-            const client = this.client ? this.client : this.clients.find(c => c.uid === apiDoc.uid && c.rno === apiDoc.rno);
+    créeRésumés(): CLFDoc[] {
+        return this.apiDocs.map((apiDoc: ApiDoc) => {
             const type: TypeCLF = typeCLF(apiDoc.type);
-            const clfDoc = this.créeDocSansLignes(type, apiDoc, client);
-            return clfDoc;
+            return CLFDoc.nouveau(this, type, apiDoc);
         });
     }
 
@@ -270,8 +266,7 @@ export class CLFDocs {
      * Le CLFDocs contient l'ApiData dans .apiDocuments[0]
      */
     créeVue(typeDoc: TypeCLF): CLFDoc {
-        const clfDoc = this.créeDocSansLignes(typeDoc, this.documents[0], this.client);
-        clfDoc.créeLignes();
+        const clfDoc = CLFDoc.avecLignes(this, typeDoc, this.apiDocs[0]);
         return clfDoc;
     }
 
@@ -280,7 +275,7 @@ export class CLFDocs {
             const clfDocs = new CLFDocs();
             clfDocs.type = this.typeASynthétiser;
             clfDocs.client = client;
-            clfDocs.documents = this.documents.filter(d => d.uid === client.uid && d.rno === client.rno);
+            clfDocs.apiDocs = this.apiDocs.filter(d => d.uid === client.uid && d.rno === client.rno);
             return clfDocs;
         });
         return clfDocsClient;
@@ -300,67 +295,103 @@ export class CLFDocs {
         }
     }
 
+    /**
+     * Ajoute ou remplace l'apiLigne ayant le no du produit de la ligne dans l'apiDoc du bon.
+     * Les lignes d'un bon ont toutes la même date Date_Nulle, leur no2 (no de produit) suffit à les distinguer.
+     * @param ligne ligne d'un bon
+     */
     quandLigneEditée(ligne: CLFLigne) {
         const apiDocument = this.type === 'commande'
-            ? this.documents[0]
-            : this.documents.find(d => d.no === 0);
+            ? this.apiDocs[0]
+            : this.apiDocs.find(d => d.no === 0);
         const index = apiDocument.lignes.findIndex(l => l.no === ligne.no2);
         if (index === -1) {
-            apiDocument.lignes.push(ligne.apiLigneDataAStocker());
+            apiDocument.lignes.push(ligne.apiLigne);
         } else {
-            apiDocument.lignes[index] = ligne.apiLigneDataAStocker();
+            apiDocument.lignes[index] = ligne.apiLigne;
         }
     }
 
-    quandLigneSupprimée(ligne: CLFLigne) {
+    /**
+     * Met à jour l'apiDoc correspondant au CLFDoc de la ligne en supprimant l'apiLigne ayant l'index passé en paramétre.
+     * @param index index d'une CLFLigne d'un bon de commande du client ou d'un bon virtuel du fournisseur dont l'enregistrement a été supprimé de la bdd.
+     * Cet index est le même dans toutes les listes où un élément correspond à la ligne.
+     */
+    quandLigneSupprimée(index: number) {
         const apiDocument = this.type === 'commande'
-            ? this.documents[0]
-            : this.documents.find(d => d.no === 0);
-        const index = apiDocument.lignes.findIndex(l => l.no === ligne.no2);
+            ? this.apiDocs[0]
+            : this.apiDocs.find(d => d.no === 0);
         apiDocument.lignes.splice(index, 1);
     }
+
+    /**
+     * Met à jour l'ApiData de la ligne et l'ApiLigne correspondant à la ligne dans les ApiDocs du CLFDocs.
+     * @param ligne CFLigne (d'un bon d'une synthèse) éditée dont l'enregistrement dans la bdd a été modifié en fixant aFixer avec la valeur du kfAFixer édité
+     */
     quandAFixerFixé(ligne: CLFLigne) {
-        ligne.sauveAFixer();
-        const apiDocument = this.documents.find(d => d.no === ligne.no);
-        const index = apiDocument.lignes.findIndex(l => l.no === ligne.no2);
-        apiDocument.lignes[index].aFixer = ligne.aFixer;
+        const àFixer = ligne.éditeur.kfAFixer.valeur;
+        ligne.apiLigne.aFixer = àFixer;
+        const apiDocument = this.apiDocs.find(d => d.no === ligne.no);
+        const apiLigne = apiDocument.lignes.find(l => l.no === ligne.no2 && l.date === ligne.date);
+        apiLigne.aFixer = àFixer;
     }
 
-    quandSourceCopiéeDansAFixer1(ligne: CLFLigne) {
-        const apiDocument = this.documents.find(d => d.no === ligne.no);
-        const index = apiDocument.lignes.findIndex(l => l.no === ligne.no2);
-        ligne.aFixer = ligne.quantité;
-        apiDocument.lignes[index] = ligne.apiLigneDataAStocker();
+    /**
+     * Met à jour l'ApiData et le kfAFixer de la ligne et l'ApiLigne correspondant à la ligne dans les ApiDocs du CLFDocs.
+     * @param ligne CFLigne éditée (d'un bon d'une synthèse) dont l'enregistrement dans la bdd a été modifié en copiant Quantité dans aFixer
+     */
+    quandQuantitéCopiéeDansAFixerLigne(ligne: CLFLigne) {
+        const apiDocument = this.apiDocs.find(d => d.no === ligne.no);
+        const apiLigne = apiDocument.lignes.find(l => l.no === ligne.no2 && l.date === ligne.date);
+        const àFixer = apiLigne.quantité;
+        ligne.aFixer = àFixer;
+        apiLigne.aFixer = àFixer;
     }
 
-    quandSourceCopiéeDansAFixerDoc(doc: CLFDoc) {
-        const apiDocument = this.documents.find(d => d.no === doc.no);
+    /**
+     * Met à jour l'ApiData et le kfAFixer de la ligne et l'ApiLigne correspondant à la ligne dans les ApiDocs du CLFDocs.
+     * @param ligne CFLigne éditée (d'un bon d'une synthèse) dont l'enregistrement dans la bdd a été modifié en annulant aFixer
+     */
+    quandAnnuleLigne(ligne: CLFLigne) {
+        const apiDocument = this.apiDocs.find(d => d.no === ligne.no);
+        const apiLigne = apiDocument.lignes.find(l => l.no === ligne.no2 && l.date === ligne.date);
+        ligne.aFixer = 0;
+        apiLigne.aFixer = 0;
+    }
+
+    /**
+     * Met à jour les ApiData (et les kfAFixer s'ils existent) des lignes modifiées et les ApiLigne correspondant à ces lignes dans les ApiDocs du CLFDocs.
+     * @param doc bon d'une synthèse dont les enregistrements des lignes dans la bdd ont été modifiés en copiant Quantité dans aFixer
+     * quand c'est possible
+     */
+    quandQuantitéCopiéeDansAFixerDoc(doc: CLFDoc) {
+        const apiDocument = this.apiDocs.find(d => d.no === doc.no);
         for (let i = 0; i < apiDocument.lignes.length; i++) {
             const ligne = doc.lignes[i];
             if (ligne.copiable) {
-                ligne.aFixer = ligne.quantité;
-                apiDocument.lignes[i] = ligne.apiLigneDataAStocker();
+                const aFixer = ligne.quantité;
+                ligne.aFixer = aFixer;
+                apiDocument.lignes[i].aFixer = aFixer;
+                doc.apiDoc.lignes[i].aFixer = aFixer;
             }
         }
     }
 
-    quandSourceCopiéeDansAFixerDocs(doc: CLFDoc) {
-        doc.àSynthétiser.forEach(d => this.quandSourceCopiéeDansAFixerDoc(d));
+    quandQuantitéCopiéeDansAFixerDocs(doc: CLFDoc) {
+        doc.àSynthétiser.forEach(d => this.quandQuantitéCopiéeDansAFixerDoc(d));
     }
 
-    quandAnnule1(ligne: CLFLigne) {
-        const apiDocument = this.documents.find(d => d.no === ligne.no);
-        const index = apiDocument.lignes.findIndex(l => l.no === ligne.no2);
-        ligne.aFixer = 0;
-        apiDocument.lignes[index] = ligne.apiLigneDataAStocker();
+    quandSupprimeBonVirtuel() {
+        const index = this.apiDocs.findIndex(d => d.no === 0);
+        this.apiDocs.splice(index, 1);
     }
 
     quandAnnuleDoc(doc: CLFDoc) {
-        const apiDocument = this.documents.find(d => d.no === doc.no);
+        const apiDocument = this.apiDocs.find(d => d.no === doc.no);
         for (let i = 0; i < apiDocument.lignes.length; i++) {
             const ligne = doc.lignes[i];
             ligne.aFixer = 0;
-            apiDocument.lignes[i] = ligne.apiLigneDataAStocker();
+            apiDocument.lignes[i] = ligne.apiLigne;
         }
     }
 
@@ -368,62 +399,60 @@ export class CLFDocs {
         synthèse.àSynthétiser.forEach(doc => this.quandAnnuleDoc(doc));
     }
 
-    quandSourceCopiéeDansAFixerSynthèse(synthèse: CLFDoc) {
-        synthèse.àSynthétiser.forEach(doc => this.quandSourceCopiéeDansAFixerDoc(doc));
+    quandQuantitéCopiéeDansAFixerSynthèse(synthèse: CLFDoc) {
+        synthèse.àSynthétiser.forEach(doc => this.quandQuantitéCopiéeDansAFixerDoc(doc));
     }
 
     /**
-     * Met à jour les documents après qu'un nouveau bon de commande ou un nouvaue bon de livraison virtuel a été créé.
-     * @param créé retour de Post
+     * Met à jour this.apiDocs après qu'un nouveau bon de commande ou un nouveau bon virtuel a été créé.
+     * @param créé retour de Post ne contient que le no du bon créé
+     */
+    quandBonCréé(créé: ApiDoc, copie?: boolean) {
+        const apiDoc = new ApiDoc();
+        apiDoc.uid = this.client.uid;
+        apiDoc.rno = this.client.rno;
+        apiDoc.no = créé.no;
+        apiDoc.lignes = [];
+        if (this.type === 'commande') {
+            // L'utilisateur est le client.
+            // Les documents sont réduits à la dernière commande du client.
+            this.apiDocs = [apiDoc];
+        } else {
+            // L'utilisateur est le fournisseur.
+            // On cherche s'il y a un modèle de bon virtuel dans les apiDocs.
+            const i = this.apiDocs.findIndex(d => d.no === 0);
+            if (i !== -1) {
+                // On remplace le modèle de bon virtuel
+                this.apiDocs[i] = apiDoc;
+            } else {
+                // On ajoute le bon virtuel au début des apiDocs
+                this.apiDocs.unshift(apiDoc);
+            }
+        }
+    }
+
+    /**
+     * Met à jour les documents après qu'un nouveau bon de commande ou un nouveau bon virtuel a été créé en copiant un modèle.
+     * @param cloné retour de Post contient uniquement le no
      * @param copie présent et vrai si copie
      */
-    quandBonCréé(créé: ApiDocument, copie?: boolean) {
-        let apiDoc: ApiDocument;
-        if (copie) {
-            if (this.type === 'commande') {
-                apiDoc = this.documents[0];
-                apiDoc.no = créé.no;
-                apiDoc.date = undefined;
-            } else {
-                apiDoc = this.documents.find(d => d.no === 0);
-                // apiDoc est un bon virtuel créé à partir de la dernière synthèse
-                // àCopier.date est la date de la dernière synthèse
-                // Pour en faire un bon actif, il suffit d'annuler sa date
-                apiDoc.date = undefined;
-                apiDoc.lignes = apiDoc.lignes
-                    .filter(l => {
-                        const produit = this.produit(l.no);
-                        return produit && produit.etat === IdEtatProduit.disponible;
-                    });
-            }
+    quandBonCloné(cloné: ApiDoc) {
+        // il faut transformer le modèle en bon en effaçant sa date et fixer son no si c'est une commande
+        // et effacer son noGroupe si c'est le bon virtuel
+        let modèle: ApiDoc;
+        if (this.type === 'commande') {
+            modèle = this.apiDocs[0];
+            modèle.no = cloné.no;
         } else {
-            apiDoc = new ApiDocument();
-            apiDoc.no = créé.no;
-            apiDoc.lignes = [];
-            let keyClient: IKeyUidRno;
-            if (this.type === 'livraison') {
-                // L'utilisateur est le fournisseur.
-                keyClient = this.client;
-                const i = this.documents.findIndex(d => d.no === 0);
-                if (i === -1) {
-                    this.documents.push(apiDoc);
-                } else {
-                    this.documents[i] = apiDoc;
-                }
-            } else {
-                // L'utilisateur est le client.
-                // Les documents sont réduits à la dernière commande du client.
-                keyClient = this.keyIdentifiant;
-                this.documents = [apiDoc];
-            }
-            apiDoc.uid = keyClient.uid;
-            apiDoc.rno = keyClient.rno;
+            modèle = this.apiDocs.find(d => d.no === 0);
+            // le modèle de bon virtuel a pour noGroupe le no de la synthèse qu'il reprend
+            modèle.noGroupe = undefined;
         }
-        this.catalogue.prixDatés = undefined;
+        modèle.date = undefined;
     }
 
     /**
-     * Si l'utilisateur a créé la commande, supprime la commande et et toutes ses lignes.
+     * Si l'utilisateur a créé la commande, supprime la commande et toutes ses lignes.
      * Si l'utilisateur est le fournisseur et la commande a été créée par le client, fixe à 0 le aLivrer de toutes les lignes.
      * @param ikeyCommande tout objet ayant l'uid, le rno et le no de la commande
      */
@@ -431,14 +460,14 @@ export class CLFDocs {
         if (this.type === 'commande') {
             // L'utilisateur est le client.
             // Les apiDocuments sont réduits à la dernière commande du client.
-            this.documents = [];
+            this.apiDocs = [];
         } else {
             // L'utilisateur est le fournisseur.
-            const index = this.documents.findIndex(d => d.no === ikeyCommande.no);
-            const commande = this.documents[index];
+            const index = this.apiDocs.findIndex(d => d.no === ikeyCommande.no);
+            const commande = this.apiDocs[index];
             if (ikeyCommande.no === 0) {
                 // le fournisseur a créé la commande, c'est une suppression
-                this.documents.splice(index, 1);
+                this.apiDocs.splice(index, 1);
             } else {
                 // le client a créé la commande, c'est un refus
                 commande.lignes.forEach(l => l.aFixer = 0);
@@ -448,12 +477,6 @@ export class CLFDocs {
 
     filtreASynthétiser(synthèse: CLFDoc) {
         const àSynthétiser = synthèse.àSynthétiser.filter(doc => !!doc.synthèse);
-        this.documents.filter(apiDoc => àSynthétiser.find(doc => doc.no === apiDoc.no));
+        this.apiDocs.filter(apiDoc => àSynthétiser.find(doc => doc.no === apiDoc.no));
     }
-
-    code(type: TypeCLF): string {
-        return type === 'facture' ? '' : type === 'livraison' ? 'B.L.' : 'B.C.';
-    }
-
 }
-

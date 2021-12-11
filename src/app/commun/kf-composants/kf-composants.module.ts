@@ -42,6 +42,7 @@ import { KfDivComponent } from './kf-partages/kf-div/kf-div.component';
 import { KfBootstrapSpinnerComponent } from './kf-elements/kf-bootstrap-spinner/kf-bootstrap-spinner.component';
 import { KfSurvolComponent } from './kf-partages/kf-survol/kf-survol.component';
 import { KfDescriptionsComponent } from './kf-description/kf-description.component';
+import { KfAccordeonComponent } from './kf-accordeon/kf-accordeon.component';
 
 @NgModule({
   imports: [
@@ -85,6 +86,8 @@ import { KfDescriptionsComponent } from './kf-description/kf-description.compone
       KfTableComponent,
       KfDivComponent,
 
+      KfAccordeonComponent,
+
       KfBootstrapSpinnerComponent,
       KfSurvolComponent,
       KfNgbModalComponent,
@@ -106,7 +109,8 @@ import { KfDescriptionsComponent } from './kf-description/kf-description.compone
       KfEtiquetteComponent,
       KfLienComponent,
       KfUlOlComponent,
-  ]
+      KfTexteComponent,
+  ],
 })
 export class KfComposantsModule {
 }

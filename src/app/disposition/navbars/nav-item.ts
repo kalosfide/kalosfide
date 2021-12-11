@@ -27,9 +27,6 @@ export abstract class NavItem {
         return this.pParent.navBar;
     }
 
-    get site(): Site {
-        return this.navBar.site;
-    }
     get identifiant(): Identifiant {
         return this.navBar.identifiant;
     }

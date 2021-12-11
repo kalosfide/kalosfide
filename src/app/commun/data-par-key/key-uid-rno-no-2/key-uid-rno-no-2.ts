@@ -7,6 +7,7 @@ export class KeyUidRnoNo2 implements IKeyUidRnoNo2 {
     uid2: string;
     rno2: number;
     no2: number;
+    date: Date;
 
     static créeParams(key: IKeyUidRnoNo2): { [param: string]: string } {
         return {
@@ -16,6 +17,7 @@ export class KeyUidRnoNo2 implements IKeyUidRnoNo2 {
             'uid2': key.uid2,
             'rno2': '' + key.rno2,
             'no2': '' + key.no2,
+            'date': new Date(key.date).toISOString(),
         };
     }
 
@@ -26,5 +28,6 @@ export class KeyUidRnoNo2 implements IKeyUidRnoNo2 {
         vers.uid2 = de.uid2;
         vers.rno2 = de.rno2;
         vers.no2 = de.no2;
+        vers.date = de.date
     }
 }

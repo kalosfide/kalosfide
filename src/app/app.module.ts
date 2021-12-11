@@ -15,7 +15,6 @@ import { httpInterceptorProviders } from './services/http-interceptor-provider';
 import { NavigationService } from './services/navigation.service';
 import { ErreursModule } from './erreurs/erreurs.module';
 import { AlerteService } from './disposition/alerte/alerte-service';
-import { IdentifiantResolverService } from './securite/identifiant-resolver.service';
 import { CatalogueService } from './modeles/catalogue/catalogue.service';
 import { ApiRequêteService } from './api/api-requete.service';
 import { RetourneVraiResolverService } from './services/retourne-vrai-resolver.service';
@@ -55,8 +54,6 @@ import { TraiteKeydownService } from './commun/traite-keydown/traite-keydown.ser
         TraiteKeydownService,
 
         ApiRequêteService,
-
-        IdentifiantResolverService,
 
         CatalogueService,
         ClientService,

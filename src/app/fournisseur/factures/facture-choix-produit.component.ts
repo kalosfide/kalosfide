@@ -17,5 +17,6 @@ export class FactureChoixProduitComponent extends CLFChoixProduitComponent imple
         protected service: FournisseurCLFService,
     ) {
         super(route, service);
+        this.fixeTypeDefRéglagesVueTable('facture');
     }
 }

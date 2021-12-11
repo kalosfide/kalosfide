@@ -7,17 +7,14 @@ import { CommandeAccueilComponent } from './commande-accueil.component';
 import { CommandeChoixProduitComponent } from './commande-choix-produit.component';
 import { CommandeProduitResolverService } from './commande-produit-resolver.service';
 import { CommandeLigneAjouteComponent } from './commande-ligne-ajoute.component';
-import { RedirigeSiContexteChangé, RedirigeSiPasContexte } from './contexte-change-garde';
 import { CommandeBonResolverService } from './commande-bon-resolver.service';
 import { CommandeBonComponent } from './commande-bon.component';
 import { CommandeAnnuleComponent } from './commande-annule.component';
-import { CommandeBonExisteGardeService } from './commande-bon-existe-garde.service';
-import { CommandeDoitCréerGardeService } from './commande-doit-creer-garde.service';
 import { CommandeEnvoiGardeService } from './commande-envoi-garde.service';
 import { CommandeNouveauComponent } from './commande-nouveau.component';
 import { CommandeLigneResolverService } from './commande-ligne-resolver.service';
 import { CommandeEnvoiComponent } from './commande-envoi.component';
-import { CommandeProduitPasDansBonGardeService } from './commande-produit-pas-dans-bon-garde.service';
+import { CEnfantsDeBonGardeService } from './c-enfants-de-bon-garde.service';
 
 @NgModule({
     imports: [
@@ -36,15 +33,11 @@ import { CommandeProduitPasDansBonGardeService } from './commande-produit-pas-da
         CommandeLigneAjouteComponent,
     ],
     providers: [
-        RedirigeSiContexteChangé,
-        RedirigeSiPasContexte,
-        CommandeBonExisteGardeService,
-        CommandeDoitCréerGardeService,
         CommandeEnvoiGardeService,
+        CEnfantsDeBonGardeService,
         CommandeBonResolverService,
         CommandeProduitResolverService,
         CommandeLigneResolverService,
-        CommandeProduitPasDansBonGardeService,
     ],
 })
 export class CommandeModule { }

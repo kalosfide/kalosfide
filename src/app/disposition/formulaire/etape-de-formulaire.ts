@@ -26,7 +26,7 @@ export class EtapeDeFormulaire {
     }
 
     get nom(): string {
-        return this.pageDef.urlSegment;
+        return this.pageDef.path;
     }
     get texteLien(): string {
         return this.pageDef.lien;

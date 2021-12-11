@@ -1,24 +1,26 @@
 import { Injectable } from '@angular/core';
 import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
-import { CLFResolverService } from 'src/app/modeles/c-l-f/c-l-f-resolver/c-l-f-resolver.service';
 import { FournisseurCLFService } from '../fournisseur-c-l-f-.service';
 import { CLFDocs } from 'src/app/modeles/c-l-f/c-l-f-docs';
 
 /**
- * résoud la liste des documents du site en cours
+ * Résoud la liste des documents d'un client en la demandant à l'api.
+ * Redirige vers la page NotFound si le client n'existe pas, vers la page clients si le client n'a pas de documents.
  */
 @Injectable()
-export class FDocumentDocumentsResolverService extends CLFResolverService implements Resolve<CLFDocs> {
+export class FDocumentDocumentsResolverService implements Resolve<CLFDocs> {
 
     constructor(
-        protected service: FournisseurCLFService,
+        private service: FournisseurCLFService,
     ) {
-        super(service);
     }
 
-    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<CLFDocs> {
-        return this.service.documents();
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): CLFDocs | Observable<CLFDocs> {
+        const clfDocs = this.service.litStockSiExistant();
+        if (!clfDocs) {
+            throw new Error('FDocumentDocumentsResolverService: La garde précédente doit avoir déjà résolu le clfDocs');
+        }
+        return clfDocs;
     }
-
 }

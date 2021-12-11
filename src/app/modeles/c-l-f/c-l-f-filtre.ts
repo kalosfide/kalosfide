@@ -1,15 +1,17 @@
 import { TypeCLF, apiType } from './c-l-f-type';
 import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
+import { IKeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/i-key-uid-rno';
 
+/**
+ * Définit les paramétres à envoyer à l'api pour recevoir une liste de documents vérifiant certaines conditions.
+ */
 export class CLFFiltre extends KeyUidRno {
     /**
-     * uid du client si l'utilisateur est le client.
-     * uid du site si l'utilisateur est le fournisseur..
+     * uid du client ou du site
      */
     uid: string;
     /**
-     * rno du client si l'utilisateur est le client.
-     * rno du site si l'utilisateur est le fournisseur..
+     * rno du client ou du site
      */
     rno: number;
     /**
@@ -33,7 +35,7 @@ export class CLFFiltre extends KeyUidRno {
      */
     nb: number;
 
-    constructor(keyClientOuSite: KeyUidRno) {
+    constructor(keyClientOuSite: IKeyUidRno) {
         super();
         this.uid = keyClientOuSite.uid;
         this.rno = keyClientOuSite.rno;
@@ -47,10 +49,10 @@ export class CLFFiltre extends KeyUidRno {
             params.type = apiType(this.type);
         }
         if (this.dateMin) {
-            params.dateMin = this.dateMin.toJSON();
+            params.dateMin = '' + this.dateMin;
         }
         if (this.dateMax) {
-            params.dateMax = this.dateMax.toJSON();
+            params.dateMax = '' + this.dateMax;
         }
         if (this.i0 !== null && this.i0 !== undefined) {
             params.i0 = '' + this.i0;

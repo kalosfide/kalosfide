@@ -1,9 +1,8 @@
 import { ItemCompte } from './item-compte';
-import { ComptePages, CompteRoutes } from '../compte-pages';
-import { SiteRoutes } from 'src/app/site/site-pages';
-import { AppSiteRoutes } from 'src/app/app-site/app-site-pages';
+import { ComptePages } from '../compte-pages';
 import { NavItemDropDownGroup } from 'src/app/disposition/navbars/nav-item-dropdown-group';
 import { NavItemLien } from 'src/app/disposition/navbars/nav-item-lien';
+import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 
 export class ItemMonCompte extends NavItemDropDownGroup {
 
@@ -12,22 +11,23 @@ export class ItemMonCompte extends NavItemDropDownGroup {
 
         this.rafraichit = () => {
             const contenus: NavItemLien[] = [];
+            const routeur = Fabrique.url.appRouteur.compte;
             if (this.identifiant) {
-                const changeMotDePasse = new NavItemLien(ComptePages.changeMotDePasse.urlSegment, this);
+                const changeMotDePasse = new NavItemLien(ComptePages.changeMotDePasse.path, this);
                 changeMotDePasse.texte = ComptePages.changeMotDePasse.lien;
-                changeMotDePasse.url = AppSiteRoutes.url(CompteRoutes.route([ComptePages.changeMotDePasse.urlSegment]));
+                changeMotDePasse.url = routeur.url(ComptePages.changeMotDePasse.path);
                 contenus.push(changeMotDePasse);
-                const changeEmail = new NavItemLien(ComptePages.changeEmail.urlSegment, this);
+                const changeEmail = new NavItemLien(ComptePages.changeEmail.path, this);
                 changeEmail.texte = ComptePages.changeEmail.lien;
-                changeEmail.url = AppSiteRoutes.url(CompteRoutes.route([ComptePages.changeEmail.urlSegment]));
+                changeEmail.url = routeur.url(ComptePages.changeEmail.path);
                 contenus.push(changeEmail);
 
-                const itemMonCompte = new NavItemLien(ComptePages.gestion.urlSegment, this);
-                itemMonCompte.texte = ComptePages.gestion.lien;
-                itemMonCompte.url = this.site
-                    ? SiteRoutes.urlDIdentifiant(this.site.url, this.identifiant, CompteRoutes.route([ComptePages.gestion.urlSegment]))
-                    : AppSiteRoutes.url(CompteRoutes.route([ComptePages.gestion.urlSegment]));
-                contenus.push(itemMonCompte);
+                if (!this.identifiant.estAdministrateur) {
+                    const itemMonCompte = new NavItemLien(ComptePages.gestion.path, this);
+                    itemMonCompte.texte = ComptePages.gestion.lien;
+                    itemMonCompte.url = routeur.url(ComptePages.gestion.path);
+                    contenus.push(itemMonCompte);
+                }
             }
             this.fixeContenus(contenus);
         };

@@ -1,19 +1,16 @@
 import { ItemCompte } from './item-compte';
-import { ComptePages, CompteRoutes } from '../compte-pages';
+import { ComptePages } from '../compte-pages';
 import { PageDef } from 'src/app/commun/page-def';
-import { SiteRoutes } from 'src/app/site/site-pages';
-import { AppSiteRoutes } from 'src/app/app-site/app-site-pages';
 import { NavItemLien } from 'src/app/disposition/navbars/nav-item-lien';
+import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 
 export class ItemConnection extends NavItemLien {
     constructor(parent: ItemCompte) {
-        super(ComptePages.connection.urlSegment, parent);
+        super(ComptePages.connection.path, parent);
         this.rafraichit = () => {
             const pageDef: PageDef = this.identifiant ? ComptePages.deconnection : ComptePages.connection;
             this.texte = pageDef.lien;
-            this.url = this.site
-                ? SiteRoutes.urlDIdentifiant(this.site.url, this.identifiant, CompteRoutes.route([pageDef.urlSegment]))
-                : AppSiteRoutes.url(CompteRoutes.route([pageDef.urlSegment]));
+            this.url = Fabrique.url.appRouteur.compte.url(pageDef.path);
         };
     }
 }

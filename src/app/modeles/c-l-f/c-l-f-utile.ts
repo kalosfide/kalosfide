@@ -6,7 +6,7 @@ import { CLFUtileColonne } from './c-l-f-utile-colonne';
 import { ConditionAction, ModeAction } from './condition-action';
 import { ValeurEtObservable } from 'src/app/commun/outils/valeur-et-observable';
 import { DataKeyUtile } from 'src/app/commun/data-par-key/data-key-utile';
-import { ApiDocument } from './api-document';
+import { ApiDoc } from './api-doc';
 import { CLFLigne } from './c-l-f-ligne';
 import { CLFService } from './c-l-f.service';
 import { CLFUtileTexte } from './c-l-f-utile-texte';
@@ -18,7 +18,7 @@ import { TypeCLF } from './c-l-f-type';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 
 
-export class CLFUtile extends DataKeyUtile<ApiDocument> {
+export class CLFUtile extends DataKeyUtile<ApiDoc> {
     private pTexte: CLFUtileTexte;
 
     private pConditionAction: ConditionAction;

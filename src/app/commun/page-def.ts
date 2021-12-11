@@ -1,4 +1,3 @@
-import { IDataPages } from './data-par-key/data-pages';
 
 /**
  * contient les informations sur une page atteignable par une route
@@ -6,9 +5,13 @@ import { IDataPages } from './data-par-key/data-pages';
  */
 export class PageDef {
     /**
-     * segment de route menant à la page
+     * path du segment de route menant à la page
      */
-    urlSegment: string;
+    path: string;
+    /**
+     * nom du paramétre de la route
+     */
+    nomParam?: string;
     /**
      * texte des liens conduisant à la page
      */

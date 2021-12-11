@@ -11,13 +11,13 @@ export class DataKeyUtileUrl<T extends IDataKey> {
     }
 
     index(): IUrlDef {
-        return this.pUtile.url.__urlDef(this.pUtile.dataRoutes, this.pUtile.dataPages.index);
+        return this.pUtile.url.__urlDef(this.pUtile.dataRouteur, this.pUtile.dataPages.index);
     }
     retourIndex(t: T): IUrlDef {
-        return this.pUtile.url.__urlDef(this.pUtile.dataRoutes, this.pUtile.dataPages.index, this.pUtile.service.urlSegmentDeKey(t), true);
+        return this.pUtile.url.__urlDef(this.pUtile.dataRouteur, this.pUtile.dataPages.index, this.pUtile.service.urlSegmentDeKey(t), true);
     }
     ajoute(): IUrlDef {
-        return this.pUtile.url.__urlDef(this.pUtile.dataRoutes, this.pUtile.dataPages.ajoute);
+        return this.pUtile.url.__urlDef(this.pUtile.dataRouteur, this.pUtile.dataPages.ajoute);
     }
     edite(t: T): IUrlDef {
         return this.dePageDef(this.pUtile.dataPages.edite, t);
@@ -26,6 +26,6 @@ export class DataKeyUtileUrl<T extends IDataKey> {
         return this.dePageDef(this.pUtile.dataPages.supprime, t);
     }
     dePageDef(pageDef?: PageDef, t?: T): IUrlDef {
-        return this.pUtile.url.__urlDef(this.pUtile.dataRoutes, pageDef, t ? this.pUtile.service.urlSegmentDeKey(t) : null);
+        return this.pUtile.url.__urlDef(this.pUtile.dataRouteur, pageDef, t ? this.pUtile.service.urlSegmentDeKey(t) : null);
     }
 }

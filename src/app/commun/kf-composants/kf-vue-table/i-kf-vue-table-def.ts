@@ -50,7 +50,7 @@ export interface IKfVueTableDef<T> {
     /**
      * pour ajouter à l'élément tr de l'item un onclick
      */
-    quandClic?: { colonneDuClic?: string } | ((item: T) => () => void);
+    quandClic?: (item: T) => (() => void);
 
     /**
      * pour ajouter dans une colonne invisible, les champs non éditables du superGroupe de l'item
@@ -75,7 +75,7 @@ export interface IKfVueTableDef<T> {
     nePasMontrerIconeDeTriSiPasTrié?: boolean;
 
     /**
-     * Si défini, une barre de pagination est affichée au dessous de la table
+     * Si défini, une barre de pagination est affichée au dessus de la table
      */
     pagination?: KfVueTablePagination<T>;
 

@@ -3,6 +3,10 @@
         <app-kf-groupe [composant]="titrePage"></app-kf-groupe>
     </ng-container>
     <ng-container *ngIf="superGroupe">
+
+        <!--
+        <p *ngIf="avecValeur">{{ valeur | json }}</p>
+        -->
         <div class="row">
             <div class="col">
                 <app-kf-groupe [composant]="superGroupe" (output)="traite($event)"></app-kf-groupe>

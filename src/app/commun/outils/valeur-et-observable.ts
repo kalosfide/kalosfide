@@ -102,9 +102,6 @@ export class ValeurEtObservable<T> {
      */
     changeValeur(valeur: T) {
         this.pValeur = valeur;
-        if (this.nom) {
-            console.log(`IO ${this.nom}: ${valeur}`);
-        }
         if (this.pSubject) {
             this.pSubject.next(valeur);
         }

@@ -1,12 +1,12 @@
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { KfComposantComponent } from '../../kf-composant/kf-composant.component';
-import { KfBalise } from '../../kf-partages/kf-balise/kf-balise';
 import { KfBootstrapSpinner } from './kf-bootstrap-spinner';
 
 @Component({
     selector: 'app-kf-bootstrap-spinner',
     templateUrl: './kf-bootstrap-spinner.component.html',
-    styleUrls: ['../../kf-composants.scss']
+    styleUrls: ['../../kf-composants.scss'],
+    encapsulation: ViewEncapsulation.None
 })
 export class KfBootstrapSpinnerComponent extends KfComposantComponent implements OnInit, AfterViewInit {
     @ViewChild('fondHtmlElement', {static: false}) fondHtmlElement: ElementRef;

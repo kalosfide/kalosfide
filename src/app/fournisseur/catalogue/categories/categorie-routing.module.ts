@@ -6,9 +6,7 @@ import { CategorieIndexComponent } from './categorie-index.component';
 import { CategorieAjouteComponent } from './categorie-ajoute.component';
 import { CategorieEditeComponent } from './categorie-edite.component';
 import { CategorieResolverService } from '../../../modeles/catalogue/categorie-resolver.service';
-import { CategoriesResolverService } from 'src/app/modeles/catalogue/categories-resolver.service';
 import { CategorieSitePasCatalogueGarde } from './categorie-site-pas-catalogue-garde';
-import { CategorieSupprimeComponent } from './categorie-supprime.component';
 import { CatalogueResolverService } from 'src/app/modeles/catalogue/catalogue-resolver.service';
 
 const routes: Routes = [
@@ -17,11 +15,11 @@ const routes: Routes = [
         children: [
             {
                 path: '',
-                redirectTo: CategoriePages.index.urlSegment,
+                redirectTo: CategoriePages.index.path,
                 pathMatch: 'full',
             },
             {
-                path: CategoriePages.index.urlSegment,
+                path: CategoriePages.index.path,
                 data: {
                     pageDef: undefined,
                 },
@@ -31,7 +29,7 @@ const routes: Routes = [
                 }
             },
             {
-                path: CategoriePages.ajoute.urlSegment,
+                path: CategoriePages.ajoute.path,
                 data: { pageDef: CategoriePages.ajoute },
                 component: CategorieAjouteComponent,
                 canActivate: [
@@ -39,20 +37,9 @@ const routes: Routes = [
                 ],
             },
             {
-                path: CategoriePages.edite.urlSegment + '/:no',
+                path: CategoriePages.edite.path + '/:no',
                 data: { pageDef: CategoriePages.edite },
                 component: CategorieEditeComponent,
-                canActivate: [
-                    CategorieSitePasCatalogueGarde,
-                ],
-                resolve: {
-                    valeur: CategorieResolverService,
-                }
-            },
-            {
-                path: CategoriePages.supprime.urlSegment + '/:no',
-                data: { pageDef: CategoriePages.supprime },
-                component: CategorieSupprimeComponent,
                 canActivate: [
                     CategorieSitePasCatalogueGarde,
                 ],

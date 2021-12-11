@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { KfComposantComponent } from '../../kf-composant/kf-composant.component';
 import { KfTypeDeComposant } from '../../kf-composants-types';
 import { KfBootstrapSpinner } from '../../kf-elements/kf-bootstrap-spinner/kf-bootstrap-spinner';
@@ -8,7 +8,8 @@ import { KfSurvol } from './kf-survol';
 @Component({
     selector: 'app-kf-survol',
     templateUrl: './kf-survol.component.html',
-    styleUrls: ['../../kf-composants.scss']
+    styleUrls: ['../../kf-composants.scss'],
+    encapsulation: ViewEncapsulation.None
 })
 export class KfSurvolComponent extends KfComposantComponent implements OnInit {
     get survol(): KfSurvol {

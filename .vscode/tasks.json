@@ -6,7 +6,7 @@
         {
             "type": "npm",
             "script": "build",
-            "problemMatcher": []
+            "problemMatcher": [],
         },
         {
             "type": "npm",

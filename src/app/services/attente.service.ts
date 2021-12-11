@@ -14,21 +14,23 @@ export class Attente {
     /**
      * Enregistrement du début par le service
      */
-    serviceCommence: (attente: Attente) => void;
+    private serviceCommence: () => void;
     /**
      * Enregistrement de la fin par le service
      */
-    serviceFinit: (attente: Attente) => void;
-    constructor(serviceCommence: (attente: Attente) => void, serviceFinit: (attente: Attente) => void) {
-        this.serviceCommence = serviceCommence;
-        this.serviceFinit = serviceFinit;
+    serviceFinit: () => void;
+    
+    constructor(serviceCommence: (attente: Attente, délai?: number) => void, serviceFinit: (attente: Attente) => void, délai?: number) {
+        this.serviceCommence = () => serviceCommence(this, délai);
+        this.serviceFinit = () => serviceFinit(this);
     }
+    
     commence() {
         this.début = Date.now();
-        this.serviceCommence(this);
+        this.serviceCommence();
     }
     finit() {
-        this.serviceFinit(this);
+        this.serviceFinit();
     }
     toString(): string {
         return `${this.nom} (${new Date(this.début)})`;
@@ -78,14 +80,21 @@ export class AttenteService {
     }
 
     // le timeOut sert à ce que l'affichage ne commence pas si l'action est de courte durée
-    private créeTimeOut() {
+    private créeTimeOut(délai?: number) {
         if (this.IdTimeOut) {
             // il y a déjà un timeOut
             throw new Error('créeTimeOut');
         }
+        if (délai === undefined) {
+            délai = this.délai;
+        }
 
-        // specify window.setTimeout to side-step conflict with node types: https://github.com/mgechev/angular2-seed/issues/901
-        this.IdTimeOut = window.setTimeout(() => this.quandDélaiTerminé(), this.délai);
+        if (délai > 0) {
+            // specify window.setTimeout to side-step conflict with node types: https://github.com/mgechev/angular2-seed/issues/901
+            this.IdTimeOut = window.setTimeout(() => this.quandDélaiTerminé(), this.délai);
+        } else {
+            this.enCoursIO.changeValeur(true);
+        }
     }
 
     private détruitTimeOut() {
@@ -94,28 +103,25 @@ export class AttenteService {
     }
 
     private quandDélaiTerminé() {
-//        console.log('délaiTerminé', this.attentes);
         this.détruitTimeOut();
         this.enCoursIO.changeValeur(true);
     }
 
     /**
      * Commence une attente. Retourne le Date.now() du commencement
-     * @param debug nom de l'attente pour le débogage
+     * @param nom nom de l'attente pour le débogage
      */
-    attente(debug: string): Attente {
-        const attente = new Attente(this.commence.bind(this), this.finit.bind(this));
-        attente.nom = debug;
+    attente(nom: string, délai?: number): Attente {
+        const attente = new Attente(this.commence.bind(this), this.finit.bind(this), délai);
+        attente.nom = nom;
         return attente;
     }
 
     /**
-     * Commence une attente. Retourne le Date.now() du commencement
-     * @param debug nom de l'attente pour le débogage
+     * Commence une attente.
      */
-    private commence(attente: Attente) {
+    private commence(attente: Attente, délai?: number) {
         this.attentes.push(attente);
-//        console.log('commence', attente.toString());
         if (this.attentes.length === 1) {
             this.créeTimeOut();
         }
@@ -123,8 +129,7 @@ export class AttenteService {
     }
 
     /**
-     * Finit une attente
-     * @param attente Date.now() du commencement de l'attente
+     * Finit une attente.
      */
     private finit(attente: Attente) {
         // finit l'attente
@@ -133,15 +138,13 @@ export class AttenteService {
             throw new Error(`AttenteService: id d'attente à terminer invalide`);
         }
         this.attentes.splice(index, 1);
-//        console.log('finit', this.attentes.length, attente.toString());
 
         // s'il n'y a plus d'attente en cours, réinitialise et termine l'affichage
-        if (this.attentes.length === 0 || this.attentes.length > 0) {
+        if (this.attentes.length === 0) {
             if (this.IdTimeOut) {
                 this.détruitTimeOut();
             }
             this.initialise();
-//        console.log('finit et emet', attente, this.debugs);
             this.enCoursIO.changeValeur(false);
         }
     }

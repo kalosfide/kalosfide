@@ -15,9 +15,11 @@ import { RéinitialiseMotDePasseModel } from './réinitialise-mot-de-passe/réin
 import { ChangeMotDePasseModel } from './change-mot-de-passe/change-mot-de-passe.model';
 import { ChangeEmailModel } from './change-email/change-email.model';
 import { DevenirClientModel } from '../app-site/devenir-client/devenir-client.model';
-import { DevenirClientData } from '../app-site/devenir-client/devenir-client-data';
+import { InvitationClient } from '../app-site/devenir-client/devenir-client-data';
 import { Site } from '../modeles/site/site';
 import { ReglesDeMotDePasse } from '../securite/mot-de-passe';
+import { StockageService } from '../services/stockage/stockage.service';
+import { NouveauSite } from '../app-site/nouveau-site/nouveau-site';
 
 @Injectable({
     providedIn: 'root',
@@ -27,9 +29,10 @@ export class CompteService extends DataService {
     public controllerUrl = ApiController.utilisateur;
 
     constructor(
+        protected stockageService: StockageService,
         protected apiRequeteService: ApiRequêteService
     ) {
-        super(apiRequeteService);
+        super(stockageService, apiRequeteService);
     }
 
     public get règlesDeMotDePasse(): ReglesDeMotDePasse {
@@ -88,17 +91,26 @@ export class CompteService extends DataService {
         return this.post(ApiController.utilisateur, ApiAction.utilisateur.confirmeChangeEmail, confirmeChangeEmailModel);
     }
 
-    public invitationClient(code: string): Observable<DevenirClientData> {
-        const demandeApi = () => this.get<DevenirClientData>(ApiController.utilisateur, ApiAction.utilisateur.invitation, { code });
-        return this.lectureObs<DevenirClientData>({ demandeApi });
+    public invitationClient(code: string): Observable<InvitationClient> {
+        const demandeApi = () => this.get<InvitationClient>(ApiController.utilisateur, ApiAction.utilisateur.invitation, { code });
+        return this.lectureObs<InvitationClient>({ demandeApi });
     }
 
     public enregistreClient(data: DevenirClientModel): Observable<ApiResult> {
         return this.post(ApiController.utilisateur, ApiAction.utilisateur.devenirClient, data);
     }
 
-    public créeSite(data: Site): Observable<ApiResult> {
-        return this.post(ApiController.site, ApiAction.site.ajoute, data);
+    public demandeNouveauSite(demande: NouveauSite): Observable<ApiResult> {
+        return this.post(ApiController.nouveauSite, ApiAction.nouveauSite.demande, demande);
+    }
+
+    public litNouveauSite(code: string): Observable<NouveauSite> {
+        const demandeApi = () => this.get<NouveauSite>(ApiController.nouveauSite, ApiAction.nouveauSite.invitation, { code });
+        return this.lectureObs<NouveauSite>({ demandeApi });
+    }
+
+    public activeNouveauSite(active: NouveauSite): Observable<ApiResult> {
+        return this.post(ApiController.nouveauSite, ApiAction.nouveauSite.active, active);
     }
 
 }

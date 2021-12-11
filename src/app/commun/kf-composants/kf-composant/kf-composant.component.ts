@@ -1,7 +1,7 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ViewEncapsulation } from '@angular/core';
 import { KfComposant } from './kf-composant';
 import { KfTypeDeComposant } from '../kf-composants-types';
-import { KfEvenement, KfTypeDEvenement, KfStatutDEvenement } from '../kf-partages/kf-evenements';
+import { KfEvenement } from '../kf-partages/kf-evenements';
 import { TraiteKeydownService } from '../../traite-keydown/traite-keydown.service';
 
 export interface IKfComponent {
@@ -12,7 +12,8 @@ export interface IKfComponent {
 @Component({
     selector: 'app-kf-composant',
     templateUrl: './kf-composant.component.html',
-    styleUrls: ['../kf-composants.scss']
+    styleUrls: ['../kf-composants.scss'],
+    encapsulation: ViewEncapsulation.None
 })
 export class KfComposantComponent implements IKfComponent, OnInit {
     @Input() composant: KfComposant;

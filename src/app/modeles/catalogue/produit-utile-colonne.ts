@@ -7,6 +7,9 @@ import { EtatsProduits } from './etat-produit';
 import { Compare } from '../../commun/outils/tri';
 import { TypeMesure } from '../type-mesure';
 import { KfBBtnGroup, KfBBtnGroupElement } from 'src/app/commun/kf-composants/kf-b-btn-group/kf-b-btn-group';
+import { KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
+import { LargeurColonne } from 'src/app/disposition/largeur-colonne';
+import { Catalogue } from './catalogue';
 
 export class ProduitUtileColonne extends DataUtileColonne {
     constructor(utile: ProduitUtile) {
@@ -73,7 +76,7 @@ export class ProduitUtileColonne extends DataUtileColonne {
                 Compare.texte((produit: Produit) => produit.typeMesure),
                 Compare.nombre((produit: Produit) => produit.prix)
             ),
-            classesItem: ['prix', 'apercu'],
+            classesTd: ['prix', 'apercu'],
             nePasAfficherSi: this.utile.conditionTable.edition
         };
         return def;
@@ -84,14 +87,14 @@ export class ProduitUtileColonne extends DataUtileColonne {
             nom: 'prix',
             enTeteDef: { titreDef: 'Prix en €' },
             créeContenu: (produit: Produit) => produit.editeur.kfPrix,
-            classesItem: ['prix', 'edite'],
+            classesTd: ['prix', 'edite'],
             nePasAfficherSi: this.utile.conditionTable.aperçu
         };
         return def;
     }
 
     etat(): IKfVueTableColonneDef<Produit> {
-        const créeContenu = (produit: Produit) => EtatsProduits.etat(produit.etat).texte;
+        const créeContenu = (produit: Produit) => EtatsProduits.état(produit.etat).texte;
         const def: IKfVueTableColonneDef<Produit> = {
             nom: 'état',
             enTeteDef: { titreDef: 'Etat' },
@@ -119,42 +122,26 @@ export class ProduitUtileColonne extends DataUtileColonne {
                 const bouton = this.utile.lien.edite(produit);
                 return bouton;
             },
-            classesItem: ['action'],
-            afficherSi: this.utile.conditionTable.edition,
+            classesCol: [KfBootstrap.classeTexte({ alignement: 'center' })],
+            largeur: LargeurColonne.action,
+            nePasAfficherSi: this.utile.conditionTable.aperçu
         };
     }
 
-    supprime(quandLigneSupprimée: (produit: Produit) => void): IKfVueTableColonneDef<Produit> {
+    supprime(quandSupprimé: (index: number, aprésSuppression: Catalogue) => void): IKfVueTableColonneDef<Produit> {
         return {
             nom: 'supprime',
             créeContenu: (produit: Produit) => {
-                const bouton = this.utile.bouton.supprime(produit, quandLigneSupprimée);
+                const bouton = this.utile.bouton.supprime(produit, quandSupprimé);
                 bouton.inactivité = produit.utilisé;
                 return bouton;
             },
-            classesItem: ['action'],
-            afficherSi: this.utile.conditionTable.edition,
+            classesCol: [KfBootstrap.classeTexte({ alignement: 'center' })],
+            largeur: LargeurColonne.action,
+            nePasAfficherSi: this.utile.conditionTable.aperçu
         };
     }
 
-
-    action(quandLigneSupprimée: (produit: Produit) => void): IKfVueTableColonneDef<Produit> {
-        return {
-            nom: 'action',
-            créeContenu: (produit: Produit) => {
-                const btnGroup = new KfBBtnGroup('action');
-                let bouton: KfBBtnGroupElement;
-                bouton = this.utile.lien.edite(produit);
-                btnGroup.ajoute(bouton);
-                bouton = this.utile.bouton.supprime(produit, quandLigneSupprimée);
-                bouton.inactivité = produit.utilisé;
-                btnGroup.ajoute(bouton);
-                return btnGroup;
-            },
-            classesItem: ['colonne-btn-group-2'],
-            afficherSi: this.utile.conditionTable.edition,
-        };
-    }
     colonnes(): IKfVueTableColonneDef<Produit>[] {
         return [
             this.catégorie(),
@@ -165,7 +152,7 @@ export class ProduitUtileColonne extends DataUtileColonne {
         ];
     }
 
-    colonnesFournisseur(quandLigneSupprimée: (produit: Produit) => void): IKfVueTableColonneDef<Produit>[] {
+    colonnesFournisseur(quandSupprimé: (index: number, aprésSuppression: Catalogue) => void): IKfVueTableColonneDef<Produit>[] {
         return [
             this.catégorie(),
             this.produit(),
@@ -176,7 +163,7 @@ export class ProduitUtileColonne extends DataUtileColonne {
             this.etat(),
             this.etat_edite(),
             this.édite(),
-            this.supprime(quandLigneSupprimée),
+            this.supprime(quandSupprimé),
         ];
     }
 

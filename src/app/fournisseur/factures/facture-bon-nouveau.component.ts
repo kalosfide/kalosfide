@@ -14,6 +14,10 @@ export class FactureBonNouveauComponent extends FactureBonComponent implements O
 
     pageDef: PageDef = FacturePages.nouveau;
 
+    get titre(): string {
+        return this.pageDef.titre;
+    }
+
     constructor(
         protected route: ActivatedRoute,
         protected service: FournisseurCLFService,

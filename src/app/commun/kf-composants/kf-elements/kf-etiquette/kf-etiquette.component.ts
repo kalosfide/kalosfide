@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { KfEtiquette } from './kf-etiquette';
 import { KfComposantComponent } from '../../kf-composant/kf-composant.component';
 import { KfContenuPhrase } from '../../kf-partages/kf-contenu-phrase/kf-contenu-phrase';
@@ -8,7 +8,8 @@ import { TraiteKeydownService } from '../../../traite-keydown/traite-keydown.ser
 @Component({
     selector: 'app-kf-etiquette',
     templateUrl: './kf-etiquette.component.html',
-    styleUrls: ['../../kf-composants.scss']
+    styleUrls: ['../../kf-composants.scss'],
+    encapsulation: ViewEncapsulation.None
 })
 export class KfEtiquetteComponent extends KfComposantComponent implements OnInit {
 

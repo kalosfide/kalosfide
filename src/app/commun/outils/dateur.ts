@@ -50,10 +50,10 @@ export class Dateur {
 
     // ISO YYYY-MM-DDTHH:mm:ss.sssZ
     static InputDateValue(date: Date): string {
-        return date.toISOString().substr(0, 10);
+        return date ? date.toISOString().substr(0, 10) : '';
     }
     static InputTimeValue(date: Date): string {
-        return date.toLocaleTimeString().substr(0, 5);
+        return date ? date.toLocaleTimeString().substr(0, 5) : '';
     }
     static InputValueToDate(inputDateValue?: string, inputTimeValue?: string): Date {
         const iso = (new Date()).toISOString();

@@ -47,28 +47,13 @@ export class KfVueTableLigne<T> extends KfVueTableLigneBase<T> implements IKfVue
             this.pSuperGroupe.listeParent = vueTable;
         }
         this.item = item;
-        const équivalentPourClic = this.équivalentPourClic;
-        if (vueTable.quandClic && équivalentPourClic) {
-            let quandClic: () => void;
-            if (typeof(vueTable.quandClic) === 'function') {
-                quandClic = vueTable.quandClic(item);
-            } else {
-                const def: { colonneDuClic?: string } = vueTable.quandClic;
-                const celluleDuClic = this.pCellules.find(c => c.colonne.nom === def.colonneDuClic);
-                if (!celluleDuClic.colonne.nePasAfficher) {
-                    quandClic = () => {
-                        celluleDuClic.contenu.gereHtml.htmlElement.click();
-                    };
-                }
+        if (vueTable.quandClic) {
+            if (!this.pGéreCss) {
+                this.pGéreCss = new KfGéreCss();
             }
-            if (quandClic) {
-                if (!this.pGéreCss) {
-                    this.pGéreCss = new KfGéreCss();
-                }
-                this.pGéreCss.ajouteClasse('kf-bouton');
-                this.pGéreHtml.ajouteEvenementASuivre(KfTypeDHTMLEvents.click);
-                this.pGéreHtml.ajouteTraiteur(KfTypeDEvenement.click, quandClic);
-            }
+            this.pGéreCss.ajouteClasse('kf-bouton');
+            this.pGéreHtml.ajouteEvenementASuivre(KfTypeDHTMLEvents.click);
+            this.pGéreHtml.ajouteTraiteur(KfTypeDEvenement.click, () => vueTable.quandClic(item)());
         }
         if (vueTable.navigationAuClavier && vueTable.navigationAuClavier.type === 'lignes') {
             const navigation = vueTable.navigationAuClavier as KfVueTableNavigationParLigne<T>;
@@ -131,11 +116,13 @@ export class KfVueTableLigne<T> extends KfVueTableLigneBase<T> implements IKfVue
         return this.pSuperGroupe.formGroup;
     }
 
+    /**
+     * Met à jour le contenu des cellules qui dépendent de la valeur de l'item.
+     * Indique à la vueTable que la ligne a été modifiée.
+     */
     public quandItemModifié() {
         this.pCellules.forEach(c => (c as KfVueTableCellule<T>).quandItemModifié());
-        if (this.vueTable.bilan) {
-            this.vueTable.bilan.quandBilanChange();
-        }
+        this.vueTable.quandLigneModifiée(this);
     }
 
     /**
@@ -145,16 +132,6 @@ export class KfVueTableLigne<T> extends KfVueTableLigneBase<T> implements IKfVue
     public fixeNuméro(index: number) {
         this.no = index + 1;
         this.pCellules[0].fixeTexte('' + this.no);
-    }
-
-    public get équivalentPourClic(): KfComposant {
-        const équivalents = this.cellulesVisibles.filter(c => {
-            const type = c.contenu.type;
-            return type === KfTypeDeComposant.lien || type === KfTypeDeComposant.bouton;
-        });
-        if (équivalents.length === 1) {
-            return équivalents[0].contenu;
-        }
     }
 
     public prendLeFocus(): boolean {

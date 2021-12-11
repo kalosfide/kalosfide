@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, CanActivateChild } from '@angular/router';
+import { CanActivate } from '@angular/router';
 import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
-import { ProduitRoutes, ProduitPages } from './produit-pages';
-import { NavigationService } from 'src/app/services/navigation.service';
+import { ProduitPages } from './produit-pages';
 import { RouteurService } from '../../../services/routeur.service';
-import { IdEtatSite } from 'src/app/modeles/etat-site';
+import { IdentificationService } from 'src/app/securite/identification.service';
+import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 
 @Injectable({
     providedIn: 'root',
@@ -13,23 +13,20 @@ import { IdEtatSite } from 'src/app/modeles/etat-site';
 /**
  * redirige vers l'index des produits si le site n'est pas d'état catalogue
  */
-export class ProduitSitePasCatalogueGarde implements CanActivate, CanActivateChild {
+export class ProduitSitePasCatalogueGarde implements CanActivate {
 
     constructor(
         private routeur: RouteurService,
-        private navigation: NavigationService,
+        private identification: IdentificationService,
     ) {
     }
 
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | boolean {
-        const site = this.navigation.litSiteEnCours();
-        if (site.etat !== IdEtatSite.catalogue) {
-            this.routeur.naviguePageDef(ProduitPages.index, ProduitRoutes, site.url);
+        const site = this.identification.siteEnCours;
+        if (site.ouvert) {
+            this.routeur.naviguePageDef(ProduitPages.index, Fabrique.url.appRouteur.produit);
             return false;
         }
         return true;
-    }
-    canActivateChild(childRoute: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | Observable<boolean> | Promise<boolean> {
-        return this.canActivate(childRoute, state);
     }
 }

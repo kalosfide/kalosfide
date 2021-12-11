@@ -2,7 +2,6 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 
 import { ActivatedRoute, Data } from '@angular/router';
 import { Site } from '../site/site';
-import { SiteService } from 'src/app/modeles/site/site.service';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { PageBaseComponent } from 'src/app/disposition/page-base/page-base.component';
 import { RouteurService } from 'src/app/services/routeur.service';
@@ -26,7 +25,6 @@ export abstract class CLFClientComponent extends PageBaseComponent implements On
     constructor(
         protected route: ActivatedRoute,
         protected service: CLFService,
-        protected siteService: SiteService,
     ) {
         super();
     }
@@ -49,12 +47,12 @@ export abstract class CLFClientComponent extends PageBaseComponent implements On
     }
 
     private rafraichit() {
-        this.barre.site = this.service.navigation.litSiteEnCours();
+        this.barre.site = this.service.litSiteEnCours();
         this.barre.rafraichit();
     }
 
     ngOnInit() {
-        this.site = this.service.navigation.litSiteEnCours();
+        this.site = this.service.litSiteEnCours();
         this.subscriptions.push(this.route.data.subscribe(
             (data: Data) => {
                 this.clfDocs = data.clfDocs;
@@ -72,7 +70,7 @@ export abstract class CLFClientComponent extends PageBaseComponent implements On
                         () => {
                             this.rafraichit();
                         }),
-                    this.service.clsBilanIO.observable.subscribe(
+                    this.service.clfBilanIO.observable.subscribe(
                         () => {
                             this.rafraichit();
                         })

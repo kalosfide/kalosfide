@@ -3,7 +3,8 @@ import { DataUtileUrl } from './data-utile-url';
 import { ILienDef } from 'src/app/disposition/fabrique/fabrique-lien';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { IUrlDef } from 'src/app/disposition/fabrique/fabrique-url';
-import { IContenuPhraseDef } from 'src/app/disposition/fabrique/fabrique-contenu-phrase';
+import { IContenuPhraséDef } from 'src/app/disposition/fabrique/fabrique-contenu-phrase';
+import { ComptePages } from 'src/app/compte/compte-pages';
 
 export class DataUtileLien {
     protected parent: DataUtile;
@@ -21,12 +22,12 @@ export class DataUtileLien {
     }
 
     texte(urlDef: IUrlDef): string {
-        return urlDef.pageDef.lien ? urlDef.pageDef.lien : urlDef.pageDef.urlSegment;
+        return urlDef.pageDef.lien ? urlDef.pageDef.lien : urlDef.pageDef.path;
     }
 
-    def(nom: string, urlDef: IUrlDef, contenu?: IContenuPhraseDef): ILienDef {
+    def(nom: string, urlDef: IUrlDef, contenu?: IContenuPhraséDef): ILienDef {
         const def: ILienDef = {
-            nom: nom ? nom : urlDef ? urlDef.pageDef.urlSegment : '',
+            nom: nom ? nom : urlDef ? urlDef.pageDef.path : '',
             urlDef,
             contenu: contenu
                 ? contenu
@@ -36,6 +37,7 @@ export class DataUtileLien {
     }
 
     déconnection() {
-        return Fabrique.lien.enLigne(this.def('deconnection', this.url.déconnection(), { texte: 'déconnecter' }), 'dansAlerte');
+        const def = this.def('deconnection', this.url.dePageDef(Fabrique.url.appRouteur.compte, ComptePages.deconnection), { texte: 'déconnecter' });
+        return Fabrique.lien.dansAlerte(Fabrique.lien.enLigne(def));
     }
 }

@@ -1,4 +1,4 @@
-import { ComptePages, CompteRoutes } from '../compte-pages';
+import { ComptePages } from '../compte-pages';
 import { Component, OnInit } from '@angular/core';
 import { PageBaseComponent } from 'src/app/disposition/page-base/page-base.component';
 import { ActivatedRoute } from '@angular/router';
@@ -67,7 +67,8 @@ export abstract class ConfirmeEmailBaseComponent extends PageBaseComponent imple
                         const def: ILienDef = {
                             nom: 'Connection',
                             urlDef: {
-                                keys: CompteRoutes.route([ComptePages.connection.urlSegment]),
+                                pageDef: ComptePages.connection,
+                                routeur: Fabrique.url.appRouteur.compte,
                                 params: [
                                     { nom: 'email', valeur: confirmeEmail.email }
                                 ]

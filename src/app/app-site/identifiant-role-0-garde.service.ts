@@ -1,0 +1,22 @@
+import { Injectable } from '@angular/core';
+import { ActivatedRouteSnapshot, RouterStateSnapshot, CanActivate } from '@angular/router';
+import { IdentificationService } from '../securite/identification.service';
+
+/**
+ * Fixe à 0 le rno du role en cours de l'identifiant s'il existe.
+ * Laisse passer.
+ */
+@Injectable()
+export class IdentifiantRole0GardeService implements CanActivate {
+
+    constructor(
+        private identification: IdentificationService,
+    ) {
+    }
+
+    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
+        this.identification.annuleRoleEnCours();
+        return true;
+    }
+
+}

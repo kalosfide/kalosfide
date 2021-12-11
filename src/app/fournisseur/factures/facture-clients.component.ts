@@ -3,7 +3,6 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { PageDef } from 'src/app/commun/page-def';
 import { ActivatedRoute } from '@angular/router';
 import { FacturePages } from './facture-pages';
-import { SiteService } from 'src/app/modeles/site/site.service';
 import { CLFClientsComponent } from 'src/app/modeles/c-l-f/c-l-f-clients.component';
 import { FournisseurCLFService } from '../fournisseur-c-l-f-.service';
 
@@ -19,5 +18,6 @@ export class FactureClientsComponent extends CLFClientsComponent implements OnIn
         protected service: FournisseurCLFService,
     ) {
         super(route, service);
+        this.fixeTypeDefRéglagesVueTable('facture');
     }
 }

@@ -71,7 +71,7 @@ export class ChangeEmailComponent extends FormulaireComponent implements OnInit 
             'nomPris',
             'Il y a déjà un utilisateur enregistré avec cette adresse'
         );
-        validateur.valeurErronée.push(this.identifiant.userName);
+        validateur.valeurErronée.push(this.identifiant.email);
         this.email.ajouteValidateur(validateur);
         groupe.ajoute(this.email);
 

@@ -32,7 +32,7 @@ export class FabriqueTexte {
             icoût = valeur;
         }
         let texte: string;
-        if (estNombre(icoût.valeur)) {
+        if (estNombre(icoût.valeur) && icoût.valeur > 0) {
             texte = icoût.valeur.toLocaleString('fr-FR', {
                 maximumFractionDigits: 2,
                 minimumFractionDigits: 2
@@ -80,29 +80,6 @@ export class FabriqueTexte {
         });
     }
 
-    get produit(): {
-        seCommande: (produit: Produit) => string,
-        seMesure: (produit: Produit) => string,
-        /**
-         * Retourne le texte du prix du produit suivi de € et de l'unité du type de mesure du produit
-         */
-        produit_prix: (produit: Produit) => string,
-        unité: (produit: Produit) => string,
-    } {
-        return {
-            seCommande: (produit: Produit) => TypeMesure.texteSeCommande(produit.typeMesure, produit.typeCommande),
-            seMesure: (produit: Produit) => TypeMesure.texte_au(produit.typeMesure),
-            produit_prix: (produit: Produit) => this.eurosAvecTypeMesure(produit.typeMesure, produit.prix),
-            unité: (produit: Produit) => TypeMesure.unité(produit.typeMesure),
-        };
-    }
-
-    private _testAvecProduit(nomFonction: string, avecProduit: IAvecProduit): Produit {
-        if (!avecProduit.produit) {
-            throw new Error(`${nomFonction}: le paramètre doit avoir une propriété 'produit' de type Produit`);
-        }
-        return avecProduit.produit as Produit;
-    }
     seMesure(produit: Produit): string {
         return TypeMesure.texte_au(produit.typeMesure);
     }
@@ -113,54 +90,15 @@ export class FabriqueTexte {
     produit_prix(produit: Produit): string {
         return this.eurosAvecTypeMesure(produit.typeMesure, produit.prix);
     }
-    /**
-     * Retourne le texte du prix du produit suivi de € et de l'unité du type de mesure du produit
-     * @param avecProduit objet ayant un champ produit
-     */
-    avecProduit_prix(avecProduit: IAvecProduit): string {
-        const produit = this._testAvecProduit('', avecProduit);
-        return this.produit_prix(produit);
-    }
-    unité(produit: Produit): string {
-        return TypeMesure.unité(produit.typeMesure);
-    }
-    avecProduit_unité(avecProduit: IAvecProduit): string {
-        const produit = this._testAvecProduit('', avecProduit);
-        return this.unité(produit);
-    }
 
-    unités(produit: Produit, id: string): string {
-        return TypeMesure.texteUnités(produit.typeMesure, id);
-    }
-    avecProduit_unités(avecProduit: IAvecProduit, id: string): string {
-        const produit = this._testAvecProduit('', avecProduit);
-        return this.unités(produit, id);
-    }
-
-    private _quantitéAvecUnité(typeMesure: string, quantité: number, idTypeCommande?: string): string {
-        if (quantité === null || quantité === undefined) {
-            return '';
-        }
-        let texte = quantité.toLocaleString('fr-FR');
-        if (idTypeCommande !== TypeCommande.id.ALUnité) {
-            texte += ' ' + TypeMesure.unité(typeMesure);
-        }
-        return texte;
-    }
-    texteDemande(typeMesure: string, demande: number, typeCommande?: string): string {
-        return this._quantitéAvecUnité(typeMesure, demande, typeCommande);
-    }
     quantitéAvecUnité(produit: Produit, quantité: number, idTypeCommande?: string): string {
         if (quantité === null || quantité === undefined) {
             return '';
         }
         let texte = quantité.toLocaleString('fr-FR');
-        if (!idTypeCommande || idTypeCommande !== TypeCommande.id.ALUnité) {
-            const unité = TypeMesure.unité(produit.typeMesure);
-            if (unité) {
-                texte += ' ' + unité;
-            }
-        }
+        const typeMesure: string = idTypeCommande && idTypeCommande === TypeCommande.id.ALUnité && produit.typeCommande === TypeCommande.id.ALUnitéOuEnVrac
+            ? TypeMesure.id.ALaPièce : produit.typeMesure;
+        texte += ' ' + (quantité <= 1 ?  TypeMesure.unité(typeMesure) : TypeMesure.unités(typeMesure));
         return texte;
     }
 

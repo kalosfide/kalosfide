@@ -46,6 +46,8 @@ export enum KfTypeDeComposant {
     description = 'description',
     li = 'li',
     b_btn_group = 'b_btn_group',
+    accordeon = 'accordeon',
+    accordeonItem = 'accordeonItem',
 
     liste = 'liste',
     listeEditeur = 'listeEditeur',

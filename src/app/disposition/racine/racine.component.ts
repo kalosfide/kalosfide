@@ -84,12 +84,12 @@ export abstract class RacineComponent implements OnDestroy {
         this.navigation.navigation.forEach((segment: NavigationSegment) => {
             titles.push(segment.title);
             if (segment.path === '') {
-                const étiquette = new KfEtiquette(segment.pageDef.urlSegment, segment.titre);
+                const étiquette = new KfEtiquette(segment.pageDef.path, segment.titre);
                 étiquette.baliseHtml = KfTypeDeBaliseHTML.span;
                 breadcrumbs.push(étiquette);
             } else {
                 url = `${url}/${segment.path}`;
-                const lien = new KfLien(segment.pageDef.urlSegment, url, segment.titre);
+                const lien = new KfLien(segment.pageDef.path, url, segment.titre);
                 breadcrumbs.push(lien);
             }
         });

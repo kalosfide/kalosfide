@@ -10,24 +10,13 @@ import { LivraisonBonsComponent } from './livraison-bons.component';
 import { LivraisonClientComponent } from './livraison-client.component';
 import { LivraisonBonLignesComponent } from './livraison-bon-lignes.component';
 
-import { LivraisonClientsResolverService } from './livraison-clients-resolver.service';
-
 import { LivraisonChoixProduitComponent } from './livraison-choix-produit.component';
 import { LivraisonClientsComponent } from './livraison-clients.component';
 import { LivraisonLigneAjouteComponent } from './livraison-ligne-ajoute.component';
-import { LivraisonBonSupprimeComponent } from './livraison-bon-supprime.component';
-import { LivraisonBonsResolverService } from './livraison-bons-resolver.service';
-import { LivraisonBonResolverService } from './livraison-bon-resolver.service';
-import { LivraisonBonVirtuelGardeService } from './livraison-bon-virtuel-garde.service';
 import { LivraisonLigneResolverService } from './livraison-ligne-resolver.service';
 import { LivraisonEnvoiComponent } from './livraison-envoi.component';
 import { LivraisonSynthèseResolverService } from './livraison-synthese-resolver.service';
-import { LivraisonBonExisteGardeService } from './livraison-bon-existe-garde.service';
-import { LivraisonDoitCréerGardeService } from './livraison-doit-creer-garde.service';
-import { LivraisonAttenteBonsGardeService } from './livraison-attente-bons-garde.service';
 import { LivraisonBonNouveauComponent } from './livraison-bon-nouveau.component';
-import { LivraisonEnvoiGardeService } from './livraison-envoi-garde.service';
-import { LivraisonProduitPasDansBonGardeService } from './livraison-produit-pas-dans-bon-garde.service';
 import { LivraisonTitreComponent } from './livraison-titre.component';
 
 @NgModule({
@@ -45,7 +34,6 @@ import { LivraisonTitreComponent } from './livraison-titre.component';
         LivraisonBonsComponent,
         LivraisonBonLignesComponent,
         LivraisonBonNouveauComponent,
-        LivraisonBonSupprimeComponent,
         LivraisonChoixProduitComponent,
         LivraisonTitreComponent,
         LivraisonClientsComponent,
@@ -53,17 +41,8 @@ import { LivraisonTitreComponent } from './livraison-titre.component';
         LivraisonEnvoiComponent,
     ],
     providers: [
-        LivraisonClientsResolverService,
-        LivraisonAttenteBonsGardeService,
-        LivraisonBonsResolverService,
-        LivraisonBonResolverService,
-        LivraisonBonExisteGardeService,
-        LivraisonDoitCréerGardeService,
-        LivraisonBonVirtuelGardeService,
-        LivraisonEnvoiGardeService,
         LivraisonLigneResolverService,
         LivraisonSynthèseResolverService,
-        LivraisonProduitPasDansBonGardeService,
     ]
 })
 export class LivraisonModule { }

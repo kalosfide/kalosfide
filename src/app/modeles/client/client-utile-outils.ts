@@ -6,6 +6,9 @@ import { KfVueTableOutilBtnGroupe } from 'src/app/commun/kf-composants/kf-vue-ta
 import { Client } from './client';
 import { KfVueTableFiltreCherche } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-filtre-cherche';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
+import { KfVueTableFiltreTexte } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-filtre-texte';
+import { EtatsRole, IdEtatRole } from '../role/etat-role';
+import { KfListeDeroulanteTexte } from 'src/app/commun/kf-composants/kf-elements/kf-liste-deroulante/kf-liste-deroulante-texte';
 
 export class ClientUtileOutils extends DataUtileOutils {
     constructor(utile: ClientUtile) {
@@ -33,11 +36,17 @@ export class ClientUtileOutils extends DataUtileOutils {
     }
 
     client(): KfVueTableFiltreCherche<Client> {
-        return Fabrique.vueTable.cherche<Client>('nom', 'Nom', 'nom', 'Rechercher un client');
+        return Fabrique.vueTable.cherche<Client>('nom', 'nom', 'Rechercher un client');
+    }
+
+    état(): KfVueTableFiltreTexte<Client> {
+        const filtre = Fabrique.vueTable.filtreTexte('etat', (c: Client, état: IdEtatRole) => c.etat === état, 'Filtrer par état')
+        EtatsRole.états.forEach(état => (filtre.composant as KfListeDeroulanteTexte).créeEtAjouteOption(état.texte, état.valeur));
+        return filtre;
     }
 
     ajoute(): KfVueTableOutilBtnGroupe<Client> {
-        return this.utile.outilsKey.outilAjoute();
+        return Fabrique.vueTable.outilAjoute(this.utile.lien.ajoute());
     }
 
 }

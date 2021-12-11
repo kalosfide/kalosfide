@@ -11,9 +11,13 @@ import { FormulaireComponent } from 'src/app/disposition/formulaire/formulaire.c
 import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 import { ClientEditeur } from '../../modeles/client/client-editeur';
 import { KfEtiquette } from '../../commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
-import { ClientPages, ClientRoutes } from '../../client/client-pages';
+import { ClientPages } from '../../client/client-pages';
 import { AppSitePages } from '../app-site-pages';
-import { DevenirClientData } from './devenir-client-data';
+import { InvitationClient } from './devenir-client-data';
+import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
+import { AppSite } from '../app-site';
+import { KfBouton } from 'src/app/commun/kf-composants/kf-elements/kf-bouton/kf-bouton';
+import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
@@ -27,22 +31,15 @@ export class DevenirClientComponent extends FormulaireComponent implements OnIni
         return `${this.pageDef.titre} de: ${this.invitation.titre}`;
     }
 
-    invitation: DevenirClientData;
+    invitation: InvitationClient;
 
     texteBoutonSoumettre: () => string;
 
-    créeBoutonsDeFormulaire = (formulaire: KfGroupe) => {
-        this.boutonSoumettre = Fabrique.bouton.soumettre(formulaire, this.texteBoutonSoumettre());
-        return [this.boutonSoumettre];
-    }
+    créeBoutonsDeFormulaire: (formulaire: KfGroupe) => (KfBouton | KfLien)[];
 
-    apiDemande = (): Observable<ApiResult> => {
-        return this.service.enregistreClient(this.valeur);
-    }
+    apiDemande: () => Observable<ApiResult>;
 
-    actionSiOk = (): void => {
-        this.routeur.naviguePageDef(ClientPages.accueil, ClientRoutes, this.invitation.url);
-    }
+    actionSiOk: () => void;
 
     constructor(
         protected route: ActivatedRoute,
@@ -54,20 +51,19 @@ export class DevenirClientComponent extends FormulaireComponent implements OnIni
         this.titreRésultatSucces = 'Enregistrement réussi.';
     }
 
+
     créeEdition = (): KfGroupe => {
         const groupe = Fabrique.formulaire.formulaire();
         let étiquette: KfEtiquette;
 
         const éditeurClient = new ClientEditeur(this);
-        const defClient = éditeurClient.créeContenus();
 
         étiquette = Fabrique.ajouteEtiquetteP();
         let texte = `Vous avez été invité par le fournisseur à `;
         if (this.invitation.nom) {
             texte += `prendre en charge un compte client qu'il a créé. `
                 + `Si vous modifiez le nom qu'il avait choisi, pensez à l'en informer.`;
-            éditeurClient.kfNom.valeur = this.invitation.nom;
-            éditeurClient.kfAdresse.valeur = this.invitation.adresse;
+            éditeurClient.roleEditeur.fixeValeur(this.invitation);
             this.texteBoutonSoumettre = () => `Prendre en charge le compte client`;
         } else {
             texte = `créer votre compte client.`;
@@ -75,7 +71,8 @@ export class DevenirClientComponent extends FormulaireComponent implements OnIni
         }
         étiquette.ajouteTextes(texte);
         groupe.ajoute(étiquette);
-        defClient.forEach(c => groupe.ajoute(c));
+        éditeurClient.créeKfDeData();
+        éditeurClient.kfDeData.forEach(c => groupe.ajoute(c));
 
         const code = Fabrique.input.texteInvisible('code', this.invitation.code);
         groupe.ajoute(code);
@@ -99,6 +96,38 @@ export class DevenirClientComponent extends FormulaireComponent implements OnIni
             this.invitation = data.invitation;
             this.niveauTitre = 0;
             this.créeTitrePage();
+            if (!this.invitation.code) {
+                this.créeAvantFormulaire = () => {
+                    const groupe = Fabrique.alerte('exemple', 'info', undefined,
+                        `Vous pouvez voir ci-dessous les informations à fournir pour devenir client d'un site sur ${AppSite.nom}`
+                    )
+                    return [groupe];
+                }
+                this.créeBoutonsDeFormulaire = (formulaire: KfGroupe) => {
+                    return [
+                        Fabrique.lien.bouton(
+                            {
+                                contenu: { texte: `Retour à l'accueil` },
+                                urlDef: { routeur: Fabrique.url.appRouteur.appSite }
+                            },
+                            'dark'
+                        ),
+                    ];
+                }
+            } else {
+                this.apiDemande = (): Observable<ApiResult> => {
+                    return this.service.enregistreClient(this.valeur);
+                }
+            
+                this.actionSiOk = (): void => {
+                    Fabrique.url.appRouteur.site.fixeSite(this.invitation.url);
+                    this.routeur.naviguePageDef(ClientPages.accueil, Fabrique.url.appRouteur.client);
+                }
+                            this.créeBoutonsDeFormulaire = (formulaire: KfGroupe) => {
+                    this.boutonSoumettre = Fabrique.bouton.soumettre(formulaire, this.texteBoutonSoumettre());
+                    return [this.boutonSoumettre];
+                }
+            }
             this.superGroupe = Fabrique.formulaire.superGroupe(this);
         }));
     }

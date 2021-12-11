@@ -4,15 +4,13 @@ import { CommunModule } from 'src/app/commun/commun.module';
 import { DispositionModule } from 'src/app/disposition/disposition.module';
 import { ErreursModule } from 'src/app/erreurs/erreurs.module';
 import { CDocumentRoutingModule } from './c-document-routing.module';
-import { CDocumentLivraisonResolverService } from './c-document-livraison-resolver.service';
-import { CDocumentCommandeResolverService } from './c-document-commande-resolver.service';
-import { CDocumentFactureResolverService } from './c-document-facture-resolver.service';
 import { CDocumentDocumentsComponent } from './c-document-documents.component';
 import { CDocumentCommandeComponent } from './c-document-commande.component';
 import { CDocumentLivraisonComponent } from './c-document-livraison.component';
 import { CDocumentFactureComponent } from './c-document-facture.component';
 import { CDocumentDocumentsResolverService } from './c-document-documents-resolver.service';
 import { CDocumentTitreComponent } from './c-document-titre.component';
+import { CDocumentResolverService } from './c-document-document-resolver.service';
 
 @NgModule({
     imports: [
@@ -31,9 +29,7 @@ import { CDocumentTitreComponent } from './c-document-titre.component';
     ],
     providers: [
         CDocumentDocumentsResolverService,
-        CDocumentCommandeResolverService,
-        CDocumentLivraisonResolverService,
-        CDocumentFactureResolverService,
+        CDocumentResolverService
     ]
 })
 export class CDocumentModule { }

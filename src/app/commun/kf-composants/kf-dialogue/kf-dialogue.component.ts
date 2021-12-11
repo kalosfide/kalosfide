@@ -1,4 +1,4 @@
-import { Component, HostBinding, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
+import { Component, HostBinding, OnInit, ViewChild, AfterViewInit, ElementRef, ViewEncapsulation } from '@angular/core';
 
 import { KfDialogueService } from './kf-dialogue.service';
 import { KfComposant } from '../kf-composant/kf-composant';
@@ -9,6 +9,7 @@ import { KfComposant } from '../kf-composant/kf-composant';
     styleUrls: [
         './kf-dialogue.component.css'
     ],
+    encapsulation: ViewEncapsulation.None,
 })
 export class KfDialogueComponent implements OnInit, AfterViewInit {
     @HostBinding('style.display') display = 'block';

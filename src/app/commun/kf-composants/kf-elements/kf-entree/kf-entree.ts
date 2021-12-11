@@ -2,7 +2,6 @@ import { KfTypeDeComposant, KfTypeDeValeur } from '../../kf-composants-types';
 import { FormControl } from '@angular/forms';
 import { KfComposantGereValeur } from '../../kf-composant/kf-composant-gere-valeur';
 import { KfGéreCss } from '../../kf-partages/kf-gere-css';
-import { KfIcone } from '../kf-icone/kf-icone';
 import { KfClavierToucheEnfoncée } from '../../kf-partages/kf-clavier/kf-clavier-touche-enfoncee';
 import { KfTypeDHTMLEvents, KfTypeDEvenement, KfEvenement, KfStatutDEvenement } from '../../kf-partages/kf-evenements';
 import { IKfEntreeFocusClavier } from './i-kf-entree-focus-clavier';

@@ -4,7 +4,6 @@ import { ItemMesSites } from './item-mes-sites';
 import { ItemMonCompte } from './item-mon-compte';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { NavItemDropdown } from 'src/app/disposition/navbars/nav-item-dropdown';
-import { ItemAjoute } from './item-ajoute';
 
 export class ItemCompte extends NavItemDropdown {
 
@@ -14,7 +13,6 @@ export class ItemCompte extends NavItemDropdown {
         this.dropdown.bouton.ajouteClasse('btn btn-sm btn-light');
 
         this.ajoute(new ItemConnection(this));
-        this.ajoute(new ItemAjoute(this));
         this.ajoute(new ItemMesSites(this));
         this.ajoute(new ItemMonCompte(this));
 

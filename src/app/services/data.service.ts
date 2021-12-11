@@ -10,14 +10,32 @@ import { ApiRequêteAction } from '../api/api-requete-action';
 import { ApiRequêteLecture } from '../api/api-requete-lecture';
 import { ApiRequêteService } from '../api/api-requete.service';
 import { IAvecServices } from './i-avec-services';
+import { KfVueTableRéglages } from '../commun/kf-composants/kf-vue-table/kf-vue-table-reglages';
+import { Stockage } from './stockage/stockage';
+import { StockageService } from './stockage/stockage.service';
+import { Site } from '../modeles/site/site';
+import { Identifiant } from '../securite/identifiant';
 
 export abstract class DataService implements IAvecServices {
 
     abstract controllerUrl: string;
 
+    private stockageRéglagesVueTable: Stockage<{ [key: string]: KfVueTableRéglages }>;
+
     constructor(
+        protected stockageService: StockageService,
         protected apiRequeteService: ApiRequêteService
     ) {
+        const nomRéglages = 'reglageVueTable';
+        this.stockageRéglagesVueTable = stockageService.stockage<{ [key: string]: KfVueTableRéglages }>(nomRéglages);
+        if (!this.stockageRéglagesVueTable) {
+            this.stockageRéglagesVueTable = stockageService.nouveau<{ [key: string]: KfVueTableRéglages }>(
+                nomRéglages,
+                {
+                    rafraichi: true
+                }
+            );
+        }
     }
 
     get identification(): IdentificationService { return this.apiRequeteService.identification; }
@@ -26,21 +44,24 @@ export abstract class DataService implements IAvecServices {
     get attenteService(): AttenteService { return this.apiRequeteService.attenteService; }
     get modalService(): KfNgbModalService { return this.apiRequeteService.modalService; }
 
-    public get keyIdentifiant(): IKeyUidRno {
-        const identifiant = this.identification.litIdentifiant();
-        if (identifiant) {
-            const urlSite = this.navigation.litSiteEnCours().url;
-            return identifiant.roleParUrl(urlSite);
+    public litSiteEnCours(): Site {
+        return this.identification.siteEnCours;
+    }
+
+    public litRéglagesVueTable(nom: string): KfVueTableRéglages {
+        const réglages = this.stockageRéglagesVueTable.litStock();
+        if (réglages) {
+            return réglages[nom];
         }
     }
 
-    public get keySiteEnCours(): IKeyUidRno {
-        const site = this.navigation.litSiteEnCours();
-        const keySite = {
-            uid: site.uid,
-            rno: site.rno
-        };
-        return keySite;
+    public fixeRéglagesVueTable(nom: string, réglages: KfVueTableRéglages) {
+        let stock = this.stockageRéglagesVueTable.litStock();
+        if (!stock) {
+            stock = {};
+        }
+        stock[nom] = réglages;
+        this.stockageRéglagesVueTable.fixeStock(stock);
     }
 
     protected post<T>(controller: string, action: string, data?: T, params?: { [param: string]: string }): Observable<ApiResult> {

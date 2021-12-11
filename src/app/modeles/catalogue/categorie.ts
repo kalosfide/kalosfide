@@ -5,10 +5,12 @@ import { ProduitBilan } from './produit-bilan';
 export interface ICategorieData extends IKeyUidRnoNoData {
     no: number;
     nom: string;
+    date?: Date
 }
 
 export class Categorie extends KeyUidRnoNo implements ICategorieData {
     nom: string;
+    date?: Date
     nbProduits: number;
     bilans: ProduitBilan[];
 
@@ -16,11 +18,15 @@ export class Categorie extends KeyUidRnoNo implements ICategorieData {
         this.nom = d.nom;
     }
 
+    compteProduits(produits: Produit[]) {
+        this.nbProduits = produits.filter(p => p.categorieNo === this.no).length;
+    }
+
     créeBilans(produits: Produit[]) {
         this.bilans = [{ type: 'C', nb: 0, quantité: 0 }, { type: 'L', nb: 0, quantité: 0 }, { type: 'F', nb: 0, quantité: 0 }];
         this.nbProduits = 0;
         produits.forEach(p => {
-            if (p.categorieNo === this.no) {
+            if (p.categorieNo === this.no && p.bilans) {
                 for (let i = 0; i < 3; i++) {
                     const b = this.bilans[i];
                     const bp = p.bilans[i];
@@ -49,4 +55,5 @@ export class Categorie extends KeyUidRnoNo implements ICategorieData {
 export class CategorieData implements ICategorieData {
     no: number;
     nom: string;
+    date?: Date
 }

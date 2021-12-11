@@ -11,9 +11,15 @@ export class ApiErreurResolverService implements Resolve<ApiResultErreur> {
     constructor(private routeur: RouteurService) {}
 
     resolve(): ApiResultErreur {
-        let apiErreur = this.routeur.apiErreur;
+    /**
+     * Erreur stockée quand le routeur navigue vers une page erreur
+     * ou quand le routeur retourne un UrlTree d'une page erreur à une garde
+     */
+     let apiErreur = this.routeur.apiErreur;
         if (!apiErreur) {
-            apiErreur = new ApiResult404NotFound();
+            // la navigation vers la page d'erreur n'a pas été déclenchée par le routeur ou une garde
+            // c'est l'Angular Router qui n'a pas reconnu la route
+            apiErreur = new ApiResult404NotFound(`l'Angular Router n'a pas reconnu la route`);
         }
         return apiErreur;
     }

@@ -26,6 +26,8 @@ import { IKfVueTableColonneNoLigneDef } from './i-kf-vue-table-colonne-no-ligne-
 import { KfVueTableNavigationBase } from './kf-vue-table-navigation-base';
 import { KfVueTableNavigationParCellule } from './kf-vue-table-navigation-par-cellule';
 import { KfVueTableNavigationParLigne } from './kf-vue-table-navigation-par-ligne';
+import { KfVueTableRéglages } from './kf-vue-table-reglages';
+import { DirectionDeTri } from '../../outils/tri';
 
 /** pour que le component soit indépendant du générique T */
 export interface IKfVueTable extends IKfComposant {
@@ -59,7 +61,15 @@ export interface IKfVueTable extends IKfComposant {
      * Vrai si table-layout: fixed
      */
     avecColgroup: boolean;
-    }
+    dansDiv: boolean;
+    /**
+      * Gére le ccs d'un élément html div contenant les éléments html dt et dd.
+      * Doit être créé par la méthode dansDiv.
+      */
+    géreCssDiv: KfGéreCss;
+    classeDiv: KfNgClasse;
+    styleDiv: KfNgStyle;
+}
 
 export class KfVueTable<T> extends KfComposant implements IKfVueTable {
     private def: IKfVueTableDef<T>;
@@ -119,7 +129,12 @@ export class KfVueTable<T> extends KfComposant implements IKfVueTable {
     /**
      * Si vrai, un élément colgroup sera ajouté.
      */
-     private pAvecColgroup: boolean;
+    private pAvecColgroup: boolean;
+
+    /**
+     * Si présent, un élément html div entourera l'élément table
+     */
+    private _géreCssDiv: KfGéreCss;
 
     constructor(nom: string, vueTableDef: IKfVueTableDef<T>) {
         super(nom, KfTypeDeComposant.vuetable);
@@ -264,16 +279,53 @@ export class KfVueTable<T> extends KfComposant implements IKfVueTable {
     get navigationAuClavier(): KfVueTableNavigationBase<T> { return this.pNavigationAuClavier; }
 
     /**
+     * Ajoute un élément html div contenant les éléments html dt et dd
+     */
+    créeDiv() {
+        this._géreCssDiv = new KfGéreCss();
+    }
+
+    /**
+     * Ajoute un élément html div contenant les éléments html dt et dd
+     */
+    get dansDiv(): boolean {
+        return this._géreCssDiv !== undefined;
+    }
+    /**
+      * Gére le ccs d'un élément html div contenant les éléments html dt et dd.
+      * Doit être créé par la méthode dansDiv.
+      */
+    get géreCssDiv(): KfGéreCss {
+        return this._géreCssDiv;
+    }
+
+    get classeDiv(): KfNgClasse {
+        if (this._géreCssDiv) {
+            return this._géreCssDiv.classe;
+        }
+    }
+
+    get styleDiv(): KfNgStyle {
+        if (this._géreCssDiv) {
+            return this._géreCssDiv.style;
+        }
+    }
+
+    /**
      * Retrouve la ligne dont l'item à une id donnée.
      * La définition de la vueTable doit avoir une propriété id.
      * @param id id de la ligne
      */
-    ligne(id: string): KfVueTableLigne<T> {
+    ligneParId(id: string): KfVueTableLigne<T> {
+        if (!this.def.id) {
+            throw new Error('La définition de la vueTable doit avoir une propriété id.');
+            
+        }
         return this.pLignes.find(l => this.def.id(l.item) === id);
     }
 
     /**
-     * définit des classes css à appliquer suivant l'état et l'effet des filtres
+     * Définit des classes css à appliquer suivant l'état et l'effet des filtres
      * @param siFiltrée classe css du corps de la table quand des lignes sont arrêtées par les filtres
      * @param siNonFiltrée classe css du corps de la table quand aucune ligne n'est arrêtée par les filtres
      */
@@ -376,8 +428,17 @@ export class KfVueTable<T> extends KfComposant implements IKfVueTable {
         }
     }
 
-    remplaceItem(index: number, item: T) {
-        this.pLignes[index].item = item;
+    /**
+     * Met à jour l'ordre des lignes s'il y a un tri actif et le bilan s'il existe.
+     * Fixe la ligne active.
+     * @param ligne ligne qui a été modifiée.
+     */
+    quandLigneModifiée(ligne: KfVueTableLigne<T>) {
+        this.pCorps.appliqueTri();
+        this.activeLigne(ligne);
+        if (this.bilan) {
+            this.bilan.quandBilanChange();
+        }
     }
 
     supprimeItem(index: number) {
@@ -404,6 +465,8 @@ export class KfVueTable<T> extends KfComposant implements IKfVueTable {
         if (this.pPagination) {
             this.pPagination.quandLigneSupprimée(ligne.indexFiltré);
         }
+
+        this.fixeLignesVisibles();
     }
 
     videLignes() {
@@ -412,6 +475,10 @@ export class KfVueTable<T> extends KfComposant implements IKfVueTable {
             this.formArray.clear();
         }
         this.pCorps.fixeLignes();
+    }
+
+    set triInitial(defTri: { colonne: string, direction: DirectionDeTri }) {
+        this.def.triInitial = defTri;
     }
 
     /**
@@ -461,8 +528,14 @@ export class KfVueTable<T> extends KfComposant implements IKfVueTable {
     /**
      * Remplit la table en créant les lignes et initialise éventuellement la valeur, le tri, les outils, la pagination
      * et la référence de l'item à la ligne
+     * @param items items à afficher
+     * @param réglages objet contenant les valeurs des filtres, du tri, de la pagination et de la navigation
+     * sauvegardés lors d'une utilisation antérieure de la vueTable
+     * @param id fonction qui retourne le même identifiant pour des items qui représentent le même objet
+     * (doit être défini si les réglages contiennent la ligne active)
      */
-    initialise(items: T[]) {
+    initialise(items: T[], réglages?: KfVueTableRéglages, id?: (t: T) => string | number) {
+        // crée les lignes avec leur contenu et id événtuel
         this.pLignes = [];
         if (items.length === 0) {
             this.pCorps.fixeLignes();
@@ -478,23 +551,58 @@ export class KfVueTable<T> extends KfComposant implements IKfVueTable {
             this.formArray.clear();
             this.pLignes.forEach(ligne => this.formArray.push(ligne.formGroup));
         }
+
+        // Fixe le tri initial
         if (this.def.triInitial) {
             this.pColonneDeTri = this.colonnes.find(c => c.nom === this.def.triInitial.colonne);
             this.pColonneDeTri.tri.direction = this.def.triInitial.direction;
         }
+        // Crée la liste des lignes du corps triées
         this.pCorps.fixeLignes();
 
         if (this.def.colonneNoLigneDef) {
-            // Fixe le numéro des lignes
+            // Fixe le numéro des lignes dans l'ordre issu du tri initial
             for (let index = 0; index < this.pCorps.lignes.length; index++) {
                 this.pCorps.lignes[index].fixeNuméro(index);
             }
         }
 
+        // Applique le tri éventuellement enregistré dans les réglages
+        if (réglages && réglages.tri) {
+            this.pColonneDeTri = this.colonnes.find(c => c.nom === réglages.tri.colonne);
+            this.pColonneDeTri.tri.direction = réglages.tri.direction;
+        }
+        this.corps.fixeLignes();
+
+        if (réglages) {
+            // Fixe éventuellement les valeurs des outils enregistrées dans les réglages
+            if (réglages.filtres) {
+                this.pOutils.valeurFiltres = réglages.filtres;
+            }
+            // Fixe éventuellement le nombre de lignes par page de la pagination
+            if (réglages.pagination) {
+                this.pPagination.initialiseNbParPage(réglages.pagination.nbParPages);
+            }
+        }
+
+        // Applique les filtres s'il y en a. Définit la liste des lignes visibles
         this.appliqueFiltres();
+
+        // Fixe éventuellement la ligne ou la page active
+
+        if (réglages) {
+            if (réglages.idLigneActive && id) {
+                const ligneActive = this.pLignes.find(l => réglages.idLigneActive === id(l.item));
+                this.activeLigne(ligneActive);
+            } else {
+                if (réglages.pagination && réglages.pagination.pageActive) {
+                    this.pagination.vaAPage(réglages.pagination.pageActive);
+                }
+            }
+        }
     }
 
-    get quandClic(): { colonneDuClic?: string } | ((item: T) => (() => void)) {
+    get quandClic(): ((item: T) => (() => void)) {
         return this.def.quandClic;
     }
 
@@ -531,15 +639,53 @@ export class KfVueTable<T> extends KfComposant implements IKfVueTable {
         }
     }
 
+    /**
+     * Rend la ligne visible en fixant la page de la pagination s'il y en a une.
+     * Rend la ligne active pour la navigation au clavier s'il y en a une.
+     * @param ligne ligne à activer
+     */
     activeLigne(ligne: KfVueTableLigne<T>) {
+        // si la ligne ne passe pas un filtre, supprime ce filtre
+        if (this.pOutils) {
+            if (this.pOutils.annuleFiltrePourLigne(ligne)) {
+                // au moins un filtre a été supprimé
+                this.appliqueFiltres();
+            }
+        }
         // s'il y a une pagination on va à la page de la ligne
         if (this.pPagination) {
             const page = this.pPagination.page(ligne.indexFiltré);
             this.pPagination.vaAPage(page);
         }
         if (this.pNavigationAuClavier) {
-            this.pNavigationAuClavier.fixeLigneActive(ligne);
+            this.pNavigationAuClavier.fixeLigneActiveEtLeFocus(ligne);
         }
+    }
+
+    /**
+     * 
+     * @param id fonction qui retourne le même identifiant pour des items qui représentent le même objet
+     * (doit être défini si les réglages contiennent la ligne active)
+     * @returns un KfVueTableRéglages
+     */
+    réglages(id?: (t: T) => string | number): KfVueTableRéglages {
+        const réglages = new KfVueTableRéglages();
+        if (this.pOutils) {
+            réglages.filtres = this.pOutils.valeurFiltres;
+        }
+        if (this.pPagination) {
+            réglages.pagination = {
+                nbParPages: this.pPagination.nbParPage,
+                pageActive: this.pPagination.pageActive
+            };
+        }
+        if (this.pColonneDeTri) {
+            réglages.tri = { colonne: this.pColonneDeTri.nom, direction: this.pColonneDeTri.tri.direction };
+        }
+        if (this.pNavigationAuClavier && this.pNavigationAuClavier.ligneActive) {
+            réglages.idLigneActive = id(this.pNavigationAuClavier.ligneActive.item);
+        }
+        return réglages
     }
 
 }

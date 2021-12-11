@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ViewChildren, QueryList, AfterViewInit, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewChildren, QueryList, AfterViewInit, ElementRef, ViewEncapsulation } from '@angular/core';
 import { KfComposantComponent } from '../../kf-composant/kf-composant.component';
 import { TraiteKeydownService } from '../../../traite-keydown/traite-keydown.service';
 import { KfListeDeroulanteBase } from './kf-liste-deroulante-base';
@@ -6,7 +6,8 @@ import { KfListeDeroulanteBase } from './kf-liste-deroulante-base';
 @Component({
     selector: 'app-kf-liste-deroulante',
     templateUrl: './kf-liste-deroulante.component.html',
-    styleUrls: ['../../kf-composants.scss']
+    styleUrls: ['../../kf-composants.scss'],
+    encapsulation: ViewEncapsulation.None
 })
 export class KfListeDeroulanteComponent extends KfComposantComponent implements OnInit, AfterViewInit {
     @ViewChild('selectElement', {static: false}) selectElementRef: ElementRef;

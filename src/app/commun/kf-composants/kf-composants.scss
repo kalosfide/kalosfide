@@ -29,7 +29,7 @@
     cursor: pointer;
     @include font-size($font-size);
     margin-right: 5px;
-    margin-top: -$base-height * 1em;
+    margin-top: decalage-vertical($base-height,  $base-padding-bottom, $base-margin-bottom, $font-size);
 }
 .kf-input-icone {
     @include kf-input-icone-mix($input-line-height, $input-padding-y, 0, $input-font-size);

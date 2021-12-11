@@ -1,22 +1,15 @@
 import { Injectable } from '@angular/core';
-import { Router, RouterStateSnapshot } from '@angular/router';
+import { NavigationExtras, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { IdentificationService } from '../securite/identification.service';
 import { NavigationService } from './navigation.service';
-import { Site } from '../modeles/site/site';
-import { SiteRoutes, ISiteRoutes, SitePages } from '../site/site-pages';
-import { AppSiteRoutes } from '../app-site/app-site-pages';
 import { PageDef } from '../commun/page-def';
-import { Identifiant } from '../securite/identifiant';
-import { FournisseurRoutes } from '../fournisseur/fournisseur-pages';
-import { ClientRoutes } from '../client/client-pages';
-import { ValeurStringDef } from '../commun/kf-composants/kf-partages/kf-string-def';
 import { IUrlDef } from '../disposition/fabrique/fabrique-url';
-import { ApiResultErreur, ApiResultErreurSpéciale } from '../api/api-results/api-result-erreur';
+import { ApiResultErreur } from '../api/api-results/api-result-erreur';
 import { AppPages } from '../app-pages';
-import { ComptePages } from '../compte/compte-pages';
-import { ApiResult404NotFound } from '../api/api-results/api-result-404-not-found';
 import { Stockage } from './stockage/stockage';
 import { StockageService } from './stockage/stockage.service';
+import { Fabrique } from '../disposition/fabrique/fabrique';
+import { Routeur } from '../commun/routeur';
 
 @Injectable({
     providedIn: 'root'
@@ -24,6 +17,12 @@ import { StockageService } from './stockage/stockage.service';
 export class RouteurService {
 
     private stockageErreur: Stockage<ApiResultErreur>;
+
+    /**
+     * Erreur stockée quand le routeur navigue vers une page erreur
+     * ou quand le routeur retourne un UrlTree d'une page erreur à une garde
+     * et lue par le resolver de cette page.
+     */
     get apiErreur(): ApiResultErreur {
         return this.stockageErreur.litStock();
     }
@@ -37,96 +36,85 @@ export class RouteurService {
         this.stockageErreur = stockageService.nouveau<ApiResultErreur>('apiErreur');
     }
 
-    routesSite(urlSite: string, identifiant: Identifiant): ISiteRoutes {
-        if (urlSite) {
-            if (identifiant) {
-                if (identifiant.estFournisseurDeSiteParUrl(urlSite)) {
-                    return FournisseurRoutes;
-                }
-                if (identifiant.estUsagerDeSiteParUrl(urlSite)) {
-                    return ClientRoutes;
-                }
-            }
-        }
-    }
-
     /**
      * préfixe l'url définie par segments par l'url racine du site pour l'identifiant
      * @param segments de l'url relative
      */
-    urlDansSite(segments?: string[]): string {
-        const site: Site = this.navigation.litSiteEnCours();
-        const identifiant = this.identification.litIdentifiant();
-        if (!site) {
-            return AppSiteRoutes.url(segments);
-        }
-        if (!identifiant) {
-            return AppSiteRoutes.url([AppPages.compte.urlSegment, ComptePages.connection.urlSegment]);
-        }
-        const role = identifiant.roles.find(r => r.site.url === site.url);
+    private urlErreur(): string {
+        const role = this.identification.roleEnCours;
         if (!role) {
-            // l'utilisateur n'est pas usager du site
+            return Fabrique.url.appRouteur.appSite.url();
         }
-        if (role.uid === site.uid && role.rno === site.rno) {
-            // c'est le fournisseur du site
-            return SiteRoutes.urlDeRole(site.url, SitePages.fournisseur.urlSegment, segments);
-        }
-        // c'est un client du site
-        return SiteRoutes.urlDeRole(site.url, SitePages.client.urlSegment, segments);
-    }
-
-    navigue(segments?: string[], params?: any) {
-        if (params) {
-            this.router.navigate([this.urlDansSite(segments), params]);
-        } else {
-            this.router.navigate([this.urlDansSite(segments)]);
-        }
-    }
-
-    navigueVersErreurModal(apiResult: ApiResultErreur) {
-        this.stockageErreur.fixeStock(apiResult);
-        this.router.navigate([this.urlDansSite([AppPages.apiErreurModal.urlSegment])]);
+        return Fabrique.url.appRouteur.routeurDeRole(role).url(AppPages.apiErreur.path);
     }
 
     navigueVersPageErreur(apiResult: ApiResultErreur) {
         this.stockageErreur.fixeStock(apiResult);
-        this.router.navigate([this.urlDansSite([AppPages.apiErreur.urlSegment])]);
+        this.router.navigate([this.urlErreur()]);
     }
 
     navigueVersPageErreur401(apiResult: ApiResultErreur) {
         this.stockageErreur.fixeStock(apiResult);
         if (apiResult.messages) {
-            this.router.navigate([AppSiteRoutes.url([AppPages.apiErreur.urlSegment])]);
+            this.router.navigate([Fabrique.url.appRouteur.appSite.url(AppPages.apiErreur.path)]);
         } else {
-            this.router.navigate([AppSiteRoutes.url()]);
+            this.router.navigate([Fabrique.url.appRouteur.appSite.url()]);
         }
     }
 
-    navigate(routes: any[]) {
-        this.router.navigate(routes);
+    navigueVersPageErreur403(apiResult: ApiResultErreur) {
+        this.stockageErreur.fixeStock(apiResult);
+        this.router.navigate([Fabrique.url.appRouteur.appSite.url(AppPages.apiErreur.path)]);
+    }
+
+    urlTreeErreur(apiResult: ApiResultErreur): UrlTree {
+        this.stockageErreur.fixeStock(apiResult);
+        return this.router.createUrlTree([this.urlErreur()]);
+    }
+
+    urlTreeErreur401(apiResult: ApiResultErreur): UrlTree {
+        this.stockageErreur.fixeStock(apiResult);
+        if (apiResult.messages) {
+            return this.router.createUrlTree([Fabrique.url.appRouteur.appSite.url(AppPages.apiErreur.path)]);
+        } else {
+            return this.router.createUrlTree([Fabrique.url.appRouteur.appSite.url()]);
+        }
+    }
+
+    urlTreeErreur403(apiResult: ApiResultErreur): UrlTree {
+        this.stockageErreur.fixeStock(apiResult);
+        return this.router.createUrlTree([Fabrique.url.appRouteur.appSite.url(AppPages.apiErreur.path)]);
+    }
+
+    navigate(routes: any[], extras?: NavigationExtras) {
+        this.router.navigate(routes, extras);
     }
 
     urlDeDef(def: IUrlDef): string {
-        let segments: string[] = def.pageDef ? [def.pageDef.urlSegment] : [];
+        if (def.local) {
+            return '.';
+        }
+        let segments: string[] = def.pageDef ? [def.pageDef.path] : [];
         if (def.keys) {
             segments = segments.concat(def.keys);
         }
-        return  def.urlSite
-            ? def.routes.url(ValeurStringDef(def.urlSite), segments)
-            : AppSiteRoutes.url(segments);
+        return def.routeur ? def.routeur.url(...segments) : Fabrique.url.appRouteur.appSite.url(...segments);
     }
 
-    urlPageDef(pageDef: PageDef, routes?: ISiteRoutes, urlSite?: string): string {
-        return  urlSite ? routes.url(urlSite, [pageDef.urlSegment]) : AppSiteRoutes.url([pageDef.urlSegment]);
-    }
-
-    naviguePageDef(pageDef: PageDef, routes?: ISiteRoutes, urlSite?: string) {
+    naviguePageDef(pageDef: PageDef, routeur?: Routeur) {
         const urlDef: IUrlDef = {
             pageDef,
-            routes,
-            urlSite,
+            routeur
         };
         this.router.navigate([this.urlDeDef(urlDef)]);
+    }
+
+    urlTreePageDef(pageDef: PageDef, routeur?: Routeur): UrlTree {
+        const urlDef: IUrlDef = {
+            pageDef,
+            routeur,
+        };
+        return this.router.createUrlTree([this.urlDeDef(urlDef)]);
     }
 
     navigueRelatif(state: RouterStateSnapshot, vers: string) {
@@ -147,7 +135,7 @@ export class RouteurService {
         }
         while (cible) {
             if (cible === '.' || cible === '..') {
-                    throw new Error(`'./' et '../' ne peuvent figurer qu'au début d'un chemin relatif`);
+                throw new Error(`'./' et '../' ne peuvent figurer qu'au début d'un chemin relatif`);
             }
             segments.push(cible);
             cible = cibles.shift();
@@ -156,15 +144,35 @@ export class RouteurService {
         this.router.navigateByUrl(url);
     }
 
-    navigueUrlDef(urlDef: IUrlDef) {
-        const url = this.urlDeDef(urlDef);
+    private urlSegmentsUrlDef(urlDef: IUrlDef): any[] {
+        const commands: any[] = [this.urlDeDef(urlDef)];
         let params: { [key: string]: string };
         if (urlDef.params) {
             params = {};
             urlDef.params.forEach(p => params[p.nom] = p.valeur);
-            this.router.navigate([url, params]);
-        } else {
-            this.router.navigate([url]);
+            commands.push(params);
         }
+        return commands;
+    }
+
+    navigueUrlDef(urlDef: IUrlDef) {
+        if (urlDef.fragment) {
+            this.router.navigate(this.urlSegmentsUrlDef(urlDef), { fragment: urlDef.fragment });
+        } else {
+            this.router.navigate(this.urlSegmentsUrlDef(urlDef));
+        }
+    }
+
+    urlTreeUrlDef(urlDef: IUrlDef): UrlTree {
+        return this.router.createUrlTree(this.urlSegmentsUrlDef(urlDef));
+    }
+
+    navigueVersFragment(url: string, fragment: string) {
+        // vérifie que l'url ne contient pas déjà un fragment
+        const posFragment = url.indexOf('#');
+        if (posFragment !== -1) {
+            url = url.substr(0, posFragment - 1);
+        }
+        this.router.navigate([url], { fragment });
     }
 }

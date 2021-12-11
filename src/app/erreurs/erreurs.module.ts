@@ -7,7 +7,6 @@ import { CommunModule } from '../commun/commun.module';
 import { PageErreurComponent } from './page-erreur.component';
 import { DispositionModule } from '../disposition/disposition.module';
 import { ApiErreurResolverService } from './api-erreur-resolver.service';
-import { ModalErreurComponent } from './modal-erreur.component';
 
 @NgModule({
     imports: [
@@ -18,7 +17,6 @@ import { ModalErreurComponent } from './modal-erreur.component';
     ],
     declarations: [
         PageErreurComponent,
-        ModalErreurComponent
     ],
     providers: [
         ApiErreurResolverService

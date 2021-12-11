@@ -4,6 +4,7 @@ import { KfGéreCss } from '../kf-gere-css';
 
 export class KfBalise extends KfGéreCss {
     baliseHTML: KfTypeDeBaliseHTML;
+    id: string;
 
     private pContenuPhrase: KfContenuPhrase;
 

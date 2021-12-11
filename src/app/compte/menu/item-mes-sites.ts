@@ -1,21 +1,37 @@
 import { ItemCompte } from './item-compte';
-import { SiteRoutes } from 'src/app/site/site-pages';
 import { AppSite } from 'src/app/app-site/app-site';
 import { NavItemDropDownGroup } from 'src/app/disposition/navbars/nav-item-dropdown-group';
 import { NavItemLien } from 'src/app/disposition/navbars/nav-item-lien';
+import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 
 export class ItemMesSites extends NavItemDropDownGroup {
     constructor(parent: ItemCompte) {
         super('mesSites', parent);
         this.rafraichit = () => {
-            let sites = this.identifiant ? this.identifiant.sites : [];
-            if (this.site) {
-                sites = sites.filter(s => s.url !== this.site.url);
+            if (!this.identifiant) {
+                this.fixeContenus([]);
+                return;
             }
-            this.fixeContenus(sites.map(s => {
-                const item = new NavItemLien(s.url, this);
-                item.texte = s.url + '@' + AppSite.nom;
-                item.url = SiteRoutes.urlDIdentifiant(s.url, this.identifiant);
+            const appRouteur = Fabrique.url.appRouteur;
+            if (this.identifiant.estAdministrateur) {
+                if (this.navBar.nom === 'admin') {
+                    this.fixeContenus([]);
+                    return;
+                } else {
+                    const item = new NavItemLien('admin', this);
+                    item.texte = 'administration' + '@' + AppSite.nom;
+                    item.url = appRouteur.admin.url();
+                    this.fixeContenus([item]);
+                    return;
+                }
+            }
+            const roles = this.identifiant
+                ? this.identifiant.rolesAccessibles.filter(role => role.rno !== this.identifiant.rnoRoleEnCours)
+                : [];
+            this.fixeContenus(roles.map(role => {
+                const item = new NavItemLien(role.site.url, this);
+                item.texte = role.site.url + '@' + AppSite.nom;
+                item.url = appRouteur.routeurDeRole(role).url();
                 return item;
             }));
         };

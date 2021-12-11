@@ -13,7 +13,20 @@ export class TypeMesure {
     static unité(id: string): string {
         switch (id) {
             case TypeMesure.id.ALaPièce:
-                break;
+                return 'pièce';
+            case TypeMesure.id.AuKilo:
+                return 'kg';
+            case TypeMesure.id.AuLitre:
+                return 'L';
+            default:
+                throw new Error(`TypeMesure: la valeur ${id} n'appartient pas au type`);
+        }
+    }
+
+    static unités(id: string): string {
+        switch (id) {
+            case TypeMesure.id.ALaPièce:
+                return 'pièces';
             case TypeMesure.id.AuKilo:
                 return 'kg';
             case TypeMesure.id.AuLitre:

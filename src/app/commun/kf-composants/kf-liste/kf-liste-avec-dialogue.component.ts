@@ -1,5 +1,5 @@
 import {
-    Component, OnInit, ViewChild, AfterViewInit, ElementRef
+    Component, OnInit, ViewChild, AfterViewInit, ElementRef, ViewEncapsulation
 } from '@angular/core';
 import { KfComposantComponent } from '../kf-composant/kf-composant.component';
 import { KfListe } from './kf-liste';
@@ -13,7 +13,8 @@ import { TraiteKeydownService } from '../../traite-keydown/traite-keydown.servic
 @Component({
     selector: 'app-kf-liste-avec-dialogue',
     templateUrl: './kf-liste.component.html',
-    styleUrls: ['../../kf-composants.scss']
+    styleUrls: ['../../kf-composants.scss'],
+    encapsulation: ViewEncapsulation.None
 })
 export class KfListeAvecDialogueComponent extends KfComposantComponent implements OnInit, AfterViewInit {
     @ViewChild('htmlElement', {static: false}) htmlElement: ElementRef;

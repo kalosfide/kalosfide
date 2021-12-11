@@ -1,5 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
-import { KfTypeDeComposant } from '../kf-composants-types';
+import { Component, OnInit, ViewChild, AfterViewInit, ElementRef, ViewEncapsulation } from '@angular/core';
 import { KfComposantComponent } from '../kf-composant/kf-composant.component';
 import { KfNavbar } from './kf-navbar';
 import { TraiteKeydownService } from '../../traite-keydown/traite-keydown.service';
@@ -7,7 +6,8 @@ import { TraiteKeydownService } from '../../traite-keydown/traite-keydown.servic
 @Component({
     selector: 'app-kf-navbar',
     templateUrl: './kf-navbar.component.html',
-    styleUrls: ['../kf-composants.scss']
+    styleUrls: ['../kf-composants.scss'],
+    encapsulation: ViewEncapsulation.None
 })
 export class KfNavbarComponent extends KfComposantComponent implements OnInit, AfterViewInit {
     @ViewChild('htmlElement', {static: false}) domElementRef: ElementRef;

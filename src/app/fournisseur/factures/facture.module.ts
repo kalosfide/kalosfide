@@ -13,18 +13,10 @@ import { FactureBonSupprimeComponent } from './facture-bon-supprime.component';
 import { FactureChoixProduitComponent } from './facture-choix-produit.component';
 import { FactureLigneAjouteComponent } from './facture-ligne-ajoute.component';
 import { FactureEnvoiComponent } from './facture-envoi.component';
-import { FactureClientsResolverService } from './facture-clients-resolver.service';
-import { FactureAttenteBonsGardeService } from './facture-attente-bons-garde.service';
-import { FactureBonsResolverService } from './facture-bons-resolver.service';
-import { FactureBonResolverService } from './facture-bon-resolver.service';
-import { FactureBonExisteGardeService } from './facture-bon-existe-garde.service';
-import { FactureDoitCréerGardeService } from './facture-doit-creer-garde.service';
-import { FactureBonVirtuelGardeService } from './facture-bon-virtuel-garde.service';
-import { FactureEnvoiGardeService } from './facture-envoi-garde.service';
 import { FactureLigneResolverService } from './facture-ligne-resolver.service';
 import { FactureSynthèseResolverService } from './facture-synthese-resolver.service';
-import { FactureProduitPasDansBonGardeService } from './facture-produit-pas-dans-bon-garde.service';
 import { FactureTitreComponent } from './facture-titre.component';
+import { FactureEnvoiGardeService } from './facture-envoi-garde.service';
 
 @NgModule({
     imports: [
@@ -49,17 +41,9 @@ import { FactureTitreComponent } from './facture-titre.component';
         FactureTitreComponent,
     ],
     providers: [
-        FactureClientsResolverService,
-        FactureAttenteBonsGardeService,
-        FactureBonsResolverService,
-        FactureBonResolverService,
-        FactureBonExisteGardeService,
-        FactureDoitCréerGardeService,
-        FactureBonVirtuelGardeService,
-        FactureEnvoiGardeService,
         FactureLigneResolverService,
         FactureSynthèseResolverService,
-        FactureProduitPasDansBonGardeService,
+        FactureEnvoiGardeService
     ]
 })
 export class FactureModule { }

@@ -1,5 +1,7 @@
 import { TypeCLF } from './c-l-f-type';
-import { CLFBilan } from './c-l-f-bilan';
+import { CLFNbBons } from './c-l-f-nb-bons';
+import { CLFDoc } from './c-l-f-doc';
+import { TexteOutils } from 'src/app/commun/outils/texte-outils';
 
 export class CLFUtileTexteChamp {
     categorie = 'Catégorie';
@@ -19,6 +21,7 @@ class Defs {
     Bons?: string;
     bons?: string;
     doc: string;
+    docs: string;
     Doc: string;
     le: string;
     Le: string;
@@ -30,37 +33,21 @@ class Defs {
     il: string;
     Il: string;
     dernier: string;
+    prochain: string;
     action: string;
     faire?: string;
     faite?: string;
+    adressé: string;
+    enregistré: string;
+    nouveau: string;
+    nouveaux: string;
 }
 
-class Bouton {
-    textes: Textes;
-    annulerVérifier = 'Annuler la vérification';
-
-    constructor(textes: Textes) {
-        this.textes = textes;
-    }
-
-    get vérifier(): string {
-        return `Vérifier ${this.textes.le_doc}`;
-    }
-    get terminer(): string {
-        return `Enregistrer ${this.textes.le_doc}`;
-    }
-}
-
-export class Textes {
+export class CLFTextes {
     def?: Defs;
     champ: CLFUtileTexteChamp;
-    bouton?: Bouton;
 
-    synthèse: Textes;
-
-    constructor() {
-        this.bouton = new Bouton(this);
-    }
+    synthèse: CLFTextes;
 
     get le_doc(): string { return `${this.def.le} ${this.def.doc}`; }
     get Le_doc(): string { return `${this.def.Le} ${this.def.doc}`; }
@@ -72,11 +59,13 @@ export class Textes {
 
     get Le_dernier_doc(): string { return `${this.def.Le} ${this.def.dernier} ${this.def.doc} `; }
 
+    get le_prochain_doc(): string { return `${this.def.le} ${this.def.prochain} ${this.def.doc} `; }
+
     get ce_dernier_doc(): string { return `${this.def.ce} ${this.def.dernier} ${this.def.doc} `; }
 
     get descriptionBonVirtuel(): string {
         return `Ce bon est virtuel car il sera supprimé lors de l'enregistrement ${this.du_doc}`
-        + ` et n'apparaitra pas parmi les documents.`;
+            + ` et n'apparaitra pas parmi les documents.`;
     }
 
     get copierBon(): string {
@@ -87,39 +76,53 @@ export class Textes {
         return `Copier les quantités ${this.def.faite}s de chaque ${this.def.bon} dans les quantités à ${this.def.faire} `;
     }
 
-    bilanRienAVérifier: (bilan: CLFBilan) => string;
-    bilanNbAVérifier: (bilan: CLFBilan) => string;
+    get nouveau_doc(): string {
+        return `${this.def.nouveau} ${this.def.doc}`
+    }
+    get nouveaux_docs(): string {
+        return `${this.def.nouveaux} ${this.def.docs}`
+    }
+    en_toutes_lettres: (nb: number) => string;
+    en_toutes_lettresMasculin(nb: number): string {
+        return TexteOutils.en_toutes_lettres(nb);
+    }
+    en_toutes_lettresFéminin(nb: number): string {
+        return TexteOutils.en_toutes_lettres(nb, { unitéFéminin: true });
+    }
+
+    bilanRienAVérifier: (bilan: CLFNbBons) => string;
+    bilanNbAVérifier: (bilan: CLFNbBons) => string;
 
     vérificationPossible = () => `La vérification puis l'enregistrement ${this.du_doc} peuvent commencer.`;
-    vérificationImpossible =  () => `Pour pouvoir vérifier puis enregistrer ${this.le_doc}, au moins un ${this.def.bon} doit `
+    vérificationImpossible = () => `Pour pouvoir vérifier puis enregistrer ${this.le_doc}, au moins un ${this.def.bon} doit `
         + `être préparé puis sélectionné.`
 
-    bilanNbAVérifierC(bilan: CLFBilan): string {
+    bilanNbAVérifierC(bilan: CLFNbBons): string {
         let nbDocs: string;
-        if (bilan.nbAPréparer === 1) {
+        if (bilan.total === 1) {
             nbDocs = `une ligne`;
         } else {
-            nbDocs = `${bilan.nbAPréparer} lignes`;
+            nbDocs = `${bilan.total} lignes`;
         }
         return `Il y a ${nbDocs} dans ${this.le_doc}.`;
     }
 
-    bilanRienAVérifierC(bilan: CLFBilan): string {
+    bilanRienAVérifierC(bilan: CLFNbBons): string {
         return `Il n'y a pas de lignes dans ${this.le_doc}`;
     }
 
-    bilanNbAVérifierLF(bilan: CLFBilan): string {
+    bilanNbAVérifierLF(bilan: CLFNbBons): string {
         let docsSélectionnés: string;
-        if (bilan.nbSélectionnés === 1) {
+        if (bilan.sélectionnés === 1) {
             docsSélectionnés = `un ${this.def.bon} sélectionné`;
         } else {
-            docsSélectionnés = `${bilan.nbSélectionnés} ${this.def.bons} sélectionnés`;
+            docsSélectionnés = `${bilan.sélectionnés} ${this.def.bons} sélectionnés`;
         }
         return `Il y a ${docsSélectionnés} pour la préparation ${this.du_doc}.`;
     }
 
-    bilanRienAVérifierLF(bilan: CLFBilan): string {
-        if (bilan.nbPréparés === 0) {
+    bilanRienAVérifierLF(bilan: CLFNbBons): string {
+        if (bilan.préparés === 0) {
             return `Il n'y a pas de ${this.def.bons} prêts à être traités dans ${this.le_doc}.`;
         }
         return `Il n'y a pas de ${this.def.bons} sélectionnés pour la préparation ${this.du_doc}.`;
@@ -127,10 +130,10 @@ export class Textes {
 }
 
 export class CLFUtileTexte {
-    choixProduit: Textes;
-    commande: Textes;
-    livraison: Textes;
-    facture: Textes;
+    choixProduit: CLFTextes;
+    commande: CLFTextes;
+    livraison: CLFTextes;
+    facture: CLFTextes;
 
     constructor() {
         this.créeChoixProduit();
@@ -139,7 +142,7 @@ export class CLFUtileTexte {
         this.créeFacture();
     }
 
-    textes(type: TypeCLF): Textes {
+    textes(type: TypeCLF): CLFTextes {
         switch (type) {
             case 'commande':
                 return this.commande;
@@ -151,14 +154,14 @@ export class CLFUtileTexte {
     }
 
     private créeChoixProduit() {
-        this.choixProduit = new Textes();
+        this.choixProduit = new CLFTextes();
         const champ = new CLFUtileTexteChamp();
         champ.typeCommande = 'Se commande';
         this.choixProduit.champ = champ;
     }
 
     private créeCommande() {
-        const textes = new Textes();
+        const textes = new CLFTextes();
         const champ = new CLFUtileTexteChamp();
         champ.typeCommande = 'Unité';
         champ.typeMesure = 'U. V.';
@@ -166,6 +169,7 @@ export class CLFUtileTexte {
         textes.champ = champ;
         textes.def = {
             doc: 'bon de commande',
+            docs: 'bons de commande',
             Doc: 'Bon de commande',
             le: 'le',
             Le: 'Le',
@@ -177,8 +181,14 @@ export class CLFUtileTexte {
             il: 'il',
             Il: 'Il',
             dernier: 'dernier',
-            action: 'commande'
+            prochain: 'prochain',
+            action: 'commande',
+            adressé: 'adressé',
+            enregistré: 'enregistré',
+            nouveau: 'nouveau',
+            nouveaux: 'nouveaux',
         };
+        textes.en_toutes_lettres = textes.en_toutes_lettresMasculin;
         textes.synthèse = this.livraison;
         textes.bilanRienAVérifier = textes.bilanRienAVérifierC;
         textes.bilanNbAVérifier = textes.bilanNbAVérifierC;
@@ -186,7 +196,7 @@ export class CLFUtileTexte {
     }
 
     private créeLivraison() {
-        const textes = new Textes();
+        const textes = new CLFTextes();
         const champ = new CLFUtileTexteChamp();
         champ.typeCommande = 'U. C.';
         champ.typeMesure = 'Unité';
@@ -199,6 +209,7 @@ export class CLFUtileTexte {
             Bons: 'Bons de commande',
             bons: 'bons de commande',
             doc: 'bon de livraison',
+            docs: 'bons de livraison',
             Doc: 'Bon de livraison',
             le: 'le',
             Le: 'Le',
@@ -210,10 +221,16 @@ export class CLFUtileTexte {
             il: 'il',
             Il: 'Il',
             dernier: 'dernier',
+            prochain: 'prochain',
             action: 'livraison',
             faire: 'livrer',
             faite: 'commandée',
+            adressé: 'adressé',
+            enregistré: 'enregistré',
+            nouveau: 'nouveau',
+            nouveaux: 'nouveaux',
         };
+        textes.en_toutes_lettres = textes.en_toutes_lettresMasculin;
         textes.synthèse = this.facture;
         textes.bilanRienAVérifier = textes.bilanRienAVérifierLF;
         textes.bilanNbAVérifier = textes.bilanNbAVérifierLF;
@@ -221,7 +238,7 @@ export class CLFUtileTexte {
     }
 
     private créeFacture() {
-        const textes = new Textes();
+        const textes = new CLFTextes();
         const champ = new CLFUtileTexteChamp();
         champ.typeMesure = 'Unité';
         champ.source = 'Livré';
@@ -233,6 +250,7 @@ export class CLFUtileTexte {
             Bons: 'Bons de livraison',
             bons: 'bons de livraison',
             doc: 'facture',
+            docs: 'factures',
             Doc: 'Facture',
             le: 'la',
             Le: 'La',
@@ -244,12 +262,27 @@ export class CLFUtileTexte {
             il: 'elle',
             Il: 'Elle',
             dernier: 'dernière',
+            prochain: 'prochaine',
             action: 'facture',
             faire: 'facturer',
-            faite: 'livrées',
+            faite: 'livrée',
+            adressé: 'adressée',
+            enregistré: 'enregistrée',
+            nouveau: 'nouvelle',
+            nouveaux: 'nouvelles',
         };
+        textes.en_toutes_lettres = textes.en_toutes_lettresFéminin;
         textes.bilanRienAVérifier = textes.bilanRienAVérifierLF;
         textes.bilanNbAVérifier = textes.bilanNbAVérifierLF;
         this.facture = textes;
+    }
+
+    listeNos(docs: CLFDoc[]): string {
+        const nos: number[] = docs.map(d => d.no);
+        if (nos.length === 1) {
+            return '' + nos[0];
+        }
+        const dernier = nos.pop();
+        return TexteOutils.joint(docs.map(d => d.no), ', ', true);
     }
 }

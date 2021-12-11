@@ -1,5 +1,5 @@
 import {
-    Component, OnInit, ViewChild, AfterViewInit, ElementRef
+    Component, OnInit, ViewChild, AfterViewInit, ElementRef, ViewEncapsulation
 } from '@angular/core';
 import { KfComposantComponent } from '../../kf-composant/kf-composant.component';
 import { KfComposant } from '../../kf-composant/kf-composant';
@@ -10,7 +10,8 @@ import { KfNgbDropdown } from './kf-ngb-dropdown';
 @Component({
     selector: 'app-kf-ngb-dropdown',
     templateUrl: './kf-ngb-dropdown.component.html',
-    styleUrls: ['../../kf-composants.scss']
+    styleUrls: ['../../kf-composants.scss'],
+    encapsulation: ViewEncapsulation.None
 })
 export class KfNgbDropdownComponent extends KfComposantComponent implements OnInit, AfterViewInit {
     @ViewChild('htmlElement', {static: false}) htmlElementRef: ElementRef;

@@ -79,7 +79,7 @@ export abstract class FormulaireAEtapesComponent extends FormulaireBaseComponent
         if (!e) {
             e = this.etapes[0];
         }
-        return this.construitUrl(e.pageDef.urlSegment);
+        return this.construitUrl(e.pageDef.path);
     }
 
     choisie(etape: EtapeDeFormulaire): boolean {

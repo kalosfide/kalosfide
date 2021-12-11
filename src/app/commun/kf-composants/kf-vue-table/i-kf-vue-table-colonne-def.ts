@@ -4,6 +4,7 @@ import { KfStringDef } from '../kf-partages/kf-string-def';
 import { IKfVueTableBilanDef } from './i-kf-vue-table-bilan-def';
 import { KfVueTableCelluleDef } from './i-kf-vue-table-cellule-def';
 import { IKfVueTableEnTeteDef } from './i-kf-vue-table-en-tete-def';
+import { KfVueTableCellule } from './kf-vue-table-cellule';
 
 export interface IKfVueTableColonneDef<T> {
     nom: string;
@@ -19,6 +20,16 @@ export interface IKfVueTableColonneDef<T> {
     créeContenu: (item: T) => KfVueTableCelluleDef;
 
     /**
+     * Si présent, itemRéférenceLigne doit être présent dans le IKfVueTableDef<T> pour que l'item puisse avoir une référence à
+     * la ligne.
+     * Si présent et égal à 'rafraichit', l'appel à quandItemModifié d'une ligne déclenche le rafraichissement de la cellule de
+     * cette ligne et cette colonne: son contenu est recalculé.
+     * Si présent et égal à une fonction, l'appel à quandItemModifié d'une ligne déclenche l'appel de cette fonction pour la cellule de
+     * cette ligne et cette colonne.
+     */
+    quandItemModifié?: 'rafraichit' | ((cellule: KfVueTableCellule<T>) => void);
+
+    /**
      * Retourne -1 si t1 est avant t2, 1 si t1 est après t2, 0 sinon
      * Présent pour associer un tri à la colonne
      */
@@ -30,9 +41,9 @@ export interface IKfVueTableColonneDef<T> {
     nePasAfficherTriSi?: ValeurEtObservable<boolean>;
 
     /**
-     * Liste des définitions de classes à ajouter à l'élément td associé à un item
+     * Liste des définitions de classes à ajouter à l'élément td de la cellule d'un item
      */
-    classesItem?: (string | ((t: T) => string) | KfNgClasseDefDe<T>)[];
+    classesTd?: (string | ((t: T) => string) | KfNgClasseDefDe<T>)[];
 
     /**
      * texte ou composant à afficher dans la ligne de bilan
@@ -61,4 +72,9 @@ export interface IKfVueTableColonneDef<T> {
      * Si présent dans une colonne, le style table-layout: fixed est appliqué à la table.
      */
     classesCol?: (KfNgClasseDef | KfStringDef)[];
+
+    /**
+     * Si présent un élément div est ajouté autour du contenu des cellules du corps de la colonne et ces classes lui sont appliquées.
+     */
+     classesDiv?: (KfNgClasseDef | KfStringDef)[];
 }

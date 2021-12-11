@@ -1,21 +1,49 @@
 import { KeyUidRno } from '../../commun/data-par-key/key-uid-rno/key-uid-rno';
-import { IdEtatSite } from '../etat-site';
-import { IRoleData } from '../role/role';
+import { ApiDoc } from '../c-l-f/api-doc';
+import { IRoleData, IRoleEtat } from '../role/role';
+import { SiteBilan } from './site-bilan';
 
+/**
+ * Contient url et titre
+ */
 export interface ISiteData {
     url: string;
     titre: string;
 }
 
-export class Site extends KeyUidRno implements ISiteData, IRoleData {
-    url: string;
-    titre: string;
+/**
+ * Contient ouvert et dateCatalogue
+ */
+export interface ISiteEtat {
+    ouvert: boolean;
+    dateCatalogue: Date;
+}
+
+export class SiteFournisseur implements IRoleData {
     nom: string;
     adresse: string;
     ville: string;
-    nbProduits?: number;
-    nbClients?: number;
-    etat: IdEtatSite;
+}
+
+export class Site extends KeyUidRno implements ISiteData, ISiteEtat {
+    url: string;
+    titre: string;
+    ouvert: boolean;
+    dateCatalogue: Date;
+
+    /**
+     * Présent si l'utilisateur est le fournisseur du site ou l'administrateur.
+     */
+     bilan: SiteBilan;
+     /**
+      * Présent si l'utilisateur est un client du site ou l'administrateur.
+      */
+     fournisseur: SiteFournisseur;
+    /**
+     * Documents enregistrés depuis la dernière déconnection.
+     * Présent si l'utilisateur est un client du site ou le fournisseur et s'est déconnecté à la fin de sa session précédente.
+     */
+     nouveauxDocs: ApiDoc[];
 
     constructor(site?: Site) {
         super();
@@ -29,25 +57,17 @@ export class Site extends KeyUidRno implements ISiteData, IRoleData {
         vers.titre = de.titre;
     }
 
-    static compare(site1: Site, site2: Site): boolean {
-        if (!site1) {
-            return !site2;
-        }
-        if (!site2) {
-            return false;
-        }
-        return site1.uid === site2.uid
-            && site1.rno === site2.rno
-            && site1.url === site2.url
-            && site1.titre === site2.titre
-            && site1.nom === site2.nom
-            && site1.nbProduits === site2.nbProduits
-            && site1.nbClients === site2.nbClients
-            && site1.etat === site2.etat;
+    static copieEtat(de: ISiteEtat, vers: ISiteEtat) {
+        vers.ouvert = de.ouvert;
+        vers.dateCatalogue = de.dateCatalogue;
     }
 
-    get ouvert(): boolean {
-        return this.etat === IdEtatSite.ouvert;
+    static ontMêmeData(isite1: ISiteData, isite2: ISiteData) {
+        return isite1.url === isite2.url && isite1.titre === isite2.titre;
+    }
+
+    static ontMêmeEtat(isite1: ISiteEtat, isite2: ISiteEtat) {
+        return isite1.ouvert === isite2.ouvert && isite1.dateCatalogue === isite2.dateCatalogue;
     }
 
     copie(site: Site) {
@@ -55,19 +75,9 @@ export class Site extends KeyUidRno implements ISiteData, IRoleData {
         this.rno = site.rno;
         this.url = site.url;
         this.titre = site.titre;
-        this.nom = site.nom;
-        this.adresse = site.adresse;
-        this.ville = site.ville;
-        this.nbProduits = site.nbProduits;
-        this.nbClients = site.nbClients;
-        this.etat = site.etat;
-    }
-    copieEtat(site: Site) {
-        this.etat = site.etat;
-    }
-
-    copieNbs(site: Site) {
-        this.nbProduits = site.nbProduits;
-        this.nbClients = site.nbClients;
+        this.fournisseur = site.fournisseur;
+        this.bilan = site.bilan;
+        this.ouvert = site.ouvert;
+        this.dateCatalogue = site.dateCatalogue;
     }
 }

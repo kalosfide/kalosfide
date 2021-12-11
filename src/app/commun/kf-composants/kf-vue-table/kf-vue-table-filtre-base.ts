@@ -18,6 +18,13 @@ export abstract class KfVueTableFiltreBase<T> implements IKfVueTableOutil<T> {
 
     abstract get composant(): KfComposant;
 
+    get valeur(): any {
+        return this.composant.gereValeur.valeur;
+    }
+    set valeur(valeur: any) {
+        this.composant.gereValeur.valeur = valeur;
+    }
+
     get filtreActif(): boolean {
         const valeur = this.composant.gereValeur.valeur;
         return valeur !== undefined && valeur !== null && valeur !== '';

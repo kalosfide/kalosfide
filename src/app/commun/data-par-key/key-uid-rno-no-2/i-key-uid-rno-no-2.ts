@@ -5,4 +5,5 @@ export interface IKeyUidRnoNo2 {
     uid2: string;
     rno2: number;
     no2: number;
+    date: Date;
 }

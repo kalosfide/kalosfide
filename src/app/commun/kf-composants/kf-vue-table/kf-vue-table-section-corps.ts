@@ -48,12 +48,16 @@ export class KfVueTableCorps<T> extends KfVueTableSectionBase<T> {
     }
 
     /**
-     * Initialise les lignes en triant les lignes de la vueTable et calcule leurs indexFiltré
+     * Initialise la liste des lignes en triant les lignes de la vueTable
      */
     fixeLignes() {
         this.pLignes = this.trie(this.pVueTable.lignes);
     }
 
+    /**
+     * Initialise la liste des lignes en triant les lignes de la vueTable.
+     * Fixe l'indexTriéFiltré des lignes qui passent les filtres.
+     */
     appliqueTri() {
         this.pLignes = this.trie(this.pVueTable.lignes);
         const lignesFiltréesTriées = this.lignes.filter(l => l.indexFiltré !== -1);
@@ -86,8 +90,20 @@ export class KfVueTableCorps<T> extends KfVueTableSectionBase<T> {
 
     supprimeLigne(ligne: KfVueTableLigne<T>) {
         this.pLignes = this.lignes.filter(l => l.index !== ligne.index);
+        let àActiver: KfVueTableLigne<T>;
+        // si la ligne supprimée faisait partie des lignes visibles
+        // (ce qui est le cas si le déclencheur de la suppression était dans une cellule de la ligne)
+        // il faut mettre à jour les indexFiltré des lignes suivantes
         if (ligne.indexFiltré !== -1) {
-            this.lignes.filter(l => l.indexFiltré > ligne.indexFiltré).forEach(l => l.indexFiltré--);
+            const triéesFiltréesAprés = this.lignes.filter(l => l.indexFiltré > ligne.indexFiltré)
+            if (triéesFiltréesAprés.length > 0) {
+                triéesFiltréesAprés.forEach(l => l.indexFiltré--);
+                àActiver = triéesFiltréesAprés[0];
+            } else {
+                if (ligne.indexFiltré > 0) {
+                    àActiver = this.lignes.find(l => l.indexFiltré === ligne.indexFiltré - 1);
+                }
+            }
         }
     }
 

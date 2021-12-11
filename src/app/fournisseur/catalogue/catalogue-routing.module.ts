@@ -26,11 +26,11 @@ const routes: Routes = [
         children: [
             {
                 path: '',
-                redirectTo: CataloguePages.produits.urlSegment,
+                redirectTo: CataloguePages.produits.path,
                 pathMatch: 'full'
             },
             {
-                path: CataloguePages.produits.urlSegment,
+                path: CataloguePages.produits.path,
                 data: {
                     pageDef: CataloguePages.produits,
                     estEnfantPathVide: true
@@ -38,7 +38,7 @@ const routes: Routes = [
                 loadChildren: () => import('./produits/produit.module').then(mod => mod.ProduitModule)
             },
             {
-                path: CataloguePages.categories.urlSegment,
+                path: CataloguePages.categories.path,
                 canActivate: [
                     ProduitSitePasCatalogueGarde,
                 ],

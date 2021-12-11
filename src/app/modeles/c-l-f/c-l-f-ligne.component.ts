@@ -2,7 +2,6 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 
 import { ActivatedRoute, RouterStateSnapshot } from '@angular/router';
 import { Site } from '../site/site';
-import { Identifiant } from 'src/app/securite/identifiant';
 import { Observable } from 'rxjs';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { Produit } from '../catalogue/produit';
@@ -29,7 +28,6 @@ import { CLFDoc } from './c-l-f-doc';
 export abstract class CLFLigneAjouteComponent extends PageBaseComponent implements OnInit, OnDestroy, IDataComponent {
 
     site: Site;
-    identifiant: Identifiant;
 
     private pLigne: CLFLigne;
 
@@ -139,12 +137,11 @@ export abstract class CLFLigneAjouteComponent extends PageBaseComponent implemen
     }
 
     protected initialiseUtile() {
-        this.service.utile.url.fixeRouteDoc(this.ligne.parent);
+        this.service.utile.url.fixeRouteBon(this.ligne.parent);
     }
 
     ngOnInit() {
-        this.site = this.service.navigation.litSiteEnCours();
-        this.identifiant = this.service.identification.litIdentifiant();
+        this.site = this.service.litSiteEnCours();
 
         this.subscriptions.push(this.route.data.subscribe(
             data => {

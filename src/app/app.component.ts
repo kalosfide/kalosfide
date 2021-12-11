@@ -9,7 +9,6 @@ import { TraiteKeydownService } from './commun/traite-keydown/traite-keydown.ser
 export class AppComponent implements OnInit {
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {
-        console.log('keydown ')
         if (this.composantService.traiteToucheEnfoncée(event)) {
             event.preventDefault();
         }

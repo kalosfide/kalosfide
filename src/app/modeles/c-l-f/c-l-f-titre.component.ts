@@ -10,7 +10,6 @@ import { CLFService } from './c-l-f.service';
 export abstract class CLFTitreComponent extends PageBaseComponent implements OnInit {
     estClient: 'client';
 
-    niveauTitre = 0;
 
     protected contenuAidePage: () => KfComposant[];
 
@@ -18,6 +17,7 @@ export abstract class CLFTitreComponent extends PageBaseComponent implements OnI
         protected service: CLFService,
     ) {
         super();
+        this.niveauTitre = 0;
     }
 
     créeBarreTitre = (): IBarreTitre => {
@@ -35,18 +35,18 @@ export abstract class CLFTitreComponent extends PageBaseComponent implements OnI
 
     ngOnInit() {
         this.créeTitrePage();
-        this.barre.site = this.service.navigation.litSiteEnCours();
+        this.barre.site = this.service.litSiteEnCours();
         this.barre.rafraichit();
 
         this.subscriptions.push(
             this.service.modeActionIO.observable.subscribe(
                 () => {
-                    this.barre.site = this.service.navigation.litSiteEnCours();
+                    this.barre.site = this.service.litSiteEnCours();
                     this.barre.rafraichit();
                 }),
             this.service.modeTableIO.observable.subscribe(
                 () => {
-                    this.barre.site = this.service.navigation.litSiteEnCours();
+                    this.barre.site = this.service.litSiteEnCours();
                     this.barre.rafraichit();
                 }),
         );

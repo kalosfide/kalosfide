@@ -9,7 +9,6 @@ import { ProduitIndexComponent } from './produit-index.component';
 import { ProduitEditeComponent } from './produit-edite.component';
 import { ProduitAjouteComponent } from './produit-ajoute.component';
 import { ProduitResolverService } from '../../../modeles/catalogue/produit-resolver.service';
-import { ProduitSiteCatalogueGarde } from './produit-site-catalogue-garde';
 import { ProduitSitePasCatalogueGarde } from './produit-site-pas-catalogue-garde';
 
 @NgModule({
@@ -26,7 +25,6 @@ import { ProduitSitePasCatalogueGarde } from './produit-site-pas-catalogue-garde
     ],
     providers: [
         ProduitResolverService,
-        ProduitSiteCatalogueGarde,
         ProduitSitePasCatalogueGarde,
     ],
 })

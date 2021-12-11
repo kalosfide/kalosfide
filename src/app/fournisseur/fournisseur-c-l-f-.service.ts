@@ -7,12 +7,15 @@ import { ClientService } from 'src/app/modeles/client/client.service';
 import { CLFService } from 'src/app/modeles/c-l-f/c-l-f.service';
 import { Observable, of } from 'rxjs';
 import { CLFDocs } from '../modeles/c-l-f/c-l-f-docs';
-import { CLFFiltre } from '../modeles/c-l-f/c-l-f-filtre';
 import { TypeCLF } from '../modeles/c-l-f/c-l-f-type';
-import { concatMap, mergeMap, tap } from 'rxjs/operators';
+import { concatMap, map, mergeMap, tap } from 'rxjs/operators';
 import { IKeyUidRno } from '../commun/data-par-key/key-uid-rno/i-key-uid-rno';
 import { KeyUidRno } from '../commun/data-par-key/key-uid-rno/key-uid-rno';
 import { Catalogue } from '../modeles/catalogue/catalogue';
+import { ApiClientBilanDocs, CLFClientBilanDocs } from '../modeles/c-l-f/c-l-f-bilan-docs';
+import { ValeurEtObservable } from '../commun/outils/valeur-et-observable';
+import { Client } from '../modeles/client/client';
+import { ApiDocs, ApiDocsAvecTarif } from '../modeles/c-l-f/api-docs';
 
 @Injectable({
     providedIn: 'root'
@@ -29,14 +32,34 @@ export class FournisseurCLFService extends CLFService {
     ) {
         super('CLFFournisseur', catalogueService, stockageService, clientService, apiRequeteService);
         this.utile.utilisateurEstLeClient = false;
+        this.utile.url.fixeRoutesDocument();
+        this.clientEnCoursIo = ValeurEtObservable.nouveau<Client>(null);
     }
 
     /**
-     * Fixe le champ clients du CLFDocs émis par l'Observable
+     * Le ApiDocs retourné par l'Api contient les listes des résumés des bons envoyés et sans synthèse de tous les clients.
+     * Le CLFDocs retourné contient les Client de tous les clients.
+     * Pas stocké.
+     * @param type type du document de synthèse
      */
-    private _fixeClients$(clfDocs$: Observable<CLFDocs>): Observable<CLFDocs> {
-        clfDocs$ = clfDocs$.pipe(
-            tap(clfDocs => clfDocs.clients = this.clientService.litClients()),
+    clientsAvecRésumésBons(type: TypeCLF): Observable<CLFDocs> {
+        const action = ApiAction.docCLF.clients;
+        const site = this.litSiteEnCours();
+        const params: { [param: string]: string } = {
+            uid: site.uid,
+            rno: '' + site.rno,
+        };
+
+        return this.lectureObs<ApiDocs>({
+            demandeApi: () => this.get<ApiDocs>(this.controller(type), action, params),
+        }).pipe(
+            map(apiDocs => {
+                const clfDocs = new CLFDocs();
+                clfDocs.site = site;
+                clfDocs.type = type;
+                clfDocs.apiDocs = apiDocs.apiDocs;
+                return clfDocs;
+            }),
             concatMap(clfDocs => {
                 return this.clientService.clients$().pipe(
                     mergeMap(clients => {
@@ -45,49 +68,12 @@ export class FournisseurCLFService extends CLFService {
                     })
                 );
             })
-        );
-        return clfDocs$;
-    }
-
-    /**
-     * Le CLFDocs lu dans l'Api contient les listes des résumés des documents de tous les clients avec leur type.
-     * Le CLFDocs retourné contient les Client de tous les clients.
-     * Pas stocké.
-     */
-    documents(): Observable<CLFDocs> {
-        const site = this.navigation.litSiteEnCours();
-        if (!this.pFiltre || this.pFiltre.uid !== site.uid || this.pFiltre.rno !== site.rno) {
-            this.pFiltre = new CLFFiltre(site);
-        }
-        const controller = ApiController.document;
-        const action = ApiAction.document.clients;
-        let clfDocs$ = this._clfDocs$(site, controller, action, this.pFiltre.créeParams());
-        clfDocs$ = this._fixeClients$(clfDocs$);
-        return clfDocs$;
-    }
-
-
-    /**
-     * Le CLFDocs lu dans l'Api contient les listes des résumés des bons envoyés et sans synthèse de tous les clients.
-     * Le CLFDocs retourné contient les Client de tous les clients.
-     * Pas stocké.
-     * @param type type du document de synthèse
-     */
-    clientsAvecRésumésBons(type: TypeCLF): Observable<CLFDocs> {
-        const action = ApiAction.docCLF.clients;
-        const site = this.navigation.litSiteEnCours();
-        const params: { [param: string]: string } = {
-            uid: site.uid,
-            rno: '' + site.rno,
-        };
-        let clfDocs$ = this._clfDocs$(site, this.controller(type), action, params);
-        clfDocs$ = this._fixeClients$(clfDocs$);
-        return clfDocs$.pipe(tap(clfDocs => clfDocs.type = type));
+        );;
     }
 
     /**
      * Pour le fournisseur.
-     * Le CLFDocs lu dans l'Api contient les documents envoyés et sans synthèse du client avec les lignes.
+     * Le CLFDocs retourné par l'Api contient les documents envoyés et sans synthèse du client avec les lignes.
      * Le CLFDocs retourné contient le Client du client.
      * Le CLFDocs retourné contient le catalogue à appliquer.
      * Stocké.
@@ -96,39 +82,41 @@ export class FournisseurCLFService extends CLFService {
      */
     clientAvecBons(keyClient: IKeyUidRno, type: TypeCLF): Observable<CLFDocs> {
         const stock = this.litStockSiExistant();
-        const site = this.navigation.litSiteEnCours();
-        let clfDocs$: Observable<CLFDocs>;
-        if (!stock
-            || stock.type !== type
-            || !KeyUidRno.compareKey(stock.keyClient, keyClient) // client changé
+        if (stock // le stock existe
+            && stock.type === type // type inchangé
+            && KeyUidRno.compareKey(stock.keyClient, keyClient) // client inchangé
         ) {
-            const action = ApiAction.docCLF.client;
-            const params: { [param: string]: string } = {
-                uid: keyClient.uid,
-                rno: '' + keyClient.rno,
-            };
-            clfDocs$ = this._clfDocs$(site, this.controller(type), action, params).pipe(
-                concatMap(clfDocs => {
-                    clfDocs.type = type;
-                    return this.clientService.client$(keyClient).pipe(
-                        mergeMap(client => {
-                            clfDocs.client = client;
-                            return of(clfDocs);
-                        })
-                    );
-                })
-            );
-        } else {
-            clfDocs$ = of(stock);
+            return of(stock);
         }
-
-        clfDocs$ = clfDocs$.pipe(
-            concatMap(clfDocs => {
+        const site = this.litSiteEnCours();
+        let clfDocs$: Observable<CLFDocs>;
+        const params: { [param: string]: string } = {
+            uid: keyClient.uid,
+            rno: '' + keyClient.rno,
+        };
+        clfDocs$ = this.lectureObs<ApiDocsAvecTarif>({
+            demandeApi: () => this.get<ApiDocsAvecTarif>(this.controller(type), ApiAction.docCLF.client, params),
+        }).pipe(
+            map(apiDocs => {
+                const clfDocs = new CLFDocs();
+                clfDocs.type = type;
                 clfDocs.site = site;
-                const tarifs = clfDocs.documents.filter(d => !!d.tarif).map(d => d.tarif);
-                return this.catalogueService.disponiblesAvecPrixDatés(clfDocs.site, tarifs).pipe(
+                clfDocs.apiDocs = apiDocs.apiDocs;
+                clfDocs.tarif = apiDocs.tarif;
+                return clfDocs;
+            }),
+            concatMap(clfDocs => {
+                return this.catalogueService.catalogue$().pipe(
                     mergeMap((catalogue?: Catalogue) => {
-                        clfDocs.catalogue = catalogue;
+                        clfDocs.fixeCatalogue(catalogue);
+                        return of(clfDocs);
+                    })
+                );
+            }),
+            concatMap(clfDocs => {
+                return this.clientService.client$(keyClient).pipe(
+                    mergeMap(client => {
+                        clfDocs.client = client;
                         this.fixeStock(clfDocs);
                         return of(clfDocs);
                     })
@@ -138,4 +126,31 @@ export class FournisseurCLFService extends CLFService {
 
         return clfDocs$;
     }
+
+    /**
+     * Contextualise si besoin les paramétres d'une requête.
+     * L'utilisateur est le fournisseur, on ne fait rien.
+     * @param params paramétres de la requête
+     * @returns params inchangé
+     */
+    protected paramsAvecContexte(params: { [param: string]: string }): { [param: string]: string } {
+        return params;
+    }
+
+    /**
+     * Retourne la liste par client des bilans (nombre et total des montants) des documents par type.
+     */
+    public clientsAvecBilanDocs(): Observable<CLFClientBilanDocs[]> {
+        const site = this.litSiteEnCours();
+        const controller = ApiController.document;
+        const action = ApiAction.document.bilans;
+        return this.lectureObs<ApiClientBilanDocs[]>({
+            demandeApi: () => this.get<ApiClientBilanDocs>(controller, action, KeyUidRno.créeParams(site)),
+        }).pipe(
+            concatMap(apiClientsBilans => this.clientService.clients$().pipe(
+                map(clients => apiClientsBilans.map(apiClientBilan => new CLFClientBilanDocs(clients, apiClientBilan)))
+            ))
+        );
+    }
+
 }

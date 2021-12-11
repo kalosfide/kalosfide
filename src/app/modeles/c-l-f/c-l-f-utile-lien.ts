@@ -34,24 +34,24 @@ export class CLFUtileLien extends DataUtileLien {
     }
 
     /**
-     * Route: (livraison ou facture)/client/:[nomParamKeyClient]
+     * Route: (livraison ou facture)/client/:key
      * Lien vers la page titre contenant toutes les pages d'édition d'un document de synthèse.
      * @param clfDocs contient le client et ses documents à synthétiser et s'il n'y en a pas la dernière synthèse.
      */
-    client(clfDocs: CLFDocs): KfLien {
-        return Fabrique.lien.bouton(this.def('client', this.url.client(clfDocs), Fabrique.contenu.choisit));
+    client(client: Client): KfLien {
+        return Fabrique.lien.bouton(this.def('client', this.url.client(client), Fabrique.contenu.choisit()));
     }
 
     /**
-     * Route: commande/bon ou (livraison ou facture)/client/:[nomParamKeyClient]/bon/:[nomParamNoDoc]
+     * Route: commande/bon ou (livraison ou facture)/client/:key/bon/:[NomParam.noDoc]
      * Lien vers la page titre contenant toutes les pages d'édition d'un document.
      */
     bon(clfDoc: CLFDoc): KfLien {
-        return Fabrique.lien.bouton(this.def('bon', this.url.bon(clfDoc), Fabrique.contenu.edite));
+        return Fabrique.lien.bouton(this.def('bon', this.url.bon(clfDoc), Fabrique.contenu.édite()));
     }
 
     /**
-     * Route: (livraison ou facture)/client/:[nomParamKeyClient]/bons
+     * Route: (livraison ou facture)/client/:key/bons
      * avec le no du bon en fragment
      * @param clfDoc bon qui est édité
      */
@@ -68,7 +68,7 @@ export class CLFUtileLien extends DataUtileLien {
             urlDef: this.url.retourDeSitePasOuvert(),
             contenu: { texte: this.utile.texte.commande.def.Doc }
         }
-        return Fabrique.lien.enLigne(def, 'dansAlerte');
+        return Fabrique.lien.dansAlerte(Fabrique.lien.enLigne(def));
     }
 
     /**
@@ -78,16 +78,13 @@ export class CLFUtileLien extends DataUtileLien {
     bonVirtuelDef(clfDocs: CLFDocs): ILienDef {
         return {
             urlDef: this.url.bonVirtuel(clfDocs.client),
-            contenu: { texte: `${clfDocs.documents.length === 0 ? 'Créer' : 'Ajouter'} un bon virtuel` }
+            contenu: { texte: `${clfDocs.apiDocs.length === 0 ? 'Créer' : 'Ajouter'} un bon virtuel` }
         };
     }
     bonVirtuel(client: Client): KfLien {
         return Fabrique.lien.ajoute(this.url.bonVirtuel(client), 'Ajouter un bon virtuel');
     }
 
-    choisit(ligne: CLFLigne): KfLien {
-        return Fabrique.lien.bouton(this.def('choisit', this.url.ajoute(ligne), Fabrique.contenu.choisit));
-    }
     defAjoute(): ILienDef {
         return { urlDef: this.url.choixProduit(), contenu: { texte: 'Ajouter une ligne' } };
     }
@@ -102,13 +99,19 @@ export class CLFUtileLien extends DataUtileLien {
     }
 
     supprime(ligne: CLFLigne): KfLien {
-        const iconeDef = ligne.client && ligne.parent.crééParLeClient ? Fabrique.contenu.annule : Fabrique.contenu.supprime;
+        const iconeDef = ligne.client && ligne.parent.crééParLeClient ? Fabrique.contenu.annule() : Fabrique.contenu.supprime();
         return Fabrique.lien.bouton(this.def('supprime', this.url.supprime(ligne), iconeDef));
     }
 
-    choixDocument(document: CLFDoc): KfLien {
-        return Fabrique.lien.bouton(this.def('', this.url.document(document), Fabrique.contenu.choisit));
+    /**
+     * Route: document/clients
+     * avec le texteKey du client en fragment.
+     * @param keyClient key du client
+     */
+     retourDUnClientVersBilansDocs(keyClient: IKeyUidRno): KfLien {
+        return Fabrique.lien.retour(this.url.retourDUnClientVersBilansDocs(keyClient), 'Autre client');
     }
+
     retourDeDocument(document?: CLFDoc): KfLien {
         return Fabrique.lien.retour(this.url.retourDeDocument(document));
     }

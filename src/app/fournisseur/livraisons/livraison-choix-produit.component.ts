@@ -17,5 +17,6 @@ export class LivraisonChoixProduitComponent extends CLFChoixProduitComponent imp
         protected service: FournisseurCLFService,
     ) {
         super(route, service);
+        this.fixeTypeDefRéglagesVueTable('livraison');
     }
 }

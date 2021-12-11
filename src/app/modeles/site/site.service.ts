@@ -1,15 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Site } from './site';
-import { Observable, of } from 'rxjs';
-import { ApiResult } from '../../api/api-results/api-result';
-import { ApiAction, ApiController } from '../../api/api-route';
+import { ApiController } from '../../api/api-route';
 import { KeyUidRnoService } from '../../commun/data-par-key/key-uid-rno/key-uid-rno.service';
-import { map, take } from 'rxjs/operators';
-import { ApiResult200Ok } from '../../api/api-results/api-result-200-ok';
 import { ApiRequêteService } from '../../api/api-requete.service';
-import { IdEtatSite } from '../etat-site';
-import { KeyUidRno } from '../../commun/data-par-key/key-uid-rno/key-uid-rno';
-import { SiteUtile } from './site-utile';
+import { StockageService } from 'src/app/services/stockage/stockage.service';
 
 @Injectable({
     providedIn: 'root'
@@ -19,57 +13,9 @@ export class SiteService extends KeyUidRnoService<Site> {
     controllerUrl = ApiController.site;
 
     constructor(
-        protected apiRequeteService: ApiRequêteService,
+        protected stockageService: StockageService,
+        protected apiRequeteService: ApiRequêteService
     ) {
-        super(apiRequeteService);
-        this.créeUtile();
-    }
-
-    protected _créeUtile() {
-        this.pUtile = new SiteUtile(this);
-    }
-
-    get utile(): SiteUtile {
-        return this.pUtile as SiteUtile;
-    }
-
-    public trouveParUrl(urlSite: string): Observable<Site> {
-        const identifiant = this.identification.litIdentifiant();
-        // si pas identifié error
-        // si pas dans les roles error
-        // si pas fournisseur doit toujours recharger
-        if (identifiant && identifiant.sites) {
-            const site: Site = identifiant.sites.find(s => s.url === urlSite);
-            if (site) {
-                return of(site);
-            }
-        }
-        const demandeApi = () => this.get<Site>(this.controllerUrl, ApiAction.site.trouveParUrl, urlSite);
-        return this.lectureObs<Site>({ demandeApi });
-    }
-
-    /**
-     * Lit dans l'Api l'état du site en cours et si changé, met à jour les stockage du site 
-     * @returns 
-     */
-    public litEtat(): Observable<IdEtatSite> {
-        const site = this.navigation.litSiteEnCours();
-        const demandeApi = () => this.get<Site>(this.controllerUrl, ApiAction.site.etat, KeyUidRno.créeParams(site));
-        return this.lectureObs<Site>({ demandeApi }).pipe(
-            map(s => {
-                if (site.etat !== s.etat) {
-                    site.etat = s.etat;
-                    this.navigation.fixeSiteEnCours(site);
-                    this.identification.fixeSiteIdentifiant(site);
-                }
-                return s.etat;
-            })
-        );
-    }
-
-    public changeEtatOk(site: Site, état: IdEtatSite) {
-        site.etat = état;
-        this.navigation.fixeSiteEnCours(site);
-        this.identification.fixeSiteIdentifiant(site);
+        super(stockageService, apiRequeteService);
     }
 }

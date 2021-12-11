@@ -1,7 +1,5 @@
 <ng-container *ngIf="!balise; else baliseTemplate">
-    <ng-container *ngIf="!texte.morceaux; else morceauxTemplate">
-        {{ texte.texte }}
-    </ng-container>
+    <ng-container *ngIf="!texte.morceaux; else morceauxTemplate">{{ texte.texte }}</ng-container>
     <ng-template #morceauxTemplate>
         <ng-container *ngFor="let morceau of texte.morceaux">
             <ng-container *ngIf="morceau.classe; else normalTemplate">
@@ -9,7 +7,6 @@
             </ng-container>
             <ng-template #normalTemplate>{{ morceau.texte }}</ng-template>
         </ng-container>
-        
     </ng-template>    
 </ng-container>
 <ng-template #baliseTemplate>

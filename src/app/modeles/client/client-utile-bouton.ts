@@ -10,7 +10,7 @@ import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { Invitation } from './invitation';
 import { Client } from './client';
 import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
-import { EtatClient } from './etat-client';
+import { IdEtatRole } from '../role/etat-role';
 import { KfstringDef, KfstringDefs } from 'src/app/commun/kf-composants/kf-elements/kf-texte/kf-textes';
 
 export class ClientUtileBouton extends DataUtileBouton {
@@ -31,13 +31,13 @@ export class ClientUtileBouton extends DataUtileBouton {
     }
 
     active(client: Client): KfBouton {
-        const contenu = Fabrique.contenu.activer;
+        const contenu = Fabrique.contenu.activer();
         const nom = { texte: client.nom, balise: KfTypeDeBaliseHTML.b };
         let titre = `Activation d'un compte client`;
         const étiquettes: KfEtiquette[] = [];
         let étiquette = Fabrique.ajouteEtiquetteP(étiquettes);
         étiquette.ajouteTextes(`Le compte `, nom);
-        if (client.etat === EtatClient.nouveau) {
+        if (client.etat === IdEtatRole.nouveau) {
             // le compte est d'état Nouveau et géré par le client
             const email = { texte: client.email, balise: KfTypeDeBaliseHTML.b };
             if (client.date0 !== client.dateEtat) {
@@ -68,13 +68,13 @@ export class ClientUtileBouton extends DataUtileBouton {
         };
         const bouton = Fabrique.bouton.attenteDeColonne('active' + KeyUidRno.texteDeKey(client),
             contenu, apiRequêteAction, this.utile.service,
-            Fabrique.confirmeModal(titre, étiquettes)
+            Fabrique.confirmeModal(titre, 'primary', étiquettes)
         );
         return bouton;
     }
 
     inactive(client: Client): KfBouton {
-        const contenu = Fabrique.contenu.fermer;
+        const contenu = Fabrique.contenu.fermer();
         const nom = { texte: client.nom, balise: KfTypeDeBaliseHTML.b };
         let titre = `Fermeture d'un compte client`;
         const étiquettes: KfEtiquette[] = [];
@@ -108,16 +108,16 @@ export class ClientUtileBouton extends DataUtileBouton {
         };
         const bouton = Fabrique.bouton.attenteDeColonne('active' + KeyUidRno.texteDeKey(client),
             contenu, apiRequêteAction, this.utile.service,
-            Fabrique.confirmeModal(titre, étiquettes)
+            Fabrique.confirmeModal(titre, 'warning', étiquettes)
         );
         return bouton;
     }
 
-    supprime(client: Client, rafraichitComponent: (rétabli?) => void): KfBouton {
+    supprime(client: Client, rafraichitComponent: (rétabli?: Client) => void): KfBouton {
         let titre = `Suppression d'un compte client`;
         let description: KfstringDef[];
         let action = ' va être supprimé.';
-        if (client.etat === EtatClient.nouveau) {
+        if (client.etat === IdEtatRole.nouveau) {
             // le compte est d'état Nouveau et géré par le client (faux)
             if (client.date0 !== client.dateEtat) {
                 // le compte existait avant d'être géré par le client (faux)
@@ -158,8 +158,8 @@ export class ClientUtileBouton extends DataUtileBouton {
             },
         };
         const bouton = Fabrique.bouton.attenteDeColonne('supprime' + KeyUidRno.texteDeKey(client),
-            Fabrique.contenu.supprime, apiRequêteAction, this.utile.service,
-            Fabrique.confirmeModal(titre, étiquettes)
+            Fabrique.contenu.supprime(), apiRequêteAction, this.utile.service,
+            Fabrique.confirmeModal(titre, 'danger', étiquettes)
         );
         return bouton;
     }
@@ -200,8 +200,8 @@ export class ClientUtileBouton extends DataUtileBouton {
             },
         };
         const bouton = Fabrique.bouton.attenteDeColonne('supprime' + invitation.email,
-            Fabrique.contenu.supprime, apiRequêteAction, this.utile.service,
-            Fabrique.confirmeModal(titre, [description])
+            Fabrique.contenu.supprime(), apiRequêteAction, this.utile.service,
+            Fabrique.confirmeModal(titre, 'warning', [description])
         );
         return bouton;
     }

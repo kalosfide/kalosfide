@@ -2,7 +2,7 @@ import { ClientUtile } from './client-utile';
 import { DataUtileColonne } from 'src/app/commun/data-par-key/data-utile-colonne';
 import { IKfVueTableColonneDef } from 'src/app/commun/kf-composants/kf-vue-table/i-kf-vue-table-colonne-def';
 import { Client } from './client';
-import { TexteEtatClient, EtatClient } from './etat-client';
+import { TexteEtatRole, IdEtatRole } from '../role/etat-role';
 import { Compare } from '../../commun/outils/tri';
 import { TexteOutils } from 'src/app/commun/outils/texte-outils';
 import { KfTexte } from 'src/app/commun/kf-composants/kf-elements/kf-texte/kf-texte';
@@ -52,12 +52,12 @@ export class ClientUtileColonne extends DataUtileColonne {
         return {
             nom: 'état',
             enTeteDef: { titreDef: 'Etat' },
-            créeContenu: (client: Client) => () => TexteEtatClient(client.etat),
+            créeContenu: (client: Client) => () => TexteEtatRole(client.etat),
             compare: Compare.enchaine(
-                Compare.texte((client: Client) => TexteEtatClient(client.etat)),
+                Compare.texte((client: Client) => TexteEtatRole(client.etat)),
                 Compare.date((client: Client) => client.dateEtat)
             ),
-            largeur: LargeurColonne.client_état
+            largeur: LargeurColonne.role_état
         };
     }
 
@@ -71,17 +71,17 @@ export class ClientUtileColonne extends DataUtileColonne {
         };
     }
 
-    invite(): IKfVueTableColonneDef<Client> {
+    email(): IKfVueTableColonneDef<Client> {
         return {
-            nom: 'invite',
-            enTeteDef: { titreDef: 'Invitation' },
+            nom: 'email',
+            enTeteDef: { titreDef: 'Email' },
             créeContenu: (client: Client) => {
                 if (client.email) {
                     const texte = new KfTexte('', client.email);
                     return texte;
                 }
-                const lien = client.invitation ? this.utile.lien.invité(client) : this.utile.lien.invite(client);
-                lien.inactivité = client.etat !== EtatClient.actif;
+                const lien = client.invitation ? this.utile.lien.invité(client) : this.utile.lien.inviter(client);
+                lien.inactivité = client.etat !== IdEtatRole.actif;
                 return lien;
             },
             largeur: LargeurColonne.client_compte,
@@ -102,13 +102,14 @@ export class ClientUtileColonne extends DataUtileColonne {
         return {
             nom: 'action1',
             créeContenu: (client: Client) => {
-                if (client.etat === EtatClient.nouveau) {
+                if (client.etat === IdEtatRole.nouveau) {
                     return this.utile.bouton.active(client);
                 }
                 const lien = this.utile.lien.edite(client);
-                lien.inactivité = !!client.email || client.etat !== EtatClient.actif;
+                lien.inactivité = !!client.email || client.etat !== IdEtatRole.actif;
                 return lien;
             },
+            classesCol: [KfBootstrap.classeTexte({ alignement: 'center' })],
             largeur: LargeurColonne.action,
             afficherSi: this.utile.conditionTable.edition,
         };
@@ -126,18 +127,19 @@ export class ClientUtileColonne extends DataUtileColonne {
             nom: 'action2',
             créeContenu: (client: Client) => {
                 switch (client.etat) {
-                    case EtatClient.nouveau:
+                    case IdEtatRole.nouveau:
                         return this.utile.bouton.supprime(client, rafraichitComponent);
-                    case EtatClient.actif:
+                    case IdEtatRole.actif:
                         if (!client.email && !client.avecDocuments) {
                             return this.utile.bouton.supprime(client, rafraichitComponent);
                         }
                         return this.utile.bouton.inactive(client);
-                    case EtatClient.inactif:
-                    case EtatClient.fermé:
+                    case IdEtatRole.inactif:
+                    case IdEtatRole.fermé:
                         return this.utile.bouton.active(client);
                 }
             },
+            classesCol: [KfBootstrap.classeTexte({ alignement: 'center' })],
             largeur: LargeurColonne.action,
             afficherSi: this.utile.conditionTable.edition,
         };
@@ -154,7 +156,7 @@ export class ClientUtileColonne extends DataUtileColonne {
 
     colonnes(): IKfVueTableColonneDef<Client>[] {
         return this.colonnesBase().concat([
-            this.invite(),
+            this.email(),
             this.action1(),
             this.action2(),
         ]);

@@ -282,7 +282,7 @@ export class KfVueTablePagination<T> implements IKfVueTablePagination {
 
     def: IKfVueTablePaginationDef;
     /**
-     * Nombre de lignes par page. Mis à jour quand la valeur de  change.
+     * Nombre de lignes par page. Mis à jour quand la valeur de choixNbParPage change.
      */
     nbParPage: number;
 
@@ -366,6 +366,13 @@ export class KfVueTablePagination<T> implements IKfVueTablePagination {
 
     initialise(vueTable: KfVueTable<T>) {
         this.vueTable = vueTable;
+    }
+
+    initialiseNbParPage(nbParPage: number) {
+        this.nbParPage = nbParPage;
+        if (this.choixNbParPage) {
+            this.choixNbParPage.liste.valeur = nbParPage;
+        }
     }
 
     private calculeNbPages(): number {

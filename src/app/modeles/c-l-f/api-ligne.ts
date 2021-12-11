@@ -1,11 +1,11 @@
 import { KeyUidRnoNo2 } from 'src/app/commun/data-par-key/key-uid-rno-no-2/key-uid-rno-no-2';
 
-export interface IApiLigneData {
+export interface IApiLigne {
 
     /**
      * Présent quand la ligne est dans une livraison ou une facture et provient d'une commande dont le tarif a changé
      */
-    date?: Date;
+    date: Date;
 
     /**
      * Présent quand la ligne est dans une commande ouverte ou en préparation
@@ -20,9 +20,9 @@ export interface IApiLigneData {
 }
 
 /**
- * Objet reçu
+ * Objet reçu et stocké dans une liste. Contient seulement les parties no2 et date de la key de la ligne.
  */
-export class ApiLigneData implements IApiLigneData {
+export class ApiLigne implements IApiLigne {
     /**
      * No du produit
      */
@@ -31,7 +31,7 @@ export class ApiLigneData implements IApiLigneData {
     /**
      * Présent quand la ligne est dans une livraison ou une facture et provient d'une commande dont le tarif a changé
      */
-    date?: Date;
+    date: Date;
 
     /**
      * Présent quand la ligne est dans une commande ouverte ou en préparation
@@ -46,14 +46,9 @@ export class ApiLigneData implements IApiLigneData {
 }
 
 /**
- * Objet à envoyer
+ * Objet à envoyer qui contient la key complète de la ligne
  */
-export class ApiLigne extends KeyUidRnoNo2 implements IApiLigneData {
-
-    /**
-     * Présent quand la ligne est dans une livraison ou une facture et provient d'une commande dont le tarif a changé
-     */
-    date?: Date;
+export class ApiLigneAEnvoyer extends KeyUidRnoNo2 implements IApiLigne {
 
     /**
      * Présent quand la ligne est dans une commande ouverte ou en préparation
@@ -66,7 +61,7 @@ export class ApiLigne extends KeyUidRnoNo2 implements IApiLigneData {
     quantité?: number;
     aFixer?: number;
 
-    static copieData(de: IApiLigneData, vers: IApiLigneData) {
+    static copieData(de: IApiLigne, vers: IApiLigne) {
         vers.typeCommande = de.typeCommande;
         vers.quantité = de.quantité;
         vers.aFixer = de.aFixer;

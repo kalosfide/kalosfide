@@ -5,6 +5,7 @@ import { DataService } from 'src/app/services/data.service';
 import { ApiController, ApiAction } from 'src/app/api/api-route';
 import { ApiResult } from 'src/app/api/api-results/api-result';
 import { ApiRequêteService } from '../api/api-requete.service';
+import { StockageService } from '../services/stockage/stockage.service';
 
 export class Peuple {
     peuple: boolean;
@@ -16,9 +17,10 @@ export class PeupleService extends DataService {
     controllerUrl = ApiController.peuple;
 
     constructor(
+        protected stockageService: StockageService,
         protected apiRequeteService: ApiRequêteService
     ) {
-        super(apiRequeteService);
+        super(stockageService, apiRequeteService);
     }
 
     estPeuplé(): Observable<ApiResult> {

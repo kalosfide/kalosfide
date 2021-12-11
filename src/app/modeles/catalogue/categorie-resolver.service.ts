@@ -8,7 +8,9 @@ import { mergeMap } from 'rxjs/operators';
 import { ApiResult404NotFound } from 'src/app/api/api-results/api-result-404-not-found';
 import { DataResolverService } from 'src/app/services/data-resolver.service';
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class CategorieResolverService extends DataResolverService implements Resolve<Categorie> {
 
     constructor(

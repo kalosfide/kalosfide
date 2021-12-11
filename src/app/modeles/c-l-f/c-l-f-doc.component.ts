@@ -37,6 +37,7 @@ import { CellDef } from 'jspdf-autotable';
 import { Role } from '../role/role';
 import { CLFDocs } from './c-l-f-docs';
 import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
+import { KfVueTableOutilBtnGroupe } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-outil-btn-group';
 
 @Component({ template: '' })
 export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> implements OnInit, OnDestroy, IDataComponent {
@@ -50,10 +51,15 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
         return `${this.pageDef.titre}${this.clfDoc ? ' n° ' + this.clfDoc.no : ''}`;
     }
 
-
     modeTableInitial: ModeTable;
 
+    outilAjoute: KfVueTableOutilBtnGroupe<CLFLigne>;
+
+    avecEtatPréparation: boolean;
+    rafraichitPréparation: () => void;
+
     étiquetteEnvoyé: KfEtiquette;
+    étiquetteLienDocument: KfEtiquette;
 
     afficheResultat: AfficheResultat;
 
@@ -157,59 +163,113 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
     private créeGroupePied() {
         const groupe = new KfGroupe('pied');
         const coût = LigneDocumentCoût.quantité().agrége(this.clfDoc.lignes);
-        const etiquette = new KfEtiquette('',
-            `${this.texteUtileDoc.Ce_doc} comporte ${TexteOutils.en_toutes_lettres(this.clfDoc.lignes.length, {
-                unitéFéminin: true,
-                unité: 'ligne',
-                unités: 'lignes',
-            })} pour un montant ${coût.complet
-                ? 'total de '
-                : 'supérieur à'} ${Fabrique.texte.eurosEnToutesLettres(coût.valeur)}.`
-        );
-        groupe.ajoute(etiquette);
+        let étiquette: KfEtiquette;
+        let texte: string;
+        étiquette = Fabrique.ajouteEtiquetteP();
+        texte = `${this.texteUtileDoc.Ce_doc} comporte ${TexteOutils.en_toutes_lettres(this.clfDoc.lignes.length, {
+            unitéFéminin: true,
+            unité: 'ligne',
+            unités: 'lignes',
+        })} pour un montant ${coût.complet
+            ? 'total de '
+            : 'supérieur à'} ${Fabrique.texte.eurosEnToutesLettres(coût.valeur)}.`;
+        étiquette.fixeTexte(texte);
+        groupe.ajoute(étiquette);
+        let nosSynthétisés: number[]
+        if (this.clfDoc.àSynthétiser) {
+            const bonsSaufVirtuel = this.clfDoc.àSynthétiser.filter(d => d.choisi && d.no !== 0);
+            if (bonsSaufVirtuel.length !== 0) {
+                nosSynthétisés = bonsSaufVirtuel.map(d => d.no);
+            }
+        } else {
+            const noBons = this.clfDoc.apiDoc.noBons
+            if (noBons && noBons.length > 0) {
+                nosSynthétisés = noBons;
+            }
+        }
+        if (nosSynthétisés) {
+            étiquette = Fabrique.ajouteEtiquetteP();
+            texte = `${this.texteUtileDoc.Ce_doc} `;
+            if (coût.valeur === 0) {
+                texte += `constate l'annulation `;
+                texte += nosSynthétisés.length === 1
+                    ? `du ${this.texteUtileBon.def.bon} `
+                    : `des ${this.texteUtileBon.def.bons} `;
+            } else {
+                texte += `répond `;
+                texte += nosSynthétisés.length === 1
+                    ? `au ${this.texteUtileBon.def.bon} `
+                    : `aux ${this.texteUtileBon.def.bons} `;
+            }
+            texte += `n° ${TexteOutils.joint(nosSynthétisés, ', ', true)}.`;
+            étiquette.fixeTexte(texte);
+            groupe.ajoute(étiquette);
+        }
+        if (this.clfDoc.estEnvoyé) { }
         return groupe;
     }
 
+    /**
+     * Supprime les objets correspondant à une ligne de la vueTable et du clfDoc aprés que la ligne a été supprimée de la bdd et du stock.
+     * Met à jour le clfDocs du clfDoc (inutile car le clfDoc n'utilise les lignes du clfDocs qu'à sa création).
+     * @param stock CLFDocs mis à jour mais pas encore stocké.
+     * @param index index commun des objets correspondant à la ligne dans toutes les listes contenant un objet correspondant à la ligne.
+     */
+    quandLigneSupprimée(stock: CLFDocs, index: number) {
+        this.vueTable.supprimeItem(index);
+        this.clfDoc.lignes.splice(index, 1);
+        this.clfDoc.apiDoc.lignes.splice(index, 1);
+        this.clfDoc.clfDocs = stock;
+        this.outilAjoute.bbtnGroup.nePasAfficher = false;
+    }
+
+    protected abstract créeColonneDefs(): IKfVueTableColonneDef<CLFLigne>[];
+
     créeGroupeTableDef(): IGroupeTableDef<CLFLigne> {
+        const identifiant = this.service.identification.litIdentifiant();
         const vueTableDef: IKfVueTableDef<CLFLigne> = {
-            colonnesDef: this.créeColonneDefs(),
+            colonnesDef: this.créeColonneDefs()
         };
         const outils = Fabrique.vueTable.outils<CLFLigne>();
         outils.ajoute(this.utile.outils.catégorie());
         outils.ajoute(this.utile.outils.produit());
+
+        // l'outil ajoute est ajouté si le document est un bon de commande non envoyé ou un bon virtuel
         if ((this.clfDoc.type === 'commande' && (this.clfDoc.no === 0 || !this.clfDoc.date)
             || (this.clfDoc.type === 'livraison' && this.clfDoc.no === 0))
         ) {
-            const outilAjoute = Fabrique.vueTable.outilAjoute(this.utile.lien.ajoute());
-            outilAjoute.bbtnGroup.afficherSi(this.utile.conditionTable.edition);
-            outils.ajoute(outilAjoute);
+            this.outilAjoute = Fabrique.vueTable.outilAjoute<CLFLigne>(this.utile.lien.ajoute());
+            this.outilAjoute.bbtnGroup.nePasAfficher = this.clfDoc.existe && this.clfDoc.clfDocs.catalogue.produits.length === this.clfDoc.lignes.length;
+            outils.ajoute(this.outilAjoute);
         }
         outils.nePasAfficherSi(this.utile.conditionTable.aperçu);
         vueTableDef.outils = outils;
-        vueTableDef.superGroupe = (ligne: CLFLigne) => {
-            if (!ligne.éditeur) {
-                ligne.créeEditeur(this);
-                ligne.éditeur.créeSuperGroupe();
-                if (ligne.éditeur.kfAFixer) {
-                    Fabrique.input.prépareSuitValeurEtFocus(
-                        ligne.éditeur.kfAFixer,
-                        this.service.apiRequêtefixeAFixer(ligne, this.superGroupe),
-                        this.service
-                    );
-                } else {
-                    [ligne.éditeur.kfQuantité, ligne.éditeur.kfTypeCommande].forEach(kf => {
-                        if (kf) {
-                            const apiRequêteAction = this.service.apiRequêteEditeLigne(ligne, this.superGroupe);
-                            Fabrique.input.prépareSuitValeurEtFocus(
-                                kf,
-                                apiRequêteAction,
-                                this.service);
-                        }
-                    });
+        if (this.service.modeAction === ModeAction.edite) {
+            vueTableDef.superGroupe = (ligne: CLFLigne) => {
+                if (!ligne.éditeur) {
+                    ligne.créeEditeur(this);
+                    ligne.éditeur.créeSuperGroupe();
+                    if (ligne.éditeur.kfAFixer) {
+                        Fabrique.input.prépareSuitValeurEtFocus(
+                            ligne.éditeur.kfAFixer,
+                            this.service.apiRequêtefixeAFixer(ligne),
+                            this.service
+                        );
+                    } else {
+                        [ligne.éditeur.kfQuantité, ligne.éditeur.kfTypeCommande].forEach(kf => {
+                            if (kf) {
+                                const apiRequêteAction = this.service.apiRequêteEditeLigne(ligne, this.superGroupe);
+                                Fabrique.input.prépareSuitValeurEtFocus(
+                                    kf,
+                                    apiRequêteAction,
+                                    this.service);
+                            }
+                        });
+                    }
                 }
-            }
-            return ligne.éditeur.superGroupe;
-        };
+                return ligne.éditeur.superGroupe;
+            };
+        }
         vueTableDef.id = (ligne: CLFLigne) => {
             return this.utile.url.id('' + ligne.produit.no);
         };
@@ -236,6 +296,31 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
             groupeTableDef.apresTable = this.créeGroupePied.bind(this);
         }
         return groupeTableDef;
+    }
+
+    private ajouteGroupeEtatPréparation() {
+        const groupe = new KfGroupe('pret');
+        const étiquette = new KfEtiquette('');
+        groupe.ajoute(étiquette);
+        this.superGroupe.ajoute(groupe);
+        this.rafraichitPréparation = () => {
+            const nbAPréparer = this.clfDoc.nbAPréparer;
+            const nbPréparés = this.clfDoc.nbPréparés;
+            const nbAnnulés = this.clfDoc.nbAnnulés;
+            if (nbAPréparer === nbPréparés) {
+                KfBootstrap.ajouteClasseAlerte(groupe, 'success');
+                étiquette.fixeContenus(
+                    `Toutes les lignes ${this.texteUtileDoc.du_doc} sont prêtes.`,
+                    this.utile.lien.retourDeBon(this.clfDoc)
+                );
+            } else {
+                KfBootstrap.ajouteClasseAlerte(groupe, 'warning');
+                const nbPasPréparés = nbAPréparer - nbPréparés;
+                étiquette.fixeContenus(
+                    `Il reste ${nbPasPréparés === 1 ? 'une ligne' : '' + nbPasPréparés + ' lignes'} à préparer`
+                );
+            }
+        }
     }
 
     private ajouteGroupeDétails() {
@@ -350,11 +435,8 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
         KfBootstrap.ajouteClasseAlerte(groupe, 'primary');
         const kfNom = Fabrique.input.texte('filename', 'Nom du fichier');
         Fabrique.formulaire.préparePourPage(kfNom);
-        const identifiant = this.service.identification.litIdentifiant();
-        const site = this.service.navigation.litSiteEnCours();
-        const role = identifiant.roleParUrl(site.url);
-        const estFournisseur = role.uid === site.uid && role.rno === site.rno;
-        const nom2 = estFournisseur ? this.clfDoc.client.nom : site.nom;
+        const role = this.service.identification.roleEnCours;
+        const nom2 = role.estFournisseur ? this.clfDoc.client.nom : role.site.fournisseur.nom;
         kfNom.valeur = Role.nomFichier(role, this.clfDoc.type, this.clfDoc.no, nom2);
         groupe.ajoute(kfNom);
         const def: IBoutonDef = {
@@ -369,19 +451,22 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
 
     private ajouteGroupeEtatDernierBon() {
         const groupe = new KfGroupe('');
+        const no_du_date = (no: number): string => {
+            return `n° ${no} du ${TexteOutils.date.en_chiffres(this.clfDoc.date)}`;
+        }
         groupe.ajouteClasse('alert alert-success');
         let etiquette: KfEtiquette;
         if (this.clfDoc.no === 0) {
             // bon virtuel: le modèle est la dernière synthèse
             etiquette = Fabrique.ajouteEtiquetteP();
             etiquette.ajouteTextes(
-                `${this.texteUtileDoc.Le_dernier_doc} à ${this.clfDoc.client} (${this.clfDoc.no_du_date}) comprenait les lignes ci-dessous.`
+                `${this.texteUtileDoc.Le_dernier_doc} à ${this.clfDoc.client.nom} (${no_du_date(this.clfDoc.apiDoc.noGroupe)}) comprenait les lignes ci-dessous.`
             );
             groupe.ajoute(etiquette);
         } else {
             etiquette = Fabrique.ajouteEtiquetteP();
             if (this.clfDoc.terminé) {
-                etiquette.ajouteTextes(`La commande ${this.clfDoc.no_du_date} a été `);
+                etiquette.ajouteTextes(`La commande ${no_du_date(this.clfDoc.no)} a été `);
                 if (this.clfDoc.annulé) {
                     etiquette.ajouteTextes(
                         {
@@ -393,7 +478,7 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
                 }
                 etiquette.ajouteTextes(` dans le bon de livraison n° ${this.clfDoc.apiDoc.noGroupe}. `);
             } else {
-                etiquette.fixeTexte(`Le bon de commande ${this.clfDoc.no_du_date} est en cours de préparation.`);
+                etiquette.fixeTexte(`Le bon de commande ${no_du_date(this.clfDoc.no)} est en cours de préparation.`);
             }
             groupe.ajoute(etiquette);
             etiquette = Fabrique.ajouteEtiquetteP();
@@ -446,7 +531,7 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
                 `Vous pouvez choisir que les lignes ${texteACopier} soient automatiquement copiées dans le ${texteACréer}`
                 + ` en cliquant sur Créer et copier.`);
             const btCopier = Fabrique.bouton.boutonAction('copier', 'Créer et copier',
-                this.service.apiRequêteCréeCopie(this.clfDoc.type, this.clfDoc.clfDocs.keyClient), this.service);
+                this.service.apiRequêteCréeCopie(this.clfDoc.type, this.clfDoc.client), this.service);
             boutons.push(btCopier);
         }
         const groupe = new GroupeBoutonsMessages('creer', { messages, boutons });
@@ -518,7 +603,7 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
             + `Pour le consulter, le télécharger, l'imprimer, suivez le lien ci-dessous.`);
 
         etiquette = Fabrique.ajouteEtiquetteP(messages);
-        etiquette.contenuPhrase.ajouteContenus(this.utile.lien.document(this.clfDoc));
+        this.étiquetteLienDocument = etiquette;
 
         if (this.clfDoc.type === 'commande') {
             etiquette = Fabrique.ajouteEtiquetteP(messages);
@@ -532,13 +617,14 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
         this.superGroupe.ajoute(groupe.groupe);
     }
 
-    rafraichitEtiquetteEnvoyé() {
+    rafraichitGroupeEnvoyé() {
         let texteNo = '';
         if (this.clfDoc.clfDocs.type !== 'commande') {
             texteNo = ` avec le n° ${this.clfDoc.no}`;
         }
         const texteDate = `${TexteOutils.date.en_chiffresHMin(this.clfDoc.date)}`;
-        this.étiquetteEnvoyé.fixeTexte(`${this.texteUtileDoc.Le_doc} a été enregistré${texteNo} et daté (${texteDate}).`);
+        this.étiquetteEnvoyé.fixeTexte(`${this.texteUtileDoc.Le_doc} a été enregistré${texteNo} et la date ${texteDate}.`);
+        this.étiquetteLienDocument.fixeContenus(this.utile.lien.document(this.clfDoc));
     }
 
     get bonCopiable(): boolean {
@@ -553,6 +639,9 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
         const mode = this.service.modeAction;
 
         if (mode === ModeAction.edite) {
+            if (this.avecEtatPréparation && !this.clfDoc.estVirtuel) {
+                this.ajouteGroupeEtatPréparation();
+            }
             this.ajouteGroupeDétails();
         }
 
@@ -566,7 +655,7 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
                 this.ajouteGroupeEtatDernierBon();
                 this.ajouteGroupeDétails();
                 if (this.clfDoc.no !== 0) {
-                    const dateCatalogue = new Date(this.clfDoc.clfDocs.catalogue.date);
+                    const dateCatalogue = new Date(this.service.identification.siteEnCours.dateCatalogue);
                     const date = new Date(this.clfDoc.date);
                     if (dateCatalogue > date) {
                         this.ajouteGroupeCatalogueChangé();
@@ -593,15 +682,9 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
         this.superGroupe.quandTousAjoutés();
     }
 
-    chargeStock(clfDoc: CLFDoc) {
-        this.clfDoc = clfDoc;
-    }
-
-    avantChargeData() {
-    }
-
     chargeData(data: Data) {
-        this.chargeStock(data.clfDoc);
+        this.clfDoc = data.clfDoc;
+        this.liste = this.clfDoc.lignes;
     }
 
     protected abstract get modeActionInitial(): ModeAction;
@@ -611,56 +694,39 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
         if (this.modeTableInitial) {
             this.service.changeModeTable(this.modeTableInitial);
         }
-        this.service.utile.url.fixeRouteDoc(this.clfDoc);
+        this.service.utile.url.fixeRouteBon(this.clfDoc);
     }
 
     private rafraichit() {
-        this.clfDoc.clfDocs.site = this.service.navigation.litSiteEnCours();
+        this.clfDoc.clfDocs.site = this.service.litSiteEnCours();
         const mode = this.service.modeAction;
         if (mode === ModeAction.envoyé) {
-            this.rafraichitEtiquetteEnvoyé();
+            this.rafraichitGroupeEnvoyé();
+        } else {
+            if (this.rafraichitPréparation) {
+                this.rafraichitPréparation();
+            }
         }
         if (this.barre) {
             this.barre.rafraichit();
-        } else {
-            console.log(this.pageDef);
         }
     }
 
     protected chargeGroupe() {
-        if (this.groupeTable) {
-        }
         this.groupeTable.etat.charge();
         if (this.clfDoc.lignes) {
             this.utile.outils.chargeCatégories(this.vueTable, this.clfDoc.clfDocs.catalogue.catégories);
-            this._chargeVueTable(this.clfDoc.lignes);
+            this._chargeVueTable(this.liste);
         }
         this.rafraichit();
     }
-
-    /**
-     * Retourne la fonction à exécuter quand la ligne a été supprimé et le stock mis à jour
-     * pour mettre à jour this.clfDoc et la vueTable
-     * @param ligne ligne supprimée de la bdd et du stock
-     */
-    quandLigneSupprimée(ligne: CLFLigne): ((stock: CLFDocs) => void) {
-        return (stock: CLFDocs) => {
-            let index = this.vueTable.lignes.findIndex(l => l.item.no2 === ligne.no2);
-            this.vueTable.supprimeItem(index);
-            index = this.clfDoc.lignes.findIndex(l => l.no2 === ligne.no2);
-            this.clfDoc.lignes.splice(index);
-            this.clfDoc.clfDocs = stock;
-        };
-    }
-
-    protected abstract créeColonneDefs(): IKfVueTableColonneDef<CLFLigne>[];
 
     protected aprèsChargeData() {
         this.subscriptions.push(
             this.service.modeActionIO.observable.subscribe(() => {
                 this.rafraichit();
             }),
-            this.service.clsBilanIO.observable.subscribe(() => {
+            this.service.clfBilanIO.observable.subscribe(() => {
                 this.rafraichit();
             })
         );
@@ -668,7 +734,6 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
 
     créePageTableDef(): IPageTableDef {
         return {
-            avantChargeData: () => this.avantChargeData(),
             chargeData: (data: Data) => this.chargeData(data),
             initialiseUtile: () => this.initialiseUtile(),
             créeSuperGroupe: () => this.créeSuperGroupe(),

@@ -20,6 +20,9 @@
         <app-kf-description *ngSwitchCase="type.description" [composant]="composant">
         </app-kf-description>
 
+        <app-kf-accordeon *ngSwitchCase="type.accordeon" [composant]="composant">
+        </app-kf-accordeon>
+
         <ng-container *ngSwitchDefault>
 
             <ng-container [ngSwitch]="composant.type">

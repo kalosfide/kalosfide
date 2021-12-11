@@ -1,105 +1,98 @@
 import { KfComposant } from '../kf-composant/kf-composant';
 import { KfGéreCss } from '../kf-partages/kf-gere-css';
-import { KfNgClasse, KfNgClasseDef } from '../kf-partages/kf-gere-css-classe';
+import { KfNgClasse } from '../kf-partages/kf-gere-css-classe';
 import { KfNgStyle } from '../kf-partages/kf-gere-css-style';
-import { KfStringDef } from '../kf-partages/kf-string-def';
+
+export class KfDescriptionItem extends KfGéreCss {
+    composant: KfComposant;
+    texte: string;
+
+    constructor(stringOucomposant: string | KfComposant) {
+        super();
+        if (typeof(stringOucomposant) === 'string') {
+            this.texte = stringOucomposant
+        } else {
+            this.composant = stringOucomposant;
+        }
+    }
+}
 
 export class KfDescription {
-    titre: KfComposant;
-    contenu: KfComposant;
-    private _géreCssTitre: KfGéreCss;
-    private _géreCssContenu: KfGéreCss;
+    /**
+     * Nom de la description
+     */
+    nom: string;
+    /**
+     * Contenus des éléments html dt
+     */
+    titres: KfDescriptionItem[];
+    /**
+     * Contenus des éléments html dd
+     */
+    details: KfDescriptionItem[];
+    /**
+     * Si présent, un élément html div contient les éléments html dt et dd
+     */
+    private _géreCssDiv: KfGéreCss;
 
-    constructor(titre: KfComposant, contenu: KfComposant) {
-        this.titre = titre;
-        this.contenu = contenu;
+    constructor(nom?: string) {
+        this.nom = nom;
+        this.titres = [];
+        this.details = [];
     }
 
-    get nePasAfficher(): boolean {
-        if (this._géreCssTitre) {
-            return this._géreCssTitre.nePasAfficher;
-        }
+    /**
+     * Ajoute un élément html div contenant les éléments html dt et dd
+     */
+    créeDiv() {
+        this._géreCssDiv = new KfGéreCss();
     }
-    set nePasAfficher(valeur: boolean) {
-        if (!this._géreCssTitre) {
-            this._géreCssTitre = new KfGéreCss();
-        }
-        this._géreCssTitre.nePasAfficher = valeur;
+ 
+    /**
+     * Ajoute un élément html div contenant les éléments html dt et dd
+     */
+    get dansDiv(): boolean {
+        return this._géreCssDiv !== undefined;
     }
-
-    ajouteClasseTitre(...classeDefs: (KfStringDef | KfNgClasseDef)[]) {
-        if (!this._géreCssTitre) {
-            this._géreCssTitre = new KfGéreCss();
-        }
-        this._géreCssTitre.ajouteClasse(...classeDefs);
-    }
-
-    supprimeClasseTitre(...classeDefs: KfStringDef[]) {
-        if (this._géreCssTitre) {
-            this._géreCssTitre.supprimeClasse(...classeDefs);
-        }
+   /**
+     * Gére le ccs d'un élément html div contenant les éléments html dt et dd.
+     * Doit être créé par la méthode dansDiv.
+     */
+    get géreCssDiv(): KfGéreCss {
+        return this._géreCssDiv;
     }
 
-    get classeTitre(): KfNgClasse {
-        if (this._géreCssTitre) {
-            return this._géreCssTitre.classe;
-        }
-    }
-
-    fixeStyleTitre(nom: string, valeur: KfStringDef, active?: () => boolean) {
-        if (!this._géreCssTitre) {
-            this._géreCssTitre = new KfGéreCss();
-        }
-        this._géreCssTitre.fixeStyleDef(nom, valeur, active);
-    }
-
-    supprimeStyleTitre(nom: string) {
-        if (this._géreCssTitre) {
-            this._géreCssTitre.supprimeStyleDef(nom);
+    get classeDiv(): KfNgClasse {
+        if (this._géreCssDiv) {
+            return this._géreCssDiv.classe;
         }
     }
 
-    get styleTitre(): KfNgStyle {
-        if (this._géreCssTitre) {
-            return this._géreCssTitre.style;
+    get styleDiv(): KfNgStyle {
+        if (this._géreCssDiv) {
+            return this._géreCssDiv.style;
         }
     }
 
-    ajouteClasseContenu(...classeDefs: (KfStringDef | KfNgClasseDef)[]) {
-        if (!this._géreCssContenu) {
-            this._géreCssContenu = new KfGéreCss();
-        }
-        this._géreCssContenu.ajouteClasse(...classeDefs);
+    /**
+     * Ajoute un élément html dt
+     * @param titre contenu de l'élément html à ajouter
+     * @returns un GéreCss de l'élément html ajouté
+     */
+    ajouteTitre(titre: string | KfComposant): KfDescriptionItem {
+        const item = new KfDescriptionItem(titre);
+        this.titres.push(item);
+        return item;
     }
 
-    supprimeClasseContenu(...classeDefs: KfStringDef[]) {
-        if (this._géreCssContenu) {
-            this._géreCssContenu.supprimeClasse(...classeDefs);
-        }
-    }
-
-    get classeContenu(): KfNgClasse {
-        if (this._géreCssContenu) {
-            return this._géreCssContenu.classe;
-        }
-    }
-
-    fixeStyleContenu(nom: string, valeur: KfStringDef, active?: () => boolean) {
-        if (!this._géreCssContenu) {
-            this._géreCssContenu = new KfGéreCss();
-        }
-        this._géreCssContenu.fixeStyleDef(nom, valeur, active);
-    }
-
-    supprimeStyleContenu(nom: string) {
-        if (this._géreCssContenu) {
-            this._géreCssContenu.supprimeStyleDef(nom);
-        }
-    }
-
-    get styleContenu(): KfNgStyle {
-        if (this._géreCssContenu) {
-            return this._géreCssContenu.style;
-        }
+    /**
+     * Ajoute un élément html dd
+     * @param détail contenu de l'élément html à ajouter
+     * @returns un GéreCss de l'élément html ajouté
+     */
+    ajouteDétail(détail: string | KfComposant): KfDescriptionItem {
+        const item = new KfDescriptionItem(détail);
+        this.details.push(item);
+        return item;
     }
 }

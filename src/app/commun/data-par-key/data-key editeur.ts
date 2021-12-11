@@ -33,10 +33,23 @@ export abstract class DataKeyEditeur<T extends IDataKey> {
 
     protected abstract créeKfDeKey(): void;
     abstract fixeKfKey(key: IDataKey): void;
+    abstract fixeNoDeAjout(key: T): void;
     protected abstract créeKfDeData(): void;
 
-    protected ajouteChamps(...champs: KfComposant[]) {
-        champs.forEach(c => this.kfDeData.push(c));
+    get valide(): boolean {
+        if (!this.kfDeData) {
+            return;
+        }
+        let valide: boolean;
+        for (const composant of this.kfDeData) {
+            if (composant.gereValeur) {
+                if (composant.gereValeur.invalide) {
+                    return false;
+                }
+                valide = true;
+            }
+        }
+        return valide;
     }
 
     private prepareGroupe() {

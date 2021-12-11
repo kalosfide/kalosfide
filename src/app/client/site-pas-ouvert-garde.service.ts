@@ -1,9 +1,10 @@
 import { Injectable } from "@angular/core";
-import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from "@angular/router";
+import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree } from "@angular/router";
 import { Observable } from "rxjs";
-import { IdEtatSite } from "../modeles/etat-site";
-import { SiteService } from "../modeles/site/site.service";
-import { ClientPages, ClientRoutes } from "./client-pages";
+import { Fabrique } from "../disposition/fabrique/fabrique";
+import { IdentificationService } from "../securite/identification.service";
+import { RouteurService } from "../services/routeur.service";
+import { ClientPages } from "./client-pages";
 
 /**
  * Lit dans le stock l'état du site et redirige vers la page accueil si le site n'est pas fermé
@@ -14,16 +15,16 @@ import { ClientPages, ClientRoutes } from "./client-pages";
 export class SitePasOuvertGardeService implements CanActivate {
 
     constructor(
-        private service: SiteService,
+        private identification: IdentificationService,
+        private routeur: RouteurService
     ) {
     }
 
-    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | boolean {
-        const site = this.service.navigation.litSiteEnCours();
-        if (site.etat === IdEtatSite.catalogue) {
+    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean | UrlTree> | boolean | UrlTree {
+        const site = this.identification.siteEnCours;
+        if (!site.ouvert) {
             return true;
         }
-        this.service.routeur.naviguePageDef(ClientPages.accueil, ClientRoutes, site.url);
-        return false;
+        return this.routeur.urlTreePageDef(ClientPages.accueil, Fabrique.url.appRouteur.client);
     }
 }

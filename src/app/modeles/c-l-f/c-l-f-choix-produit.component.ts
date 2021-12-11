@@ -13,7 +13,7 @@ import { CLFUtile } from './c-l-f-utile';
 import { RouteurService } from 'src/app/services/routeur.service';
 import { CLFDoc } from './c-l-f-doc';
 import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
-import { KfBBtnGroup } from 'src/app/commun/kf-composants/kf-b-btn-group/kf-b-btn-group';
+import { TypeCLF } from './c-l-f-type';
 
 @Component({ template: '' })
 export abstract class CLFChoixProduitComponent extends PageTableComponent<CLFLigne> implements OnInit, OnDestroy {
@@ -33,6 +33,10 @@ export abstract class CLFChoixProduitComponent extends PageTableComponent<CLFLig
         protected service: CLFService,
     ) {
         super(route, service);
+    }
+
+    protected fixeTypeDefRéglagesVueTable(type: TypeCLF) {
+        this.fixeDefRéglagesVueTable(`${type}.produits`, (l: CLFLigne) => l.no2);
     }
 
     get routeur(): RouteurService { return this.service.routeur; }
@@ -60,7 +64,7 @@ export abstract class CLFChoixProduitComponent extends PageTableComponent<CLFLig
             id: (ligne: CLFLigne) => {
                 return this.service.fragment(ligne);
             },
-            quandClic: { colonneDuClic: this._utile.nom.choisit }, // (ligne: CLFLigne) => (() => this.routeur.navigueUrlDef(this._utile.url.ajoute(ligne))).bind(this),
+            quandClic: (ligne: CLFLigne) => (() => this.routeur.navigueUrlDef(this._utile.url.ajoute(ligne))).bind(this),
             triInitial: { colonne: this._utile.nom.catégorie, direction: 'asc' },
             pagination: Fabrique.vueTable.pagination<CLFLigne>('produit')
         };
@@ -91,7 +95,7 @@ export abstract class CLFChoixProduitComponent extends PageTableComponent<CLFLig
             avantChargeData: () => this.avantChargeData(),
             chargeData: (data: Data) => this.chargeData(data),
             créeSuperGroupe: () => this.créeSuperGroupe(),
-            initialiseUtile: () => this.service.utile.url.fixeRouteDoc(this.clfDoc),
+            initialiseUtile: () => this.service.utile.url.fixeRouteBon(this.clfDoc),
             chargeGroupe: () => this.chargeGroupe(),
         };
     }

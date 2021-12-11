@@ -26,50 +26,14 @@ export class RetourEnHautComponent implements OnInit {
         }
     }
 
-    retourneEnHaut() {
-        let début: DOMHighResTimeStamp;
-        const départ = document.documentElement.scrollTop || document.body.scrollTop;
-        const date = (Date.now());
-        const duréeEnSecondes = .8;
-        let arithmétique: number;
-        let i = 0;
-        function prochain(timeStamp: DOMHighResTimeStamp, actuel: number): number {
-            let pas = actuel / 2;
-            if (pas < 10) {
-                pas = 10;
-            }
-            let nouveau: number;
-            nouveau = actuel - arithmétique;
-            nouveau = actuel - pas;
-            if (nouveau < 10) {
-                nouveau = 0;
-                console.log(date, date - (Date.now()));
-            }
-            console.log(i++, nouveau);
-            return nouveau;
-        }
-        function smoothscroll(timeStamp: DOMHighResTimeStamp) {
-            if (!début) {
-                début = timeStamp;
-                const nb = (duréeEnSecondes * 6); // 6 rafraichissements par seconde
-                arithmétique = départ / nb;
-                console.log(nb, arithmétique);
-            }
-            const actuel = document.documentElement.scrollTop || document.body.scrollTop;
-            if (actuel > 0) {
-                window.requestAnimationFrame(smoothscroll);
-                window.scrollTo(0, prochain(timeStamp, actuel));
-            }
-        }
-        window.requestAnimationFrame(smoothscroll);
-    }
-
     ngOnInit() {
         this.groupe = new KfGroupe('retour-en-haut');
         this.groupe.ajouteClasse('retour-en-haut', { nom: 'retour-en-haut-montre', active: () => this.windowScrolled });
         const def: IBoutonDef = {
             nom: 'retour-en-haut',
-            action: () => this.retourneEnHaut(),
+            action: () => {
+                window.scrollTo({top: 0, behavior: 'smooth'});
+            },
             contenu: {
                 icone: Fabrique.icone.retourEnHaut()
             },

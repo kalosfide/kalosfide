@@ -1,7 +1,6 @@
 import { OnInit, Component } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
-import { KfSuperGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-super-groupe';
 import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 import { KfInputTexte } from 'src/app/commun/kf-composants/kf-elements/kf-input/kf-input-texte';
 import { KfValidateurs } from 'src/app/commun/kf-composants/kf-partages/kf-validateur';
@@ -11,7 +10,6 @@ import { ComptePages } from '../compte-pages';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { ApiResult } from 'src/app/api/api-results/api-result';
 import { CompteService } from '../compte.service';
-import { IBarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',

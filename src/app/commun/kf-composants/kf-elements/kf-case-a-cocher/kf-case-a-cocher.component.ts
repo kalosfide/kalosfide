@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, ElementRef, ViewEncapsulation } from '@angular/core';
 import { KfComposantComponent } from '../../kf-composant/kf-composant.component';
 import { KfCaseACocher } from './kf-case-a-cocher';
 import { TraiteKeydownService } from '../../../traite-keydown/traite-keydown.service';
@@ -6,7 +6,8 @@ import { TraiteKeydownService } from '../../../traite-keydown/traite-keydown.ser
 @Component({
     selector: 'app-kf-caseacocher',
     templateUrl: './kf-case-a-cocher.component.html',
-    styleUrls: ['../../kf-composants.scss']
+    styleUrls: ['../../kf-composants.scss'],
+    encapsulation: ViewEncapsulation.None
 })
 export class KfCaseACocherComponent extends KfComposantComponent implements OnInit, AfterViewInit {
     @ViewChild('inputElement', {static: false}) inputElement: ElementRef;

@@ -36,7 +36,12 @@ export class ApiRequêteAction {
      */
     titreSucces?: string;
     /**
-     * Si présent et si retourne true, l'erreur n'est pas affichée et n'entraine pas de redirection vers une page d'erreur.
+     * Si présent, et si retourne true, l'erreur n'est pas affichée et n'entraine pas de redirection vers une page d'erreur.
      */
     traiteErreur?: (apiResult: ApiResult) => boolean;
+
+    /**
+     * Si présent, est appelé avant le traitement par défaut des ApiResult
+     */
+    convertitResult?: (apiResult: ApiResult) => ApiResult;
 }

@@ -58,6 +58,17 @@ export abstract class KfVueTableNavigationBase<T> {
 
     abstract fixeLigneActive(ligne: KfVueTableLigne<T>): void;
 
+    get aLeFocus(): boolean {
+        return this.pAleFocus;
+    }
+
+    abstract fixeLeFocus(): void;
+
+    fixeLigneActiveEtLeFocus(ligne: KfVueTableLigne<T>) {
+        this.fixeLigneActive(ligne);
+        this.fixeLeFocus();
+    }
+
     /** 
      * S'il n'a pas de ligne active, active la première ligne qui passe les filtres s'il y en a une.
      * Si la ligne active ne passe pas les filtres, active la ligne suivante qui passe les filtres s'il y en a une
@@ -67,7 +78,7 @@ export abstract class KfVueTableNavigationBase<T> {
         if (!this.ligneActive) {
             const lignes = this.pVueTable.corps.lignes.filter(l => l.indexFiltré !== -1);
             if (lignes.length > 0) {
-                this.fixeLigneActive(lignes[0])
+                this.fixeLigneActiveEtLeFocus(lignes[0])
             }
             return;
         }
@@ -78,21 +89,15 @@ export abstract class KfVueTableNavigationBase<T> {
             const index = lignes.findIndex(l => l === this.ligneActive);
             if (index < lignes.length - 1) {
                 // il y a une ligne aprés la ligne active qui passe les filtres
-                this.fixeLigneActive(lignes[index + 1]);
+                this.fixeLigneActiveEtLeFocus(lignes[index + 1]);
             } else {
                 if (index > 0) {
                     // il y a une ligne avant la ligne active qui passe les filtres
-                    this.fixeLigneActive(lignes[index - 1]);
+                    this.fixeLigneActiveEtLeFocus(lignes[index - 1]);
                 }
             }
         }
     }
-
-    get aLeFocus(): boolean {
-        return this.pAleFocus;
-    }
-
-    abstract fixeLeFocus(): void;
 
     protected estCtrlAltShift(event: KeyboardEvent): boolean {
         return event.key === 'Control' || event.key === 'Alt' || event.key === 'Shift';
@@ -134,8 +139,7 @@ export abstract class KfVueTableNavigationBase<T> {
         const lignesVisibles = this.pVueTable.corps.lignesVisibles;
         const indexDansVisibles = lignesVisibles.findIndex(l => l === this.ligneActive);
         if (indexDansVisibles > 0) {
-            this.fixeLigneActive(lignesVisibles[indexDansVisibles - 1]);
-            this.fixeLeFocus();
+            this.fixeLigneActiveEtLeFocus(lignesVisibles[indexDansVisibles - 1]);
         } else {
             // c'est la première ligne visible
             const pagination = this.pVueTable.pagination;
@@ -152,8 +156,7 @@ export abstract class KfVueTableNavigationBase<T> {
         const lignesVisibles = this.pVueTable.corps.lignesVisibles;
         const indexDansVisibles = lignesVisibles.findIndex(l => l === this.ligneActive);
         if (indexDansVisibles < lignesVisibles.length - 1) {
-            this.fixeLigneActive(lignesVisibles[indexDansVisibles + 1]);
-            this.fixeLeFocus();
+            this.fixeLigneActiveEtLeFocus(lignesVisibles[indexDansVisibles + 1]);
         } else {
             // c'est la dernière ligne visible
             const pagination = this.pVueTable.pagination;

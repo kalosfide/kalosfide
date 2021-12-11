@@ -19,6 +19,7 @@ export class LivraisonBonLignesComponent extends LivraisonBonComponent implement
         protected service: FournisseurCLFService,
     ) {
         super(route, service);
+        this.avecEtatPréparation = true;
     }
 
     protected get modeActionInitial(): ModeAction {

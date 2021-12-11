@@ -1,7 +1,7 @@
-import { Component, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, ElementRef, ViewEncapsulation } from '@angular/core';
 import { KfFichier } from './kf-fichier';
 import { KfComposantComponent } from '../../kf-composant/kf-composant.component';
-import { KfTypeDEvenement, KfStatutDEvenement, KfEvenement } from '../../kf-partages/kf-evenements';
+import { KfTypeDEvenement, KfEvenement } from '../../kf-partages/kf-evenements';
 import { TraiteKeydownService } from '../../../traite-keydown/traite-keydown.service';
 
 @Component({
@@ -22,7 +22,8 @@ import { TraiteKeydownService } from '../../../traite-keydown/traite-keydown.ser
     <!--
     -->
 `,
-    styleUrls: ['../../kf-composants.scss']
+    styleUrls: ['../../kf-composants.scss'],
+    encapsulation: ViewEncapsulation.None
 })
 export class KfFichierComponent extends KfComposantComponent implements OnInit, AfterViewInit {
     @ViewChild('inputElement', {static: false}) inputElement: ElementRef;

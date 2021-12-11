@@ -3,6 +3,7 @@ import { KfOptionTexte } from './kf-option-texte';
 import { KfStringDef } from '../../kf-partages/kf-string-def';
 import { KfListeDeroulanteType } from './kf-liste-deroulante-type';
 import { IKfOption } from './kf-option-base';
+import { KfTypeDeValeur } from '../../kf-composants-types';
 
 export class KfListeDeroulanteTexteBase extends KfListeDeroulanteBase implements IKfListeDeroulante {
 
@@ -36,7 +37,7 @@ export class KfListeDeroulanteTexte extends KfListeDeroulanteTexteBase implement
 
     get valeur(): string {
         const valeur = this.gereValeur.valeur;
-        if (valeur) {
+        if (valeur !== null && valeur !== undefined) {
             return '' + valeur;
         }
     }
@@ -50,6 +51,7 @@ export class KfListeDeroulanteNombre extends KfListeDeroulanteTexteBase implemen
 
     constructor(nom: string, texte?: KfStringDef) {
         super(nom, texte);
+        this.gereValeur.typeDeValeur = KfTypeDeValeur.avecEntreeInputNombre;
     }
 
     créeEtAjouteOption(texte: string, valeur: number): KfOptionTexte {
@@ -61,7 +63,7 @@ export class KfListeDeroulanteNombre extends KfListeDeroulanteTexteBase implemen
 
     get valeur(): number {
         const valeur = this.gereValeur.valeur;
-        if (valeur) {
+        if (valeur !== null && valeur !== undefined) {
             return parseInt(valeur as string, 10);
         }
     }

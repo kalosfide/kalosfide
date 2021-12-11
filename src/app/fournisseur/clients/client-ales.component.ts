@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { FournisseurClientRoutes, FournisseurClientPages } from './client-pages';
+import { FournisseurClientPages } from './client-pages';
 import { Site } from 'src/app/modeles/site/site';
 import { Client } from 'src/app/modeles/client/client';
 import { ClientService } from 'src/app/modeles/client/client.service';
@@ -15,7 +15,6 @@ export abstract class ClientALESComponent extends KeyUidRnoALESComponent<Client>
     }
 
     dataPages = FournisseurClientPages;
-    dataRoutes = FournisseurClientRoutes;
 
     site: Site;
     client: Client;

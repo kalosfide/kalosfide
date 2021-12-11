@@ -19,10 +19,21 @@ export type BootstrapType = 'success' | 'info' | 'warning' | 'danger' | 'primary
 const BootstrapTypes: string[] = ['success', 'info', 'warning', 'danger', 'primary', 'secondary', 'light', 'dark'];
 export type BootstrapTypeBouton = BootstrapType | 'link';
 const BootstrapTypesBouton: string[] = BootstrapTypes.concat(['link']);
+export type BootstrapBordureCouleur = BootstrapType | 'white';
 export type BootstrapTypeFond = BootstrapType | 'white' | 'body' | 'transparent' | 'gradient';
 const BootstrapTypesFond: string[] = BootstrapTypes.concat(['white', 'body', 'transparent']);
-export type BootstrapTypeTexte = BootstrapType | 'white' | 'body' | 'mute' | 'black-50' | 'white-50';
-const BootstrapTypesTexte: string[] = BootstrapTypes.concat(['white', 'body', 'mute', 'black-50', 'white-50']);
+export type BootstrapTypeTexteCouleur = BootstrapType | 'white' | 'body' | 'muted' | 'black-50' | 'white-50';
+const BootstrapTypesTexteCouleur: string[] = BootstrapTypes.concat(['white', 'body', 'mute', 'black-50', 'white-50']);
+export type BootstrapTypeTextePoids = 'bold' | 'bolder' | 'normal' | 'light' | 'lighter';
+const BootstrapTypesTextePoids: string[] = ['bold', 'bolder', 'normal', 'light', 'lighter'];
+export type BootstrapTypeTexteTaille = 1 | 2 | 3 | 4 | 5 | 6;
+const BootstrapTypesTexteTaille: string[] = ['1', '2', '3', '4', '5', '6'];
+export type BootstrapTypeTexteStyle = 'italic' | 'normal';
+const BootstrapTypesTexteStyle: string[] = ['italic', 'normal'];
+export type BootstrapTypeTexteAlignement = 'start' | 'center' | 'end';
+const BootstrapTypesTexteAlignement: string[] = ['start', 'center', 'end'];
+export type BootstrapTypeTexteDécoration = 'underline' | 'line-through' | 'none';
+const BootstrapTypesTexteDécoration: string[] = ['underline', 'line-through', 'none'];
 
 export type BootstrapSpacingPropriété = 'margin' | 'padding';
 type BootstrapSpacingProperty = 'm' | 'p';
@@ -34,7 +45,22 @@ function spacingProperty(propriété: BootstrapSpacingPropriété): BootstrapSpa
             return 'p';
     }
 }
-export type BootstrapSpacingCôtés = 'haut' | 'bas' | 'gauche' | 'droite' | 'gaucheEtDroite' | 'hautEtBas' | 'tous';
+export type BootstrapCôté = 'haut' | 'bas' | 'gauche' | 'droite';
+type BootstrapBorderSides = 'top' | 'bottom' | 'start' | 'end';
+function borderSide(côtés: BootstrapCôté): BootstrapBorderSides {
+    switch (côtés) {
+        case 'haut':
+            return 'top';
+        case 'bas':
+            return 'bottom';
+        case 'gauche':
+            return 'start';
+        case 'droite':
+            return 'end';
+    }
+}
+export type BootstrapBordureLargeur = 1 | 2 | 3 | 4 | 5;
+export type BootstrapSpacingCôtés = BootstrapCôté | 'gaucheEtDroite' | 'hautEtBas' | 'tous';
 type BootstrapSpacingSides = 't' | 'b' | 's' | 'e' | 'x' | 'y' | ''
 function spacingSizes(côtés: BootstrapSpacingCôtés): BootstrapSpacingSides {
     switch (côtés) {
@@ -46,7 +72,7 @@ function spacingSizes(côtés: BootstrapSpacingCôtés): BootstrapSpacingSides {
             return 's';
         case 'droite':
             return 'e';
-        case'gaucheEtDroite':
+        case 'gaucheEtDroite':
             return 'x';
         case 'hautEtBas':
             return 'y';
@@ -60,6 +86,11 @@ export type KfBootstrapColOptions = {
     breakpoint?: 'sm' | 'md' | 'sg' | 'sm'
     width?: number
 };
+
+export type KfBootstrapBoutonOptions = {
+    nom: BootstrapTypeBouton,
+    outline?: 'outline',
+}
 
 export type KfBootstrapLabelOptions = 'nePasAfficherLabel' | 'labelFlottant' | KfBootstrapColOptions;
 
@@ -81,14 +112,15 @@ export interface IKfBootstrapOptions {
     /**
      * Si présent, la case à cocher ou le radio est affiché comme un bouton.
      * Si présent, l'option label est ignorée.
+     * A un effet sur KfRadio, KfCaseACocher, KfBouton.
+     */
+    bouton?: KfBootstrapBoutonOptions;
+    /**
+     * Si présent, la case à cocher ou le radio est affiché comme un bouton.
+     * Si présent, l'option label est ignorée.
      * A un effet sur KfRadio, KfCaseACocher.
      */
-    bouton?: {
-        nom: BootstrapTypeBouton,
-        outline?: 'outline',
-        nomChecked?: BootstrapTypeBouton,
-        outlineChecked?: 'outline',
-    },
+    boutonCoché?: KfBootstrapBoutonOptions,
     /**
      * Si présent et vrai, la case à cocher ou le radio et son label seront entourés d'une div quand ils sont dans une vueTable.
      * A un effet sur KfRadio, KfCaseACocher.
@@ -118,6 +150,30 @@ export interface IKfBootstrapOptions {
     classeDiv?: string;
 }
 
+export class KfBootstrapClasseOpérateur<T extends string | number> {
+    classes: string[];
+    préfixe: string;
+
+    constructor(préfixe: string, classes: string[]) {
+        this.préfixe = préfixe;
+        this.classes = classes;
+    }
+
+    classe(t: T): string {
+        return this.préfixe + '-' + t;
+    }
+    supprime(géreCss: KfGéreCss) {
+        géreCss.supprimeClasseAPréfixe(this.préfixe, this.classes);
+    }
+    ajoute(géreCss: KfGéreCss, t: T) {
+        géreCss.ajouteClasse(this.classe(t));
+    }
+    fixe(géreCss: KfGéreCss, t: T) {
+        géreCss.supprimeClasseAPréfixe(this.préfixe, this.classes);
+        géreCss.ajouteClasse(this.classe(t));
+    }
+}
+
 export class KfBootstrap {
 
     private static _classe(préfixe: string, nom: string, outline?: 'outline'): string {
@@ -133,16 +189,58 @@ export class KfBootstrap {
         return KfBootstrap._classe(préfixe, nom, outline);
     }
 
-    static classeBouton(type: BootstrapTypeBouton, outline?: 'outline'): string {
+    private static _classeBouton(type: BootstrapTypeBouton, outline?: 'outline'): string {
         return KfBootstrap._classe('btn', type, outline);
     }
 
-    static classeTexte(def: {
-        color?: BootstrapTypeTexte,
-        poids?: 'bold' | 'bolder' | 'normal' | 'light' | 'lighter',
-        style?: 'italic' | 'normal',
-        taille?: number;
+    static classeBouton(def: {
+        type: BootstrapTypeBouton,
+        outline?: 'outline',
+        taille?: 'sm' | 'lg'
     }): string {
+        const classes = ['btn', KfBootstrap._classeBouton(def.type, def.outline)];
+        if (def.taille) {
+            classes.push(`btn-${def.taille}`);
+        }
+        return classes.join(' ');
+    }
+
+    static texteColor(): KfBootstrapClasseOpérateur<BootstrapTypeTexteCouleur> {
+        return new KfBootstrapClasseOpérateur<BootstrapTypeTexteCouleur>('text', BootstrapTypesTexteCouleur);
+    }
+
+    static textePoids(): KfBootstrapClasseOpérateur<BootstrapTypeTextePoids> {
+        return new KfBootstrapClasseOpérateur<BootstrapTypeTextePoids>('fw', BootstrapTypesTextePoids);
+    }
+
+    static texteTaille(): KfBootstrapClasseOpérateur<BootstrapTypeTexteTaille> {
+        return new KfBootstrapClasseOpérateur<BootstrapTypeTexteTaille>('fs', BootstrapTypesTexteTaille);
+    }
+
+    static texteStyle(): KfBootstrapClasseOpérateur<BootstrapTypeTexteStyle> {
+        return new KfBootstrapClasseOpérateur<BootstrapTypeTexteStyle>('fst', BootstrapTypesTexteStyle);
+    }
+
+    static texteDécoration(): KfBootstrapClasseOpérateur<BootstrapTypeTexteDécoration> {
+        return new KfBootstrapClasseOpérateur<BootstrapTypeTexteDécoration>('text-decoration', BootstrapTypesTexteDécoration);
+    }
+
+    static texteAlignement(): KfBootstrapClasseOpérateur<BootstrapTypeTexteAlignement> {
+        return new KfBootstrapClasseOpérateur<BootstrapTypeTexteAlignement>('text', BootstrapTypesTexteAlignement);
+    }
+
+    static classeTexte(def: {
+        color?: BootstrapTypeTexteCouleur,
+        poids?: BootstrapTypeTextePoids,
+        taille?: BootstrapTypeTexteTaille,
+        style?: BootstrapTypeTexteStyle,
+        décoration?: BootstrapTypeTexteDécoration,
+        alignement?: BootstrapTypeTexteAlignement,
+        reset?: 'reset'
+    }): string {
+        if (def.reset) {
+            return 'text-reset';
+        }
         const classes: string[] = [];
         if (def.color) {
             classes.push(`text-${def.color}`);
@@ -156,6 +254,12 @@ export class KfBootstrap {
         if (def.taille) {
             classes.push(`fs-${def.taille}`);
         }
+        if (def.alignement) {
+            classes.push(`text-${def.alignement}`);
+        }
+        if (def.décoration) {
+            classes.push(`text-decoration-${def.décoration}`);
+        }
         return classes.join(' ');
     }
 
@@ -165,6 +269,24 @@ export class KfBootstrap {
 
     static classeFond(type: BootstrapTypeFond): string {
         return `bg-${type}`;
+    }
+
+    static classeBordure(def: {
+        côté?: BootstrapCôté,
+        couleur?: BootstrapBordureCouleur,
+        largeur?: BootstrapBordureLargeur
+    }): string {
+        let classe = 'border';
+        if (def.côté) {
+            classe += borderSide(def.côté);
+        }
+        if (def.couleur) {
+            classe += ' border-' + def.couleur;
+        }
+        if (def.largeur) {
+            classe += ' border-' + def.largeur;
+        }
+        return classe;
     }
 
     static ajouteClasseAlerte(géreCss: KfGéreCss, type: BootstrapType) {
@@ -225,8 +347,8 @@ export class KfBootstrap {
                     évenement.statut = KfStatutDEvenement.fini;
                     input.gereHtml.htmlElement.click();
                 });
-            const classe = KfBootstrap.classeBouton(options.bouton.nom, options.bouton.outline);
-            if (options.bouton.nomChecked) {
+            const classe = KfBootstrap._classeBouton(options.bouton.nom, options.bouton.outline);
+            if (options.boutonCoché) {
                 let coché: () => boolean;
                 if (input.type === KfTypeDeComposant.caseacocher) {
                     const caseACocher = input as KfCaseACocher;
@@ -238,7 +360,7 @@ export class KfBootstrap {
                     nom: classe,
                     active: () => !coché()
                 }, {
-                    nom: KfBootstrap.classeBouton(options.bouton.nomChecked, options.bouton.outlineChecked),
+                    nom: KfBootstrap._classeBouton(options.boutonCoché.nom, options.boutonCoché.outline),
                     active: () => coché()
                 })
             } else {

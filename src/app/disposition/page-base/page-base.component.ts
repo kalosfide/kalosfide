@@ -26,7 +26,7 @@ export abstract class PageBaseComponent implements OnDestroy {
     superGroupe: KfSuperGroupe;
 
     get nom(): string {
-        return this.pageDef.urlSegment;
+        return this.pageDef.path;
     }
 
     get titre(): string {
@@ -36,7 +36,7 @@ export abstract class PageBaseComponent implements OnDestroy {
     titrePage: KfSuperGroupe;
     barre: IBarreTitre;
 
-    niveauTitre: number;
+    niveauTitre: 0 | 1;
     protected créeBarreTitre = (): IBarreTitre => {
         const barre = Fabrique.titrePage.barreTitre({
             pageDef: this.pageDef,
@@ -47,14 +47,16 @@ export abstract class PageBaseComponent implements OnDestroy {
     }
 
     get avecValeur(): boolean {
-        return !!this.superGroupe.gereValeur;
+        const racinesV = this.superGroupe.racinesV();
+        return racinesV && racinesV.length > 0;
     }
     get valeur(): any {
-        return {
-            statut: this.superGroupe.formGroup ? this.superGroupe.formGroup.status : 'indéfini',
-            valeur: this.superGroupe.gereValeur.valeur,
-        };
+        const v: {[key: string]: any} = {};
+        const racinesV = this.superGroupe.racinesV();
+        racinesV.forEach(r => v[r.nom] = r.gereValeur.valeur)
+        return v;
     }
+    
 
     /**
      * Les classes dérivées doivent avoir un pageDef et appeler créeTitrePage pour avoir un groupe titre
@@ -63,8 +65,7 @@ export abstract class PageBaseComponent implements OnDestroy {
         if (!this.pageDef) {
             return;
         }
-        const niveau = this.niveauTitre !== undefined ? this.niveauTitre : 1;
-        this.titrePage = Fabrique.titrePage.titrePage(this.titre, niveau,
+        this.titrePage = Fabrique.titrePage.titrePage(this.titre, this.niveauTitre,
             this.créeBarreTitre ? this.créeBarreTitre.bind(this) : undefined);
     }
 

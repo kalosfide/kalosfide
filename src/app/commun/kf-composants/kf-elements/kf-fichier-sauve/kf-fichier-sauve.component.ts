@@ -1,8 +1,7 @@
-import { Component, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, ElementRef, ViewEncapsulation } from '@angular/core';
 import { KfComposantComponent } from '../../kf-composant/kf-composant.component';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { KfFichierSauve } from './kf-fichier-sauve';
-import { KfEvenement, KfTypeDEvenement, KfStatutDEvenement } from '../../kf-partages/kf-evenements';
 import { TraiteKeydownService } from '../../../traite-keydown/traite-keydown.service';
 
 @Component({
@@ -13,7 +12,8 @@ import { TraiteKeydownService } from '../../../traite-keydown/traite-keydown.ser
             <app-kf-contenu-phrase  [contenuPhrase]="fichier.contenuPhrase"></app-kf-contenu-phrase>
         </a>
 `,
-    styleUrls: ['../../kf-composants.scss']
+    styleUrls: ['../../kf-composants.scss'],
+    encapsulation: ViewEncapsulation.None
 })
 export class KfFichierSauveComponent extends KfComposantComponent implements OnInit, AfterViewInit {
     @ViewChild('baliseElement', {static: false}) baliseElementRef: ElementRef;

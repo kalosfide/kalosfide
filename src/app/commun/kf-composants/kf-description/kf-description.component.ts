@@ -1,11 +1,12 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, ViewEncapsulation } from '@angular/core';
 import { KfComposantComponent } from '../kf-composant/kf-composant.component';
 import { KfDescriptions } from './kf-descriptions';
 
 @Component({
     selector: 'app-kf-description',
     templateUrl: './kf-description.component.html',
-    styleUrls: ['../kf-composants.scss']
+    styleUrls: ['../kf-composants.scss'],
+    encapsulation: ViewEncapsulation.None
 })
 
 export class KfDescriptionsComponent extends KfComposantComponent implements OnInit, AfterViewInit {

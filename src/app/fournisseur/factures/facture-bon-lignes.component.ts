@@ -19,6 +19,7 @@ export class FactureBonLignesComponent extends FactureBonComponent implements On
         protected service: FournisseurCLFService,
     ) {
         super(route, service);
+        this.avecEtatPréparation = true;
     }
 
     protected get modeActionInitial(): ModeAction {

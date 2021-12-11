@@ -206,7 +206,7 @@ export class ClientInviteComponent extends FormulaireComponent implements OnInit
                 `Il y a déjà un client enregistré avec cette adresse email.`));
             // l'utilisateur ne doit pas être le fournisseur
             this.email.ajouteValidateur(KfValidateurs.validateurDeFn('est_fournisseur',
-                (value: any) => value === this.identifiant.userName,
+                (value: any) => value === this.identifiant.email,
                 'Vous ne pouvez pas être client de votre site.'
             ))
             this.email.gereHtml.suitLaValeur();
@@ -241,7 +241,7 @@ export class ClientInviteComponent extends FormulaireComponent implements OnInit
             this.invitations = data.liste;
             this.niveauTitre = 1;
             this.créeTitrePage();
-            this.site = this.navigation.litSiteEnCours();
+            this.site = this.service.litSiteEnCours();
             this.identifiant = this.identification.litIdentifiant();
             this.superGroupe = Fabrique.formulaire.superGroupe(this);
         }));

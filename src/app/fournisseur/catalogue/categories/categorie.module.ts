@@ -8,7 +8,6 @@ import { CategorieResolverService } from '../../../modeles/catalogue/categorie-r
 import { CommunModule } from 'src/app/commun/commun.module';
 import { DispositionModule } from 'src/app/disposition/disposition.module';
 import { CategorieSitePasCatalogueGarde } from './categorie-site-pas-catalogue-garde';
-import { CategorieSupprimeComponent } from './categorie-supprime.component';
 
 @NgModule({
     imports: [
@@ -20,7 +19,6 @@ import { CategorieSupprimeComponent } from './categorie-supprime.component';
     declarations: [
         CategorieAjouteComponent,
         CategorieEditeComponent,
-        CategorieSupprimeComponent,
         CategorieIndexComponent,
     ],
     providers: [

@@ -16,7 +16,8 @@ import {
 import { KeyUidRnoNoEditeur } from 'src/app/commun/data-par-key/key-uid-rno-no/key-uid-rno-no-editeur';
 import { ProduitService } from './produit.service';
 import { IDataComponent } from 'src/app/commun/data-par-key/i-data-component';
-import { KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
+import { KfOptionTexte } from 'src/app/commun/kf-composants/kf-elements/kf-liste-deroulante/kf-option-texte';
+import { Compare } from 'src/app/commun/outils/tri';
 
 export class ProduitEditeur extends KeyUidRnoNoEditeur<Produit> {
     categories: Categorie[];
@@ -75,19 +76,19 @@ export class ProduitEditeur extends KeyUidRnoNoEditeur<Produit> {
             this.kfNom = Fabrique.input.texte('nom', 'Nom');
             validateurs.forEach(v => this.kfNom.ajouteValidateur(v));
         }
-        this.ajouteChamps(this.kfNom);
+        this.kfDeData.push(this.kfNom);
     }
 
     private créeCategorie(lectureSeule?: boolean) {
         if (lectureSeule) {
             this.kfNomCategorie = Fabrique.input.texte('nomCategorie', 'Catégorie');
             this.kfNomCategorie.lectureSeule = true;
-            this.ajouteChamps(this.kfNomCategorie);
+            this.kfDeData.push(this.kfNomCategorie);
         } else {
             const categorieNo = Fabrique.listeDéroulante.nombre('categorieNo', 'Catégorie');
             this.kfCategorieNo = categorieNo;
             categorieNo.ajouteValidateur(KfValidateurs.required);
-            this.ajouteChamps(categorieNo);
+            this.kfDeData.push(categorieNo);
         }
     }
     private créeTypesMesureEtCommande(lectureSeule?: boolean) {
@@ -100,7 +101,7 @@ export class ProduitEditeur extends KeyUidRnoNoEditeur<Produit> {
             this.kfTypeCommandeLS = Fabrique.input.texte('texteTypeCommande', titreCommande);
             this.kfTypeCommandeLS.lectureSeule = true;
             this.kfTypeCommandeLS.estRacineV = true;
-            this.ajouteChamps(this.kfTypeMesureLS, this.kfTypeCommandeLS);
+            this.kfDeData.push(this.kfTypeMesureLS, this.kfTypeCommandeLS);
         } else {
             const typeMesure = Fabrique.listeDéroulante.texte('typeMesure', titreMesure);
             TypeMesure.Mesures.forEach(mesure => {
@@ -116,7 +117,7 @@ export class ProduitEditeur extends KeyUidRnoNoEditeur<Produit> {
             typeCommande.ajouteValidateur(KfValidateurs.required);
             typeCommande.valeur = TypeCommande.id.ALUnité;
 
-            this.ajouteChamps(typeMesure, typeCommande);
+            this.kfDeData.push(typeMesure, typeCommande);
 
             const rafraichit = () => {
                 if (typeMesure.valeur === TypeMesure.id.ALaPièce) {
@@ -136,12 +137,15 @@ export class ProduitEditeur extends KeyUidRnoNoEditeur<Produit> {
     }
 
     private créePrix(lectureSeule?: boolean) {
-        this.kfPrix = Fabrique.input.nombrePrix('prix', 'Prix');
+        this.kfPrix = Fabrique.input.nombre('prix', 'Prix');
         this.kfPrix.min = 0;
         this.kfPrix.max = 999.99;
         this.kfPrix.pas = 0.05;
         this.kfPrix.lectureSeule = lectureSeule;
-        this.ajouteChamps(this.kfPrix);
+        if (!lectureSeule) {
+            this.kfPrix.ajouteValidateur(KfValidateurs.required, KfValidateurs.nombreVirgule(7, 2, '>'));
+        }
+        this.kfDeData.push(this.kfPrix);
     }
 
     private créeEtat(lectureSeule?: boolean) {
@@ -149,14 +153,14 @@ export class ProduitEditeur extends KeyUidRnoNoEditeur<Produit> {
         if (lectureSeule) {
             this.kfEtatLS = Fabrique.input.texteLectureSeule('texteEtat', titre);
             this.kfEtatLS.estRacineV = true;
-            this.ajouteChamps(this.kfEtatLS);
+            this.kfDeData.push(this.kfEtatLS);
         } else {
             const etat = Fabrique.listeDéroulante.texte('etat', titre);
-            EtatsProduits.etats.forEach(e => etat.créeEtAjouteOption(e.texte, e.valeur));
+            EtatsProduits.états.forEach(e => etat.créeEtAjouteOption(e.texte, e.valeur));
             etat.ajouteValidateur(KfValidateurs.required);
             etat.valeur = EtatsProduits.disponible.valeur;
             this.kfEtat = etat;
-            this.ajouteChamps(etat);
+            this.kfDeData.push(etat);
         }
     }
 
@@ -192,10 +196,12 @@ export class ProduitEditeur extends KeyUidRnoNoEditeur<Produit> {
     }
 
     chargeData(data: Data) {
-        this.categories = data.categories;
+        const categories = (data.categories as Categorie[])
+            .map(c => c)
+            .sort(Compare.texte((c: Categorie) => c.nom));
         if (this.kfCategorieNo) {
-            this.categories.forEach(c => this.kfCategorieNo.créeEtAjouteOption(c.nom, c.no));
-            this.kfCategorieNo.valeur = this.categories[0].no;
+            categories.forEach(c => this.kfCategorieNo.créeEtAjouteOption(c.nom, c.no));
+            this.kfCategorieNo.valeur = categories[0].no;
         }
     }
 

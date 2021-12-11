@@ -13,14 +13,15 @@ import {
     KfListeDeroulanteNombre, KfListeDeroulanteTexte
 } from 'src/app/commun/kf-composants/kf-elements/kf-liste-deroulante/kf-liste-deroulante-texte';
 import { ILienDef } from 'src/app/disposition/fabrique/fabrique-lien';
-import { CategoriePages, CategorieRoutes } from 'src/app/fournisseur/catalogue/categories/categorie-pages';
-import { ProduitPages, ProduitRoutes } from 'src/app/fournisseur/catalogue/produits/produit-pages';
+import { CategoriePages } from 'src/app/fournisseur/catalogue/categories/categorie-pages';
+import { ProduitPages } from 'src/app/fournisseur/catalogue/produits/produit-pages';
 import { BootstrapType } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
 import { IUrlDef } from 'src/app/disposition/fabrique/fabrique-url';
 import { IGroupeTableDef } from 'src/app/disposition/page-table/groupe-table';
 import { EtatTable } from 'src/app/disposition/fabrique/etat-table';
 import { Site } from '../site/site';
 import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
+import { Compare } from 'src/app/commun/outils/tri';
 
 
 @Component({ template: '' })
@@ -37,6 +38,7 @@ export abstract class ProduitIndexBaseComponent extends KeyUidRnoNoIndexComponen
         protected service: ProduitService,
     ) {
         super(route, service);
+        this.fixeDefRéglagesVueTable('catalogue.produits', (p: Produit) => p.no);
     }
 
     protected _créeVueTableDef(): IKfVueTableDef<Produit> {
@@ -78,12 +80,16 @@ export abstract class ProduitIndexBaseComponent extends KeyUidRnoNoIndexComponen
         return this.produits.map(p => p.nomCategorie);
     }
 
+    avantChargeData() {
+        this.site = this.service.litSiteEnCours();
+    }
+
     /**
      * fixe la liste de la vueTable: surcharge du  cas par défaut où il y a un champ 'liste'
      * @param data Data résolu avec un champ 'catalogue'
      */
     protected chargeData(data: Data) {
-        const catalogue: Catalogue = Catalogue.nouveau(data.catalogue);
+        const catalogue: Catalogue = Catalogue.nouveau(this.site, data.catalogue);
         this.liste = catalogue.produits;
         this.categories = catalogue.catégories;
         this.liste.forEach(p => p.nomCategorie = this.categories.find(c => c.no === p.categorieNo).nom);
@@ -103,8 +109,7 @@ export abstract class ProduitIndexBaseComponent extends KeyUidRnoNoIndexComponen
                 message = 'Le catalogue est vide. Vous devez créer au moins une catégorie et y ajouter des produits.';
                 urlDef = {
                     pageDef: CategoriePages.ajoute,
-                    routes: CategorieRoutes,
-                    urlSite: () => this.site.url
+                    routeur: Fabrique.url.appRouteur.catégorie
                 };
                 texte = 'Créer une catégorie';
                 type = 'danger';
@@ -112,8 +117,7 @@ export abstract class ProduitIndexBaseComponent extends KeyUidRnoNoIndexComponen
                 message = `Il n'y a pas de produits dans le catalogue.`;
                 urlDef = {
                     pageDef: ProduitPages.ajoute,
-                    routes: ProduitRoutes,
-                    urlSite: () => this.site.url
+                    routeur: Fabrique.url.appRouteur.produit
                 };
                 texte = 'Créer un produit';
                 type = 'danger';
@@ -145,21 +149,34 @@ export abstract class ProduitIndexBaseComponent extends KeyUidRnoNoIndexComponen
         etat.grBtnsMsgs.alerte(type);
     }
 
+    /**
+     * Charge les options des filtres par catégorie et par état de produit.
+     * Charge le groupe d'affichage de l'état de la liste.
+     * Charge la liste dans la vueTable.
+     * Appelée aprés le chargement de la liste de la table et la création du superGroupe.
+     */
     protected chargeGroupe() {
+        // charge les options du filtre par catégorie
         let filtre = this.vueTable.outils.outil(this.service.utile.nom.catégorie);
         const listeCatégories: KfListeDeroulanteNombre = filtre.composant as KfListeDeroulanteNombre;
-        this.categories.forEach((c: Categorie) => listeCatégories.créeEtAjouteOption(c.nom, c.no));
-        filtre = this.vueTable.outils.outil(this.service.utile.nom.état);
-        if (filtre) {
-            const listeEtats: KfListeDeroulanteTexte = filtre.composant as KfListeDeroulanteTexte;
-            EtatsProduits.etats.forEach((e: EtatProduit) => listeEtats.créeEtAjouteOption(e.texte, e.valeur));
-        }
-        this.groupeTable.etat.charge();
-        this._chargeVueTable(this.liste);
-    }
+        this.categories
+            .map(c => ({ nom: c.nom, no: c.no }))
+            .sort(Compare.texte(nom_no => nom_no.nom))
+            .forEach(nom_no => listeCatégories.créeEtAjouteOption(nom_no.nom, nom_no.no));
 
-    avantChargeData() {
-        this.site = this.service.navigation.litSiteEnCours();
+        // charge les options du filtre par état de produit s'il est là
+        filtre = this.vueTable.outils.outil(this.service.utile.nom.état);
+        let listeEtats: KfListeDeroulanteTexte;
+        if (filtre) {
+            listeEtats = filtre.composant as KfListeDeroulanteTexte;
+            EtatsProduits.états.forEach((e: EtatProduit) => listeEtats.créeEtAjouteOption(e.texte, e.valeur));
+        }
+
+        // charge le groupe d'affichage de l'état de la liste
+        this.groupeTable.etat.charge();
+
+        // charge la liste dans la vueTable
+        this._chargeVueTable(this.liste);
     }
 
 }

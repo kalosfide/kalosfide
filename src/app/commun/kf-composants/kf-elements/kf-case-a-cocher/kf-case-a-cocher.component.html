@@ -33,12 +33,12 @@
 
     <ng-container *ngIf="case.aspect; else normalTemplate">
         <input type='checkbox' #inputElement [name]="case.nom" [formControl]="case.formControl" class="kf-invisible"
-            [attr.disabled]="case.inactif" />
+            [attr.disabled]="case.inactif === true ? true : null" />
         <app-kf-composant [composant]="case.aspect"></app-kf-composant>
     </ng-container>
     <ng-template #normalTemplate>
         <input type='checkbox' #inputElement [name]="case.nom" [formControl]="case.formControl" [ngClass]="case.classe"
-            [attr.disabled]="case.inactif" />
+            [attr.disabled]="case.inactif === true ? true : null" />
     </ng-template>
     <ng-container *ngIf="case.avecLabelApres">
         <ng-container *ngTemplateOutlet="labelTemplate; context: { $implicit: case }"></ng-container>

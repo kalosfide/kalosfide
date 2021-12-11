@@ -1,6 +1,6 @@
 
 /**
- * Objet permettant à un service de stocker des données la mémoire du navigateur sans être obligé de les recharger à chaque utilisation
+ * Objet permettant à un service de stocker des données dans la mémoire du navigateur sans être obligé de les recharger à chaque utilisation.
  */
 export interface Stockage<T> {
     /**

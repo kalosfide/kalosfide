@@ -14,77 +14,88 @@
 </ng-container>
 <!-- outils -->
 
-<table #tableElement [ngClass]="vueTable.classe" [ngStyle]="vueTable.style">
+<ng-container *ngIf="vueTable.dansDiv; else sansDivTemplate">
+    <div [ngClass]="vueTable.classeDiv" [ngStyle]="vueTable.styleDiv">
+        <ng-container *ngTemplateOutlet="sansDivTemplate"></ng-container>
+    </div>
+</ng-container>
 
-    <colgroup *ngIf="vueTable.avecColgroup">
-        <ng-container *ngFor="let colonne of vueTable.colonnes">
-            <col *ngIf="!colonne.nePasAfficher" [attr.width]= "colonne.largeur" [ngClass]="colonne.classeCol">
-        </ng-container>
-        
-    </colgroup>
+<ng-template #sansDivTemplate>
+    <table #tableElement [ngClass]="vueTable.classe" [ngStyle]="vueTable.style">
 
-    <!-- en-têtes -->
-    <thead *ngIf="vueTable.enTete" [ngClass]="vueTable.enTete.classe">
-        <ng-container *ngFor="let ligne of vueTable.enTete.lignes">
-            <tr [ngClass]="ligne.classe" [ngStyle]="ligne.style">
-                <ng-container *ngTemplateOutlet="cellulesTemplate; context: { $implicit: ligne }"></ng-container>
-            </tr>
-        </ng-container>
-    </thead>
-
-    <!-- corps -->
-    <tbody [ngClass]="vueTable.corps.classe">
-        <!-- remplace les lignes quand les filtres ne laissent rien passer -->
-        <tr *ngIf="vueTable.rienPasseFiltres">
-            <td class="text-center" [attr.colspan]="vueTable.nbColonnesVisibles">{{ vueTable.texteRienPasseFiltres }}
-            </td>
-        </tr>
-
-        <ng-container *ngIf="vueTable.avecValeur; else sansValeurTemplate">
-            <ng-container *ngFor="let ligne of vueTable.corps.lignesVisibles">
-                <tr #trElement [attr.id]="ligne.id" [ngClass]="ligne.classe" [ngStyle]="ligne.style"
-                    [formGroup]="ligne.formGroup">
-                    <ng-container *ngTemplateOutlet="cellulesTemplate; context: { $implicit: ligne }"></ng-container>
-                </tr>
-                <tr *ngIf="ligne.erreurs" class="kf-ligne-invalide">
-                    <td [attr.colspan]="ligne.nbColonnesVisibles">
-                        <div class="invalid-feedback">
-                            <p *ngFor="let erreur of ligne.erreurs">{{erreur}}</p>
-                        </div>
-                    </td>
-                </tr>
+        <colgroup *ngIf="vueTable.avecColgroup">
+            <ng-container *ngFor="let colonne of vueTable.colonnes">
+                <col *ngIf="!colonne.nePasAfficher" [attr.width]="colonne.largeur" [ngClass]="colonne.classeCol">
             </ng-container>
-        </ng-container>
-        <ng-template #sansValeurTemplate>
-            <ng-container *ngFor="let ligne of vueTable.corps.lignesVisibles">
-                <tr [attr.id]="ligne.id" [ngClass]="ligne.classe" [ngStyle]="ligne.style">
+
+        </colgroup>
+
+        <!-- en-têtes -->
+        <thead *ngIf="vueTable.enTete" [ngClass]="vueTable.enTete.classe">
+            <ng-container *ngFor="let ligne of vueTable.enTete.lignes">
+                <tr [ngClass]="ligne.classe" [ngStyle]="ligne.style">
                     <ng-container *ngTemplateOutlet="cellulesTemplate; context: { $implicit: ligne }"></ng-container>
                 </tr>
             </ng-container>
-        </ng-template>
-    </tbody>
+        </thead>
 
-    <!-- bilans -->
-    <tfoot *ngIf="vueTable.bilan" [ngClass]="vueTable.bilan.classe">
-        <ng-container *ngFor="let ligne of vueTable.bilan.lignes">
-            <tr [ngClass]="ligne.classe" [ngStyle]="ligne.style">
-                <ng-container *ngTemplateOutlet="cellulesTemplate; context: { $implicit: ligne }"></ng-container>
+        <!-- corps -->
+        <tbody [ngClass]="vueTable.corps.classe">
+            <!-- remplace les lignes quand les filtres ne laissent rien passer -->
+            <tr *ngIf="vueTable.rienPasseFiltres">
+                <td class="text-center" [attr.colspan]="vueTable.nbColonnesVisibles">{{ vueTable.texteRienPasseFiltres
+                    }}
+                </td>
             </tr>
-        </ng-container>
-    </tfoot>
-</table>
+
+            <ng-container *ngIf="vueTable.avecValeur; else sansValeurTemplate">
+                <ng-container *ngFor="let ligne of vueTable.corps.lignesVisibles">
+                    <tr #trElement [attr.id]="ligne.id" [ngClass]="ligne.classe" [ngStyle]="ligne.style"
+                        [formGroup]="ligne.formGroup">
+                        <ng-container *ngTemplateOutlet="cellulesTemplate; context: { $implicit: ligne }">
+                        </ng-container>
+                    </tr>
+                    <tr *ngIf="ligne.erreurs" class="kf-ligne-invalide">
+                        <td [attr.colspan]="ligne.nbColonnesVisibles">
+                            <div class="invalid-feedback">
+                                <p *ngFor="let erreur of ligne.erreurs">{{erreur}}</p>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-container>
+            </ng-container>
+            <ng-template #sansValeurTemplate>
+                <ng-container *ngFor="let ligne of vueTable.corps.lignesVisibles">
+                    <tr [attr.id]="ligne.id" [ngClass]="ligne.classe" [ngStyle]="ligne.style">
+                        <ng-container *ngTemplateOutlet="cellulesTemplate; context: { $implicit: ligne }">
+                        </ng-container>
+                    </tr>
+                </ng-container>
+            </ng-template>
+        </tbody>
+
+        <!-- bilans -->
+        <tfoot *ngIf="vueTable.bilan" [ngClass]="vueTable.bilan.classe">
+            <ng-container *ngFor="let ligne of vueTable.bilan.lignes">
+                <tr [ngClass]="ligne.classe" [ngStyle]="ligne.style">
+                    <ng-container *ngTemplateOutlet="cellulesTemplate; context: { $implicit: ligne }"></ng-container>
+                </tr>
+            </ng-container>
+        </tfoot>
+    </table>
+</ng-template>
 
 <!-- cellules -->
 <ng-template #cellulesTemplate let-ligne>
     <ng-container *ngFor="let cellule of ligne.cellulesVisibles">
         <ng-container *ngIf="cellule.thScope; else tdTemplate">
-            <th #tdElement [attr.scope]="cellule.thScope" [ngClass]="cellule.classe" [colSpan]="cellule.colSpan"
+            <th #tdElement [attr.scope]="cellule.thScope" [ngClass]="cellule.classe" [attr.colspan]="cellule.colSpan"
                 [attr.rowspan]="cellule.rowSpan">
                 <ng-container *ngTemplateOutlet="contenuTemplate; context: { $implicit: cellule }"></ng-container>
             </th>
         </ng-container>
         <ng-template #tdTemplate>
-            <td #tdElement [ngClass]="cellule.classe" [colSpan]="cellule.colSpan">
+            <td #tdElement [ngClass]="cellule.classe" [attr.colspan]="cellule.colSpan" [attr.rowspan]="cellule.rowSpan">
                 <ng-container *ngTemplateOutlet="contenuTemplate; context: { $implicit: cellule }"></ng-container>
             </td>
         </ng-template>
@@ -93,10 +104,17 @@
 
 <!-- contenu -->
 <ng-template #contenuTemplate let-cell>
-    <ng-container *ngIf="cell.estTexte; else composantTemplate">
-        <app-kf-texte [composant]="cell.contenu"></app-kf-texte>
+    <ng-container *ngIf="cell.classeDiv; else contenuSansDivTemplate">
+        <div [ngClass]="cell.classeDiv">
+            <ng-container *ngTemplateOutlet="contenuSansDivTemplate"></ng-container>
+        </div>
     </ng-container>
-    <ng-template #composantTemplate>
-        <app-kf-composant [composant]="cell.contenu"></app-kf-composant>
+    <ng-template #contenuSansDivTemplate>
+        <ng-container *ngIf="cell.estTexte; else composantTemplate">
+            <app-kf-texte [composant]="cell.contenu"></app-kf-texte>
+        </ng-container>
+        <ng-template #composantTemplate>
+            <app-kf-composant [composant]="cell.contenu"></app-kf-composant>
+        </ng-template>
     </ng-template>
 </ng-template>

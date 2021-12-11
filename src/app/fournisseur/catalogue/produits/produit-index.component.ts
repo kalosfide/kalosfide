@@ -2,13 +2,11 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 
 import { ActivatedRoute, Data } from '@angular/router';
 
-import { ProduitPages, ProduitRoutes } from './produit-pages';
+import { ProduitPages } from './produit-pages';
 import { ProduitIndexBaseComponent } from 'src/app/modeles/catalogue/produit-index-base.component';
 import { PageDef } from 'src/app/commun/page-def';
 import { ProduitService } from 'src/app/modeles/catalogue/produit.service';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
-import { IdEtatSite } from 'src/app/modeles/etat-site';
-import { SiteService } from 'src/app/modeles/site/site.service';
 import { ModeTable } from 'src/app/commun/data-par-key/condition-table';
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
@@ -19,9 +17,11 @@ import { IGroupeTableDef } from 'src/app/disposition/page-table/groupe-table';
 import { Produit } from 'src/app/modeles/catalogue/produit';
 import { ProduitEditeur } from '../../../modeles/catalogue/produit-editeur';
 import { ApiRequêteAction } from 'src/app/api/api-requete-action';
-import { CataloguePages, CatalogueRoutes } from '../catalogue-pages';
+import { CataloguePages } from '../catalogue-pages';
 import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
 import { Site } from 'src/app/modeles/site/site';
+import { Catalogue } from 'src/app/modeles/catalogue/catalogue';
+import { KfVueTableLigne } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-ligne';
 
 @Component({
     templateUrl: '../../../disposition/page-base/page-base.html',
@@ -35,12 +35,10 @@ export class ProduitIndexComponent extends ProduitIndexBaseComponent implements 
     }
 
     dataPages = ProduitPages;
-    dataRoutes = ProduitRoutes;
 
     constructor(
         protected route: ActivatedRoute,
         protected service: ProduitService,
-        protected siteService: SiteService,
     ) {
         super(route, service);
         this.identifiantEstFournisseur = true;
@@ -49,12 +47,11 @@ export class ProduitIndexComponent extends ProduitIndexBaseComponent implements 
     protected get barreTitreDef(): IBarreDef {
         const urlDef: IUrlDef = {
             pageDef: CataloguePages.categories,
-            routes: CatalogueRoutes,
-            urlSite: this.site.url
+            routeur: Fabrique.url.appRouteur.catalogue
         };
         const def = this._barreTitreDef;
         const groupeDef = Fabrique.titrePage.groupeRetour(Fabrique.lien.retour(urlDef));
-        groupeDef.groupe.afficherSi(this.service.navigation.conditionSite.catalogue);
+        groupeDef.groupe.afficherSi(this.service.identification.conditionSite.catalogue);
         def.groupesDeBoutons = [groupeDef];
         return def;
     }
@@ -75,7 +72,7 @@ export class ProduitIndexComponent extends ProduitIndexBaseComponent implements 
     }
 
     avantChargeData() {
-        this.site = this.service.navigation.litSiteEnCours();
+        this.site = this.service.litSiteEnCours();
     }
 
     créeGroupeTableDef(): IGroupeTableDef<Produit> {
@@ -85,31 +82,35 @@ export class ProduitIndexComponent extends ProduitIndexBaseComponent implements 
         vueTableDef.id = (produit: Produit) => {
             return this.service.fragment(produit);
         };
+
         vueTableDef.outils.ajoute(this.service.utile.outils.état());
         const outilAjoute = this.service.utile.outils.ajoute();
-        outilAjoute.bbtnGroup.afficherSi(this.service.navigation.conditionSite.catalogue);
+        outilAjoute.bbtnGroup.afficherSi(this.service.identification.conditionSite.catalogue);
         vueTableDef.outils.ajoute(outilAjoute);
+
+        vueTableDef.itemRéférenceLigne = (produit: Produit, ligne: KfVueTableLigne<Produit>) => {
+            produit.vueTableLigne = ligne;
+        }
         vueTableDef.superGroupe = (produit: Produit) => {
             const editeur = new ProduitEditeur(this);
             const superGroupe = editeur.créeSuperGroupe();
             editeur.fixeValeur(produit);
             produit.editeur = editeur;
-            let apiAction: ApiRequêteAction = {
-                demandeApi: (() => {
-                    return this.service.edite(produit.apiProduitPrix);
-                }).bind(this),
-                actionSiOk: (créé?: any) => this.service.quandEdite(produit),
-                formulaire: superGroupe
-            };
-            Fabrique.input.prépareSuitValeurEtFocus(editeur.kfPrix, apiAction, this.service);
-            apiAction = {
-                demandeApi: (() => {
-                    return this.service.edite(produit.apiProduitEtat);
-                }).bind(this),
-                actionSiOk: (créé?: any) => this.service.quandEdite(produit),
-                formulaire: superGroupe
-            };
-            Fabrique.listeDéroulante.prépareSuitValeurEtFocus(editeur.kfEtat, apiAction, this.service);
+            const apiRequêteAction: (apiProduit: () => Produit) => ApiRequêteAction =
+                (apiProduit: () => Produit) => {
+                    return {
+                        demandeApi: (() => {
+                            return this.service.edite(apiProduit());
+                        }).bind(this),
+                        actionSiOk: (créé?: any) => {
+                            this.service.quandEdite(produit);
+                            produit.vueTableLigne.quandItemModifié();
+                        },
+                        formulaire: superGroupe
+                    }
+                }
+            Fabrique.input.prépareSuitValeurEtFocus(editeur.kfPrix, apiRequêteAction(() => produit.apiProduitPrix), this.service);
+            Fabrique.listeDéroulante.prépareSuitValeurEtFocus(editeur.kfEtat, apiRequêteAction(() => produit.apiProduitEtat), this.service);
             superGroupe.avecInvalidFeedback = true;
             return superGroupe;
         };
@@ -120,25 +121,26 @@ export class ProduitIndexComponent extends ProduitIndexBaseComponent implements 
         };
     }
 
-    quandLigneSupprimée(produit: Produit) {
-        const index = this.liste.findIndex(p => p.no === produit.no);
-        this.liste.splice(index);
+    quandLigneSupprimée(index: number, aprésSuppression: Catalogue) {
+        this.liste = aprésSuppression.produits;
         this.vueTable.supprimeItem(index);
     }
 
     calculeModeTable(): ModeTable {
-        return this.site.etat === IdEtatSite.catalogue ? ModeTable.edite : ModeTable.aperçu;
+        return !this.site.ouvert ? ModeTable.edite : ModeTable.aperçu;
     }
 
     rafraichit(site: Site) {
         this.site = site;
         this.service.changeModeTable(this.calculeModeTable());
+        this.barre.site = site;
+        this.barre.rafraichit();
     }
 
     aprèsChargeData() {
-        this.subscriptions.push(
-            this.service.navigation.siteObs().subscribe((site: Site) => this.rafraichit(site))
-        );
+        const site = this.service.litSiteEnCours();
+        this.rafraichit(site);
+        this.subscriptions.push(this.service.identification.souscritASiteChange(this.rafraichit.bind(this)));
     }
 
     créePageTableDef(): IPageTableDef {

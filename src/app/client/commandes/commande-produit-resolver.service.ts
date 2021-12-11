@@ -2,13 +2,12 @@ import { Injectable } from '@angular/core';
 import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { Produit } from 'src/app/modeles/catalogue/produit';
 import { ClientCLFService } from '../client-c-l-f.service';
-import { CommandeRoutes, CommandePages } from './commande-pages';
+import { CommandePages } from './commande-pages';
 import { Observable } from 'rxjs';
 
 @Injectable()
 export class CommandeProduitResolverService implements Resolve<Produit> {
     pageDefErreur = CommandePages.lignes;
-    routesErreur = CommandeRoutes;
 
     constructor(
         private service: ClientCLFService,

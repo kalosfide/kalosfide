@@ -21,5 +21,8 @@ export abstract class KeyUidRnoEditeur<T extends KeyUidRno> extends DataKeyEdite
     fixeKfKey(key: IKeyUidRno) {
         this._kfUid.valeur = key.uid;
         this._kfRno.valeur = key.rno;
-   }
+    }
+    fixeNoDeAjout(key: IKeyUidRno) {
+        this._kfRno.valeur = key.rno;
+    }
 }

@@ -1,16 +1,16 @@
 import {
-    Component, OnInit, ViewChild, AfterViewInit, ElementRef
+    Component, OnInit, ViewChild, AfterViewInit, ElementRef, ViewEncapsulation
 } from '@angular/core';
 import { KfBouton } from './kf-bouton';
 import { KfComposantComponent } from '../../kf-composant/kf-composant.component';
 import { KfContenuPhrase } from '../../kf-partages/kf-contenu-phrase/kf-contenu-phrase';
-import { KfTypeDeBouton } from '../../kf-composants-types';
 import { TraiteKeydownService } from '../../../traite-keydown/traite-keydown.service';
 
 @Component({
     selector: 'app-kf-bouton',
     templateUrl: './kf-bouton.component.html',
-    styleUrls: ['../../kf-composants.scss']
+    styleUrls: ['../../kf-composants.scss'],
+    encapsulation: ViewEncapsulation.None
 })
 export class KfBoutonComponent extends KfComposantComponent implements OnInit, AfterViewInit {
     @ViewChild('htmlElement', {static: false}) htmlElementRef: ElementRef;

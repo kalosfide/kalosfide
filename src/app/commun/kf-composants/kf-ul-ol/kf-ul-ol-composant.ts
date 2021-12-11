@@ -1,6 +1,7 @@
 import { EventEmitter } from '@angular/core';
 import { KfComposant } from '../kf-composant/kf-composant';
 import { KfTypeDeComposant } from '../kf-composants-types';
+import { KfEtiquette } from '../kf-elements/kf-etiquette/kf-etiquette';
 import { KfGroupe } from '../kf-groupe/kf-groupe';
 import { KfEvenement } from '../kf-partages/kf-evenements';
 import { KfGéreCss } from '../kf-partages/kf-gere-css';
@@ -23,6 +24,16 @@ class KfLiComposant extends KfComposant {
     get item(): KfComposant {
         return this.contenus[0];
     }
+
+    get composants(): KfComposant[] {
+        const item = this.contenus[0];
+        if (item.type === KfTypeDeComposant.etiquette) {
+            return item.contenuPhrase.contenus;
+        } else {
+            return [item];
+        }
+
+    }
 }
 
 export class KfUlComposant extends KfComposant {
@@ -31,10 +42,23 @@ export class KfUlComposant extends KfComposant {
     items: KfComposant[];
     private pGereCssLi: KfGéreCss;
 
-    constructor(nom: string, dansNav?: boolean) {
+    private ul_ol: 'ul' | 'ol';
+
+    protected pAvecRouterOutlet: boolean
+
+    constructor(nom: string, ul_ol?: 'ul' | 'ol') {
         super(nom, KfTypeDeComposant.ulol);
         this.lis = [];
         this.items = [];
+        this.ul_ol = ul_ol;
+    }
+
+    get avecUl(): boolean {
+        return this.ul_ol !== 'ol'
+    }
+
+    get avecRouterOutlet(): boolean {
+        return this.pAvecRouterOutlet;
     }
 
     get dansNav(): boolean {

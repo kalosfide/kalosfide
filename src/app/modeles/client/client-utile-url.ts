@@ -2,9 +2,8 @@ import { ClientUtile } from './client-utile';
 import { DataUtileUrl } from 'src/app/commun/data-par-key/data-utile-url';
 import { IUrlDef } from 'src/app/disposition/fabrique/fabrique-url';
 import { Client } from './client';
-import { FournisseurClientRoutes, FournisseurClientPages } from 'src/app/fournisseur/clients/client-pages';
+import { FournisseurClientPages } from 'src/app/fournisseur/clients/client-pages';
 import { Invitation } from './invitation';
-import { iSiteRoutePlusSegments } from 'src/app/site/site-pages';
 import { PageDef } from 'src/app/commun/page-def';
 
 export class ClientUtileUrl extends DataUtileUrl {
@@ -17,7 +16,7 @@ export class ClientUtileUrl extends DataUtileUrl {
     }
 
     accueil(): IUrlDef {
-        return this.__urlDef(FournisseurClientRoutes, FournisseurClientPages.accueil);
+        return this.__urlDef(this.utile.dataRouteur, FournisseurClientPages.accueil);
     }
 
     index(): IUrlDef {
@@ -32,7 +31,7 @@ export class ClientUtileUrl extends DataUtileUrl {
         if (client) {
             texteKey = this.utile.service.urlSegmentDeKey(client);
         }
-        return this.__urlDef(iSiteRoutePlusSegments(FournisseurClientRoutes, [FournisseurClientPages.index.urlSegment]), pageDef, texteKey);
+        return this.__urlDef(this.utile.dataRouteur.enfant(FournisseurClientPages.index.path), pageDef, texteKey);
     }
     ajoute(): IUrlDef {
         return this.urlCompte(FournisseurClientPages.ajoute)
@@ -41,25 +40,18 @@ export class ClientUtileUrl extends DataUtileUrl {
         return this.urlCompte(FournisseurClientPages.edite, t);
     }
 
-    accepte(client: Client): IUrlDef {
-        return this.urlCompte(FournisseurClientPages.accepte, client);
-    }
-
-    exclut(client: Client): IUrlDef {
-        return this.urlCompte(FournisseurClientPages.exclut, client);
-    }
     inviteClient(client?: Client): IUrlDef {
         return this.urlCompte(FournisseurClientPages.invite, client);
     }
 
     invitations(): IUrlDef {
-        return this.dePageDef(FournisseurClientRoutes, FournisseurClientPages.invitations);
+        return this.dePageDef(this.utile.dataRouteur, FournisseurClientPages.invitations);
     }
     retourInvitations(invitation: Invitation): IUrlDef {
-        return this.__urlDef(FournisseurClientRoutes, FournisseurClientPages.invitations, invitation.email, true);
+        return this.__urlDef(this.utile.dataRouteur, FournisseurClientPages.invitations, invitation.email, true);
     }
     private urlInvitation(pageDef: PageDef, texteKey?: string): IUrlDef {
-        return this.__urlDef(iSiteRoutePlusSegments(FournisseurClientRoutes, [FournisseurClientPages.invitations.urlSegment]), pageDef, texteKey);
+        return this.__urlDef(this.utile.dataRouteur.enfant(FournisseurClientPages.invitations.path), pageDef, texteKey);
     }
     invite(): IUrlDef {
         return this.urlInvitation(FournisseurClientPages.invite);

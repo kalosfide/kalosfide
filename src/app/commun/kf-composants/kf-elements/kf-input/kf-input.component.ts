@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, ElementRef, ViewEncapsulation } from '@angular/core';
 import { KfComposantComponent } from '../../kf-composant/kf-composant.component';
 import { KfInput } from './kf-input';
 import { KfInputNombre } from './kf-input-nombre';
@@ -11,7 +11,8 @@ import { KfTypeDInput } from './kf-type-d-input';
 @Component({
     selector: 'app-kf-input',
     templateUrl: './kf-input.component.html',
-    styleUrls: ['../../kf-composants.scss']
+    styleUrls: ['../../kf-composants.scss'],
+    encapsulation: ViewEncapsulation.None
 })
 export class KfInputComponent extends KfComposantComponent implements OnInit, AfterViewInit {
     @ViewChild('inputElement', {static: false}) inputElement: ElementRef;

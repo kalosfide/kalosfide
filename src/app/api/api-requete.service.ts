@@ -319,17 +319,25 @@ export class ApiRequêteService implements IAvecServices {
         const attente = requêteDef.attente
             ? requêteDef.attente
             : this.attenteService.attente('action');
-        attente.commence();
 
-        if (requêteDef.afficheResultat) {
-            requêteDef.afficheResultat.commence();
-        }
-        return requêteDef.demandeApi().pipe(
+        return of(true).pipe(
+            tap(() => {
+                attente.commence();
+
+                if (requêteDef.afficheResultat) {
+                    requêteDef.afficheResultat.commence();
+                }
+            }),
+            concatMap(() => requêteDef.demandeApi()),
             delay(0),
             concatMap((result: ApiResult): Observable<boolean> => {
                 attente.finit();
                 if (!result) {
                     return null;
+                }
+
+                if (requêteDef.convertitResult) {
+                    result = requêteDef.convertitResult(result);
                 }
 
                 switch (result.statusCode) {
@@ -383,7 +391,9 @@ export class ApiRequêteService implements IAvecServices {
                             return of(false);
                         } else {
                             apiErreur.action = requêteDef.titreErreur;
-                            return this.modalService.confirme(Fabrique.erreurModal(apiErreur));
+                            return this.modalService.confirme(Fabrique.erreurModal(apiErreur)).pipe(
+                                map(() => false)
+                            );
                         }
                 }
             })
@@ -395,13 +405,20 @@ export class ApiRequêteService implements IAvecServices {
             ? requêteDef.attente
             : this.attenteService.attente('lecture');
 
-        attente.commence();
-        return requêteDef.demandeApi().pipe(
+        return of(true).pipe(
+            tap(() => {
+                attente.commence();
+            }),
+            concatMap(() => requêteDef.demandeApi()),
             delay(0),
             map((result: ApiResult): T => {
                 attente.finit();
                 if (!result) {
                     return null;
+                }
+
+                if (requêteDef.convertitResult) {
+                    result = requêteDef.convertitResult(result);
                 }
 
                 switch (result.statusCode) {
@@ -414,9 +431,6 @@ export class ApiRequêteService implements IAvecServices {
                         if (result.ok) {
                             console.error(`lecturObs a un retour sans erreur autre que 200.`);
                         } else {
-                            if (requêteDef.traiteErreur && requêteDef.traiteErreur(result)) {
-                                return null;
-                            }
                             this.routeur.navigueVersPageErreur(result as ApiResultErreur);
                         }
                         return null;

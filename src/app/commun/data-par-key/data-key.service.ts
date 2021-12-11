@@ -4,13 +4,11 @@ import { Observable } from 'rxjs';
 import { DataService } from '../../services/data.service';
 import { IDataKey } from './data-key';
 import { ApiAction } from '../../api/api-route';
-import { tap } from 'rxjs/operators';
 import { DataUtile } from 'src/app/commun/data-par-key/data-utile';
 import { ValeurEtObservable } from '../outils/valeur-et-observable';
 import { ModeTable } from './condition-table';
 import { DataKeyUtile } from './data-key-utile';
 import { ApiResult } from 'src/app/api/api-results/api-result';
-import { ApiResult201Created } from 'src/app/api/api-results/api-result-201-created';
 
 export abstract class DataKeyService<T extends IDataKey> extends DataService {
 
@@ -24,8 +22,6 @@ export abstract class DataKeyService<T extends IDataKey> extends DataService {
     fragment(t: T): string {
         return this.pUtile.url.id(this.urlSegmentDeKey(t));
     }
-    abstract get keyDeAjoute(): IDataKey;
-    abstract fixeKeyDeAjoute(envoyé: T, reçu: T): void;
 
     protected _créeUtile() {
         this.pUtile = new DataUtile(this);
@@ -74,25 +70,12 @@ export abstract class DataKeyService<T extends IDataKey> extends DataService {
      * @param objet contient la clé (incomplète si numAuto) et tous les autres champs
      */
     ajoute(objet: T): Observable<ApiResult> {
-        return this.post<T>(this.controllerUrl, ApiAction.data.ajoute, objet).pipe(
-            tap(apiResult => {
-                if (apiResult.statusCode === ApiResult201Created.code) {
-                    const donnée = (apiResult as ApiResult201Created).entity as T;
-                    this.fixeKeyDeAjoute(objet, donnée);
-                }
-        })
-        );
+        return this.post<T>(this.controllerUrl, ApiAction.data.ajoute, objet);
     }
 
     lit(key: IDataKey): Observable<ApiResult> {
         console.log(key);
         return this.get<T>(this.controllerUrl, ApiAction.data.lit, this.créeParams(key));
-    }
-
-    liste(key?: IDataKey): Observable<ApiResult> {
-        return key
-            ? this.getAll<T>(this.controllerUrl, ApiAction.data.liste, this.créeParams(key))
-            : this.getAll<T>(this.controllerUrl, ApiAction.data.liste);
     }
 
     /**

@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { IBarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { Identifiant } from 'src/app/securite/identifiant';
 import { ActivatedRoute, Data } from '@angular/router';
 import { FournisseurClientPages } from './client-pages';
@@ -29,7 +28,6 @@ export class ClientInvitationsComponent extends PageTableComponent<Invitation> i
         return this.pageDef.titre;
     }
 
-    identifiant: Identifiant;
     site: Site;
 
     constructor(
@@ -37,10 +35,19 @@ export class ClientInvitationsComponent extends PageTableComponent<Invitation> i
         protected service: ClientService
     ) {
         super(route, service);
+        this.fixeDefRéglagesVueTable('clients.invitations', (i: Invitation) => i.email);
     }
 
-    protected chargeGroupe() {
+    /**
+     * Charge les options des filtres par catégorie et par état de produit.
+     * Charge le groupe d'affichage de l'état de la liste.
+     * Charge la liste dans la vueTable.
+     * Appelée aprés le chargement de la liste de la table et la création du superGroupe.
+     */
+     protected chargeGroupe() {
+        // charge le groupe d'affichage de l'état de la liste
         this.groupeTable.etat.charge();
+        // charge la liste dans la vueTable
         this._chargeVueTable(this.liste);
     }
 
@@ -61,7 +68,7 @@ export class ClientInvitationsComponent extends PageTableComponent<Invitation> i
         const rafraichitQuandSupprime = (invitation: Invitation) => {
             return (() => {
                 const index = this.liste.findIndex(i => i.email === invitation.email);
-                this.liste.splice(index)
+                this.liste.splice(index, 1)
                 this.vueTable.supprimeItem(index);
             }).bind(this);
         };
@@ -110,8 +117,7 @@ export class ClientInvitationsComponent extends PageTableComponent<Invitation> i
         return {
             avantChargeData: () => {
             this.niveauTitre = 1;
-            this.site = this.service.navigation.litSiteEnCours();
-            this.identifiant = this.service.identification.litIdentifiant();
+            this.site = this.service.litSiteEnCours();
         },
             chargeData: (data: Data) => this.chargeData(data),
             créeSuperGroupe: () => this.créeGroupe('super'),

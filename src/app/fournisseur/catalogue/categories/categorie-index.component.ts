@@ -2,15 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { KeyUidRnoNoIndexComponent } from 'src/app/commun/data-par-key/key-uid-rno-no/key-uid-rno-no-index.component';
 import { Categorie } from 'src/app/modeles/catalogue/categorie';
 import { PageDef } from 'src/app/commun/page-def';
-import { CategoriePages, CategorieRoutes } from './categorie-pages';
+import { CategoriePages } from './categorie-pages';
 import { Site } from 'src/app/modeles/site/site';
-import { Identifiant } from 'src/app/securite/identifiant';
 import { ActivatedRoute, Data } from '@angular/router';
 import { CategorieService } from 'src/app/modeles/catalogue/categorie.service';
-import { ProduitRoutes, ProduitPages } from '../produits/produit-pages';
+import { ProduitPages } from '../produits/produit-pages';
 import { IKfVueTableDef } from 'src/app/commun/kf-composants/kf-vue-table/i-kf-vue-table-def';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
-import { IdEtatSite } from 'src/app/modeles/etat-site';
 import { Catalogue } from 'src/app/modeles/catalogue/catalogue';
 import { IGroupeTableDef } from 'src/app/disposition/page-table/groupe-table';
 import { EtatTable } from 'src/app/disposition/fabrique/etat-table';
@@ -34,10 +32,8 @@ export class CategorieIndexComponent extends KeyUidRnoNoIndexComponent<Categorie
     }
 
     dataPages = CategoriePages;
-    dataRoutes = CategorieRoutes;
 
     site: Site;
-    identifiant: Identifiant;
 
     catalogue: Catalogue;
 
@@ -46,13 +42,13 @@ export class CategorieIndexComponent extends KeyUidRnoNoIndexComponent<Categorie
         protected service: CategorieService,
     ) {
         super(route, service);
+        this.fixeDefRéglagesVueTable('catalogue.categorie', (c: Categorie) => c.no);
     }
 
     protected get barreTitreDef(): IBarreDef {
         const urlDef: IUrlDef = {
             pageDef: ProduitPages.index,
-            routes: ProduitRoutes,
-            urlSite: this.site.url
+            routeur: Fabrique.url.appRouteur.produit
         };
         const lien = Fabrique.lien.retour(urlDef);
         const def = this._barreTitreDef;
@@ -107,7 +103,7 @@ export class CategorieIndexComponent extends KeyUidRnoNoIndexComponent<Categorie
     }
 
     calculeModeTable(): ModeTable {
-        return this.site.etat === IdEtatSite.catalogue ? ModeTable.edite : ModeTable.aperçu;
+        return !this.site.ouvert ? ModeTable.edite : ModeTable.aperçu;
     }
 
     rafraichit(site: Site) {
@@ -116,19 +112,18 @@ export class CategorieIndexComponent extends KeyUidRnoNoIndexComponent<Categorie
     }
 
     aprèsChargeData() {
-        this.subscriptions.push(
-            this.service.navigation.siteObs().subscribe((site: Site) => this.rafraichit(site))
-        );
+        this.subscriptions.push(this.service.identification.souscritASiteChange(this.rafraichit.bind(this)));
     }
 
     protected chargeGroupe() {
+        // charge le groupe d'affichage de l'état de la liste
         this.groupeTable.etat.charge();
+        // charge la liste dans la vueTable
         this._chargeVueTable(this.liste);
     }
 
     avantChargeData() {
-        this.site = this.service.navigation.litSiteEnCours();
-        this.identifiant = this.service.identification.litIdentifiant();
+        this.site = this.service.litSiteEnCours();
     }
 
     /**
@@ -136,14 +131,14 @@ export class CategorieIndexComponent extends KeyUidRnoNoIndexComponent<Categorie
      * @param data Data résolu avec un champ 'catalogue'
      */
     protected chargeData(data: Data) {
-        const catalogue: Catalogue = Catalogue.nouveau(data.catalogue);
+        const catalogue: Catalogue = Catalogue.nouveau(this.site, data.catalogue);
         this.liste = catalogue.catégories;
-        this.liste.forEach(c => c.créeBilans(catalogue.produits));
+        this.liste.forEach(c => c.compteProduits(catalogue.produits));
     }
 
-    quandLigneSupprimée() {
-        this.liste = this.service.litCatégories();
-        this.chargeGroupe();
+    quandLigneSupprimée(index: number, aprésSuppression: Catalogue) {
+        this.liste = aprésSuppression.catégories;
+        this.vueTable.supprimeItem(index);
     }
 
     créePageTableDef(): IPageTableDef {

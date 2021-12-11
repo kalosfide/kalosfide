@@ -6,7 +6,7 @@ import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
 import { Client } from 'src/app/modeles/client/client';
 import { KeyUidRnoService } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno.service';
 import { ApiController, ApiAction } from '../../api/api-route';
-import { EtatClient } from './etat-client';
+import { IdEtatRole } from '../role/etat-role';
 import { ApiResult } from '../../api/api-results/api-result';
 import { ApiRequêteService } from '../../api/api-requete.service';
 import { ClientUtile } from './client-utile';
@@ -15,6 +15,8 @@ import { StockageService } from 'src/app/services/stockage/stockage.service';
 import { IKeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/i-key-uid-rno';
 import { ApiResult201Created } from 'src/app/api/api-results/api-result-201-created';
 import { Invitation, InvitationDeApi, InvitationVersApi } from './invitation';
+import { SiteBilanClients } from '../site/site-bilan';
+import { Identifiant } from 'src/app/securite/identifiant';
 
 class ApiClients {
     clients: Client[];
@@ -49,10 +51,10 @@ export class ClientService extends KeyUidRnoService<Client> {
     private stockage: Stockage<Stock>;
 
     constructor(
-        stockageService: StockageService,
+        protected stockageService: StockageService,
         protected apiRequeteService: ApiRequêteService
     ) {
-        super(apiRequeteService);
+        super(stockageService, apiRequeteService);
         this.stockage = stockageService.nouveau<Stock>('Clients', {
             // Le stockage sera réinitialisé à chaque changement de site ou d'identifiant
             rafraichi: true
@@ -88,11 +90,11 @@ export class ClientService extends KeyUidRnoService<Client> {
         return !!stock.clients.find(s => s.nom === nom && (s.uid !== uid || s.rno !== rno));
     }
 
-    changeSiteNbClients(deltaNbClients: number) {
-        const site = this.navigation.litSiteEnCours();
-        site.nbClients += deltaNbClients;
-        this.navigation.fixeSiteEnCours(site);
-        this.identification.fixeSiteIdentifiant(site);
+    private bilanClients(stock: Stock): SiteBilanClients {
+       return {
+           actifs: stock.clients.filter(c => c.etat === IdEtatRole.actif).length,
+           nouveaux: stock.clients.filter(c => c.etat === IdEtatRole.nouveau).length
+       };
     }
 
     private quandEtatChange(client: Client) {
@@ -104,9 +106,10 @@ export class ClientService extends KeyUidRnoService<Client> {
         if (index === -1) {
             throw new Error('Clients: édité absent du stock');
         }
-        stock.clients[index].etat = client.etat === EtatClient.fermé ? EtatClient.inactif : EtatClient.actif;
-        stock.clients[index].dateEtat = new Date(Date.now());
+        stock.clients[index].etat = client.etat === IdEtatRole.fermé ? IdEtatRole.inactif : IdEtatRole.actif;
+        stock.clients[index].dateEtat = client.dateEtat;
         this.stockage.fixeStock(stock);
+        this.identification.fixeSiteBilanClients(this.bilanClients(stock));
     }
 
     private remplace(client: Client, nouveau: Client) {
@@ -123,23 +126,23 @@ export class ClientService extends KeyUidRnoService<Client> {
     }
 
     active(client: Client) {
-        return this.post<Client>(ApiController.client, ApiAction.client.active, null, KeyUidRno.créeParams(client));
+        return this.put<Client>(ApiController.client, ApiAction.client.active, null, KeyUidRno.créeParams(client));
     }
     quandActivé(client: Client) {
-        client.etat = EtatClient.actif;
+        client.etat = IdEtatRole.actif;
         this.quandEtatChange(client);
     }
 
     inactive(client: Client) {
-        return this.post<Client>(ApiController.client, ApiAction.client.inactive, null, KeyUidRno.créeParams(client));
+        return this.put<Client>(ApiController.client, ApiAction.client.inactive, null, KeyUidRno.créeParams(client));
     }
     quandInactivé(client: Client): (créé: Client) => void {
         return (créé: Client) => {
             if (client.email) {
                 // le compte est géré par le client
-                if (client.etat === EtatClient.actif) {
+                if (client.etat === IdEtatRole.actif) {
                     // il était actif, il est devenu inactif
-                    client.etat = EtatClient.inactif;
+                    client.etat = IdEtatRole.inactif;
                     this.quandEtatChange(client);
                     return;
                 }
@@ -157,7 +160,7 @@ export class ClientService extends KeyUidRnoService<Client> {
             // le compte est géré par le fournisseur
             if (client.avecDocuments) {
                 // il est devenu inactif
-                client.etat = EtatClient.inactif;
+                client.etat = IdEtatRole.inactif;
                 this.quandEtatChange(client);
             } else {
                 // il a été supprimé
@@ -167,7 +170,7 @@ export class ClientService extends KeyUidRnoService<Client> {
     }
 
     ajoute(client: Client): Observable<ApiResult> {
-        const site = this.navigation.litSiteEnCours();
+        const site = this.identification.siteEnCours;
         const params: { [param: string]: string } = KeyUidRno.créeParams(site);
         params.nom = client.nom;
         params.adresse = client.adresse;
@@ -191,7 +194,7 @@ export class ClientService extends KeyUidRnoService<Client> {
         ajouté.dateEtat = new Date(Date.now());
         stock.clients.push(ajouté);
         this.stockage.fixeStock(stock);
-        this.changeSiteNbClients(1);
+        this.identification.fixeSiteBilanClients(this.bilanClients(stock));
     }
 
     quandEdite(édité: Client) {
@@ -218,6 +221,7 @@ export class ClientService extends KeyUidRnoService<Client> {
         }
         stock.clients.splice(index, 1);
         this.stockage.fixeStock(stock);
+        this.identification.fixeSiteBilanClients(this.bilanClients(stock));
     }
 
     private quandInvitation(invitation: Invitation, supprime?: boolean) {
@@ -260,8 +264,8 @@ export class ClientService extends KeyUidRnoService<Client> {
             // qui n'ont pas d'importance pour choisir un client dans la liste ou changer son état.
             return of(true);
         }
-        const site = this.navigation.litSiteEnCours();
         const identifiant = this.identification.litIdentifiant();
+        const site = Identifiant.siteEnCours(identifiant);
         const demandeApi = () => this.get<ApiClients>(ApiController.client, ApiAction.client.liste, KeyUidRno.créeParams(site));
         return this.lectureObs<ApiClients>({ demandeApi }).pipe(
             take(1),
@@ -279,7 +283,7 @@ export class ClientService extends KeyUidRnoService<Client> {
                     // on donne l'état nouveau aux clients créés par ces réponses
                     répondues.forEach(invitation => {
                         const client = nouveauStock.clients.find(c => c.email === invitation.email);
-                        client.etat = EtatClient.nouveau;
+                        client.etat = IdEtatRole.nouveau;
                     })
                 }
                 nouveauStock.date = apiClients.date;
@@ -384,7 +388,7 @@ export class ClientService extends KeyUidRnoService<Client> {
      * @param àEnvoyer  contient l'email de l'invité et la key du site
      */
     envoie(àEnvoyer: Invitation): Observable<ApiResult> {
-        const site = this.navigation.litSiteEnCours();
+        const site = this.identification.siteEnCours;
         return this.post<InvitationVersApi>(ApiController.utilisateur, ApiAction.utilisateur.invitation, InvitationVersApi.nouveau(àEnvoyer, site));
     }
     quandEnvoi(invitation: Invitation) {

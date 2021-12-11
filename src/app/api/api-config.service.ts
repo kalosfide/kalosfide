@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { AppRoutes } from '../app-pages';
 
 @Injectable()
 export class ApiConfigService {
@@ -21,11 +20,10 @@ export class ApiConfigService {
     }
 
     route(controller: string, action?: string, keyUrl?: string): string {
-        let route = this.config.UrlAPI + controller + AppRoutes.séparateur + action;
+        let route = this.config.UrlAPI + controller + '/' + action;
         if (keyUrl) {
-            route += AppRoutes.séparateur + keyUrl;
+            route += '/' + keyUrl;
         }
-        console.log(route);
         return route;
     }
 }

@@ -1,7 +1,7 @@
 import { CategorieService } from './categorie.service';
 import { DataKeyUtile } from 'src/app/commun/data-par-key/data-key-utile';
 import { Categorie } from './categorie';
-import { CategorieRoutes, CategoriePages } from 'src/app/fournisseur/catalogue/categories/categorie-pages';
+import { CategoriePages } from 'src/app/fournisseur/catalogue/categories/categorie-pages';
 import { DataKeyUtileUrl } from 'src/app/commun/data-par-key/data-key-utile-url';
 import { DataKeyUtileLien } from 'src/app/commun/data-par-key/data-key-utile-lien';
 import { CategorieUtileUrl } from './categorie-utile-url';
@@ -11,11 +11,12 @@ import { CategorieUtileOutils } from './categorie-utile-outils';
 import { DataKeyUtileColonne } from 'src/app/commun/data-par-key/data-key-utile-colonne';
 import { CategorieUtileColonne } from './categorie-utile-colonne';
 import { DataKeyUtileOutils } from 'src/app/commun/data-par-key/data-key-utile-outils';
+import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 
 export class CategorieUtile extends DataKeyUtile<Categorie> {
     constructor(service: CategorieService) {
         super(service);
-        this.dataRoutes = CategorieRoutes;
+        this.dataRouteur = Fabrique.url.appRouteur.catégorie;
         this.dataPages = CategoriePages;
         this.pUrl = new CategorieUtileUrl(this);
         this.pLien = new CategorieUtileLien(this);

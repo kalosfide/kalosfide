@@ -1,6 +1,6 @@
 import { IKeyUidRno } from './i-key-uid-rno';
 
-export abstract class KeyUidRno implements IKeyUidRno {
+export class KeyUidRno implements IKeyUidRno {
     uid: string;
     rno: number;
 
@@ -44,4 +44,8 @@ export abstract class KeyUidRno implements IKeyUidRno {
         }
         return key1.uid === key2.uid && key1.rno === key2.rno;
     }
+}
+
+export class KeyUidRnoActif extends KeyUidRno {
+    actif: boolean;
 }

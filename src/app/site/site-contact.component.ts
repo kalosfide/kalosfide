@@ -2,8 +2,8 @@ import { OnInit } from '@angular/core';
 import { PageBaseComponent } from '../disposition/page-base/page-base.component';
 import { KfSuperGroupe } from '../commun/kf-composants/kf-groupe/kf-super-groupe';
 import { KfEtiquette } from '../commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
-import { NavigationService } from '../services/navigation.service';
 import { Site } from '../modeles/site/site';
+import { IdentificationService } from '../securite/identification.service';
 
 export abstract class SiteContactComponent extends PageBaseComponent implements OnInit {
 
@@ -14,7 +14,7 @@ export abstract class SiteContactComponent extends PageBaseComponent implements 
     }
 
     constructor(
-        protected service: NavigationService,
+        protected service: IdentificationService,
     ) {
         super();
     }
@@ -25,7 +25,7 @@ export abstract class SiteContactComponent extends PageBaseComponent implements 
     }
 
     ngOnInit() {
-        this.site = this.service.litSiteEnCours();
+        this.site = this.service.siteEnCours;
         this.créeContenus();
     }
 

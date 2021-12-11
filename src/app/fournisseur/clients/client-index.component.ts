@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { PageDef } from 'src/app/commun/page-def';
-import { FournisseurClientPages, FournisseurClientRoutes } from './client-pages';
+import { FournisseurClientPages } from './client-pages';
 import { Site } from 'src/app/modeles/site/site';
-import { Identifiant } from 'src/app/securite/identifiant';
 import { ActivatedRoute, Data } from '@angular/router';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { Client } from 'src/app/modeles/client/client';
@@ -13,8 +12,7 @@ import { ModeTable } from 'src/app/commun/data-par-key/condition-table';
 import { EtatTable } from 'src/app/disposition/fabrique/etat-table';
 import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
 import { KfGéreCss } from 'src/app/commun/kf-composants/kf-partages/kf-gere-css';
-import { KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
-import { EtatClient } from 'src/app/modeles/client/etat-client';
+import { IdEtatRole } from 'src/app/modeles/role/etat-role';
 import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
 import { Invitation } from 'src/app/modeles/client/invitation';
 
@@ -30,10 +28,9 @@ export class ClientIndexComponent extends KeyUidRnoIndexComponent<Client> implem
     }
 
     dataPages = FournisseurClientPages;
-    dataRoutes = FournisseurClientRoutes;
 
     site: Site;
-    identifiant: Identifiant;
+
     invitations: Invitation[];
 
     constructor(
@@ -41,11 +38,13 @@ export class ClientIndexComponent extends KeyUidRnoIndexComponent<Client> implem
         protected service: ClientService,
     ) {
         super(route, service);
+        this.fixeDefRéglagesVueTable('clients.clients', (c: Client) => c.uid);
     }
 
     créeGroupeTableDef(): IGroupeTableDef<Client> {
         const outils = Fabrique.vueTable.outils<Client>();
         outils.ajoute(this.service.utile.outils.client());
+        outils.ajoute(this.service.utile.outils.état());
         outils.texteRienPasseFiltres = `Il n'y a pas de client correspondant aux critères de recherche.`;
         outils.ajoute(this.service.utile.outils.ajoute());
         const etatTable = Fabrique.vueTable.etatTable({
@@ -71,7 +70,7 @@ export class ClientIndexComponent extends KeyUidRnoIndexComponent<Client> implem
                     const gereCss = new KfGéreCss();
                     gereCss.ajouteClasse({
                         nom: this.service.utile.classeNouveau,
-                        active: () => t.etat === EtatClient.nouveau
+                        active: () => t.etat === IdEtatRole.nouveau
                     });
                     return gereCss;
                 },
@@ -81,8 +80,16 @@ export class ClientIndexComponent extends KeyUidRnoIndexComponent<Client> implem
         };
     }
 
-    protected chargeGroupe() {
+    /**
+     * Charge les options des filtres.
+     * Charge le groupe d'affichage de l'état de la liste.
+     * Charge la liste dans la vueTable.
+     * Appelée aprés le chargement de la liste de la table et la création du superGroupe.
+     */
+     protected chargeGroupe() {
+        // charge le groupe d'affichage de l'état de la liste
         this.groupeTable.etat.charge();
+        // charge la liste dans la vueTable
         this._chargeVueTable(this.liste);
     }
 
@@ -91,8 +98,7 @@ export class ClientIndexComponent extends KeyUidRnoIndexComponent<Client> implem
     }
 
     avantChargeData() {
-        this.site = this.service.navigation.litSiteEnCours();
-        this.identifiant = this.service.identification.litIdentifiant();
+        this.site = this.service.litSiteEnCours();
     }
 
     chargeData(data: Data) {

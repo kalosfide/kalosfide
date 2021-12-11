@@ -1,17 +1,16 @@
 import { FabriqueMembre } from './fabrique-membre';
-import { FabriqueClasse, Fabrique } from './fabrique';
+import { FabriqueClasse } from './fabrique';
 import { PageDef } from 'src/app/commun/page-def';
 import { IKfVueTableDef } from 'src/app/commun/kf-composants/kf-vue-table/i-kf-vue-table-def';
 import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 import { TexteOutils } from 'src/app/commun/outils/texte-outils';
-import { IdEtatSite } from 'src/app/modeles/etat-site';
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
 import { FournisseurPages } from 'src/app/fournisseur/fournisseur-pages';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
 
 export class EtatSite extends FabriqueMembre {
-    id: IdEtatSite;
+    ouvert: boolean;
 
     /**
      * nom de l'état
@@ -84,7 +83,7 @@ export class FabriqueEtatSite extends FabriqueMembre {
 
     private créeCatalogue(): EtatSite {
         const état = new EtatSite(this.fabrique);
-        état.id = IdEtatSite.catalogue;
+        état.ouvert = false;
         état.pageDef = FournisseurPages.catalogue;
         état.nom = 'Catalogue';
         état.article = 'la';
@@ -113,7 +112,7 @@ export class FabriqueEtatSite extends FabriqueMembre {
 
     private créeOuvert(): EtatSite {
         const état = new EtatSite(this.fabrique);
-        état.id = IdEtatSite.ouvert;
+        état.ouvert = true;
         état.pageDef = null;
         état.nom = 'Ouvert';
         état.titre = 'Commandes ouvertes';
@@ -152,16 +151,5 @@ export class FabriqueEtatSite extends FabriqueMembre {
 
     get états(): EtatSite[] {
         return this.pEtats;
-    }
-
-    état(id: string): EtatSite {
-        switch (id) {
-            case IdEtatSite.ouvert:
-                return this.ouvert;
-            case IdEtatSite.catalogue:
-                return this.catalogue;
-            default:
-                return undefined;
-        }
     }
 }

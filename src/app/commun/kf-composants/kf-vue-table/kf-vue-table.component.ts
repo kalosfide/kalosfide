@@ -1,4 +1,4 @@
-import { Component, ViewChild, AfterViewInit, ElementRef, AfterViewChecked, OnInit } from '@angular/core';
+import { Component, ViewChild, AfterViewInit, ElementRef, AfterViewChecked, OnInit, ViewEncapsulation } from '@angular/core';
 import { KfComposantComponent } from '../kf-composant/kf-composant.component';
 import { IKfVueTable } from './kf-vue-table';
 import { TraiteKeydownService } from '../../traite-keydown/traite-keydown.service';
@@ -6,7 +6,8 @@ import { TraiteKeydownService } from '../../traite-keydown/traite-keydown.servic
 @Component({
     selector: 'app-kf-vue-table',
     templateUrl: './kf-vue-table.component.html',
-    styleUrls: ['../kf-composants.scss']
+    styleUrls: ['../kf-composants.scss'],
+    encapsulation: ViewEncapsulation.None
 })
 export class KfVueTableComponent extends KfComposantComponent implements OnInit, AfterViewInit, AfterViewChecked {
     @ViewChild('tableElement', {static: false}) tableElement: ElementRef;

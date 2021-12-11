@@ -5,12 +5,11 @@ import { Router, NavigationEnd, ActivatedRoute, ActivatedRouteSnapshot } from '@
 import { filter, distinctUntilChanged } from 'rxjs/operators';
 import { PageDef } from '../commun/page-def';
 import { AttenteService } from './attente.service';
-import { SiteRoutes } from '../site/site-pages';
 import { StockageService } from './stockage/stockage.service';
 import { Stockage } from './stockage/stockage';
-import { KeyUidRno } from '../commun/data-par-key/key-uid-rno/key-uid-rno';
 import { NavigationSegment } from './navigation-segment';
-import { ConditionEtatSite } from '../commun/data-par-key/condition-etat-site';
+import { IdentificationService } from '../securite/identification.service';
+import { Fabrique } from '../disposition/fabrique/fabrique';
 
 /**
  * Rassemble les membres statiques à ajouter à la propriété data d'une Route pour définir
@@ -18,15 +17,15 @@ import { ConditionEtatSite } from '../commun/data-par-key/condition-etat-site';
  */
 export interface IRouteData {
     /**
-     * Si la route a un path non vide, son data doit avoir un pageDef et le path est l'urlSegment de ce pageDef
+     * Si la route a un path non vide, son data doit avoir un pageDef et le path est le path de ce pageDef
      */
     pageDef?: PageDef;
     /**
      * Si la route a un path non vide et est redirigée car son premier enfant a un path vide
      * et si son descendant par défaut est le point d'arrivée du routeur, title, titre et path de son NavigationSegment
-     * sont composés des title, titre et urlSegment de sa PageDef et de celle du descendant par défaut.
+     * sont composés des title, titre et path de sa PageDef et de celle du descendant par défaut.
      * Si son descendant par défaut n'est pas le point d'arrivée du routeur, title, titre de son NavigationSegment sont
-     * ceux de sa PageDef et le path de son NavigationSegment est composés des urlSegment de sa PageDef
+     * ceux de sa PageDef et le path de son NavigationSegment est composés des path de sa PageDef
      * et de celle du descendant par défaut.
      */
     pageDefDescendantParDéfaut?: PageDef;
@@ -54,8 +53,6 @@ export class NavigationService implements OnDestroy {
 
     private keySiteSubject = new Subject<Site>();
 
-    private pConditionSite: ConditionEtatSite;
-
     private actionsAprèsNavigation: (() => void)[] = [];
     private actionsAprèsNavigationCommencées: boolean;
 
@@ -64,6 +61,7 @@ export class NavigationService implements OnDestroy {
         public activatedRoute: ActivatedRoute,
         stockageService: StockageService,
         private pAttenteService: AttenteService,
+        private pIdentification: IdentificationService
     ) {
         this.stockageHistorique = stockageService.nouveau<string[]>('Historique');
         this.stockageNavigation = stockageService.nouveau<NavigationSegment[]>('Navigation');
@@ -83,7 +81,6 @@ export class NavigationService implements OnDestroy {
             // tous les stockages dépendant du site sont vidés quand le site change
             déclencheVidage: this.keySiteSubject.asObservable()
         });
-        this.pConditionSite = new ConditionEtatSite(this);
         this.initialise();
     }
 
@@ -111,12 +108,6 @@ export class NavigationService implements OnDestroy {
                 this.stockageHistorique.fixeStock([...this.historique(), navigationEnd.urlAfterRedirects]);
                 this.historiqueAChangé.next(true);
                 this.stockageNavigation.fixeStock(this.créeNavigationsSegments());
-
-                const urlSite = SiteRoutes.urlSite(navigationEnd.urlAfterRedirects);
-                // le seul changement de site qui n'est pas traité par SiteResolver est un retour à la racine
-                if (urlSite === undefined && this.stockageSite) {
-                    this.fixeSiteEnCours(null);
-                }
 
                 if (this.actionsAprèsNavigation.length > 0) {
                     this.actionsAprèsNavigationCommencées = true;
@@ -224,7 +215,7 @@ export class NavigationService implements OnDestroy {
             dernierSnapshot = snapshot;
             snapshot = snapshot.firstChild;
         }
-        console.log(segments);
+//        console.log(segments);
         segments[segments.length - 1].path = '';
         return segments;
     }
@@ -242,31 +233,6 @@ export class NavigationService implements OnDestroy {
     public urlPrécédente(): string {
         const historique = this.historique();
         return historique.length > 1 ? historique[historique.length - 2] : null;
-    }
-
-    public routePasseParSite(): boolean {
-        const historique = this.historique();
-        return historique.length > 0 && SiteRoutes.urlSite(historique[historique.length - 1]) !== undefined;
-    }
-
-    public litSiteEnCours(): Site {
-        const isite = this.stockageSite.litStock();
-        return isite ? new Site(isite) : null;
-    }
-    public fixeSiteEnCours(site: Site) {
-        this.stockageSite.fixeStock(site);
-    }
-
-    public siteObs(): Observable<Site> {
-        return this.siteSubject.asObservable();
-    }
-
-    public keySiteObs(): Observable<KeyUidRno> {
-        return this.keySiteSubject.asObservable();
-    }
-
-    get conditionSite(): ConditionEtatSite {
-        return this.pConditionSite;
     }
 
     /**

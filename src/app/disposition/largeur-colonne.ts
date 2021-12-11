@@ -1,7 +1,7 @@
 export const LargeurColonne = {
     no_ligne: "60px",
     date: "120px",
-    client_état: "130px",
+    role_état: "130px",
     client_compte: "100px",
     nombre: "120px",
     prix: "150px",

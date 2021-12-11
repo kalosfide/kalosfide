@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, of, Subject } from 'rxjs';
 import { ApiAction, ApiController } from 'src/app/api/api-route';
 import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
-import { concatMap, tap, map, switchMap } from 'rxjs/operators';
+import { concatMap, map, switchMap } from 'rxjs/operators';
 import { ApiRequêteService } from 'src/app/api/api-requete.service';
 import { Site } from 'src/app/modeles/site/site';
 import { StockageService } from 'src/app/services/stockage/stockage.service';
@@ -12,20 +12,17 @@ import { CLFDocs } from 'src/app/modeles/c-l-f/c-l-f-docs';
 import { CatalogueService } from 'src/app/modeles/catalogue/catalogue.service';
 import { ClientService } from 'src/app/modeles/client/client.service';
 import { CLFDoc } from '../modeles/c-l-f/c-l-f-doc';
-import { IdEtatSite } from '../modeles/etat-site';
 import { ApiResult } from '../api/api-results/api-result';
 import { ApiResult409Conflict } from '../api/api-results/api-result-409-conflict';
-import { ApiDocumentsData } from '../modeles/c-l-f/api-documents-client-data';
-import { Identifiant } from '../securite/identifiant';
-import { Client } from '../modeles/client/client';
+import { ApiDocs } from '../modeles/c-l-f/api-docs';
 import { ContexteCatalogue } from './contexte-catalogue';
-import { Catalogue } from '../modeles/catalogue/catalogue';
-import { CLFFiltre } from '../modeles/c-l-f/c-l-f-filtre';
-import { SiteService } from '../modeles/site/site.service';
 import { Fabrique } from '../disposition/fabrique/fabrique';
 import { KfComposant } from '../commun/kf-composants/kf-composant/kf-composant';
 import { KfEtiquette } from '../commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 import { ClientUtile } from '../modeles/client/client-utile';
+import { UrlTree } from '@angular/router';
+import { ApiResult200Ok } from '../api/api-results/api-result-200-ok';
+import { Client } from '../modeles/client/client';
 
 @Injectable({
     providedIn: 'root'
@@ -41,16 +38,53 @@ export class ClientCLFService extends CLFService {
         protected stockageService: StockageService,
         protected clientService: ClientService,
         protected apiRequeteService: ApiRequêteService,
-        private siteService: SiteService
     ) {
         super('CLFClient', catalogueService, stockageService, clientService, apiRequeteService);
         this.utile.utilisateurEstLeClient = true;
+        this.utile.url.fixeRoutesDocument();
         this.pStockChargéSubject = new Subject<CLFDocs>();
         this.traiteErreur = this.traiteErreur409.bind(this);
     }
 
     get clientUtile(): ClientUtile {
         return this.clientService.utile;
+    }
+
+    /**
+     * Lit l'état du site en cours dans la bdd et si changé, met à jour les stockages du site
+     * et si le site a fermé, vide le stockage du catalogue et met un contexte dans le stockage des docs
+     * et si le site a réouvert, affiche une fenêtre modale  d'information.
+     * @returns of(true)
+     */
+    litEtatSiteEtRetourneTrue(): Observable<boolean> {
+        const site = this.litSiteEnCours();
+        return this.catalogueService.contexteChangé(site).pipe(
+            switchMap(changé => {
+                if (!changé) {
+                    return of(true);
+                }
+                // la variable site a été modifié
+                if (site.ouvert) {
+                    const defs: { titre: string, textes: string[] } = this.clientUtile.textesEtatSite(true)
+                    const infos: KfComposant[] = [];
+                    let étiquette: KfEtiquette;
+                    defs.textes.forEach(texte => {
+                        étiquette = Fabrique.ajouteEtiquetteP(infos);
+                        étiquette.ajouteTextes(texte);
+                    });
+                    const modal = Fabrique.infoModal(defs.titre, infos, 'success');
+                    return this.modalService.confirme(modal);
+                } else {
+                    this.catalogueService.fixeStock(null);
+                    const clfDocs = new CLFDocs();
+                    clfDocs.type = 'commande';
+                    clfDocs.site = site;
+                    this.fixeStock(clfDocs);
+                    this.routeur.navigueUrlDef(this.utile.url.sitePasOuvert());
+                }
+                return of(true);
+            })
+        );
     }
 
     /// SECTION Observables du stock
@@ -96,7 +130,7 @@ export class ClientCLFService extends CLFService {
      * L'erreur 409 Conflict est retournée quand une requête Api émise par un client ne peut pas être exécutée
      * parce qu'une modification du catalogue est en cours ou a eu lieu depuis le chargement du site. L'objet
      * contenu dans l'erreur est un ClfDocs contexte
-     * Le traitement de l'erreur met à jour, s'il a changé, l'état des site stockés, stocke le contexte et redirige vers la page Contexte.
+     * Le traitement de l'erreur met à jour, s'il a changé, l'état des site stockés, stocke le contexte.
      */
     get traiteErreur409(): (apiResult: ApiResult) => boolean {
         return (apiResult: ApiResult) => {
@@ -106,197 +140,145 @@ export class ClientCLFService extends CLFService {
             }
             // une modification du catalogue est en cours ou a eu lieu depuis le chargement du stock
             const contexte: ContexteCatalogue = (apiResult as ApiResult409Conflict).erreur as ContexteCatalogue;
-            const site = this.navigation.litSiteEnCours();
+            const site = this.litSiteEnCours();
             // le site en mémoire était d'état ouvert quand la requête a été émise
-            if (contexte.etatSite === IdEtatSite.catalogue) {
-                // l'état du site a changé depuis le chargement du site
-                site.etat = IdEtatSite.catalogue;
-                this.navigation.fixeSiteEnCours(site);
-                this.identification.fixeSiteIdentifiant(site);
+            if (contexte.ouvert) {
+                // la modification du catalogue a eu lieu et la date du catalogue a changé depuis le chargement du site
+                site.dateCatalogue = contexte.dateCatalogue;
+            } else {
+                // une modification du catalogue est en cours
+                site.ouvert = false;
             }
+            this.identification.fixeSite(site);
             const clfDocs = new CLFDocs();
             clfDocs.type = 'commande';
             clfDocs.site = site;
-            clfDocs.catalogue = Catalogue.deDate(contexte.dateCatalogue);
             this.fixeStock(clfDocs);
-            const urlDef = this.utile.url.sitePasOuvert();
-            urlDef.params = [{ nom: 'err', valeur: '409' }];
-            this.routeur.navigueUrlDef(urlDef);
             return true;
         }
     }
 
     /**
-     * Le CLFDocs lu dans l'Api.
-     * Si le site est d'état Catalogue, retourne un contexte Catalogue: état site = Catalogue, date catalogue = DateNulle.
-     * Si le site est ouvert et si l'utilisateur a passé la date de son catalogue
-     * et si la date du catalogue utilisateur est postérieure à celle du catalogue de la bdd, les données utilisateur sont à jour,
-     * retourne un contexte Ok: état site = ouvert, date catalogue = DataNulle.
-     * Si le site est ouvert et si l'utilisateur a passé la date de son catalogue
-     * et si la date du catalogue utilisateur est antérieure à celle du catalogue de la bdd
-     * retourne un contexte Périmé: état site = ouvert, date catalogue = celle du catalogue de la bdd.
-     * Si le site est ouvert et si l'utilisateur n'a pas passé la date de son catalogue, il n'y pas de données utilisateur,
-     * retourne un CLFDocs dont le champ Documents contient les données pour client de la dernière commande du client
-     * Pas stocké.
+     * Crée et stocke un ClfDocs qui contient le document en cours ou est un contexte avec l'état du site et la date du catalogue.
+     * Si le site est fermé, le ClfDocs stocké est le contexte { état: Catalogue, date: null }.
+     * Si le site est ouvert, si le stock existait et n'était pas un contexte, il est remplacé par le contexte
+     * { état: Ouvert, date du catalogue de la bdd } s'il est périmé.
+     * Si le site est ouvert, si le stock n'existait pas ou était un contexte, le ClfDocs stocké contient le document en cours.
+     * @returns un Observable qui émet true ou l'UrlTree de la page pasOuvert si le ClfDocs stocké est un contexte
      */
-    private litClfDocs(controller: string, action: string, params: { [param: string]: string }): Observable<CLFDocs> {
-        const clfDocs$: Observable<CLFDocs> = this.lectureObs<ApiDocumentsData>({
-            demandeApi: () => this.get<ApiDocumentsData>(controller, action, params),
-            traiteErreur: this.traiteErreur409
-        }).pipe(
-            map(datas => {
-                const clfDocs = new CLFDocs();
-                clfDocs.charge(datas);
-                return clfDocs;
-            })
-        );
-        return clfDocs$;
-    }
-
-    /**
-     * Charge le contexte.
-     * Si site pas ouvert ou catalogue périmé, stocke le contexte et redirige vers ./contexte.
-     * Sinon, si le stock n'existe pas ou est un contexte, charge et stocke le cflDocs
-     */
-    private clfDocsDeBon(): Observable<CLFDocs> {
-        const site: Site = this.navigation.litSiteEnCours();
-        const identifiant: Identifiant = this.identification.litIdentifiant();
-        const client: Client = identifiant.roleParUrl(site.url) as Client;
+    chargeDocumentOuContexte(): Observable<boolean | UrlTree> {
+        const role = this.identification.roleEnCours;
+        const site: Site = role.site;
+        const client = Client.deRole(role);
         const keyIdentifiant = {
             uid: client.uid,
             rno: client.rno
         };
-        const stock = this.litStockSiExistant();
+        let stock = this.litStockSiExistant();
+        if (stock && stock.type !== 'commande') {
+            stock = undefined;
+        }
         const params = KeyUidRno.créeParams(keyIdentifiant);
         // si le stock existe et n'est pas un contexte résultant d'une erreur 409 précédente
-        // il faut vérifier qu'il est à jour.
+        // il faut vérifier qu'il est à jour en passant la date à l'api
         if (stock && !stock.estContexte) {
-            params.dateCatalogue = '' + stock.catalogue.date;
+            params.dateCatalogue = '' + site.dateCatalogue;
         }
+
         // Si le site est d'état Catalogue
-        //  retourne l'erreur 409 avec contexte Catalogue: état site = Catalogue, date catalogue = null.
-        // Sinon,
-        //  si le stock existe, la date du catalogue du stock est passée en paramètre
-        //      si la date du catalogue du stock est antérieure à celle du catalogue de la bdd
-        //          retourne l'erreur 409 avec contexte Périmé: état site = ouvert, date catalogue = celle du catalogue de la bdd
+        //  l'Api retourne l'erreur 409 avec contexte Catalogue: état site = Catalogue, date catalogue = null.
+        // Sinon, le site est d'état Ouvert,
+        //  si le stock existe et n'est pas un contexte, la date du catalogue du stock est passée en paramètre
+        //      si la date du catalogue du stock est antérieure à celle du catalogue de la bdd,
+        //          l'Api retourne l'erreur 409 avec contexte Périmé: état site = ouvert, date catalogue = celle du catalogue de la bdd
         //      sinon, le stock est à jour,
-        //          retourne un ClfDocs vide
-        // sinon
-        //      retourne un CLFDocs dont le champ Documents contient les données pour client de la dernière commande du client
-        // Si le site est d'état Catalogue, retourne un contexte Catalogue: état site = Catalogue, date catalogue = null.
-        // Si le site est ouvert et si l'utilisateur a passé la date de son catalogue
-        // et si la date du catalogue utilisateur est postérieure à celle du catalogue de la bdd, les données utilisateur sont à jour,
-        // retourne un contexte Ok: état site = ouvert, date catalogue = DataNulle.
-        // Si le site est ouvert et si l'utilisateur a passé la date de son catalogue
-        // et si la date du catalogue utilisateur est antérieure à celle du catalogue de la bdd
-        // retourne un contexte Périmé: état site = ouvert, date catalogue = celle du catalogue de la bdd.
-        // Si le site est ouvert et si l'utilisateur n'a pas passé la date de son catalogue, il n'y pas de données utilisateur,
-        // retourne un CLFDocs dont le champ Documents contient les données pour client de la dernière commande du client
-        return this.lectureObs<ApiDocumentsData>({
-            demandeApi: () => this.get<ApiDocumentsData>(ApiController.commande, ApiAction.bon.encours, params),
-            traiteErreur: this.traiteErreur409
-        }).pipe(
-            concatMap(datas => {
-                if (!datas.documents) {
-                    // l'ApiDocumentsData retourné est vide donc le stock existe et et à jour
-                    return of(stock);
+        //          l'Api retourne un ApiDocs vide
+        // sinon, le stock n'existe pas ou est un contexte,
+        //      l'Api retourne un ApiDocs dont le champ Documents contient les données pour client de la dernière commande du client
+        const demandeApi = () => this.get<ApiDocs>(ApiController.commande, ApiAction.bon.encours, params);
+
+        // Si l'api a retourné l'erreur 409, met à jour l'état des sites stockés s'il a changé, crée et stocke un ClfDocs contexte
+        // et convertit l'erreur 409 en ApiResult204NoContent
+        const convertitErreur409: (apiResult: ApiResult) => ApiResult = (apiResult: ApiResult) => {
+                if (apiResult.statusCode !== ApiResult409Conflict.code) {
+                    // ce n'est pas une erreur du contexte
+                    return apiResult;
                 }
+                // une modification du catalogue est en cours ou a eu lieu depuis le chargement du stock
+                const contexte: ContexteCatalogue = (apiResult as ApiResult409Conflict).erreur as ContexteCatalogue;
+                const site = this.identification.siteEnCours;
+                // le site en mémoire était d'état ouvert quand la requête a été émise
+                if (!contexte.ouvert) {
+                    // l'état du site a changé depuis le chargement du site
+                    site.ouvert = contexte.ouvert;
+                    site.dateCatalogue = contexte.dateCatalogue;
+                    this.identification.fixeSite(site);
+                }
+                // crée et stocke un ClfDocs contexte
                 const clfDocs = new CLFDocs();
                 clfDocs.type = 'commande';
                 clfDocs.site = site;
-                clfDocs.client = client;
-                clfDocs.documents = datas.documents;
-                const tarifs = clfDocs.documents.filter(d => !!d.tarif).map(d => d.tarif);
-                return this.catalogueService.disponiblesAvecPrixDatés(site, tarifs).pipe(
-                    map(catalogue => {
-                        clfDocs.catalogue = catalogue;
-                        this.fixeStock(clfDocs);
-                        return clfDocs;
-                    })
-                );
-            })
-        );
-    }
+                this.fixeStock(clfDocs);
+                return new ApiResult200Ok(null);
+            }
 
-    /**
-     * Lit l'état du site en cours dans la bdd et si changé, met à jour les stockages du site
-     * et si le site a fermé, vide le stockage du catalogue et met un contexte dans le stockage des docs
-     * et si le site a réouvert, affiche une fenêtre modale  d'information.
-     * @returns of(true)
-     */
-    litEtatSiteEtRetourneTrue(): boolean | Observable<boolean> {
-        const site = this.navigation.litSiteEnCours();
-        return this.siteService.litEtat().pipe(
-            switchMap(état => {
-                if (état === site.etat) {
-                    // site n'a pas changé même si le stockage a été mis à jour
-                    return of(true);
-                }
-                if (état === IdEtatSite.ouvert) {
-                    const defs: { titre: string, textes: string[] } = this.clientUtile.textesEtatSite(IdEtatSite.ouvert)
-                    const infos: KfComposant[] = [];
-                    let étiquette: KfEtiquette;
-                    defs.textes.forEach(texte => {
-                        étiquette = Fabrique.ajouteEtiquetteP(infos);
-                        étiquette.ajouteTextes(texte);
-                    });
-                    const modal = Fabrique.infoModal(defs.titre, infos);
-                    return this.modalService.confirme(modal);
-                } else {
-                    this.catalogueService.fixeStock(null);
+            return this.lectureObs<ApiDocs>({
+                demandeApi,
+                convertitResult: convertitErreur409
+            }).pipe(
+                concatMap(datas => {
+                    if (!datas) {
+                        // l'erreur 409 a été convertie en ApiResult200Ok(null)
+                        // et le stockage contient un ClfDocs contexte
+                        const urlDef = this.utile.url.sitePasOuvert();
+                        urlDef.params = [{ nom: 'err', valeur: '409' }];
+                        return of(this.routeur.urlTreeUrlDef(urlDef));
+                    }
+                    if (!datas.apiDocs) {
+                        // l'ApiDocs retourné est vide donc le stock existait et était à jour
+                        return of(true);
+                    }
+                    // le stock n'existait pas ou n'était pas à jour 
                     const clfDocs = new CLFDocs();
                     clfDocs.type = 'commande';
                     clfDocs.site = site;
-                    clfDocs.catalogue = Catalogue.deDate();
-                    this.fixeStock(clfDocs);
-                    this.routeur.navigueUrlDef(this.utile.url.sitePasOuvert());
-                }
-                return of(true);
-            })
-        );
+                    clfDocs.client = client;
+                    clfDocs.apiDocs = datas.apiDocs;
+                    return this.catalogueService.catalogue$().pipe(
+                        map(catalogue => {
+                            // Pour être sur que le catalogue est chargé
+                            this.fixeStock(clfDocs);
+                            clfDocs.catalogue = catalogue;
+                            return true;
+                        })
+                    );
+                })
+            );
     }
 
     /**
-     * Charge le contexte.
-     * Si site pas ouvert ou catalogue périmé, stocke le contexte et redirige vers ./contexte.
-     * Sinon, si le stock n'existe pas ou est un contexte, charge et stocke le cflDocs
-     */
-    gardePageBon(): Observable<boolean> {
-        return this.clfDocsDeBon().pipe(
-            map(clfDocs => {
-                return clfDocs !== null;
-            })
-        );
-    }
-
-    /**
-     * Garde si le stock existe et est un contexte.
-     * Redirige vers bon sinon
-     */
-    gardeContexte(): boolean {
-        const stock = this.litStock();
-        if (stock && stock.estContexte) {
-            return true;
-        }
-        // Pas de boucle contexte->bon->contexte
-        this.routeur.navigueUrlDef(this.utile.url.bon());
-        return false;
-    }
-
-    /**
-     * Le stock existe car gardePageBon garde aussi envoi
+     * Le stock existe et n'est pas un contexte car chargeDocumentOuContexte garde aussi envoi
      * retourne vrai si le document est prêt à l'envoi
      */
-    gardeEnvoi(): Observable<boolean> {
-        return this.clfDocsDeBon().pipe(
-            map(clfDocs => {
-                if (clfDocs) {
-                    const apiDoc = clfDocs.documents[0];
+    gardeEnvoi(): Observable<boolean | UrlTree> {
+        return this.chargeDocumentOuContexte().pipe(
+            map((result: boolean | UrlTree) => {
+                if (result === true) {
+                    const stock = this.litStockSiExistant();
+                    if (!stock) {
+                        return this.routeur.urlTreeUrlDef(this.utile.url.bon());
+                    }
+                    if (stock.estContexte) {
+                        const urlDef = this.utile.url.sitePasOuvert();
+                        urlDef.params = [{ nom: 'err', valeur: '409' }];
+                        return this.routeur.urlTreeUrlDef(urlDef);
+                    }
+                    const apiDoc = stock.apiDocs[0];
                     return !apiDoc.date && apiDoc.lignes.length > 0;
                 }
-                return false;
+                return result;
             })
-        );
+        )
     }
 
     /**
@@ -331,32 +313,19 @@ export class ClientCLFService extends CLFService {
 
     // API
 
-    protected _paramsAvecContexte(params: { [param: string]: string }): { [param: string]: string } {
-        const stock = this.litStock();
-        params.dateCatalogue = '' + stock.catalogue.date;
-        return params;
-    }
-
     /**
-     * Le CLFDocs lu dans l'Api contient les listes des résumés des documents du client avec leur type.
-     * Le CLFDocs retourné contient le Client du client.
-     * Pas stocké.
+     * Contextualise les paramétres d'une requête.
+     * L'utilisateur est le client, on ajoute la date du catalogue du stock aux paramétres de la requête.
+     * @param params paramétres de la requête
+     * @returns params contextualisé
      */
-    documents(): Observable<CLFDocs> {
-        const site = this.navigation.litSiteEnCours();
-        const identifiant = this.identification.litIdentifiant();
-        const client: Client = identifiant.roleParUrl(site.url) as Client;
-        const controller = ApiController.document;
-        const action = ApiAction.document.client;
-        if (!this.pFiltre || this.pFiltre.uid !== client.uid || this.pFiltre.rno !== client.rno) {
-            this.pFiltre = new CLFFiltre(client);
+     protected paramsAvecContexte(params: { [param: string]: string }): { [param: string]: string } {
+        const stock = this.litStockSiExistant();
+        if (stock) {
+            const site = this.litSiteEnCours();
+            params.dateCatalogue = '' + site.dateCatalogue;
         }
-        return this._clfDocs$(site, controller, action, this.pFiltre.créeParams()).pipe(
-            tap(clfDocs => {
-                clfDocs.site = site;
-                clfDocs.client = client;
-            })
-        );
+        return params;
     }
 
 }

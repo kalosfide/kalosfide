@@ -1,5 +1,5 @@
 import {
-    Component, OnInit, ViewChild, AfterViewInit, ElementRef
+    Component, OnInit, ViewChild, AfterViewInit, ElementRef, ViewEncapsulation
 } from '@angular/core';
 import { KfComposantComponent } from '../kf-composant/kf-composant.component';
 import { TraiteKeydownService } from '../../traite-keydown/traite-keydown.service';
@@ -13,7 +13,8 @@ import { KfMenu } from './kf-menu';
             [composant]="sousMenu"></app-kf-sous-menu>
     </div>
 `,
-    styleUrls: ['../kf-composants.scss']
+    styleUrls: ['../kf-composants.scss'],
+    encapsulation: ViewEncapsulation.None
 })
 export class KfMenuComponent extends KfComposantComponent implements OnInit, AfterViewInit {
     @ViewChild('divElement', {static: false}) divElementRef: ElementRef;

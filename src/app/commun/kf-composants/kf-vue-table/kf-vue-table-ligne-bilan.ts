@@ -21,8 +21,11 @@ export class KfVueTableLigneBilan<T> extends KfVueTableLigneBase<T> implements I
             // une colonne sans bilan qui est la première colonne ou qui suit une colonne avec bilan contient une cellule qui s'étend jusqu'à la colonne avec bilan suivante
             // ou jusqu'à la dernière colonne s'il n'y a pas de colonne avec bilan suivante
             // toutes les colonnes entre deux colonnes avec bilan forme une seule cellule contenant le titre du bilan de la seconde
-            this.pCellules.push(new KfVueTableCelluleBilan<T>(colonne, this, colonneAvecBilan),
-            new KfVueTableCelluleBilan<T>(colonneAvecBilan, this, colonneAvecBilan));
+            if (colonne !== colonneAvecBilan) {
+                // il y a des colonnes sans bilan
+                this.pCellules.push(new KfVueTableCelluleBilan<T>(colonne, this, colonneAvecBilan));
+            }
+            this.pCellules.push(new KfVueTableCelluleBilan<T>(colonneAvecBilan, this, colonneAvecBilan));
             indexColonneAvecBilanPrécédente = colonneAvecBilan.index;
             indexDansColonnesAvecBilan++;
         }

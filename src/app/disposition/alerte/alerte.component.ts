@@ -1,5 +1,5 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
-import { Alerte, TypeAlerte } from './alerte';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Alerte } from './alerte';
 import { AlerteService } from './alerte-service';
 import { Subscription } from 'rxjs';
 import { NavigationService } from 'src/app/services/navigation.service';

@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, CanActivateChild } from '@angular/router';
+import { CanActivate, UrlTree } from '@angular/router';
 import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
-import { NavigationService } from 'src/app/services/navigation.service';
+import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
+import { IdentificationService } from 'src/app/securite/identification.service';
 import { RouteurService } from 'src/app/services/routeur.service';
-import { IdEtatSite } from 'src/app/modeles/etat-site';
-import { CategoriePages, CategorieRoutes } from './categorie-pages';
+import { CategoriePages } from './categorie-pages';
 
 @Injectable({
     providedIn: 'root',
@@ -13,23 +13,19 @@ import { CategoriePages, CategorieRoutes } from './categorie-pages';
 /**
  * redirige vers l'index des catégories si le site n'est pas d'état catalogue
  */
-export class CategorieSitePasCatalogueGarde implements CanActivate, CanActivateChild {
+export class CategorieSitePasCatalogueGarde implements CanActivate {
 
     constructor(
         private routeur: RouteurService,
-        private navigation: NavigationService,
+        private identification: IdentificationService,
     ) {
     }
 
-    canActivate(_route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): Observable<boolean> | boolean {
-        const site = this.navigation.litSiteEnCours();
-        if (site.etat !== IdEtatSite.catalogue) {
-            this.routeur.naviguePageDef(CategoriePages.index, CategorieRoutes, site.url);
-            return false;
+    canActivate(_route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): Observable<boolean | UrlTree> | boolean | UrlTree {
+        const site = this.identification.siteEnCours;
+        if (site.ouvert) {
+            return this.routeur.urlTreePageDef(CategoriePages.index, Fabrique.url.appRouteur.catégorie);
         }
         return true;
-    }
-    canActivateChild(childRoute: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | Observable<boolean> | Promise<boolean> {
-        return this.canActivate(childRoute, state);
     }
 }

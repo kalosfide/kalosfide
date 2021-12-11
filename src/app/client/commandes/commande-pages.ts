@@ -1,17 +1,15 @@
-import { SitePages, iSiteRoutePlusSegments } from 'src/app/site/site-pages';
-import { ClientRoutes, ClientPages } from 'src/app/client/client-pages';
 import { PageDef } from 'src/app/commun/page-def';
 import { CLFPages } from 'src/app/modeles/c-l-f/c-l-f-pages';
 
 export class CommandePages {
 
     /**
-     * Route: commande/bon/:[nomParamNoDoc]
+     * Route: commande/bon/:[NomParam.noDoc]
      * Garde des enfants: RedirigeSiContexteChangé
      * Pas de page.
      */
     static bon: PageDef = {
-        urlSegment: CLFPages.bon.urlSegment,
+        path: CLFPages.bon.path,
         title: CLFPages.bon.title,
         titre: CLFPages.bon.titre,
     };
@@ -23,7 +21,7 @@ export class CommandePages {
      * Lien ajouter vers choixProduit.
      */
     static lignes: PageDef = {
-        urlSegment: CLFPages.lignes.urlSegment,
+        path: CLFPages.lignes.path,
         lien: CLFPages.lignes.lien,
         title: CLFPages.lignes.title,
         titre: CLFPages.lignes.titre,
@@ -36,9 +34,9 @@ export class CommandePages {
      * Boutons créer et éventuellement copier
      */
     static nouveau: PageDef = {
-        urlSegment: CLFPages.nouveau.urlSegment,
+        path: CLFPages.nouveau.path,
         title: CLFPages.nouveau.title,
-        titre: CLFPages.nouveau.titre,
+        titre: 'Nouveau bon de commande'
     };
 
     /**
@@ -46,18 +44,18 @@ export class CommandePages {
      * Page de choix du produit d'une ligne à ajouter à une commande.
      */
     static choixProduit: PageDef = {
-        urlSegment: CLFPages.choixProduit.urlSegment,
+        path: CLFPages.choixProduit.path,
         title: CLFPages.choixProduit.title,
         titre: CLFPages.choixProduit.titre,
     };
 
     /**
-     * Route: ./ajoute/:[nomParamNoLigne]
+     * Route: ./ajoute/:[NomParam.noLigne]
      * Page d'édition d'une ligne à ajouter à une commande.
-     * Param nomParamNoLigne: no du produit de la ligne
+     * Param NomParam.noLigne: no du produit de la ligne
      */
     static ajoute: PageDef = {
-        urlSegment: CLFPages.ajoute.urlSegment,
+        path: CLFPages.ajoute.path,
         title: CLFPages.ajoute.title,
         titre: CLFPages.ajoute.titre,
     };
@@ -69,7 +67,7 @@ export class CommandePages {
      * Lien: avant envoi, annuler vers ./client/:key/bons; après envoi, vers ./clients
      */
     static envoi: PageDef = {
-        urlSegment: CLFPages.envoi.urlSegment,
+        path: CLFPages.envoi.path,
         title: CLFPages.envoi.title,
         titre: CLFPages.envoi.titre + ' le bon de commande',
     };
@@ -81,16 +79,14 @@ export class CommandePages {
      * Lien: annuler vers ./client/:key/bons (fournisseur) ou ./ (client).
      */
     static annule: PageDef = {
-        urlSegment: CLFPages.annule.urlSegment,
+        path: CLFPages.annule.path,
         title: CLFPages.annule.title,
         titre: CLFPages.annule.titre + ' la commande',
     };
 
     static contexte: PageDef = {
-        urlSegment: 'contexte',
+        path: 'contexte',
         title: 'Arrêt',
         titre: 'Arrêt des commandes',
     };
 }
-
-export const CommandeRoutes = iSiteRoutePlusSegments(ClientRoutes, [ClientPages.commandes.urlSegment]);

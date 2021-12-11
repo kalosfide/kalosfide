@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Observable, fromEvent, race, from, of } from 'rxjs';
+import { Observable, from, of } from 'rxjs';
 import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 import { KfNgbModalComponent } from './kf-ngb-modal.component';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, tap } from 'rxjs/operators';
 import { KfNgbModal } from './kf-ngb-modal';
 
 /**
@@ -12,7 +12,7 @@ import { KfNgbModal } from './kf-ngb-modal';
 export class KfNgbModalService {
 
     constructor(
-        private modalService: NgbModal
+        private modalService: NgbModal,
     ) {
     }
 
@@ -20,6 +20,11 @@ export class KfNgbModalService {
         const modalComponentRef = this.modalService.open(KfNgbModalComponent, modal.options);
         const modalComponent = modalComponentRef.componentInstance as KfNgbModalComponent;
         modalComponent.modal = modal;
+        if (modal.déplaçable) {
+            modalComponentRef.shown.subscribe(() => {
+                modalComponent.prépareDéplacement();
+            })
+        }
         return from(modalComponentRef.result).pipe(
             map(result => {
                 const ok = result === modal.boutonOk.nom;

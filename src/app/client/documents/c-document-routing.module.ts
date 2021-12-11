@@ -1,16 +1,14 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { CDocumentPages } from './c-document-pages';
-import { CDocumentCommandeResolverService } from './c-document-commande-resolver.service';
-import { CDocumentLivraisonResolverService } from './c-document-livraison-resolver.service';
-import { CDocumentFactureResolverService } from './c-document-facture-resolver.service';
-import { CLFPages } from 'src/app/modeles/c-l-f/c-l-f-pages';
 import { CDocumentDocumentsComponent } from './c-document-documents.component';
 import { CDocumentCommandeComponent } from './c-document-commande.component';
 import { CDocumentLivraisonComponent } from './c-document-livraison.component';
 import { CDocumentDocumentsResolverService } from './c-document-documents-resolver.service';
 import { CDocumentFactureComponent } from './c-document-facture.component';
 import { CDocumentTitreComponent } from './c-document-titre.component';
+import { NomParam } from 'src/app/modeles/nom-param';
+import { CDocumentResolverService } from './c-document-document-resolver.service';
 
 const routes: Routes = [
     {
@@ -19,11 +17,11 @@ const routes: Routes = [
         children: [
             {
                 path: '',
-                redirectTo: CDocumentPages.liste.urlSegment,
+                redirectTo: CDocumentPages.liste.path,
                 pathMatch: 'full',
             },
             {
-                path: CDocumentPages.liste.urlSegment,
+                path: CDocumentPages.liste.path,
                 data: {
                     pageDef: CDocumentPages.liste,
                     estEnfantPathVide: true
@@ -34,27 +32,36 @@ const routes: Routes = [
                 },
             },
             {
-                path: CDocumentPages.commande.urlSegment + '/:' + CLFPages.nomParamNoDoc,
-                data: { pageDef: CDocumentPages.commande },
+                path: CDocumentPages.commande.path + '/:' + NomParam.noDoc,
+                data: {
+                    typeCLF: 'commande',
+                    pageDef: CDocumentPages.commande
+                },
                 component: CDocumentCommandeComponent,
                 resolve: {
-                    clfDoc: CDocumentCommandeResolverService,
+                    clfDoc: CDocumentResolverService,
                 },
             },
             {
-                path: CDocumentPages.livraison.urlSegment + '/:' + CLFPages.nomParamNoDoc,
-                data: { pageDef: CDocumentPages.livraison },
+                path: CDocumentPages.livraison.path + '/:' + NomParam.noDoc,
+                data: {
+                    typeCLF: 'livraison',
+                    pageDef: CDocumentPages.livraison
+                },
                 component: CDocumentLivraisonComponent,
                 resolve: {
-                    clfDoc: CDocumentLivraisonResolverService,
+                    clfDoc: CDocumentResolverService,
                 },
             },
             {
-                path: CDocumentPages.facture.urlSegment + '/:' + CLFPages.nomParamNoDoc,
-                data: { pageDef: CDocumentPages.facture },
+                path: CDocumentPages.facture.path + '/:' + NomParam.noDoc,
+                data: {
+                    typeCLF: 'facture',
+                    pageDef: CDocumentPages.facture,
+                },
                 component: CDocumentFactureComponent,
                 resolve: {
-                    clfDoc: CDocumentFactureResolverService,
+                    clfDoc: CDocumentResolverService,
                 },
             },
         ]

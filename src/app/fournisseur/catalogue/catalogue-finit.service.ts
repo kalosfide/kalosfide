@@ -1,12 +1,10 @@
 import { Injectable } from "@angular/core";
 import { ActivatedRouteSnapshot, CanDeactivate, RouterStateSnapshot } from "@angular/router";
-import { Observable, of } from "rxjs";
-import { map, switchMap } from "rxjs/operators";
+import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
 import { ApiRequêteAction } from "src/app/api/api-requete-action";
-import { ApiResult } from "src/app/api/api-results/api-result";
 import { Catalogue } from "src/app/modeles/catalogue/catalogue";
 import { CatalogueService } from "src/app/modeles/catalogue/catalogue.service";
-import { IdEtatSite } from "src/app/modeles/etat-site";
 import { CatalogueComponent } from "./catalogue.component";
 
 /**
@@ -24,7 +22,7 @@ export class CatalogueFinitService implements CanDeactivate<CatalogueComponent> 
     ): boolean | Observable<boolean> {
         const site = component.site;
         // si la modification n'est pas en cours, on peut quitter la page du catalogue
-        if (site.etat !== IdEtatSite.catalogue) {
+        if (site.ouvert) {
             return true;
         }
         const catalogue: Catalogue = this.service.litStock();
@@ -34,15 +32,8 @@ export class CatalogueFinitService implements CanDeactivate<CatalogueComponent> 
             return true;
         }
         // si la modification est en cours et si le catalogue n'est pas vide, on demande à l'api de terminer la modification
-        const apiRequête: ApiRequêteAction = {
-            formulaire: component.superGroupe,
-            demandeApi: (): Observable<ApiResult> => {
-                return this.service.termineModification(site);
-            },
-            actionSiOk: (): void => {
-                this.service.termineModificationOk(site);
-            },
-        };
+        const apiRequête: ApiRequêteAction = this.service.termineModification(site);
+        apiRequête.formulaire = component.superGroupe;
         return this.service.actionObs(apiRequête).pipe(
             map((ok: boolean) => {
                 if (!ok) {

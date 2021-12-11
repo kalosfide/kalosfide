@@ -50,6 +50,8 @@ export interface IFabriqueIconeDefs {
 
     retour_en_haut: IKfIconeDef;
     liste: IKfIconeDef;
+
+    marque: IKfIconeDef;
 }
 
 export class FabriqueIcone extends FabriqueMembre {
@@ -101,6 +103,8 @@ export class FabriqueIcone extends FabriqueMembre {
             oeil_barré: def('eye-slash'),
             retour_en_haut: def('angle-double-up'),
             liste: def('list'),
+
+            marque: def('bookmark'),
         }
     }
     private créeDefBootstrap() {
@@ -116,7 +120,7 @@ export class FabriqueIcone extends FabriqueMembre {
             question: def('question-circle-fill'),
             info: def('info-circle-fill'),
             danger: def('exclamation-triangle-fill'),
-            danger_cercle: def('exclamation-circle-fill'),
+            danger_cercle: def('exclamation-circle'),
             accepter: def('check-lg'),
             refuser: def('dash-circle-fill'), // ?
             modifier: def('pencil-square'),
@@ -136,7 +140,7 @@ export class FabriqueIcone extends FabriqueMembre {
             prix: def('currency-euro'),
             case_vide: def('square'),//
             case_cochée: def('check-square'),//
-            croix: def('times'),//
+            croix: def('x-lg'),//
 
             début: def('chevron-double-left'),
             précédent: def('chevron-left'),
@@ -147,6 +151,7 @@ export class FabriqueIcone extends FabriqueMembre {
             oeil_barré: def('eye-slash'),
             retour_en_haut: def('chevron-double-up'),
             liste: def('list-ol'),
+            marque: def('bookmark-fill'),
         }
     }
 

@@ -10,11 +10,11 @@ const routes: Routes = [
         children: [
             {
                 path: '',
-                redirectTo: FSitePages.edite.urlSegment,
+                redirectTo: FSitePages.edite.path,
                 pathMatch: 'full',
             },
             {
-                path: FSitePages.edite.urlSegment,
+                path: FSitePages.edite.path,
                 data: {
                     pageDef: FSitePages.edite,
                     estEnfantPathVide: true

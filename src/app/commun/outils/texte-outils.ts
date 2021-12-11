@@ -74,13 +74,13 @@ class TexteDate {
     en_lettresAvecJour(date: Date): string {
         const surementUneDate = new Date(date);
         const jours: string[] = [
+            'dimanche',
             'lundi',
             'mardi',
             'mercredi',
             'jeudi',
             'vendredi',
             'samedi',
-            'dimanche',
         ];
         return `${jours[surementUneDate.getDay()]} ${this.en_lettres(surementUneDate)}`;
     }
@@ -139,10 +139,14 @@ export class TexteOutils {
         if (!estNombre(nombre)) {
             return '';
         }
-        if (nombre === 0) {
-            return 'zéro';
-        }
         let texte = '';
+        if (nombre === 0) {
+            texte = 'zéro';
+            if (options.unité) {
+                texte += ' ' + options.unité;
+            }
+            return texte;
+        }
         if (nombre < 0) {
             texte = 'moins ';
             nombre = -nombre;
@@ -226,15 +230,15 @@ export class TexteOutils {
                 break;
             case 7:
                 texte += dizainesEnLettres[dizaines];
-                texte += unités === 0 ? '' : (unités === 1 ? '-et-' : '-') + unitésEnLettres[10 + unités];
+                texte += (unités === 1 ? '-et-' : '-') + unitésEnLettres[10 + unités];
                 break;
             case 8:
                 texte += dizainesEnLettres[dizaines];
-                texte += unités === 0 ? 's' : '-' + unitésEnLettres[10 + unités];
+                texte += unités === 0 ? 's' : '-' + unitésEnLettres[unités];
                 break;
             case 9:
                 texte += dizainesEnLettres[dizaines];
-                texte += unités === 0 ? '' : '-' + unitésEnLettres[10 + unités];
+                texte += '-' + unitésEnLettres[10 + unités];
                 break;
             default:
                 texte += dizainesEnLettres[dizaines];
@@ -283,4 +287,30 @@ export class TexteOutils {
         }
         return texte;
     }
+
+    public static joint(liste: any[], séparateur: string, et_devantDernier?: boolean): string {
+        if (liste.length === 1) {
+            return '' + liste[0];
+        }
+        if (!séparateur) {
+            séparateur = ', ';
+        }
+        if (et_devantDernier) {
+            const dernier = liste.pop();
+            return liste.join(séparateur) + ' et ' + dernier;
+        }
+        return liste.join(séparateur);
+    }
+
+    /**
+     * Enlève les espaces au début et à la fin d'un chaine de caractères.
+     * Remplace les suites d'espaces par un seul.
+     */
+    public static enlèveEspaces(texte: string): string {
+        if (!texte) {
+            return texte;
+        }
+        return texte.trim().replace(/\s+/g, ' ');
+    }
+
 }

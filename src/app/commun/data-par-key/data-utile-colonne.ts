@@ -13,10 +13,6 @@ export class DataUtileColonne {
         return this._parent;
     }
 
-    get url(): DataUtileUrl {
-        return this._parent.url;
-    }
-
     get lien(): DataUtileLien {
         return this._parent.lien;
     }

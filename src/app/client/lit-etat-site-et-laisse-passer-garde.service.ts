@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { CanActivate, CanActivateChild, ActivatedRouteSnapshot, RouterStateSnapshot } from "@angular/router";
+import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from "@angular/router";
 import { Observable } from "rxjs";
 import { ClientCLFService } from "./client-c-l-f.service";
 
@@ -19,7 +19,7 @@ export class LitEtatSiteEtLaissePasserGardeService implements CanActivate {
     ) {
     }
 
-    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | boolean {
+    canActivate(_route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): Observable<boolean> {
         return this.service.litEtatSiteEtRetourneTrue();
     }
 }

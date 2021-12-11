@@ -21,12 +21,12 @@ const routes: Routes = [
         path: '',
         children: [
             {
-                path: ComptePages.ajoute.urlSegment,
+                path: ComptePages.ajoute.path,
                 data: { pageDef: ComptePages.ajoute },
                 component: AjouteComponent,
             },
             {
-                path: ComptePages.confirmeEmail.urlSegment,
+                path: ComptePages.confirmeEmail.path,
                 data: { pageDef: ComptePages.confirmeEmail },
                 component: ConfirmeEmailComponent,
                 resolve: {
@@ -35,7 +35,7 @@ const routes: Routes = [
                 },
             },
             {
-                path: ComptePages.connection.urlSegment,
+                path: ComptePages.connection.path,
                 data: { pageDef: ComptePages.connection },
                 component: ConnectionComponent,
                 resolve: {
@@ -43,19 +43,19 @@ const routes: Routes = [
                 },
             },
             {
-                path: ComptePages.deconnection.urlSegment,
+                path: ComptePages.deconnection.path,
                 component: DeconnectionComponent,
                 canActivate: [
                     IdentifiantGardeService,
                 ]
             },
             {
-                path: ComptePages.oubliMotDePasse.urlSegment,
+                path: ComptePages.oubliMotDePasse.path,
                 data: { pageDef: ComptePages.oubliMotDePasse },
                 component: OubliMotDePasseComponent
             },
             {
-                path: ComptePages.réinitialiseMotDePasse.urlSegment,
+                path: ComptePages.réinitialiseMotDePasse.path,
                 data: { pageDef: ComptePages.réinitialiseMotDePasse },
                 component: RéinitialiseMotDePasseComponent,
                 resolve: {
@@ -63,7 +63,7 @@ const routes: Routes = [
                 },
             },
             {
-                path: ComptePages.changeMotDePasse.urlSegment,
+                path: ComptePages.changeMotDePasse.path,
                 data: { pageDef: ComptePages.changeMotDePasse },
                 component: ChangeMotDePasseComponent,
                 canActivate: [
@@ -71,7 +71,7 @@ const routes: Routes = [
                 ]
             },
             {
-                path: ComptePages.changeEmail.urlSegment,
+                path: ComptePages.changeEmail.path,
                 data: { pageDef: ComptePages.changeEmail },
                 component: ChangeEmailComponent,
                 canActivate: [
@@ -79,7 +79,7 @@ const routes: Routes = [
                 ]
             },
             {
-                path: ComptePages.confirmeChangeEmail.urlSegment,
+                path: ComptePages.confirmeChangeEmail.path,
                 data: { pageDef: ComptePages.confirmeChangeEmail },
                 component: ConfirmeChangeEmailComponent,
                 resolve: {
@@ -88,7 +88,7 @@ const routes: Routes = [
                 },
             },
             {
-                path: ComptePages.gestion.urlSegment,
+                path: ComptePages.gestion.path,
                 data: { pageDef: ComptePages.gestion },
                 loadChildren: () => import('./gestion/gestion.module').then(mod => mod.GestionModule),
                 canActivateChild: [

@@ -263,15 +263,15 @@ export class KfValidateurs {
     }
 
     /**
-     * Interdit les espaces au début et à la fin d'un texte
+     * Interdit les espaces au début d'un texte
      */
     static get trim(): KfValidateur {
         return KfValidateurs.validateurDeFn(
             'Trim',
             (texte: string) => {
-                return !!texte && (texte.startsWith(' ') || texte.endsWith(' '));
+                return !!texte && texte.startsWith(' ');
             },
-            `Il ne doit pas y avoir d'espace au début ni à la fin`);
+            `Il ne doit pas y avoir d'espace au début.`);
     }
 
     static requiredLength(valeur: number): KfValidateur {

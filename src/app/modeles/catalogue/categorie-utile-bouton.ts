@@ -8,6 +8,7 @@ import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquet
 import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { ApiRequêteAction } from 'src/app/api/api-requete-action';
+import { Catalogue } from './catalogue';
 
 export class CategorieUtileBouton extends DataUtileBouton {
     constructor(utile: CategorieUtile) {
@@ -26,7 +27,7 @@ export class CategorieUtileBouton extends DataUtileBouton {
         return this.utile.lien;
     }
 
-    supprime(catégorie: Categorie, rafraichitTable: (catégorie: Categorie) => void): KfBouton {
+    supprime(catégorie: Categorie, quandSupprimé: (index: number, aprésSuppression: Catalogue) => void): KfBouton {
         const titre = `Suppression d'une catégorie`;
         const description = new KfEtiquette('');
         description.baliseHtml = KfTypeDeBaliseHTML.p;
@@ -38,17 +39,10 @@ export class CategorieUtileBouton extends DataUtileBouton {
             },
             ' va être supprimée.'
         );
-        const apiRequêteAction: ApiRequêteAction = {
-            formulaire: null,
-            demandeApi: () => this.utile.service.supprime(catégorie),
-            actionSiOk: () => {
-                this.utile.service.quandSupprime(catégorie);
-                rafraichitTable(catégorie);
-            },
-        };
+        const apiRequêteAction: ApiRequêteAction = this.utile.service.apiRequêteSupprime(catégorie, quandSupprimé);
         const bouton = Fabrique.bouton.attenteDeColonne('supprime' + catégorie.no,
-            Fabrique.contenu.supprime, apiRequêteAction, this.utile.service,
-            Fabrique.confirmeModal(titre, [description])
+            Fabrique.contenu.supprime(), apiRequêteAction, this.utile.service,
+            Fabrique.confirmeModal(titre, 'danger', [description])
         );
         return bouton;
     }

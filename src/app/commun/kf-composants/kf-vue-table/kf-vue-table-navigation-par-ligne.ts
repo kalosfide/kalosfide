@@ -45,14 +45,11 @@ export class KfVueTableNavigationParLigne<T> extends KfVueTableNavigationBase<T>
 
     quandLignePrendFocus(ligne: KfVueTableLigne<T>) {
         this.fixeLigneActive(ligne);
-        console.log(`nav focus ligne ${ligne.index}`);
         this.pVueTable.composant.traiteKeydownService.traiteurDuFocus = this.traiteToucheEnfoncée.bind(this);
         this.pAleFocus = true;
     }
 
     quandLignePerdFocus() {
-        console.log(`nav blur ligne ${this.ligneActive.index}`)
-        //        this.pVueTable.composant.traiteKeydownService.traiteurDuFocus = undefined;
         this.pAleFocus = false;
     }
 
@@ -76,9 +73,8 @@ export class KfVueTableNavigationParLigne<T> extends KfVueTableNavigationBase<T>
             case 'Enter':
             case ' ':
                 if (!event.ctrlKey && !event.altKey && !event.shiftKey) {
-                    const équivalentPourClic = this.ligneActive.équivalentPourClic;
-                    if (équivalentPourClic) {
-                        équivalentPourClic.gereHtml.htmlElement.click();
+                    if (this.pVueTable.quandClic) {
+                        this.pVueTable.quandClic(this.ligneActive.item)();
                         return true;
                     }
                 }

@@ -8,9 +8,11 @@ import { CompteModule } from '../compte/compte.module';
 import { ErreursModule } from '../erreurs/erreurs.module';
 import { FournisseurRacineComponent } from './fournisseur-racine.component';
 import { ClientRacineComponent } from './client-racine.component';
-import { FournisseurGarde } from './fournisseur-garde';
-import { ClientGarde } from './client-garde';
-import { UsagerGarde } from './usager-garde';
+import { FournisseurGardeService } from './fournisseur-garde.service';
+import { ClientGardeService } from './client-garde.service';
+import { UsagerGardeService } from './usager-garde.service';
+import { SiteResolverService } from './site-resolver.service';
+import { SiteOuvertGardeService } from './site-ouvert-garde.service';
 
 @NgModule({
     imports: [
@@ -26,9 +28,11 @@ import { UsagerGarde } from './usager-garde';
         ClientRacineComponent,
     ],
     providers: [
-        UsagerGarde,
-        FournisseurGarde,
-        ClientGarde,
+        UsagerGardeService,
+        SiteResolverService,
+        FournisseurGardeService,
+        ClientGardeService,
+        SiteOuvertGardeService
     ],
 })
 export class SiteModule { }

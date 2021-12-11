@@ -1,18 +1,13 @@
-import { Site } from 'src/app/modeles/site/site';
-import { Identifiant } from 'src/app/securite/identifiant';
 import { AppSite } from 'src/app/app-site/app-site';
-import { AppRoutes } from 'src/app/app-pages';
 import { ItemCompte } from 'src/app/compte/menu/item-compte';
 import { KfImageDef } from 'src/app/commun/kf-composants/kf-partages/kf-image-def';
 import { NavBar } from '../navbars/navbar';
 import { NavItemLien } from '../navbars/nav-item-lien';
 import { NavItemUlLi } from '../navbars/nav-item-ul-li';
 import { NavItemDropdown } from '../navbars/nav-item-dropdown';
+import { Fabrique } from '../fabrique/fabrique';
 
 export abstract class Menu extends NavBar {
-
-    site: Site;
-    identifiant: Identifiant;
 
     marqueImage: NavItemLien;
     marqueTexte: NavItemLien;
@@ -35,12 +30,12 @@ export abstract class Menu extends NavBar {
     protected créeMarqueImage(): NavItemLien {
         const i = new NavItemLien('imageMarque', this);
         const imageDef: KfImageDef = {
-            urlDef: () => AppRoutes.urlImage(this.site ? AppSite.imageInactif : AppSite.imageActif),
+            urlDef: () => Fabrique.url.appRouteur.image.url(this.site ? AppSite.imageInactif : AppSite.imageActif),
             largeurDef: AppSite.côtéImage,
             hauteurDef: AppSite.côtéImage
         };
         i.image = imageDef;
-        i.url = AppRoutes.url();
+        i.url = Fabrique.url.appRouteur.url();
         i.lien.ajouteClasse('navbar-brand');
         return i;
     }

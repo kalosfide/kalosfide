@@ -6,7 +6,7 @@ import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { Compare } from '../../commun/outils/tri';
 import { CLFDocs } from './c-l-f-docs';
 import { CLFDoc } from './c-l-f-doc';
-import { ApiDocument } from './api-document';
+import { ApiDoc } from './api-doc';
 
 export class CLFUtileColonneClient {
     protected utile: CLFUtile;
@@ -36,20 +36,20 @@ export class CLFUtileColonneClient {
     nbDocuments(titre: string): IKfVueTableColonneDef<CLFDocs> {
         return {
             nom: 'nbDocuments',
-            créeContenu: (clfDocs: CLFDocs) => '' + clfDocs.documents.length,
+            créeContenu: (clfDocs: CLFDocs) => '' + clfDocs.apiDocs.length,
             enTeteDef: { titreDef: titre },
-            compare: Compare.nombre((clfDocs: CLFDocs) => clfDocs.documents.length),
+            compare: Compare.nombre((clfDocs: CLFDocs) => clfDocs.apiDocs.length),
         };
     }
 
     nbPrêts(): IKfVueTableColonneDef<CLFDocs> {
         return {
             nom: 'nbPrêts',
-            créeContenu: (clfDocs: CLFDocs) => '' + clfDocs.documents.filter(d => ApiDocument.prêt(d)).length,
+            créeContenu: (clfDocs: CLFDocs) => '' + clfDocs.apiDocs.filter(d => ApiDoc.prêt(d)).length,
             enTeteDef: { titreDef: 'Prêts' },
             compare: Compare.enchaine(
-                Compare.nombre((clfDocs: CLFDocs) => clfDocs.documents.length),
-                Compare.nombre((clfDocs: CLFDocs) => clfDocs.documents.filter(d => ApiDocument.prêt(d)).length),
+                Compare.nombre((clfDocs: CLFDocs) => clfDocs.apiDocs.length),
+                Compare.nombre((clfDocs: CLFDocs) => clfDocs.apiDocs.filter(d => ApiDoc.prêt(d)).length),
             ),
         };
     }
@@ -57,7 +57,7 @@ export class CLFUtileColonneClient {
     choixClient(): IKfVueTableColonneDef<CLFDocs> {
         return {
             nom: this.utile.nom.choisit,
-            créeContenu: (clfDocs: CLFDocs) => this.lien.client(clfDocs),
+            créeContenu: () => Fabrique.étiquetteLien(Fabrique.contenu.choisit()),
         };
     }
 
@@ -69,42 +69,6 @@ export class CLFUtileColonneClient {
             this.nbPrêts(),
             this.choixClient()
         ];
-    }
-
-    àPréparer(): IKfVueTableColonneDef<CLFDoc> {
-        return {
-            nom: 'àPréparer',
-            créeContenu: (doc: CLFDoc) => '' + doc.nbAPréparer,
-            compare: Compare.nombre((doc: CLFDoc) => doc.nbAPréparer),
-            enTeteDef: { titreDef: 'à préparer', chapeauDef: 'Nombre de lignes', longueurChapeau: 3 },
-        };
-    }
-
-    préparés(): IKfVueTableColonneDef<CLFDoc> {
-        return {
-            nom: 'préparés',
-            créeContenu: (doc: CLFDoc) => '' + doc.nbPréparés,
-            compare: Compare.nombre((doc: CLFDoc) => doc.nbPréparés),
-            enTeteDef: { titreDef: 'préparées' },
-        };
-    }
-
-    annulés(): IKfVueTableColonneDef<CLFDoc> {
-        return {
-            nom: 'annulés',
-            créeContenu: (doc: CLFDoc) => '' + doc.nbAnnulés,
-            compare: Compare.nombre((doc: CLFDoc) => doc.nbAnnulés),
-            enTeteDef: { titreDef: 'dont annulées' },
-        };
-    }
-
-    montant(): IKfVueTableColonneDef<CLFDoc> {
-        return {
-            nom: 'montant',
-            créeContenu: (document: CLFDoc) => Fabrique.texte.euros(document.apiDoc.total),
-            compare: Compare.nombre((doc: CLFDoc) => doc.apiDoc.total),
-            enTeteDef: { titreDef: 'Montant' },
-        };
     }
 
 }

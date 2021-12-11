@@ -9,6 +9,9 @@ import { CategorieUtile } from './categorie-utile';
 import { Observable } from 'rxjs';
 import { Catalogue } from './catalogue';
 import { map, switchMap } from 'rxjs/operators';
+import { ApiRequêteAction } from 'src/app/api/api-requete-action';
+import { KfVueTableRéglages } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-reglages';
+import { StockageService } from 'src/app/services/stockage/stockage.service';
 
 
 @Injectable({
@@ -20,9 +23,10 @@ export class CategorieService extends KeyUidRnoNoService<Categorie> {
 
     constructor(
         private catalogueService: CatalogueService,
+        protected stockageService: StockageService,
         protected apiRequeteService: ApiRequêteService
     ) {
-        super(apiRequeteService);
+        super(stockageService, apiRequeteService);
         this.créeUtile();
     }
 
@@ -84,14 +88,28 @@ export class CategorieService extends KeyUidRnoNoService<Categorie> {
         this.catalogueService.fixeStock(stock);
     }
 
-    quandSupprime(supprimé: Categorie) {
-        const stock = this.catalogueService.litStock();
-        const index = stock.catégories.findIndex(s => s.no === supprimé.no);
-        if (index === -1) {
-            throw new Error('Catégories: supprimé absent du stock');
+    apiRequêteSupprime(àSupprimer: Categorie, quandSupprimé: (index: number, aprésSuppression: Catalogue) => void): ApiRequêteAction {
+        return {
+            demandeApi: () => this.supprime(àSupprimer),
+            actionSiOk: (créé: any) => {
+                const stock = this.catalogueService.litStock();
+                const index = stock.catégories.findIndex(s => s.no === àSupprimer.no);
+                if (index === -1) {
+                    throw new Error('Catégories: supprimé absent du stock');
+                }
+                stock.catégories.splice(index, 1);
+                quandSupprimé(index, stock);
+                this.catalogueService.fixeStock(stock);
+            }
         }
-        stock.catégories.splice(index, 1);
-        this.catalogueService.fixeStock(stock);
+    }
+    
+    get réglagesVueTable(): KfVueTableRéglages {
+        return this.catalogueService.litRéglagesVueTable('categorie')
+    }
+
+    set réglagesVueTable(réglages: KfVueTableRéglages) {
+        this.catalogueService.fixeRéglagesVueTable('categorie', réglages);
     }
 
 }

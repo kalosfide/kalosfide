@@ -1,73 +1,61 @@
-import { AppPages } from '../app-pages';
+import { PageDef } from '../commun/page-def';
 
-export const ComptePages = {
-    ajoute: {
-        urlSegment: 'ajoute',
+export class ComptePages {
+    static ajoute: PageDef = {
+        path: 'ajoute',
         lien: 'Créer un compte',
         title: 'Création',
         titre: 'Créer un compte',
-    },
-    connection: {
-        urlSegment: 'connection',
+    };
+    static     connection: PageDef = {
+        path: 'connection',
         lien: 'Connection',
         title: 'Connection',
         titre: 'Connection',
-    },
-    confirmeEmail: {
-        urlSegment: 'confirmeEmail',
+    };
+    static confirmeEmail: PageDef = {
+        path: 'confirmeEmail',
         title: 'Confirme email',
         titre: 'Confirmation de votre adresse email',
-    },
+    };
 
-    deconnection: {
-        urlSegment: 'deconnection',
+    static deconnection: PageDef = {
+        path: 'deconnection',
         lien: 'Déconnection',
         title: 'Déconnection',
-    },
-    oubliMotDePasse: {
-        urlSegment: 'oubliMotDePasse',
+    };
+    static oubliMotDePasse: PageDef = {
+        path: 'oubliMotDePasse',
         lien: 'Mot de passe oublié?',
         title: 'Mot de passe oublié',
         titre: 'Mot de passe oublié',
-    },
-    réinitialiseMotDePasse: {
-        urlSegment: 'réinitialiseMotDePasse',
+    };
+    static réinitialiseMotDePasse: PageDef = {
+        path: 'réinitialiseMotDePasse',
         title: 'Réinitialisation mot de passe',
         titre: 'Réinitialisation du mot de passe',
-    },
-    changeMotDePasse: {
+    };
+    static changeMotDePasse: PageDef = {
         lien: 'Changer de mot de passe',
-        urlSegment: 'changeMotDePasse',
+        path: 'changeMotDePasse',
         title: 'Changement mot de passe',
         titre: 'Changement du mot de passe',
-    },
-    changeEmail: {
+    };
+    static changeEmail: PageDef = {
         lien: `Changer d'adresse email`,
-        urlSegment: 'changeEmail',
+        path: 'changeEmail',
         title: 'Changement email',
         titre: `Changement d'adresse email`,
-    },
-    confirmeChangeEmail: {
-        urlSegment: 'confirmeChangeEmail',
+    };
+    static confirmeChangeEmail: PageDef = {
+        path: 'confirmeChangeEmail',
         title: 'Confirme nouvel email',
         titre: 'Confirmation de votre nouvelle adresse email',
-    },
-    gestion: {
-        urlSegment: 'monCompte',
+    };
+    static gestion: PageDef = {
+        path: 'monCompte',
         lien: 'Mon compte',
         title: 'Mon compte',
         titre: 'Mon compte',
-    },
+    };
 };
-
-export class CompteRoutes {
-
-    static route(segments?: string[]): string[] {
-        let s: string[] = [];
-        s.push(AppPages.compte.urlSegment);
-        if (segments) {
-            s = s.concat(segments);
-        }
-        return s;
-    }
-}

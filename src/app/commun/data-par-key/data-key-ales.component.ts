@@ -25,7 +25,7 @@ export class ActionAles {
     nom: string;
     texteSoumettre: string;
     apiDemande: () => Observable<ApiResult>;
-    actionSiOk?: () => void;
+    actionSiOk?: (créé?: any) => void;
 }
 
 @Component({ template: '' })
@@ -49,6 +49,9 @@ export abstract class DataKeyALESComponent<T extends IDataKey> extends Formulair
 
     dataEditeur: DataKeyEditeur<T>;
     abstract créeDataEditeur(): void;
+
+    abstract get keyDeAjoute(): IDataKey;
+    abstract fixeKeyDeAjoute(ajouté: T): void;
 
     constructor(
         protected route: ActivatedRoute,
@@ -105,8 +108,12 @@ export abstract class DataKeyALESComponent<T extends IDataKey> extends Formulair
         return this.dataEditeur.edition;
     }
 
+    get avecValeur(): boolean {
+        return true;
+    }
+
     ngOnInit() {
-        this.site = this.service.navigation.litSiteEnCours();
+        this.site = this.service.litSiteEnCours();
         this.subscriptions.push(this.route.data.subscribe(
             (data: Data) => {
                 if (this.service.utile.lienKey) {
@@ -143,7 +150,7 @@ export abstract class DataKeyALESComponent<T extends IDataKey> extends Formulair
                 }
                 this.créeTitrePage();
                 if (this.action.nom === ApiAction.data.ajoute) {
-                    this.dataEditeur.fixeKfKey(this.service.keyDeAjoute);
+                    this.dataEditeur.fixeKfKey(this.keyDeAjoute);
                 } else {
                     this.dataEditeur.fixeKfKey(data.valeur);
                     this.fixeValeur(data.valeur);
@@ -159,11 +166,14 @@ export abstract class DataKeyALESComponent<T extends IDataKey> extends Formulair
         return this.action.apiDemande();
     }
 
-    actionSiOk = (): void => {
-        if (this.action.actionSiOk) {
-            this.action.actionSiOk();
+    actionSiOk = (créé?: T): void => {
+        if (this.action.nom === ApiAction.data.ajoute) {
+            this.fixeKeyDeAjoute(créé);
         }
-        this.routeur.navigueUrlDef(this.service.utile.urlKey.index());
+        if (this.action.actionSiOk) {
+            this.action.actionSiOk(this.valeur);
+        }
+        this.routeur.navigueUrlDef(this.service.utile.urlKey.retourIndex(this.valeur));
     }
 
     get valeur(): T {

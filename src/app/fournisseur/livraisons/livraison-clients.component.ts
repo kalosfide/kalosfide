@@ -17,5 +17,6 @@ export class LivraisonClientsComponent extends CLFClientsComponent implements On
         protected service: FournisseurCLFService,
     ) {
         super(route, service);
+        this.fixeTypeDefRéglagesVueTable('livraison');
     }
 }

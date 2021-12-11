@@ -2,6 +2,7 @@ import { KeyUidRnoNo, IKeyUidRnoNoData } from '../../commun/data-par-key/key-uid
 import { ProduitEditeur } from './produit-editeur';
 import { ProduitBilan } from './produit-bilan';
 import { TypeCLF, apiType } from '../c-l-f/c-l-f-type';
+import { KfVueTableLigne } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-ligne';
 
 export interface IAvecProduit {
     produit: Produit;
@@ -15,6 +16,7 @@ export interface IProduitData extends IKeyUidRnoNoData {
     typeMesure: string;
     prix: number;
     etat: string;
+    date?: Date;
     bilans: ProduitBilan[];
 }
 
@@ -26,6 +28,7 @@ export class Produit extends KeyUidRnoNo implements IAvecProduit, IProduitData {
     prix: number;
     // présents pour le fournisseur
     etat: string;
+    date?: Date;
     bilans: ProduitBilan[];
 
     // affecté à la création
@@ -33,6 +36,14 @@ export class Produit extends KeyUidRnoNo implements IAvecProduit, IProduitData {
 
     editeur?: ProduitEditeur;
 
+    /**
+     * Ligne d'une vueTable affichant le produit.
+     */
+    vueTableLigne?: KfVueTableLigne<Produit>;
+
+    /**
+     * Implémentation de l'interface IAvecProduit.
+     */
     get produit(): Produit {
         return this;
     }
@@ -49,6 +60,7 @@ export class Produit extends KeyUidRnoNo implements IAvecProduit, IProduitData {
         if (de.typeMesure) { vers.typeMesure = de.typeMesure; }
         if (de.prix) { vers.prix = de.prix; }
         if (de.etat) { vers.etat = de.etat; }
+        if (de.date) { vers.date = de.date; }
         if (de.bilans) { vers.bilans = de.bilans; }
     }
 
@@ -97,6 +109,7 @@ export class ProduitData implements IProduitData {
     typeMesure: string;
     prix: number;
     etat: string;
+    date?: Date;
     bilans: ProduitBilan[];
 }
 

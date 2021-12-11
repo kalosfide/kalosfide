@@ -7,7 +7,9 @@ import { CatalogueService } from './catalogue.service';
 /**
  * Charge le catalogue ou le lit s'il est déjà dans le stock.
  */
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class CatalogueResolverService implements Resolve<Catalogue> {
 
     constructor(

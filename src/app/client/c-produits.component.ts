@@ -18,7 +18,6 @@ export class CProduitsComponent extends ProduitIndexBaseComponent implements OnI
     get titre(): string {
         return this.pageDef.titre;
     }
-    niveauTitre = 0;
 
 
     constructor(
@@ -26,6 +25,7 @@ export class CProduitsComponent extends ProduitIndexBaseComponent implements OnI
         protected service: ProduitService,
     ) {
         super(route, service);
+        this.niveauTitre = 0;
     }
 
     créeBarreTitre = (): IBarreTitre => {
@@ -47,7 +47,7 @@ export class CProduitsComponent extends ProduitIndexBaseComponent implements OnI
             créeSuperGroupe: () => this.créeGroupe('super'),
             chargeGroupe: () => this.chargeGroupe(),
             aprèsChargeData: () => {
-                this.barre.site = this.service.navigation.litSiteEnCours();
+                this.barre.site = this.service.identification.siteEnCours;
                 this.barre.rafraichit();
             }
         };

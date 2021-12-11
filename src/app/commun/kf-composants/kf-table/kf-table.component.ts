@@ -1,11 +1,12 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, ViewEncapsulation } from '@angular/core';
 import { KfComposantComponent } from '../kf-composant/kf-composant.component';
 import { KfTable } from './kf-table-composant';
 
 @Component({
     selector: 'app-kf-table',
     templateUrl: './kf-table.component.html',
-    styleUrls: ['../kf-composants.scss']
+    styleUrls: ['../kf-composants.scss'],
+    encapsulation: ViewEncapsulation.None
 })
 
 export class KfTableComponent extends KfComposantComponent implements OnInit, AfterViewInit {

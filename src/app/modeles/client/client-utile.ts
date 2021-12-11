@@ -2,7 +2,7 @@ import { ClientService } from './client.service';
 import { Client } from './client';
 import { DataKeyUtileUrl } from 'src/app/commun/data-par-key/data-key-utile-url';
 import { DataKeyUtileLien } from 'src/app/commun/data-par-key/data-key-utile-lien';
-import { FournisseurClientRoutes, FournisseurClientPages } from 'src/app/fournisseur/clients/client-pages';
+import { FournisseurClientPages } from 'src/app/fournisseur/clients/client-pages';
 import { ClientUtileUrl } from './client-utile-url';
 import { DataKeyUtileColonne } from 'src/app/commun/data-par-key/data-key-utile-colonne';
 import { ClientUtileLien } from './client-utile-lien';
@@ -13,12 +13,12 @@ import { DataKeyUtileOutils } from 'src/app/commun/data-par-key/data-key-utile-o
 import { KeyUidRnoUtile } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno-utile';
 import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
 import { KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
-import { IdEtatSite } from '../etat-site';
+import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 
 export class ClientUtile extends KeyUidRnoUtile<Client> {
     constructor(service: ClientService) {
         super(service);
-        this.dataRoutes = FournisseurClientRoutes;
+        this.dataRouteur = Fabrique.url.appRouteur.clients;
         this.dataPages = FournisseurClientPages;
         this.pUrl = new ClientUtileUrl(this);
         this.pLien = new ClientUtileLien(this);
@@ -67,11 +67,11 @@ export class ClientUtile extends KeyUidRnoUtile<Client> {
         return 60;
     }
 
-    textesEtatSite(état: IdEtatSite): {
+    textesEtatSite(ouvert: boolean): {
         titre: string,
         textes: string[]
     } {
-        return état === IdEtatSite.ouvert
+        return ouvert
             ? {
                 titre: 'Réouverture du site',
                 textes: [

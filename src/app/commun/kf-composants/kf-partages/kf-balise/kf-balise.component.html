@@ -8,9 +8,7 @@
     <ng-template #autreTemplatee>
         <ng-container *ngIf="balise.contenuTexte; then texteTemplate; else phraseTemplate"></ng-container>
 
-        <ng-template #texteTemplate>
-            {{ balise.contenuTexte }}
-        </ng-template>
+        <ng-template #texteTemplate>{{ balise.contenuTexte }}</ng-template>
 
         <ng-template #phraseTemplate>
         <app-kf-contenu-phrase *ngIf="balise.contenuPhrase" [contenuPhrase]="balise.contenuPhrase"></app-kf-contenu-phrase>   
@@ -25,67 +23,67 @@
         <ng-container *ngTemplateOutlet="contenu"></ng-container>
     </ng-container>
 
-    <b *ngSwitchCase="typeDeBalise.b" #baliseElement [ngClass]="balise.classe" [ngStyle]="balise.style">
+    <b *ngSwitchCase="typeDeBalise.b" #baliseElement [attr.id]="balise.id" [ngClass]="balise.classe" [ngStyle]="balise.style">
         <ng-container *ngTemplateOutlet="contenu"></ng-container>
     </b>
 
-    <i *ngSwitchCase="typeDeBalise.i" #baliseElement [ngClass]="balise.classe" [ngStyle]="balise.style">
+    <i *ngSwitchCase="typeDeBalise.i" #baliseElement [attr.id]="balise.id" [ngClass]="balise.classe" [ngStyle]="balise.style">
         <ng-container *ngTemplateOutlet="contenu"></ng-container>
     </i>
 
-    <div *ngSwitchCase="typeDeBalise.div" #baliseElement [ngClass]="balise.classe" [ngStyle]="balise.style">
+    <div *ngSwitchCase="typeDeBalise.div" #baliseElement [attr.id]="balise.id" [ngClass]="balise.classe" [ngStyle]="balise.style">
         <ng-container *ngTemplateOutlet="contenu"></ng-container>
     </div>
 
-    <h1 *ngSwitchCase="typeDeBalise.h1" #baliseElement [ngClass]="balise.classe" [ngStyle]="balise.style">
+    <h1 *ngSwitchCase="typeDeBalise.h1" #baliseElement [attr.id]="balise.id" [ngClass]="balise.classe" [ngStyle]="balise.style">
         <ng-container *ngTemplateOutlet="contenu"></ng-container>
     </h1>
 
-    <h2 *ngSwitchCase="typeDeBalise.h2" #baliseElement [ngClass]="balise.classe" [ngStyle]="balise.style">
+    <h2 *ngSwitchCase="typeDeBalise.h2" #baliseElement [attr.id]="balise.id" [ngClass]="balise.classe" [ngStyle]="balise.style">
         <ng-container *ngTemplateOutlet="contenu"></ng-container>
     </h2>
 
-    <h3 *ngSwitchCase="typeDeBalise.h3" #baliseElement [ngClass]="balise.classe" [ngStyle]="balise.style">
+    <h3 *ngSwitchCase="typeDeBalise.h3" #baliseElement [attr.id]="balise.id" [ngClass]="balise.classe" [ngStyle]="balise.style">
         <ng-container *ngTemplateOutlet="contenu"></ng-container>
     </h3>
 
-    <h4 *ngSwitchCase="typeDeBalise.h4" #baliseElement [ngClass]="balise.classe" [ngStyle]="balise.style">
+    <h4 *ngSwitchCase="typeDeBalise.h4" #baliseElement [attr.id]="balise.id" [ngClass]="balise.classe" [ngStyle]="balise.style">
         <ng-container *ngTemplateOutlet="contenu"></ng-container>
     </h4>
 
-    <h5 *ngSwitchCase="typeDeBalise.h5" #baliseElement [ngClass]="balise.classe" [ngStyle]="balise.style">
+    <h5 *ngSwitchCase="typeDeBalise.h5" #baliseElement [attr.id]="balise.id" [ngClass]="balise.classe" [ngStyle]="balise.style">
         <ng-container *ngTemplateOutlet="contenu"></ng-container>
     </h5>
 
-    <h6 *ngSwitchCase="typeDeBalise.h6" #baliseElement [ngClass]="balise.classe" [ngStyle]="balise.style">
+    <h6 *ngSwitchCase="typeDeBalise.h6" #baliseElement [attr.id]="balise.id" [ngClass]="balise.classe" [ngStyle]="balise.style">
         <ng-container *ngTemplateOutlet="contenu"></ng-container>
     </h6>
 
-    <label *ngSwitchCase="typeDeBalise.label" #baliseElement [ngClass]="balise.classe" [ngStyle]="balise.style">
+    <label *ngSwitchCase="typeDeBalise.label" #baliseElement [attr.id]="balise.id" [ngClass]="balise.classe" [ngStyle]="balise.style">
         <ng-container *ngTemplateOutlet="contenu"></ng-container>
     </label>
 
-    <P *ngSwitchCase="typeDeBalise.p" #baliseElement [ngClass]="balise.classe" [ngStyle]="balise.style">
+    <P *ngSwitchCase="typeDeBalise.p" #baliseElement [attr.id]="balise.id" [ngClass]="balise.classe" [ngStyle]="balise.style">
         <ng-container *ngTemplateOutlet="contenu"></ng-container>
     </P>
 
-    <pre *ngSwitchCase="typeDeBalise.pre" #baliseElement [ngClass]="balise.classe" [ngStyle]="balise.style">
+    <pre *ngSwitchCase="typeDeBalise.pre" #baliseElement [attr.id]="balise.id" [ngClass]="balise.classe" [ngStyle]="balise.style">
         <ng-container *ngTemplateOutlet="contenu"></ng-container>
     </pre>
 
-    <small *ngSwitchCase="typeDeBalise.small" #baliseElement [ngClass]="balise.classe" [ngStyle]="balise.style">
+    <small *ngSwitchCase="typeDeBalise.small" #baliseElement [attr.id]="balise.id" [ngClass]="balise.classe" [ngStyle]="balise.style">
         <ng-container *ngTemplateOutlet="contenu"></ng-container>
     </small>
 
-    <span *ngSwitchCase="typeDeBalise.span" #baliseElement [ngClass]="balise.classe" [ngStyle]="balise.style">
+    <span *ngSwitchCase="typeDeBalise.span" #baliseElement [attr.id]="balise.id" [ngClass]="balise.classe" [ngStyle]="balise.style">
         <ng-container *ngTemplateOutlet="contenu"></ng-container>
     </span>
 
-    <strong *ngSwitchCase="typeDeBalise.strong" #baliseElement [ngClass]="balise.classe" [ngStyle]="balise.style">
+    <strong *ngSwitchCase="typeDeBalise.strong" #baliseElement [attr.id]="balise.id" [ngClass]="balise.classe" [ngStyle]="balise.style">
         <ng-container *ngTemplateOutlet="contenu"></ng-container>
     </strong>
 
-    <dfn *ngSwitchCase="typeDeBalise.definition" #baliseElement [ngClass]="balise.classe" [ngStyle]="balise.style">
+    <dfn *ngSwitchCase="typeDeBalise.definition" #baliseElement [attr.id]="balise.id" [ngClass]="balise.classe" [ngStyle]="balise.style">
         <ng-container *ngTemplateOutlet="contenu"></ng-container>
     </dfn>
 

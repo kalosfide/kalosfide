@@ -218,6 +218,10 @@ export class KfGéreCss {
         classeDefs.forEach(classeDef => this._ajouteClasseDef(classeDef));
     }
 
+    ajouteClasses(classes: string[], classeEnCours: () => string): void {
+        this.ajouteClasse(...classes.map(classe => ({ nom: classe, active: () => classeEnCours() === classe })))
+    }
+
     supprimeClasse(...classeDefs: KfStringDef[]): void {
         if (this.pClasseDefs) {
             const liste = this.motsOuFonctions(classeDefs);

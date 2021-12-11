@@ -16,11 +16,11 @@ const routes: Routes = [
         children: [
             {
                 path: '',
-                redirectTo: ProduitPages.index.urlSegment,
+                redirectTo: ProduitPages.index.path,
                 pathMatch: 'full'
             },
             {
-                path: ProduitPages.index.urlSegment,
+                path: ProduitPages.index.path,
                 data: {
                     pageDef: undefined
                 },
@@ -30,7 +30,7 @@ const routes: Routes = [
                 }
             },
             {
-                path: ProduitPages.ajoute.urlSegment,
+                path: ProduitPages.ajoute.path,
                 data: {
                     pageDef: ProduitPages.ajoute,
                     estEnfantPathVide: undefined
@@ -44,7 +44,7 @@ const routes: Routes = [
                 }
             },
             {
-                path: ProduitPages.edite.urlSegment + '/:no',
+                path: ProduitPages.edite.path + '/:no',
                 data: {
                     pageDef: ProduitPages.edite,
                     estEnfantPathVide: undefined

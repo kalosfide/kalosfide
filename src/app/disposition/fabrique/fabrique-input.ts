@@ -17,6 +17,7 @@ import { ReglesDeMotDePasse } from 'src/app/securite/mot-de-passe';
 import { IKfEntreeFocusClavier } from 'src/app/commun/kf-composants/kf-elements/kf-entree/i-kf-entree-focus-clavier';
 import { KfRadios } from 'src/app/commun/kf-composants/kf-elements/kf-radios/kf-radios';
 import { KfRadio } from 'src/app/commun/kf-composants/kf-elements/kf-radios/kf-radio';
+import { KfInputDateTemps } from 'src/app/commun/kf-composants/kf-elements/kf-input/kf-input-date-temps';
 
 class FabriqueEntrée extends FabriqueMembre {
     constructor(fabrique: FabriqueClasse) {
@@ -51,6 +52,7 @@ export class FabriqueInput extends FabriqueEntrée {
     texte(nom: string, texte?: KfStringDef, placeholder?: string): KfInputTexte {
         const input = new KfInputTexte(nom, texte);
         input.placeholder = placeholder;
+        input.enlèveEspaces = true;
         return input;
     }
     texteLectureSeule(nom: string, texte?: KfStringDef, valeur?: string): KfInputTexte {
@@ -110,16 +112,6 @@ export class FabriqueInput extends FabriqueEntrée {
         input.visible = false;
         return input;
     }
-    nombrePrix(nom: string, texte?: KfStringDef, placeholder?: string): KfInputNombre {
-        const input = this.nombre(nom, texte, placeholder);
-        input.ajouteValidateur(KfValidateurs.nombreVirgule(7, 2, '>'));
-        return input;
-    }
-    nombreUnités(nom: string, texte?: KfStringDef, placeholder?: string): KfInputNombre {
-        const input = this.nombre(nom, texte, placeholder);
-        input.ajouteValidateur(KfValidateurs.nombreVirgule(8, 0, '>='));
-        return input;
-    }
     nombreQuantité(nom: string, typeCommande: () => string, texte?: KfStringDef, placeholder?: string): KfInputNombre {
         const input = this.nombre(nom, texte, placeholder);
         input.min = 0;
@@ -128,6 +120,17 @@ export class FabriqueInput extends FabriqueEntrée {
             const type = typeCommande();
             return type === TypeCommande.id.ALUnité ? 0 : 3;
         }, '>='));
+        return input;
+    }
+    date(nom: string, texte?: KfStringDef, placeholder?: string): KfInputDateTemps {
+        const input = new KfInputDateTemps(nom, texte);
+        input.placeholder = placeholder;
+        return input;
+    }
+    dateInvisible(nom: string, valeur?: Date): KfInputDateTemps {
+        const input = new KfInputDateTemps(nom);
+        input.valeur = valeur;
+        input.visible = false;
         return input;
     }
 }

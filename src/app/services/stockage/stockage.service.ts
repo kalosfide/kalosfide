@@ -81,7 +81,6 @@ class CStockage<T> implements IStockage, Stockage<T> {
         if (changé) {
             // Sauve l'objet à stocker dans la mémoire du navigateur sous le nom du stockage
             window.sessionStorage[this.pNom] = stock ? JSON.stringify(stock) : undefined;
-            //            console.log(this.nom, stock);
             if (this.quandStockChange) {
                 this.quandStockChange(ancien, stock);
             }
@@ -100,23 +99,26 @@ class CStockage<T> implements IStockage, Stockage<T> {
 @Injectable({
     providedIn: 'root'
 })
+/**
+ * Service de gestion de stockage de données dans la mémoire du navigateur.
+ */
 export class StockageService {
     private stockages: IStockage[];
     private subscriptions: Subscription[];
 
-    private dépendances: {
-        nom: string,
-        dépendants: IStockage[]
-    }[];
+    private dépendants: IStockage[];
+
+    private vidages: { déclencheur: string, dépendant: IStockage }[];
 
     constructor() {
         this.stockages = [];
         this.subscriptions = [];
-        this.dépendances = [];
+        this.dépendants = [];
+        this.vidages = [];
     }
 
     /**
-     * Retourne un stockage
+     * Retourne un stockage.
      * @param nom nom du stockage unique dans l'application
      * @param options définit le comportement du stockage et ses relations avec les autres stockage
      */
@@ -136,31 +138,32 @@ export class StockageService {
             if (options.rafraichi) {
                 throw new Error(`Un stockage avec un 'déclencheVidage' ne peut pas être rafraichi.`);
             }
-            this.dépendances.push({
-                nom,
-                dépendants: []
-            });
             this.subscriptions.push(options.déclencheVidage.subscribe(
                 () => {
-                    const déclencheur = this.dépendances.find(d => d.nom === nom);
-                    déclencheur.dépendants.forEach(s => s.vide());
+                    const vidages = this.vidages.filter(v => v.déclencheur === nom);
+                    vidages.forEach(v => {
+                        v.dépendant.vide();
+                    })
+                    this.dépendants.forEach(s => s.vide());
                 }
             ));
         }
         if (options.rafraichi) {
             if (options.dépendDe) {
                 options.dépendDe.forEach(nomDéclencheur => {
-                    const déclencheur = this.dépendances.find(d => d.nom === nomDéclencheur);
-                    if (déclencheur === undefined) {
-                        throw new Error(`Il n'y a pas de déclencheur de ce nom: ${nomDéclencheur}`);
+                    if (!this.vidages.find(v => v.déclencheur === nomDéclencheur && v.dépendant.nom === nom)) {
+                        this.vidages.push({ déclencheur: nomDéclencheur, dépendant: stockage });
                     }
-                    déclencheur.dépendants.push(stockage);
                 });
             } else {
                 // sans dépendDe, le stockage dépend de tous les déclencheurs
-                this.dépendances.forEach(d => d.dépendants.push(stockage));
+                this.dépendants.push(stockage);
             }
         }
         return stockage;
+    }
+
+    public stockage<T>(nom: string): Stockage<T> {
+        return this.stockages.find(s => s.nom === nom) as Stockage<T>;
     }
 }

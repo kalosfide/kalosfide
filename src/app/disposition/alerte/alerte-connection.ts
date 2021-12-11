@@ -7,7 +7,7 @@ export function AlerteConnection(identifiant: Identifiant): Alerte {
     const alerte = new Alerte();
     alerte.id = ALERTE_CONNECTION_ID;
     alerte.type = 'success';
-    alerte.contenu = new KfEtiquette('', identifiant ? 'Bienvenue ' + identifiant.userName : 'Vous êtes bien déconnecté.');
+    alerte.contenu = new KfEtiquette('', identifiant ? 'Bienvenue ' + identifiant.email : 'Vous êtes bien déconnecté.');
     alerte.nbNavigationAvantFermeture = 2;
     alerte.fermable = true;
     alerte.fermetureAuto = 5000;

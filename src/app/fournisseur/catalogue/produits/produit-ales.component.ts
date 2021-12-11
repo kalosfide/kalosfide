@@ -1,6 +1,6 @@
 import { ActivatedRoute, Data } from '@angular/router';
 
-import { ProduitRoutes, ProduitPages } from './produit-pages';
+import { ProduitPages } from './produit-pages';
 import { Produit } from 'src/app/modeles/catalogue/produit';
 import { Component, OnInit } from '@angular/core';
 import { Site } from 'src/app/modeles/site/site';
@@ -24,7 +24,6 @@ export abstract class ProduitALESComponent extends KeyUidRnoNoALESComponent<Prod
     produitChargéDisponible: boolean;
 
     dataPages = ProduitPages;
-    dataRoutes = ProduitRoutes;
 
     constructor(
         protected route: ActivatedRoute,
@@ -42,7 +41,7 @@ export abstract class ProduitALESComponent extends KeyUidRnoNoALESComponent<Prod
         etiquette = Fabrique.ajouteEtiquetteP(infos);
         etiquette.ajouteTextes(
             `Ceci est `,
-            { texte: 'à faire', balise: KfTypeDeBaliseHTML.b},
+            { texte: 'à faire', balise: KfTypeDeBaliseHTML.b },
             '.'
         );
 
@@ -64,15 +63,6 @@ export abstract class ProduitALESComponent extends KeyUidRnoNoALESComponent<Prod
     fixeValeur(valeur: Produit) {
         this.dataEditeur.fixeValeur(valeur);
         this.produitChargéDisponible = valeur && valeur.etat === IdEtatProduit.disponible;
-    }
-
-    protected metAJourNbProduits(delta: number) {
-            this.site.nbProduits = this.site.nbProduits + delta;
-            this.service.navigation.fixeActionsAprèsNavigation(
-                () => {
-                    this.service.navigation.fixeSiteEnCours(this.site);
-                    this.service.identification.fixeSiteIdentifiant(this.site);
-                });
     }
 
 }

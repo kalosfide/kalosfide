@@ -45,9 +45,16 @@ export class KfVueTableCelluleEnTete<T> extends KfVueTableCelluleBase<T> impleme
     }
 
     /**
-     * classe à ajouter à l'élément th de l'en-tête
+     * KfNgClasse de l'élément th de l'en-tête.
      */
-    get classe(): KfNgClasse {
-        return this.pColonne.classeEntete;
+     get classe(): KfNgClasse {
+        return this.pColonne.classeEnteteTh;
+    }
+
+    /**
+     * KfNgClasse de l'élément div ajouté autour du contenu de l'en-tête s'il existe.
+     */
+     get classeDiv(): KfNgClasse {
+        return this.pColonne.classeEnteteDiv;
     }
 }

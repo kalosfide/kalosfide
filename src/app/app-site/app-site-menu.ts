@@ -1,12 +1,12 @@
 import { Menu } from '../disposition/menu/menu';
 import { PageDef } from '../commun/page-def';
-import { AppSiteRoutes, AppSitePages } from './app-site-pages';
+import { AppSitePages } from './app-site-pages';
 import { AppSite } from './app-site';
-import { AppRoutes } from '../app-pages';
 import { ItemCompte } from '../compte/menu/item-compte';
 import { NavItemLien } from '../disposition/navbars/nav-item-lien';
 import { NavItemDropdown } from '../disposition/navbars/nav-item-dropdown';
 import { NavItemDropDownGroup } from '../disposition/navbars/nav-item-dropdown-group';
+import { Fabrique } from '../disposition/fabrique/fabrique';
 
 export class AppSiteMenu extends Menu {
     constructor() {
@@ -14,9 +14,9 @@ export class AppSiteMenu extends Menu {
     }
 
     private créeItemApp(pageDef: PageDef): NavItemLien {
-        const item = new NavItemLien(pageDef.urlSegment, this);
+        const item = new NavItemLien(pageDef.path, this);
         item.texte = pageDef.lien;
-        item.url = AppSiteRoutes.url([pageDef.urlSegment]);
+        item.url = Fabrique.url.appRouteur.appSite.url(pageDef.path);
         return item;
     }
 
@@ -24,7 +24,7 @@ export class AppSiteMenu extends Menu {
         const i = new NavItemLien('texteMarque', this);
         i.lien.ajouteClasse('navbar-brand');
         i.texte = AppSite.texte;
-        i.url = AppRoutes.url();
+        i.url = Fabrique.url.appRouteur.url();
         return i;
     }
 
@@ -36,21 +36,21 @@ export class AppSiteMenu extends Menu {
         ];
     }
 
-    private créeItemDevenirFournisseur(parent: ItemCompte): NavItemDropDownGroup {
-        const itemDevenir = new NavItemDropDownGroup('devenir', parent);
-        const itemFournisseur = new NavItemLien(AppSitePages.devenirFournisseur.urlSegment, this);
-        itemFournisseur.url = AppSiteRoutes.url([AppSitePages.devenirFournisseur.urlSegment]);
-        itemFournisseur.texte = AppSitePages.devenirFournisseur.lien;
-        itemDevenir.fixeContenus([]);
-        itemDevenir.rafraichit = () => {
-            itemDevenir.fixeContenus(itemDevenir.identifiant ? [itemFournisseur] : []);
+    private créeItemNouveauSite(parent: ItemCompte): NavItemDropDownGroup {
+        const itemNouveau = new NavItemDropDownGroup('devenir', parent);
+        const itemFournisseur = new NavItemLien(AppSitePages.nouveauSite.path, this);
+        itemFournisseur.url = Fabrique.url.appRouteur.appSite.url(AppSitePages.nouveauSite.path);
+        itemFournisseur.texte = AppSitePages.nouveauSite.lien;
+        itemNouveau.fixeContenus([]);
+        itemNouveau.rafraichit = () => {
+            itemNouveau.fixeContenus(!(itemNouveau.identifiant && itemNouveau.identifiant.estAdministrateur) ? [itemFournisseur] : []);
         };
-        return itemDevenir;
+        return itemNouveau;
     }
 
     protected créeItemCompte(): NavItemDropdown {
         const i = new ItemCompte(this);
-        i.ajoute(this.créeItemDevenirFournisseur(i));
+        i.ajoute(this.créeItemNouveauSite(i));
         return i;
     }
 

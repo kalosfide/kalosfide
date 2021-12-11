@@ -31,7 +31,6 @@ export class NavItemDropDownGroup extends NavItem {
 
     fixeContenus(contenus: NavItemLien[]) {
         this.pDropdownGroup.fixeContenus(contenus.map(c => c.lien));
-        console.log(contenus);
         this.pItems = contenus;
     }
 }

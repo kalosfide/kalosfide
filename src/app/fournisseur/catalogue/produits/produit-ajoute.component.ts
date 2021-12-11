@@ -5,6 +5,8 @@ import { PageDef } from 'src/app/commun/page-def';
 import { ProduitPages } from './produit-pages';
 import { ProduitService } from 'src/app/modeles/catalogue/produit.service';
 import { IdEtatProduit } from 'src/app/modeles/catalogue/etat-produit';
+import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
+import { Categorie } from 'src/app/modeles/catalogue/categorie';
 
 @Component({
     templateUrl: '../../../disposition/page-base/page-base.html',
@@ -23,11 +25,14 @@ export class ProduitAjouteComponent extends ProduitALESComponent implements OnIn
 
         this.action = this.actionAjoute();
         this.action.actionSiOk = () => {
-            if (this.produit.etat === IdEtatProduit.disponible) {
-                this.metAJourNbProduits(1);
-            }
             this.service.quandAjoute(this.produit);
         };
+        this.créeAvantFormulaire = () => {
+            const groupe = new KfGroupe('ajoutCategorie');
+            return [groupe];
+        }
     }
+
+    quandCatégorieAjoutée(catégorie: Categorie) {}
 
 }

@@ -1,13 +1,17 @@
-<div *ngIf="modal.titre" class="modal-header" [ngClass]="modal.classeEnTete">
-    <p class="modal-title" [ngClass]="modal.classeTitre" id="modal-title">{{ modal.titre }}</p>
-    <input *ngIf="modal.sansAutoFocus" type="text" style="display:none" ngbAutofocus/>
-    <button type="button" class="btn-close" aria-describedby="modal-title" aria-label="Ferme" (click)="activeModal.dismiss('ngbModalCroix')">
+<div #titreElement *ngIf="modal.titre" class="modal-header" [ngClass]="modal.enTete.classe">
+    <p class="modal-title" [ngClass]="modal.titre.classe" id="modal-title">{{ modal.titre.texte }}</p>
+    <input *ngIf="modal.sansAutoFocus" type="text" style="display:none" ngbAutofocus />
+    <button type="button" class="btn-close" aria-describedby="modal-title" aria-label="close"
+        (click)="activeModal.dismiss('ngbModalCroix')">
     </button>
 </div>
-<div *ngIf="modal.corps" class="modal-body" [ngClass]="modal.classeCorps">
-    <app-kf-groupe [composant]="modal.corps"></app-kf-groupe>
+<div #corpsElement *ngIf="modal.corps" class="modal-body" [ngClass]="modal.corps.classe">
+    <ng-container *ngFor="let contenu of modal.corps.contenus">
+        <app-kf-composant [composant]="contenu"></app-kf-composant>
+    </ng-container>
+
 </div>
-<div *ngIf="modal.boutons" class="modal-footer" [ngClass]="modal.classePied">
+<div #piedElement *ngIf="modal.pied" class="modal-footer" [ngClass]="modal.pied.classe">
     <ng-container *ngFor="let bouton of modal.boutons">
         <app-kf-bouton [composant]="bouton" (output)="traiteClic($event)"></app-kf-bouton>
     </ng-container>

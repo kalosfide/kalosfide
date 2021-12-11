@@ -1,25 +1,11 @@
 import { InvitationDeApi } from './invitation';
 import { Role } from '../role/role';
-
-export interface IClientData {
-    nom: string;
-    adresse?: string;
-}
-
-export class ClientData implements IClientData {
-    nom: string;
-    adresse?: string;
-
-    copieData(data: IClientData) {
-        this.nom = data.nom;
-        this.adresse = data.adresse;
-    }
-}
+import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
 
 /**
  * Si dans liste ne contient que
  */
-export class Client extends Role implements IClientData {
+export class Client extends Role {
     email: string;
     /**
      * Fixé lors des lectures mais pas stocké
@@ -27,13 +13,11 @@ export class Client extends Role implements IClientData {
     invitation?: InvitationDeApi;
     avecDocuments: boolean;
 
-    /**
-     * recopie les champs hors clé qui sont définis
-     * @param de Client
-     */
-    static copieData(de: IClientData, vers: Client) {
-        vers.nom = de.nom;
-        vers.adresse = de.adresse;
+    static deRole(role: Role): Client {
+        const client = new Client();
+        KeyUidRno.copieKey(role, client);
+        Client.copieData(role, client);
+        return client;
     }
 
 }

@@ -8,38 +8,45 @@ import { PageErreurComponent } from '../erreurs/page-erreur.component';
 import { LivraisonPages } from './livraisons/livraison-pages';
 import { FacturePages } from './factures/facture-pages';
 import { FDocumentPages } from './documents/f-document-pages';
-import { ModalErreurComponent } from '../erreurs/modal-erreur.component';
 import { ApiErreurResolverService } from '../erreurs/api-erreur-resolver.service';
 import { FournisseurClientPages } from './clients/client-pages';
+import { AppSitePages } from '../app-site/app-site-pages';
+import { SiteOuvertGardeService } from '../site/site-ouvert-garde.service';
 
 const routes: Routes = [
     {
         path: '',
-        redirectTo: FournisseurPages.accueil.urlSegment,
+        redirectTo: FournisseurPages.accueil.path,
         pathMatch: 'full',
     },
     {
-        path: FournisseurPages.accueil.urlSegment,
+        path: FournisseurPages.accueil.path,
         component: FAccueilComponent,
     },
     {
-        path: FournisseurPages.livraison.urlSegment,
+        path: FournisseurPages.livraison.path,
         data: {
             pageDef: FournisseurPages.livraison,
             pageDefDescendantParDéfaut: LivraisonPages.choixClient
         },
+        canActivate: [
+            SiteOuvertGardeService
+        ],
         loadChildren: () => import('./livraisons/livraison.module').then(mod => mod.LivraisonModule)
     },
     {
-        path: FournisseurPages.facture.urlSegment,
+        path: FournisseurPages.facture.path,
         data: {
             pageDef: FournisseurPages.facture,
             pageDefDescendantParDéfaut: FacturePages.choixClient
         },
+        canActivate: [
+            SiteOuvertGardeService
+        ],
         loadChildren: () => import('./factures/facture.module').then(mod => mod.FactureModule)
     },
     {
-        path: FournisseurPages.documents.urlSegment,
+        path: FournisseurPages.documents.path,
         data: {
             pageDef: FournisseurPages.documents,
             pageDefDescendantParDéfaut: FDocumentPages.liste,
@@ -47,33 +54,33 @@ const routes: Routes = [
         loadChildren: () => import('./documents/f-document.module').then(mod => mod.FDocumentModule),
     },
     {
-        path: FournisseurPages.site.urlSegment,
+        path: FournisseurPages.gestion.path,
         data: {
-            pageDef: FournisseurPages.site,
+            pageDef: FournisseurPages.gestion,
             pageDefDescendantParDéfaut: FournisseurPages.catalogue,
         },
         children: [
             {
                 path: '',
-                redirectTo: FournisseurPages.catalogue.urlSegment,
+                redirectTo: FournisseurPages.catalogue.path,
                 pathMatch: 'full',
             },
             {
-                path: FournisseurPages.site.urlSegment,
-                data: {
-                    pageDef: FournisseurPages.site,
-                },
-                loadChildren: () => import('./f-site/f-site.module').then(mod => mod.FSiteModule),
-            },
-            {
-                path: FournisseurPages.catalogue.urlSegment,
+                path: FournisseurPages.catalogue.path,
                 data: {
                     pageDef: FournisseurPages.catalogue,
                 },
                 loadChildren: () => import('./catalogue/catalogue.module').then(mod => mod.CatalogueModule)
             },
             {
-                path: FournisseurPages.clients.urlSegment,
+                path: FournisseurPages.site.path,
+                data: {
+                    pageDef: FournisseurPages.site,
+                },
+                loadChildren: () => import('./f-site/f-site.module').then(mod => mod.FSiteModule),
+            },
+            {
+                path: FournisseurPages.clients.path,
                 data: {
                     pageDef: FournisseurPages.clients,
                     pageDefDescendantParDéfaut: FournisseurClientPages.accueil,
@@ -83,12 +90,12 @@ const routes: Routes = [
         ],
     },
     {
-        path: AppPages.compte.urlSegment,
+        path: AppSitePages.compte.path,
         loadChildren: () => import('../compte/compte.module').then(mod => mod.CompteModule)
     },
     // pages d'erreur
     {
-        path: AppPages.apiErreur.urlSegment,
+        path: AppPages.apiErreur.path,
         data: { pageDef: AppPages.apiErreur },
         component: PageErreurComponent,
         resolve: {
@@ -96,12 +103,8 @@ const routes: Routes = [
         }
     },
     {
-        path: AppPages.apiErreurModal.urlSegment,
-        component: ModalErreurComponent,
-    },
-    {
         path: '**',
-        redirectTo: AppPages.apiErreur.urlSegment,
+        redirectTo: AppPages.apiErreur.path,
     },
 ];
 

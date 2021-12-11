@@ -1,3 +1,4 @@
+import { TexteOutils } from 'src/app/commun/outils/texte-outils';
 import { KfGéreCss } from '../../kf-partages/kf-gere-css';
 import { KfNgClasseDef } from '../../kf-partages/kf-gere-css-classe';
 import { IKfIconeDef } from '../../kf-partages/kf-icone-def';
@@ -27,6 +28,8 @@ class IconeBouton {
 export class KfInputTexte extends KfInput {
     typeDInput: KfTypeDInput;
 
+    private pEnlèveEspaces: boolean;
+
     /**
      * Icones placées dans l'input ayant un role de bouton qui change la valeur ou l'aspect de l'input
      */
@@ -42,11 +45,22 @@ export class KfInputTexte extends KfInput {
         this.typeDInput = KfTypeDInput.texte;
     }
 
+    /**
+     * Si vrai les espaces au début et à la fin de la valeur sont supprimés et les suites d'espaces remplacées par un seul.
+     */
+    public get enlèveEspaces(): boolean {
+        return this.pEnlèveEspaces;
+    }
+    public set enlèveEspaces(value: boolean) {
+        this.pEnlèveEspaces = value;
+    }
+
     get valeur(): string {
-        return this.litValeur() as string;
+        const valeur = this.litValeur() as string;
+        return this.pEnlèveEspaces ? TexteOutils.enlèveEspaces(valeur) : valeur;
     }
     set valeur(valeur: string) {
-        this.fixeValeur(valeur);
+        this.fixeValeur(this.pEnlèveEspaces ? TexteOutils.enlèveEspaces(valeur) : valeur);
     }
 
     /**

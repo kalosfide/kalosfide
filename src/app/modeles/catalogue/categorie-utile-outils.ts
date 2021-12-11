@@ -25,8 +25,7 @@ export class CategorieUtileOutils extends DataUtileOutils {
     }
 
     catégorie(): KfVueTableFiltreCherche<Categorie> {
-        return Fabrique.vueTable.cherche<Categorie>(this.utile.nom.catégorie, 'Nom',
-            this.utile.nom.catégorie, 'Rechercher une catégorie');
+        return Fabrique.vueTable.cherche<Categorie>(this.utile.nom.catégorie, this.utile.nom.catégorie, 'Rechercher une catégorie');
     }
 
     ajoute(): KfVueTableOutilBtnGroupe<Categorie> {

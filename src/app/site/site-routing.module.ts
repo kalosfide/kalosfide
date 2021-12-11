@@ -3,22 +3,26 @@ import { Routes, RouterModule } from '@angular/router';
 import { SitePages } from './site-pages';
 import { FournisseurRacineComponent } from './fournisseur-racine.component';
 import { ClientRacineComponent } from './client-racine.component';
-import { FournisseurGarde } from './fournisseur-garde';
-import { ClientGarde } from './client-garde';
-import { UsagerGarde } from './usager-garde';
+import { FournisseurGardeService } from './fournisseur-garde.service';
+import { ClientGardeService } from './client-garde.service';
+import { UsagerGardeService } from './usager-garde.service';
+import { SiteResolverService } from './site-resolver.service';
 
 const routes: Routes = [
     {
         path: ':urlSite',
-        canActivateChild: [
+        canActivate: [
             // Si l'utilisateur est identifié et si son identifiant possède le site dont l'url est le paramétre de la route,
-            // fixe le site en cours du NavigationService et laisse passer. Sinon, redirige vers la page erreur 404.
-            // Les Resolver et Gardes suivants peuvent obtenir le site par le NavigationService.
-            UsagerGarde
+            // fixe le role en cours de l'IdentificationService et laisse passer. Sinon, redirige vers la page erreur 404.
+            // Les Resolver et Gardes suivants peuvent obtenir le role en cours par l'IdentificationService.
+            UsagerGardeService
         ],
+        resolve: {
+            site: SiteResolverService
+        },
         children: [
             {
-                path: SitePages.fournisseur.urlSegment,
+                path: SitePages.fournisseur.path,
                 data: {
                     pageDef: SitePages.fournisseur,
                     cheminDeTitre: ['site', 'titre']
@@ -27,12 +31,12 @@ const routes: Routes = [
                 canActivateChild: [
                     // Si l'utilisateur est identifié et s'il est le fournisseur du site en cours du NavigationService, laisse passer.
                     // Sinon, redirige vers la page erreur 403.
-                    FournisseurGarde
+                    FournisseurGardeService
                 ],
                 loadChildren: () => import('../fournisseur/fournisseur.module').then(mod => mod.FournisseurModule)
             },
             {
-                path: SitePages.client.urlSegment,
+                path: SitePages.client.path,
                 data: {
                     pageDef: SitePages.client,
                     cheminDeTitre: ['site', 'titre']
@@ -41,7 +45,7 @@ const routes: Routes = [
                 canActivateChild: [
                     // Si l'utilisateur est identifié et s'il est client du site en cours du NavigationService, laisse passer.
                     // Sinon, redirige vers la page erreur 403.
-                    ClientGarde
+                    ClientGardeService
                 ],
                 loadChildren: () => import('../client/client.module').then(mod => mod.ClientModule)
             },

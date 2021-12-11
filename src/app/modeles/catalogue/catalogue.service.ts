@@ -1,21 +1,23 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { Catalogue, CatalogueApi } from './catalogue';
-import { concatMap, map, take, tap } from 'rxjs/operators';
+import { concatMap, map } from 'rxjs/operators';
 import { KeyUidRno } from '../../commun/data-par-key/key-uid-rno/key-uid-rno';
 import { DataService } from '../../services/data.service';
 import { ApiController, ApiAction } from 'src/app/api/api-route';
-import { EtatsProduits } from './etat-produit';
+import { EtatsProduits, IdEtatProduit } from './etat-produit';
 import { Site } from '../site/site';
 import { ApiRequêteService } from 'src/app/api/api-requete.service';
-import { ApiResult } from 'src/app/api/api-results/api-result';
 import { SiteService } from '../site/site.service';
-import { IdEtatSite } from '../etat-site';
 import { Stockage } from 'src/app/services/stockage/stockage';
 import { StockageService } from 'src/app/services/stockage/stockage.service';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
+import { ApiRequêteAction } from 'src/app/api/api-requete-action';
+import { ContexteCatalogue } from 'src/app/client/contexte-catalogue';
+import { Role } from '../role/role';
+import { SiteBilanCatalogue } from '../site/site-bilan';
 
 @Injectable({
     providedIn: 'root'
@@ -31,7 +33,7 @@ export class CatalogueService extends DataService {
         stockageService: StockageService,
         private siteService: SiteService,
     ) {
-        super(apiRequeteService);
+        super(stockageService, apiRequeteService);
         this.stockage = stockageService.nouveau<Catalogue>('Catalogue', {
             // Le stockage sera réinitialisé à chaque changement de site ou d'identifiant
             rafraichi: true
@@ -78,7 +80,7 @@ export class CatalogueService extends DataService {
             const demandeApi = () => this.get<CatalogueApi>(ApiController.catalogue, apiAction, KeyUidRno.créeParams(site));
             return this.lectureObs<CatalogueApi>({ demandeApi }).pipe(
                 map(catalogueApi => {
-                    const catalogue: Catalogue = Catalogue.nouveau(catalogueApi);
+                    const catalogue: Catalogue = Catalogue.nouveau(site, catalogueApi);
                     catalogue.avecIndisponibles = avecIndisponibles;
                     this.stockage.fixeStock(catalogue);
                     return catalogue;
@@ -94,47 +96,62 @@ export class CatalogueService extends DataService {
      * Retourne le catalogue complet si l'utilisateur est le fournisseur
      */
     catalogue$(): Observable<Catalogue> {
-        const site = this.navigation.litSiteEnCours();
-        const identifiant = this.identification.litIdentifiant();
-        const avecIndisponibles = identifiant.estFournisseur(site);
-        return this._catalogue$(site, avecIndisponibles);
+        const role = this.identification.roleEnCours;
+        const avecIndisponibles = role.estFournisseur
+        return this._catalogue$(role.site, avecIndisponibles);
     }
 
-    disponiblesAvecPrixDatés(site: Site, tarifs: CatalogueApi[]): Observable<Catalogue> {
-        return this._catalogue$(site, false).pipe(
-            tap(catalogue => {
-                catalogue.prixDatés = Catalogue.prixDatés(tarifs);
+    /**
+     * Lit dans l'Api l'état du site en cours et si changé, met à jour les stockage du site et le site passé en paramètre.
+     * @param site ce paramètre est modifié si besoin pour refléter le site de l'Api.
+     */
+    public contexteChangé(site: Site): Observable<boolean> {
+        const demandeApi = () => this.get<ContexteCatalogue>(this.controllerUrl, ApiAction.catalogue.etat, KeyUidRno.créeParams(site));
+        return this.lectureObs<ContexteCatalogue>({ demandeApi }).pipe(
+            map(contexte => {
+                // la date de l'état du site n'existe pas avant le premier appel a contexteChangé
+                const initial = !site.dateCatalogue;
+                if (!Site.ontMêmeEtat(site, contexte)) {
+                    Site.copieEtat(contexte, site);
+                    this.identification.fixeSite(site);
+                    return true;
+                }
+                return false;
             })
         );
     }
 
     // ACTIONS
-    commenceModification(site: Site): Observable<ApiResult> {
-        return this.post(ApiController.catalogue, ApiAction.catalogue.commence, null, KeyUidRno.créeParams(site));
-    }
-    commenceModificationOk(site: Site) {
-        this.siteService.changeEtatOk(site, IdEtatSite.catalogue);
+
+    apiRequêteAction(site: Site, apiAction: string, ouvert: boolean): ApiRequêteAction {
+        const params = KeyUidRno.créeParams(site);
+        return {
+            demandeApi: () => this.post(ApiController.catalogue, apiAction, null, params),
+            actionSiOk: (créé: any) => {
+                site.ouvert = ouvert;
+                site.dateCatalogue = créé.date;
+                this.identification.fixeSite(site);
+            }
+        };
     }
 
-    termineModification(site: Site): Observable<ApiResult> {
-        return this.post(ApiController.catalogue, ApiAction.catalogue.termine, null, KeyUidRno.créeParams(site));
+    commenceModification(site: Site): ApiRequêteAction {
+        return this.apiRequêteAction(site, ApiAction.catalogue.commence, false);
     }
-    termineModificationOk(site: Site) {
-        this.siteService.changeEtatOk(site, IdEtatSite.ouvert);
+
+    termineModification(site: Site): ApiRequêteAction {
+        return this.apiRequêteAction(site, ApiAction.catalogue.termine, true);
     }
 
     private actionModification(
         apiAction: string,
-        étatCatalogue: IdEtatSite,
+        ouvert: boolean,
         titre: string,
         infos: KfEtiquette[]
     ): Observable<boolean> {
-        const site = this.navigation.litSiteEnCours();
-        const modal = Fabrique.infoModal(titre, infos);
-        return this.actionObs({
-            demandeApi: () => this.post(ApiController.catalogue, apiAction, null, KeyUidRno.créeParams(site)),
-            actionSiOk: () => this.siteService.changeEtatOk(site, étatCatalogue)
-        }).pipe(
+        const site = this.identification.siteEnCours;
+        const modal = Fabrique.infoModal(titre, infos, 'success');
+        return this.actionObs(this.apiRequêteAction(site, apiAction, ouvert)).pipe(
             concatMap((ok: boolean) => {
                 if (ok) {
                     return this.modalService.confirme(modal);
@@ -157,7 +174,7 @@ export class CatalogueService extends DataService {
         étiquette.ajouteTextes(
             `Il faut quitter les pages du catalogue ou vous déconnecter pour réouvrir votre site.`
         );
-        const modal = Fabrique.infoModal(titre, infos);
-        return this.actionModification(ApiAction.catalogue.commence, IdEtatSite.catalogue, titre, infos)
+        return this.actionModification(ApiAction.catalogue.commence, false, titre, infos)
+
     }
 }

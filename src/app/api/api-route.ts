@@ -1,8 +1,8 @@
 
 export const ApiController = {
-    motdepasse: 'motdepasse',
+    admin: 'admin',
     utilisateur: 'utilisateur',
-    enregistrement: 'enregistrement',
+    nouveauSite: 'nouveauSite',
     role: 'role',
     site: 'site',
     fournisseur: 'fournisseur',
@@ -19,9 +19,12 @@ export const ApiController = {
 };
 
 export const ApiAction = {
-    motdepasse: {
-        options: 'options',
+
+    peuple: {
+        estPeuple: 'estPeuple',
+        peuple: 'peuple',
     },
+
     data: {
         ajoute: 'ajoute',
         lit: 'lit',
@@ -30,6 +33,7 @@ export const ApiAction = {
         supprime: 'supprime',
         dernierNo: 'dernierNo',
     },
+
     utilisateur: {
         ajoute: 'ajoute',
         confirmeEmail: 'confirmeEmail',
@@ -50,17 +54,18 @@ export const ApiAction = {
         supprime: 'supprime',
         session: 'session',
     },
-    enregistrement: {
-        fournisseur: 'fournisseur',
-        client: 'client',
-        userNamePris: 'userNamePris',
-        emailPris: 'emailPris',
+
+    nouveauSite: {
+        demande: 'demande',
+        invite: 'invite',
+        invitation: 'invitation',
+        active: 'active',
     },
-    site: {
+
+    admin: {
+        fournisseurs: 'fournisseurs',
+        active: 'active',
         ajoute: 'ajoute',
-        liste: 'liste',
-        trouveParUrl: 'trouveParUrl',
-        etat: 'etat',
     },
     catalogue: {
         /** GET le catalogue actuel d'un site
@@ -68,12 +73,10 @@ export const ApiAction = {
          */
         complet: 'complet',
         disponible: 'disponible',
-        commande: 'commande',
-        livraison: 'livraison',
-        obsolete: 'obsolete',
+        etat: 'etat',
         // modification
         commence: 'commence',
-        termine: 'termine'
+        termine: 'termine',
     },
     categorie: {
         ajoute: 'ajoute',
@@ -83,7 +86,6 @@ export const ApiAction = {
     produit: {
         ajoute: 'ajoute',
         edite: 'edite',
-        fixePrix: 'prix',
         supprime: 'supprime',
     },
     client: {
@@ -112,15 +114,16 @@ export const ApiAction = {
     bon: {
 
         /**
-         *  Si le site est d'état Catalogue, retourne un contexte Catalogue: état site = Catalogue, date catalogue = null.
-         *  Si le site est ouvert et si l'utilisateur a passé la date de son catalogue
-         *  et si la date du catalogue utilisateur est postérieure à celle du catalogue de la bdd, les données utilisateur sont à jour,
-         *  retourne un contexte Ok: état site = ouvert, date catalogue = null.
-         *  Si le site est ouvert et si l'utilisateur a passé la date de son catalogue
-         *  et si la date du catalogue utilisateur est antérieure à celle du catalogue de la bdd
-         *  retourne un contexte Périmé: état site = ouvert, date catalogue = null.
-         *  Si le site est ouvert et si l'utilisateur n'a pas passé la date de son catalogue, il n'y pas de données utilisateur,
-         *  retourne un CLFDocs dont le champ Documents contient les données pour client de la dernière commande du client
+         * Si le site est d'état Catalogue
+         *  l'Api retourne l'erreur 409 avec contexte Catalogue: état site = Catalogue, date catalogue = null.
+         * Sinon, le site est d'état Ouvert,
+         *  si le stock existe et n'est pas un contexte, la date du catalogue du stock est passée en paramètre
+         *      si la date du catalogue du stock est antérieure à celle du catalogue de la bdd,
+         *          l'Api retourne l'erreur 409 avec contexte Périmé: état site = ouvert, date catalogue = celle du catalogue de la bdd
+         *      sinon, le stock est à jour,
+         *          l'Api retourne un ApiDocs vide
+         * sinon, le stock n'existe pas ou est un contexte,
+         *      l'Api retourne un ApiDocs dont le champ Documents contient les données pour client de la dernière commande du client
          * Param: key du Client et date du catalogue stocké s'il y en a un.
          */
         encours: 'enCours',
@@ -141,13 +144,13 @@ export const ApiAction = {
          * Param: key du Client
          * Retour: key de la commande créée.
          * Condition: Site ouvert.
-         * Sinon: BadRequest avec les erreurs etatSite et dateCatalogue.
+         * Sinon: Conflict avec les erreurs etatSite et dateCatalogue.
          */
         clone: 'clone',
 
         /**
-         * Supprime les détails de la commande créés par l'utilisateur. S'il reste des détails, fixe leur aLivrer à 0.
-         * S'il n'y a plus de détails, supprime la commande.
+         * Supprime les lignes d'un bon et si le bon est virtuel, supprime le bon.
+         * Param: key du clfDoc
          */
         efface: 'efface',
 
@@ -176,13 +179,13 @@ export const ApiAction = {
     docCLF: {
 
         /**
-         * Le CLFDocs lu dans l'Api contient les listes des documents à synthétiser de tous les clients avec leur état de préparation.
+         * Le ApiDocs retourné par l'Api contient les listes des documents à synthétiser de tous les clients avec leur état de préparation.
          * Param: key du Site
          */
         clients: 'clients',
 
         /**
-         * Le CLFDocs lu dans l'Api contient les documents à synthétiser d'un client avec leurs lignes.
+         * Le ApiDocs retourné par l'Api contient les documents à synthétiser d'un client avec leurs lignes.
          * Param: key du Client
          */
         client: 'client',
@@ -245,30 +248,44 @@ export const ApiAction = {
         annuleT: 'annuleT',
     },
 
-    peuple: {
-        estPeuple: 'estPeuple',
-        peuple: 'peuple',
-    },
-
     document: {
         /**
-         * Le CLFDocs lu dans l'Api contient les résumés des documents terminés de tous les clients.
+         * L'Api retourne la liste des ApiClientBilanDocs du site.
+         * Param: key du Site
+         */
+        bilans: 'bilans',
+
+        /**
+         * Le ApiDocs retourné par l'Api contient les résumés des documents terminés de tous les clients.
          * Param: key du Site
          */
         clients: 'clients',
 
         /**
-         * Le CLFDocs lu dans l'Api contient les résumés des documents terminés d'un client.
+         * Le ApiDocs retourné par l'Api contient les résumés des documents terminés d'un client.
          * Param: key du Client
          */
         client: 'client',
 
         /**
-         * Le CLFDocs lu dans l'Api contient le document terminé d'un client avec ses lignes.
+         * Le ApiDocs retourné par l'Api contient les résumés des documents envoyés à l'utilisateur
+         * depuis sa dernière déconnection (bons de commande pour les sites dont l'utilisateur est fournisseur,
+         * bons de livraison et factures pour les sites dont l'utilisateur est client).
+         */
+        nouveaux: 'nouveaux',
+
+        /**
+         * Le ApiDocs retourné par l'Api contient le document terminé d'un client avec ses lignes.
          * Param: key du Document
          */
         commande: 'commande',
         livraison: 'livraison',
         facture: 'facture',
+
+        /**
+         * Retourne vrai si le document (bon de livraison ou facture) recherché existe.
+         * Param: key du site et no du document
+         */
+        cherche: 'cherche',
     },
 };

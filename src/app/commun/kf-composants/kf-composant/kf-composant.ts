@@ -16,7 +16,6 @@ import { AbstractControl } from '@angular/forms';
 import { KfTypeDeComposant, KfTypeDeValeur } from '../kf-composants-types';
 import { Noeud } from '../../outils/arbre/noeud';
 import { KfListe } from '../kf-liste/kf-liste';
-import { KfSuperGroupe } from '../kf-groupe/kf-super-groupe';
 import { KfGroupe } from '../kf-groupe/kf-groupe';
 import { KfComposantGereHtml } from './kf-composant-gere-html';
 import { KfGereTabIndex } from './kf-composant-gere-tabindex';
@@ -30,7 +29,6 @@ import { IKfIconeDef } from '../kf-partages/kf-icone-def';
 import { KfGéreCss } from '../kf-partages/kf-gere-css';
 import { Subscription, Observable } from 'rxjs';
 import { ValeurEtObservable } from '../../outils/valeur-et-observable';
-import { KfDiv } from '../kf-partages/kf-div/kf-div';
 import { KfNgClasse } from '../kf-partages/kf-gere-css-classe';
 import { KfNgStyle } from '../kf-partages/kf-gere-css-style';
 import { EventEmitter } from '@angular/core';
@@ -268,13 +266,27 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
      * Est vrai si le composant est la racine d'un arbre de valeur.
      * A fixer avant d'appeler quandTousAjoutés du superGroupe racine de l'arbre de disposition.
      */
-     get estRacineV(): boolean {
+    get estRacineV(): boolean {
         return this.gereValeur && this.gereValeur.estRacineV;
     }
     set estRacineV(valeur: boolean) {
         if (this.gereValeur) {
             this.gereValeur.estRacineV = valeur;
         }
+    }
+    /**
+     * Liste des composants contenus ou contenus dans les contenus de ce composant qui sont des racines de valeur.
+     * @returns KfComposant[]
+     */
+    racinesV(): KfComposant[] {
+        const r: KfComposant[] = [];
+        if (this.estRacineV) {
+            r.push(this);
+        }
+        this.contenus.forEach(c => {
+            r.push(...c.racinesV());
+        });
+        return r;
     }
     /**
      * Est vrai si le composant est un groupe qui est la racine d'un arbre de valeur.
@@ -351,6 +363,9 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
     }
 
     private _active(inactivité: boolean) {
+        if (this.pInactivité === inactivité) {
+            return;
+        }
         this.pInactivité = inactivité;
         if (this.abstractControl) {
             if (inactivité) {
@@ -407,7 +422,7 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
 
     // HTML
 
-    initialiseHtml(htmlElement: HTMLElement, output: EventEmitter<KfEvenement>) {
+    initialiseHtml(htmlElement: HTMLElement, output?: EventEmitter<KfEvenement>) {
         this.gereHtml.htmlElement = htmlElement;
         this.gereHtml.initialiseHtml(output);
     }
@@ -444,6 +459,10 @@ export abstract class KfComposant extends KfGéreCss implements IKfComposant {
         if (this.gereTabIndex) {
             return this.gereTabIndex.prendLeFocus();
         }
+    }
+
+    clic() {
+        this.gereHtml.htmlElement.click();
     }
 
     /**

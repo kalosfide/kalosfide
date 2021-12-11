@@ -1,5 +1,4 @@
-import { Component, Input, ViewChild, AfterViewInit, ElementRef, OnInit } from '@angular/core';
-import { KfVueJson } from './kf-vue-json';
+import { Component, ViewChild, AfterViewInit, ElementRef, OnInit, ViewEncapsulation } from '@angular/core';
 import { KfComposantComponent } from '../../kf-composant/kf-composant.component';
 import { TraiteKeydownService } from '../../../traite-keydown/traite-keydown.service';
 
@@ -10,7 +9,8 @@ import { TraiteKeydownService } from '../../../traite-keydown/traite-keydown.ser
         <pre #preElement>{{ composant.texte }}</pre>
     </div>
   `,
-    styleUrls: ['../../kf-composants.scss']
+    styleUrls: ['../../kf-composants.scss'],
+    encapsulation: ViewEncapsulation.None
 })
 export class KfVueJsonComponent extends KfComposantComponent implements OnInit, AfterViewInit {
     @ViewChild('preElement', {static: false}) preElement: ElementRef;

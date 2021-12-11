@@ -1,7 +1,6 @@
 
 import { Observable, Subscription } from 'rxjs';
 
-import { KfSuperGroupe } from '../../commun/kf-composants/kf-groupe/kf-super-groupe';
 import { KfBouton } from '../../commun/kf-composants/kf-elements/kf-bouton/kf-bouton';
 import { AfficheResultat } from '../affiche-resultat/affiche-resultat';
 import { KfGroupe } from '../../commun/kf-composants/kf-groupe/kf-groupe';
@@ -28,8 +27,6 @@ export abstract class FormulaireBaseComponent extends PageBaseComponent {
 
     // membres communs
     formulaire: KfGroupe;
-
-    subscriptions: Subscription[] = [];
 
     boutonSoumettre: KfBouton;
     afficheResultat: AfficheResultat;

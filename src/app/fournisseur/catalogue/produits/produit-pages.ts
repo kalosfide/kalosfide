@@ -1,26 +1,22 @@
-import { iSiteRoutePlusSegments } from 'src/app/site/site-pages';
 import { PageDef } from 'src/app/commun/page-def';
-import { CatalogueRoutes, CataloguePages } from '../catalogue-pages';
 
 export class ProduitPages {
     static index: PageDef = {
-        urlSegment: 'index',
+        path: 'index',
         lien: 'Produits',
         title: 'Liste',
         titre: 'Produits',
     };
     static ajoute: PageDef = {
-        urlSegment: 'ajoute',
+        path: 'ajoute',
         lien: 'Nouveau produit',
         title: 'Nouveau',
         titre: 'Créer un nouveau produit',
     };
     static edite: PageDef = {
-        urlSegment: 'edite',
+        path: 'edite',
         lien: 'Modifier',
         title: 'Modifier',
         titre: 'Modifier un produit',
     };
 }
-
-export const ProduitRoutes = iSiteRoutePlusSegments(CatalogueRoutes, [CataloguePages.produits.urlSegment]);

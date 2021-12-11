@@ -7,31 +7,34 @@ import { AppSiteAProposComponent } from './app-site-a-propos.component';
 import { AppSitePeupleComponent } from './app-site-peuple.component';
 import { AppSiteContactComponent } from './app-site-contact.component';
 import { AppSiteComponent } from './app-site.component';
-import { DevenirFournisseurComponent } from './devenir-fournisseur/devenir-fournisseur.component';
+import { NouveauSiteComponent } from './nouveau-site/nouveau-site.component';
 import { PeupleResolverService } from './peuple-resolver.service';
-import { IdentifiantResolverService } from '../securite/identifiant-resolver.service';
+import { IdentifiantResolverService } from './identifiant-resolver.service';
 import { AppSiteAccueilComponent } from './app-site-accueil.component';
 import { DevenirClientComponent } from './devenir-client/devenir-client.component';
 import { DevenirClientResolverService } from './devenir-client/devenir-client-resolver.service';
-import { IdentifiantGardeService } from '../securite/identifant-garde.service';
 import { ApiErreurResolverService } from '../erreurs/api-erreur-resolver.service';
-import { ModalErreurComponent } from '../erreurs/modal-erreur.component';
+import { IdentifiantRole0GardeService } from './identifiant-role-0-garde.service';
+import { NouveauSiteResolverService } from './nouveau-site/nouveau-site-resolver.service';
 
 const routes: Routes = [
     {
         path: '',
         component: AppSiteComponent,
+        canActivate: [
+            IdentifiantRole0GardeService
+        ],
         resolve: {
             identifiant: IdentifiantResolverService,
         },
         children: [
             {
                 path: '',
-                redirectTo: AppSitePages.accueil.urlSegment,
+                redirectTo: AppSitePages.accueil.path,
                 pathMatch: 'full',
             },
             {
-                path: AppSitePages.accueil.urlSegment,
+                path: AppSitePages.accueil.path,
                 component: AppSiteAccueilComponent,
                 data: {
                     pageDef: AppSitePages.accueil,
@@ -39,7 +42,7 @@ const routes: Routes = [
                 },
             },
             {
-                path: AppSitePages.peuple.urlSegment,
+                path: AppSitePages.peuple.path,
                 data: { pageDef: AppSitePages.peuple },
                 component: AppSitePeupleComponent,
                 resolve: {
@@ -47,25 +50,25 @@ const routes: Routes = [
                 }
             },
             {
-                path: AppSitePages.contact.urlSegment,
+                path: AppSitePages.contact.path,
                 data: { pageDef: AppSitePages.contact },
                 component: AppSiteContactComponent
             },
             {
-                path: AppSitePages.apropos.urlSegment,
+                path: AppSitePages.apropos.path,
                 data: { pageDef: AppSitePages.apropos },
                 component: AppSiteAProposComponent,
             },
             {
-                path: AppSitePages.devenirFournisseur.urlSegment,
-                data: { pageDef: AppSitePages.devenirFournisseur },
-                component: DevenirFournisseurComponent,
-                canActivate: [
-                    IdentifiantGardeService,
-                ]
+                path: AppSitePages.nouveauSite.path,
+                data: { pageDef: AppSitePages.nouveauSite },
+                component: NouveauSiteComponent,
+                resolve: {
+                    nouveauSite: NouveauSiteResolverService,
+                },
             },
             {
-                path: AppSitePages.devenirClient.urlSegment,
+                path: AppSitePages.devenirClient.path,
                 data: {
                     pageDef: AppSitePages.devenirClient,
                  },
@@ -75,11 +78,11 @@ const routes: Routes = [
                 },
             },
             {
-                path: AppPages.compte.urlSegment,
+                path: AppSitePages.compte.path,
                 loadChildren: () => import('../compte/compte.module').then(mod => mod.CompteModule)
             },
             {
-                path: AppPages.apiErreur.urlSegment,
+                path: AppPages.apiErreur.path,
                 data: { pageDef: AppPages.apiErreur },
                 component: PageErreurComponent,
                 resolve: {
@@ -87,12 +90,8 @@ const routes: Routes = [
                 }
             },
             {
-                path: AppPages.apiErreurModal.urlSegment,
-                component: ModalErreurComponent,
-            },
-            {
                 path: '**',
-                redirectTo: AppPages.apiErreur.urlSegment,
+                redirectTo: AppPages.apiErreur.path,
             },
         ]
     },

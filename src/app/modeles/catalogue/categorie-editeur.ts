@@ -6,7 +6,6 @@ import { KfValidateurs, KfValidateur } from 'src/app/commun/kf-composants/kf-par
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { CategoriePages } from '../../fournisseur/catalogue/categories/categorie-pages';
 import { IDataComponent } from 'src/app/commun/data-par-key/i-data-component';
-import { KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
 
 export class CategorieEditeur extends KeyUidRnoNoEditeur<Categorie> {
     kfNom: KfInputTexte;
@@ -68,11 +67,6 @@ export class CategorieEditeur extends KeyUidRnoNoEditeur<Categorie> {
             case CategoriePages.edite:
                 this.kfDeData = [
                     this.créeNom(this.validateursNomEdite()),
-                ];
-                break;
-            case CategoriePages.supprime:
-                this.kfDeData = [
-                    this.créeNom(),
                 ];
                 break;
             default:

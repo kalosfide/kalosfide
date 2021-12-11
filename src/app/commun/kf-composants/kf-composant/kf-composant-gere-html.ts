@@ -4,8 +4,7 @@ import {
 } from '../kf-partages/kf-evenements';
 import { KfComposant } from './kf-composant';
 import { KfDocumentContexte } from '../kf-constantes';
-import { KfBouton } from '../kf-elements/kf-bouton/kf-bouton';
-import { KfTypeDeBouton, KfTypeDeComposant } from '../kf-composants-types';
+import { KfTypeDeComposant } from '../kf-composants-types';
 import { EventEmitter } from '@angular/core';
 import { Subscription } from 'rxjs';
 
@@ -243,11 +242,12 @@ export class KfComposantGereHtml {
             this.pOutput = output;
         }
         if (this.evenementsADéclencher) {
+            const composant = this.composant;
             this.evenementsADéclencher.forEach(
                 htmlEventType =>
                     this.htmlElement['on' + htmlEventType] =
                     ((event: Event): any => {
-                        const evenement = new KfEvenement(this.composant, htmlEventType, event);
+                        const evenement = new KfEvenement(composant, htmlEventType, event);
                         event.stopPropagation();
                         this.traite(evenement);
                         if (evenement.statut === KfStatutDEvenement.fini) {

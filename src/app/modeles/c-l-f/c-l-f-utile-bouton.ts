@@ -14,13 +14,14 @@ import { KfSuperGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-super-g
 import { ModeAction } from './condition-action';
 import { IBoutonDef } from 'src/app/disposition/fabrique/fabrique-bouton';
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
-import { Couleur } from 'src/app/disposition/fabrique/fabrique-couleurs';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
 import { IBtnGroupeDef, IBarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
-import { ApiDocument } from './api-document';
+import { ApiDoc } from './api-doc';
 import { AfficheResultat } from 'src/app/disposition/affiche-resultat/affiche-resultat';
 import { CLFDocs } from './c-l-f-docs';
+import { BootstrapType, KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
+import { TypeCLF } from './c-l-f-type';
 
 export class CLFUtileBouton extends DataUtileBouton {
     constructor(utile: CLFUtile) {
@@ -43,13 +44,7 @@ export class CLFUtileBouton extends DataUtileBouton {
         return this.utile.lien;
     }
 
-    copieLigne(ligne: CLFLigne): KfBouton {
-        const bouton = Fabrique.bouton.attenteDeColonne('copie1_' + ligne.no2,
-            Fabrique.contenu.copier, this.service.apiRequêteCopieSourceDansAFixer1(ligne), this.service);
-        return bouton;
-    }
-
-    supprime(ligne: CLFLigne, quandLigneSupprimée: (ligne: CLFLigne) => ((stock: CLFDocs) => void)): KfBouton {
+    supprime(ligne: CLFLigne, quandLigneSupprimée: (stock: CLFDocs, index: number) => void): KfBouton {
         const texteUtile = this.utile.texte.textes(ligne.parent.type);
         const titre = `Suppression d'une ligne`;
         const description = new KfEtiquette('');
@@ -61,7 +56,7 @@ export class CLFUtileBouton extends DataUtileBouton {
                     ? Fabrique.texte.quantitéAvecUnité(ligne.produit, ligne.aFixer, ligne.typeCommande)
                     : Fabrique.texte.quantitéAvecUnité(ligne.produit, ligne.quantité, ligne.typeCommande)
                     }`,
-                balise: KfTypeDeBaliseHTML.b
+                classe: KfBootstrap.classeTexte({ poids: 'bold' }),
             },
             ' de ',
             {
@@ -75,88 +70,106 @@ export class CLFUtileBouton extends DataUtileBouton {
             },
             ' va être supprimée.'
         );
-        const apiRequêteAction: ApiRequêteAction = this.service.apiRequêteSupprimeLigne(ligne, quandLigneSupprimée(ligne));
+        const apiRequêteAction: ApiRequêteAction = this.service.apiRequêteSupprimeLigne(ligne, quandLigneSupprimée);
         const bouton = Fabrique.bouton.attenteDeColonne('supprime' + ligne.no2,
-            Fabrique.contenu.supprime, apiRequêteAction, this.service,
-            Fabrique.confirmeModal(titre, [description])
+            Fabrique.contenu.supprime(), apiRequêteAction, this.service,
+            Fabrique.confirmeModal(titre, 'danger', [description])
         );
         return bouton;
     }
 
-    copieDoc(doc: CLFDoc): KfBouton {
-        const texteUtile = this.utile.texte.textes(doc.synthèse.type);
-        const titre = `Remplissage automatique`;
-        const description = texteUtile.copierBon;
-        const apiRequêteAction: ApiRequêteAction = this.service.apiRequêteCopieSourceDansAFixerDoc(doc,
-            () => doc.vueTableLigne.quandItemModifié());
-        const bouton = Fabrique.bouton.attenteDeColonne('copie_D', Fabrique.contenu.copier,
-            apiRequêteAction, this.service, Fabrique.confirmeModal(titre, description));
-        bouton.titleHtml = description;
-        return bouton;
-    }
-
-    copieDocs(doc: CLFDoc): KfBouton {
-        const texteUtile = this.utile.texte.textes(doc.type);
-        const titre = `Remplissage automatique`;
-        const description = texteUtile.copierBons;
-        const apiRequêteAction: ApiRequêteAction = this.service.apiRequêteCopieSourceDansAFixerDocs(doc,
-                () => doc.àSynthétiser.forEach(bon => bon.vueTableLigne.quandItemModifié()));
-        const bouton = Fabrique.bouton.attenteDeColonne('copie_T', Fabrique.contenu.copier,
-            apiRequêteAction, this.service, Fabrique.confirmeModal(titre, description));
-        bouton.titleHtml = description;
+    copieLigne(ligne: CLFLigne): KfBouton {
+        const bouton = Fabrique.bouton.attenteDeColonne('copie1_' + ligne.no2,
+            Fabrique.contenu.copier(), this.service.apiRequêteCopieQuantitéDansAFixerLigne(ligne), this.service);
         return bouton;
     }
 
     annuleLigne(ligne: CLFLigne): KfBouton {
         const apiRequêteAction: ApiRequêteAction = this.service.apiRequêteAnnuleLigne(ligne);
         const bouton = Fabrique.bouton.attenteDeColonne('annule1',
-            Fabrique.contenu.annule, apiRequêteAction, this.service);
+            Fabrique.contenu.annule(), apiRequêteAction, this.service);
         return bouton;
     }
 
-    annuleDoc(doc: CLFDoc): KfBouton {
+    copieDoc(doc: CLFDoc, quandBonModifié?: (bon: CLFDoc) => void): KfBouton {
+        const texteUtile = this.utile.texte.textes(doc.synthèse.type);
+        const titre = `Remplissage automatique`;
+        const description = texteUtile.copierBon;
+        const apiRequêteAction: ApiRequêteAction = this.service.apiRequêteCopieQuantitéDansAFixerDoc(doc, quandBonModifié);
+        const bouton = Fabrique.bouton.attenteDeColonne('copie_D', Fabrique.contenu.copier(),
+            apiRequêteAction, this.service, Fabrique.confirmeModal(titre, 'primary', description));
+        bouton.titleHtml = description;
+        return bouton;
+    }
+
+    annuleDoc(doc: CLFDoc, quandBonModifié?: (bon: CLFDoc) => void): KfBouton {
         const texteUtile = this.utile.texte.textes(doc.synthèse.type);
         const titre = `Remplissage automatique`;
         const description = `${texteUtile.Le_doc} sera préparé en annulant les quantités du ${texteUtile.def.bon}`;
-        const apiRequêteAction: ApiRequêteAction = this.service.apiRequêteAnnuleDoc(doc, () => doc.vueTableLigne.quandItemModifié());
+        const apiRequêteAction: ApiRequêteAction = this.service.apiRequêteAnnuleDoc(doc, quandBonModifié);
         const bouton = Fabrique.bouton.attenteDeColonne('annuleD',
-            Fabrique.contenu.annule, apiRequêteAction, this.service,
-            Fabrique.confirmeModal(titre, description)
+            Fabrique.contenu.annule(), apiRequêteAction, this.service,
+            Fabrique.confirmeModal(titre, 'warning', description)
         );
         return bouton;
     }
 
-    annuleDocs(doc: CLFDoc): KfBouton {
+    copieDocs(doc: CLFDoc, quandBonsModifiés: () => void): KfBouton {
+        const texteUtile = this.utile.texte.textes(doc.type);
+        const titre = `Remplissage automatique`;
+        const description = texteUtile.copierBons;
+        const apiRequêteAction: ApiRequêteAction = this.service.apiRequêteCopieQuantitéDansAFixerDocs(doc, quandBonsModifiés);
+        const bouton = Fabrique.bouton.attenteDeColonne('copie_T', Fabrique.contenu.copier(),
+            apiRequêteAction, this.service, Fabrique.confirmeModal(titre, 'primary', description));
+        bouton.titleHtml = description;
+        return bouton;
+    }
+
+    annuleDocs(doc: CLFDoc, quandBonsModifiés: () => void): KfBouton {
         const texteUtile = this.utile.texte.textes(doc.type);
         const titre = `Remplissage automatique`;
         const description = `${texteUtile.Le_doc} sera préparé en annulant les quantités du ${texteUtile.def.bon}`;
-        const apiRequêteAction: ApiRequêteAction = this.service.apiRequêteAnnuleDocs(doc,
-            () => doc.àSynthétiser.forEach(bon => bon.vueTableLigne.quandItemModifié())
-        );
+        const apiRequêteAction: ApiRequêteAction = this.service.apiRequêteAnnuleDocs(doc, quandBonsModifiés);
         const bouton = Fabrique.bouton.attenteDeColonne('annuleT',
-            Fabrique.contenu.annule, apiRequêteAction, this.service,
-            Fabrique.confirmeModal(titre, description)
+            Fabrique.contenu.annule(), apiRequêteAction, this.service,
+            Fabrique.confirmeModal(titre, 'warning', description)
         );
         return bouton;
     }
 
+    supprimeBonVirtuel(doc: CLFDoc, quandBonVirtuelSupprimé?: () => void): KfBouton {
+        const texteUtile = this.utile.texte.textes(doc.synthèse.type);
+        const titre = `Suppression du bon virtuel`;
+        const description = `Le ${texteUtile.def.bon} virtuel va être supprimé`;
+        let rafraichitTable: () => void;
+        if (quandBonVirtuelSupprimé) {
+            rafraichitTable = () => {
+                const ligne = doc.vueTableLigne;
+                ligne.vueTable.supprimeItem(ligne.index);
+                quandBonVirtuelSupprimé();
+            };
+        }
+        const apiRequêteAction: ApiRequêteAction = this.service.apiRequêteSupprimeBonVirtuel(doc, rafraichitTable);
+        const bouton = Fabrique.bouton.attenteDeColonne('supprimeD',
+            Fabrique.contenu.supprime(), apiRequêteAction, this.service,
+            Fabrique.confirmeModal(titre, 'danger', description, { ok: `Supprimer le bon virtuel` })
+        );
+        return bouton;
+    }
+
+    texteVérifier(type: TypeCLF): string {
+        return `Vérifier ${this.utile.texte.textes(type).le_doc}`;
+    }
+    texteAnnulerVérifier(): string {
+        return 'Annuler la vérification';
+    }
+    texteTerminer(type: TypeCLF): string {
+        return `Enregistrer ${this.utile.texte.textes(type).le_doc}`;
+    }
+
     envoi(clfDoc: CLFDoc, superGroupe: KfSuperGroupe, afficheResultat: AfficheResultat): KfBouton {
-        const apiRequêteAction: ApiRequêteAction = {
-            formulaire: superGroupe,
-            demandeApi: (): Observable<ApiResult> => {
-                return this.service.envoi(clfDoc);
-            },
-            actionSiOk: (créé: ApiDocument): void => {
-                clfDoc.apiDoc.date = créé.date;
-                if (clfDoc.type !== 'commande') {
-                    clfDoc.apiDoc.no = créé.no;
-                }
-                this.service.videStock();
-                this.service.changeMode(ModeAction.envoyé);
-            },
-            afficheResultat,
-        };
-        const texte = this.utile.texte.textes(clfDoc.type).bouton.terminer;
+        const apiRequêteAction: ApiRequêteAction = this.service.apiRequêteEnvoi(clfDoc, superGroupe, afficheResultat);
+        const texte = this.texteTerminer(clfDoc.type);
         const bouton = Fabrique.bouton.boutonAction('envoi', texte, apiRequêteAction, this.service);
         return bouton;
     }
@@ -166,7 +179,7 @@ export class CLFUtileBouton extends DataUtileBouton {
         const client = clfDocs.type === 'commande' ? undefined : clfDocs.client;
         const def: IBoutonDef = {
             nom: 'annuler',
-            contenu: { texte: this.utile.texte.textes(clfDocs.type).bouton.annulerVérifier },
+            contenu: { texte: this.texteAnnulerVérifier() },
             bootstrap: { type: 'dark' },
             action: () => {
                 this.service.routeur.navigueUrlDef(this.service.utile.url.retourDEnvoi(client));
@@ -183,32 +196,32 @@ export class CLFUtileBouton extends DataUtileBouton {
             const texteUtile = this.utile.texte.textes(type);
             const infos: KfComposant[] = [];
 
-            let couleur: Couleur;
+            let couleur: BootstrapType;
             let etiquette: KfEtiquette;
 
             clfDocs.créeBilan();
             const prêt = type === 'commande'
-                ? clfDocs.clfBilan.nbAPréparer > 0
-                : clfDocs.clfBilan.nbSélectionnés > 0;
+                ? clfDocs.clfBilan.total > 0
+                : clfDocs.clfBilan.sélectionnés > 0;
             if (prêt) {
                 etiquette = Fabrique.ajouteEtiquetteP(infos);
                 etiquette.ajouteTextes(texteUtile.bilanNbAVérifier(clfDocs.clfBilan));
                 etiquette = Fabrique.ajouteEtiquetteP(infos);
                 etiquette.ajouteTextes(texteUtile.vérificationPossible());
                 etiquette.ajouteClasse('alert-success');
-                couleur = Couleur.green;
+                couleur = 'success';
             } else {
                 etiquette = Fabrique.ajouteEtiquetteP(infos);
                 etiquette.ajouteTextes(texteUtile.bilanRienAVérifier(clfDocs.clfBilan));
                 etiquette = Fabrique.ajouteEtiquetteP(infos);
                 etiquette.ajouteTextes(texteUtile.vérificationImpossible());
                 etiquette.ajouteClasse('alert-warning');
-                couleur = Couleur.warning;
+                couleur = 'warning';
             }
             Fabrique.bouton.fixeDef(vérifier, {
                 nom: 'vérifier',
                 contenu: {
-                    texte: texteUtile.bouton.vérifier,
+                    texte: this.texteVérifier(type),
                 },
                 bootstrap: { type: 'secondary' },
                 action: () => {
@@ -218,7 +231,7 @@ export class CLFUtileBouton extends DataUtileBouton {
             vérifier.inactivité = !(this.utile.conditionAction.edite && prêt);
             Fabrique.contenu.fixeDef(info, {
                 iconeDef: Fabrique.icone.def.info,
-                couleurIcone: couleur,
+                classeIcone: KfBootstrap.classeTexte({ color: couleur }),
             });
             Fabrique.titrePage.fixePopover(info, '', infos);
 
@@ -227,7 +240,7 @@ export class CLFUtileBouton extends DataUtileBouton {
 
     rafraichitAnnulerVérifier(info: KfBouton, vérifier: KfBouton): () => void {
         return () => {
-            const clfDocs = this.service.litStock();
+            const clfDocs = this.service.litStockSiExistant();
             if (!clfDocs) {
                 return;
             }
@@ -238,13 +251,13 @@ export class CLFUtileBouton extends DataUtileBouton {
             const etiquette = Fabrique.ajouteEtiquetteP(infos);
             etiquette.ajouteTextes(
                 `Le bouton `,
-                { texte: texteUtile.bouton.terminer, balise: KfTypeDeBaliseHTML.b },
+                { texte: this.texteTerminer(clfDocs.type), balise: KfTypeDeBaliseHTML.b },
                 ` est en bas de la page.`
             );
             Fabrique.bouton.fixeDef(vérifier, {
                 nom: 'vérifier',
                 contenu: {
-                    texte: texteUtile.bouton.annulerVérifier,
+                    texte: this.texteAnnulerVérifier(),
                 },
                 bootstrap: { type: 'dark' },
                 action: () => {
@@ -254,7 +267,7 @@ export class CLFUtileBouton extends DataUtileBouton {
             vérifier.inactivité = false;
             Fabrique.contenu.fixeDef(info, {
                 iconeDef: Fabrique.icone.def.info,
-                couleurIcone: Couleur.green,
+                classeIcone: KfBootstrap.classeTexte({ color: 'success' }),
             });
             Fabrique.titrePage.fixePopover(info, '', infos);
 

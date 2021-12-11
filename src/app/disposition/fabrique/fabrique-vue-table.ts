@@ -17,7 +17,6 @@ import { IKfVueTablePaginationDef, KfVueTablePagination } from 'src/app/commun/k
 import { IKfIconeDef } from 'src/app/commun/kf-composants/kf-partages/kf-icone-def';
 import { KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
-import { LargeurColonne } from '../largeur-colonne';
 
 export class FabriqueVueTable extends FabriqueMembre {
 
@@ -34,10 +33,6 @@ export class FabriqueVueTable extends FabriqueMembre {
     }
 
     vueTable<T>(nom: string, vueTableDef: IKfVueTableDef<T>): KfVueTable<T> {
-        vueTableDef.nePasMontrerIconeDeTriSiPasTrié = true;
-        vueTableDef.colonneNoLigneDef = {
-            largeur: LargeurColonne.no_ligne,
-        };
         const vueTable = new KfVueTable<T>(nom + '_table', vueTableDef);
         vueTable.ajouteClasse('table-sm table-hover table-borderless');
         if (vueTable.enTete) {
@@ -49,7 +44,7 @@ export class FabriqueVueTable extends FabriqueMembre {
         vueTable.colonnes.forEach(colonne => {
             colonne.ajouteClasseItem('align-middle');
             if (colonne.enTeteDef) {
-                colonne.ajouteClasseEntete('align-middle');
+                colonne.ajouteClasseEnteteTh('align-middle');
             }
             if (colonne.bilanDef) {
                 colonne.ajouteClasseBilan('align-middle');
@@ -61,6 +56,9 @@ export class FabriqueVueTable extends FabriqueMembre {
             vueTable.outils.ajouteClasse('border border-rounded p-1 mb-2');
             vueTable.outils.fixeClassesFiltre(this.classeFondFiltre);
         }
+
+        vueTable.créeDiv();
+        vueTable.géreCssDiv.ajouteClasse('table-responsive');
 
         return vueTable;
     }
@@ -76,7 +74,7 @@ export class FabriqueVueTable extends FabriqueMembre {
         const icone = this.fabrique.icone.icone(iconeDef);
         icone.ajouteClasse(
             {
-                nom: this.fabrique.couleur.classeCouleur(Couleur.gray),
+                nom: KfBootstrap.classeTexte({ color: 'muted' }),
                 active: inactif
             }
         )
@@ -85,7 +83,7 @@ export class FabriqueVueTable extends FabriqueMembre {
         return étiquette;
     }
 
-    private _prépareFiltre<T>(filtre: KfVueTableFiltreTexte<T> | KfVueTableFiltreNombre<T>, titre: string, placeholder?: string) {
+    private _prépareFiltre<T>(filtre: KfVueTableFiltreTexte<T> | KfVueTableFiltreNombre<T>, placeholder?: string) {
         const inactif: () => boolean = () => filtre.liste.valeur === undefined;
         const fauxBouton = this.iconeAvant(this.fabrique.icone.def.filtre, inactif);
         filtre.liste.fixeComposantAvant(fauxBouton);
@@ -112,7 +110,7 @@ export class FabriqueVueTable extends FabriqueMembre {
         return filtre;
     }
 
-    cherche<T>(nom: string, titre: string, colonne: string, placeholder?: string): KfVueTableFiltreCherche<T> {
+    cherche<T>(nom: string, colonne: string, placeholder?: string): KfVueTableFiltreCherche<T> {
         const filtre = new KfVueTableFiltreCherche<T>(nom, colonne, KfBootstrap.classeFond('warning'));
         filtre.composant.ajouteClasse('form-control');
         const inactif: () => boolean = () => !filtre.texte.valeur || filtre.texte.valeur === ''
@@ -127,16 +125,16 @@ export class FabriqueVueTable extends FabriqueMembre {
         return filtre;
     }
 
-    filtreTexte<T>(nom: string, titre: string, valide: (t: T, valeur: string) => boolean, placeholder?: string): KfVueTableFiltreTexte<T> {
+    filtreTexte<T>(nom: string, valide: (t: T, valeur: string) => boolean, placeholder?: string): KfVueTableFiltreTexte<T> {
         const filtre = new KfVueTableFiltreTexte<T>(nom, valide);
-        this._prépareFiltre(filtre, titre, placeholder);
+        this._prépareFiltre(filtre, placeholder);
         return filtre;
     }
 
-    filtreNombre<T>(nom: string, titre: string, valide: (t: T, valeur: number) => boolean, placeholder?: string)
+    filtreNombre<T>(nom: string, valide: (t: T, valeur: number) => boolean, placeholder?: string)
         : KfVueTableFiltreNombre<T> {
         const filtre = new KfVueTableFiltreNombre<T>(nom, valide);
-        this._prépareFiltre(filtre, titre, placeholder);
+        this._prépareFiltre(filtre, placeholder);
         return filtre;
     }
 
@@ -169,8 +167,8 @@ export class FabriqueVueTable extends FabriqueMembre {
         const def: IKfVueTablePaginationDef = {
             icone: this.fabrique.icone.iconesPagination(),
             nbBoutons: 5,
-            choixNbParPage: [4, 8, 12],
-            nbParPage: 8,
+            choixNbParPage: [5, 10, 15],
+            nbParPage: 10,
             avecEtat: {
                 nomLigne,
                 nomLignes

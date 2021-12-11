@@ -20,8 +20,8 @@ export class KfDescriptions extends KfComposant {
         return;
     }
 
-    ajouteDescription(titre: KfComposant, contenu: KfComposant): KfDescription {
-        const description = new KfDescription(titre, contenu);
+    ajouteDescription(nom?: string): KfDescription {
+        const description = new KfDescription(nom);
         this.descriptions.push(description)
         return description;
     }

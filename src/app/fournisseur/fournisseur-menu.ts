@@ -1,10 +1,15 @@
 
-import { FournisseurRoutes, FournisseurPages } from './fournisseur-pages';
+import { FournisseurPages } from './fournisseur-pages';
 import { SiteMenu } from '../site/site-menu';
 import { NavItemLien } from '../disposition/navbars/nav-item-lien';
+import { Fabrique } from '../disposition/fabrique/fabrique';
 
 export class FournisseurMenu extends SiteMenu {
-    routes = FournisseurRoutes;
+
+    constructor() {
+        super();
+        this.routeur = Fabrique.url.appRouteur.fournisseur;
+    }
 
     protected créeItemsAction(): NavItemLien[] {
         return [

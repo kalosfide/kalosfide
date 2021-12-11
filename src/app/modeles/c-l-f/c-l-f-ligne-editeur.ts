@@ -1,6 +1,6 @@
 import { Produit } from '../catalogue/produit';
 import { KeyUidRnoNo2Editeur } from 'src/app/commun/data-par-key/key-uid-rno-no-2/key-uid-rno-no-2-editeur';
-import { ApiLigneData } from './api-ligne';
+import { ApiLigne } from './api-ligne';
 import { IDataComponent } from 'src/app/commun/data-par-key/i-data-component';
 import { KfListeDeroulanteTexte } from 'src/app/commun/kf-composants/kf-elements/kf-liste-deroulante/kf-liste-deroulante-texte';
 import { KfInputTexte } from 'src/app/commun/kf-composants/kf-elements/kf-input/kf-input-texte';
@@ -16,13 +16,12 @@ import { FacturePages } from 'src/app/fournisseur/factures/facture-pages';
 import { CLFLigne } from './c-l-f-ligne';
 import { CLFService } from './c-l-f.service';
 import { CLFUtileTexteChamp } from './c-l-f-utile-texte';
-import { KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
 
 export class CLFLigneEditeur extends KeyUidRnoNo2Editeur<CLFLigne> {
     private ligne: CLFLigne;
 
     get produit(): Produit { return this.ligne.produit; }
-    get data(): ApiLigneData { return this.ligne.apiData; }
+    get apiLigne(): ApiLigne { return this.ligne.apiLigne; }
 
     kfTypeCommande: KfListeDeroulanteTexte;
     kfTypeCommandeLS: KfInputTexte;
@@ -63,8 +62,8 @@ export class CLFLigneEditeur extends KeyUidRnoNo2Editeur<CLFLigne> {
         const titre = 'Unité';
         const nom = 'typeCommande';
         const typeCommande = this.produit.typeCommande;
-        const valeur = this.data.typeCommande
-            ? this.data.typeCommande
+        const valeur = this.apiLigne.typeCommande
+            ? this.apiLigne.typeCommande
             : TypeMesure.typeCommandeParDéfaut(this.produit.typeMesure);
         const texte = (id: string) => {
             return TypeMesure.texteUnités(this.produit.typeMesure, id);
@@ -94,13 +93,13 @@ export class CLFLigneEditeur extends KeyUidRnoNo2Editeur<CLFLigne> {
         let input: KfInputNombre | KfInputTexte;
         if (lectureSeule) {
             this.kfQuantitéLS = Fabrique.input.texteLectureSeule(nom + '_ls', titre,
-                Fabrique.texte.quantitéAvecUnité(this.produit, this.data.quantité));
+                Fabrique.texte.quantitéAvecUnité(this.produit, this.apiLigne.quantité));
             input = this.kfQuantitéLS;
         } else {
-            this.kfQuantité = Fabrique.input.nombreQuantité(nom, () => this.data.typeCommande
-                ? this.data.typeCommande
+            this.kfQuantité = Fabrique.input.nombreQuantité(nom, () => this.apiLigne.typeCommande
+                ? this.apiLigne.typeCommande
                 : TypeMesure.typeCommandeParDéfaut(this.ligne.produit.typeMesure), titre);
-            const valeur = this.data.quantité;
+            const valeur = this.apiLigne.quantité;
             if (valeur) {
                 this.kfQuantité.valeur = valeur;
             }
@@ -133,12 +132,12 @@ export class CLFLigneEditeur extends KeyUidRnoNo2Editeur<CLFLigne> {
         let input: KfInputNombre | KfInputTexte;
         if (lectureSeule) {
             this.kfAFixerLS = Fabrique.input.texteLectureSeule(nom + '_ls', titre,
-                Fabrique.texte.quantitéAvecUnité(this.produit, this.data.aFixer));
+                Fabrique.texte.quantitéAvecUnité(this.produit, this.apiLigne.aFixer));
             input = this.kfAFixerLS;
         } else {
             this.kfAFixer = Fabrique.input.nombreQuantité(nom,
                 () => TypeMesure.typeCommandeParDéfaut(this.produit.typeMesure), titre);
-            const valeur = this.data.aFixer;
+            const valeur = this.apiLigne.aFixer;
             if (valeur >= 0) {
                 this.kfAFixer.valeur = valeur;
             }
@@ -206,7 +205,7 @@ export class CLFLigneEditeur extends KeyUidRnoNo2Editeur<CLFLigne> {
                 break;
 
             default:
-                console.log(this.pageDef);
+                console.error('CLFLigneEditeur: PageDef non traitée', this.pageDef);
                 break;
         }
     }

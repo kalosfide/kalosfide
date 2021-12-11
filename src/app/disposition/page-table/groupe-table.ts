@@ -4,6 +4,7 @@ import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
 import { Fabrique } from '../fabrique/fabrique';
 import { IKfVueTableDef } from 'src/app/commun/kf-composants/kf-vue-table/i-kf-vue-table-def';
+import { LargeurColonne } from '../largeur-colonne';
 
 export interface IGroupeTableDef<T> {
     avantTable?: () => KfGroupe;
@@ -20,6 +21,10 @@ export class GroupeTable<T> {
     etat: EtatTable;
 
     constructor(groupeTableDef: IGroupeTableDef<T>) {
+        groupeTableDef.vueTableDef.nePasMontrerIconeDeTriSiPasTrié = true;
+        groupeTableDef.vueTableDef.colonneNoLigneDef = {
+            largeur: LargeurColonne.no_ligne,
+        };
         this.vueTable = Fabrique.vueTable.vueTable('', groupeTableDef.vueTableDef);
         if (groupeTableDef.avantTable) {
             this.avantTable = groupeTableDef.avantTable();

@@ -1,7 +1,7 @@
 import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
 import { KfGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-groupe';
 import { KfUlComposant } from 'src/app/commun/kf-composants/kf-ul-ol/kf-ul-ol-composant';
-import { IContenuPhraseDef } from './fabrique-contenu-phrase';
+import { IContenuPhraséDef } from './fabrique-contenu-phrase';
 import { IUrlDef } from './fabrique-url';
 import { FabriqueMembre } from './fabrique-membre';
 import { FabriqueClasse } from './fabrique';
@@ -10,7 +10,7 @@ import { BootstrapTypeBouton, KfBootstrap } from '../../commun/kf-composants/kf-
 export interface ILienDef {
     nom?: string;
     urlDef?: IUrlDef;
-    contenu?: IContenuPhraseDef;
+    contenu?: IContenuPhraséDef;
     /**
      * Ajoute la directive routerLinkActive au template
      * @param classe classe css à appliquer quand l'url du lien est préfixe de l'url de la page active du router.
@@ -39,11 +39,13 @@ export class FabriqueLien extends FabriqueMembre {
                 lien.avecRouterLinkActive(def.avecRouterLinkActive.classe, def.avecRouterLinkActive.exact);
             }
         }
-        if (!def.contenu) {
-            def.contenu = {};
-        }
-        if (!def.contenu.iconeDef && !def.contenu.icone && def.contenu.texte === undefined) {
-            def.contenu.texte = def.urlDef.pageDef.lien ? def.urlDef.pageDef.lien : def.urlDef.pageDef.urlSegment;
+        const pasDeContenu = !def.contenu || (!def.contenu.iconeDef && !def.contenu.icone && def.contenu.texte === undefined);
+        if (pasDeContenu) {
+            if (!def.urlDef || !def.urlDef.pageDef) {
+                console.error(`Un ILienDef sans contenu doit avoir un IUrlDef avec PageDef`, def);
+                return;
+            }
+            def.contenu = { texte: def.urlDef.pageDef.lien ? def.urlDef.pageDef.lien : def.urlDef.pageDef.path };
         }
         this.fabrique.contenu.fixeDef(lien, def.contenu);
     }
@@ -52,7 +54,7 @@ export class FabriqueLien extends FabriqueMembre {
      * Crée un lien sans mise en forme
      * @param nomOuDef nom seul ou définition
      */
-    enLigne(nomOuDef: string | ILienDef, dansAlerte?: 'dansAlerte'): KfLien {
+    enLigne(nomOuDef: string | ILienDef): KfLien {
         let lien: KfLien;
         if (typeof (nomOuDef) === 'string') {
             lien = new KfLien(nomOuDef);
@@ -60,11 +62,18 @@ export class FabriqueLien extends FabriqueMembre {
             lien = new KfLien('');
             this.fixeDef(lien, nomOuDef);
         }
-        if (dansAlerte) {
-            lien.ajouteClasse('alert-link')
-        }
         return lien;
     }
+
+    /**
+     * Ajoute la classe alert-link à un lien
+     * @param lien
+     */
+    dansAlerte(lien: KfLien): KfLien {
+        lien.ajouteClasse('alert-link');
+        return lien;
+    }
+
     bouton(nomOuDef: string | ILienDef, bootstrap?: BootstrapTypeBouton): KfLien {
         const lien = this.enLigne(nomOuDef);
         KfBootstrap.ajouteClasseBouton(lien, bootstrap ? bootstrap : 'link');
@@ -80,7 +89,7 @@ export class FabriqueLien extends FabriqueMembre {
 
     retourDef(urlDef: IUrlDef, texte?: string): ILienDef {
         if (texte === null || texte === undefined) {
-            texte = urlDef.pageDef.lien ? urlDef.pageDef.lien : urlDef.pageDef.urlSegment;
+            texte = urlDef.pageDef.lien ? urlDef.pageDef.lien : urlDef.pageDef.path;
         }
         const def: ILienDef = {
             nom: 'retour',

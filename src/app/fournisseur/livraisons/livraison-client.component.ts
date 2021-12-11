@@ -5,7 +5,6 @@ import { FournisseurCLFService } from '../fournisseur-c-l-f-.service';
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
 import { PageDef } from 'src/app/commun/page-def';
 import { FournisseurPages } from '../fournisseur-pages';
-import { SiteService } from 'src/app/modeles/site/site.service';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
@@ -22,9 +21,8 @@ export class LivraisonClientComponent extends CLFClientComponent implements OnIn
     constructor(
         protected route: ActivatedRoute,
         protected service: FournisseurCLFService,
-        protected siteService: SiteService,
     ) {
-        super(route, service, siteService);
+        super(route, service);
     }
 
     protected contenuAidePage(): KfComposant[] {

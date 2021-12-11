@@ -58,7 +58,7 @@ export class GroupeBoutonsMessages {
         boutons?: (KfBouton | KfLien)[]
     }) {
         this.pGroupe = new KfGroupe(nom);
-        this.pGroupe.ajouteClasse('mb-2');
+        this.pGroupe.ajouteClasse(KfBootstrap.classeSpacing('margin', 'hautEtBas', 3));
         this.pGroupe.créeDivTable();
         let ligne: KfDivTableLigne;
         let col: KfDivTableColonne;
@@ -107,6 +107,25 @@ export class FabriqueFormulaire extends FabriqueMembre {
         super(fabrique);
     }
 
+    static optionsLabel: {
+        flottant: IKfBootstrapOptions,
+        colonne: (largeur: number) => IKfBootstrapOptions,
+        ligne: IKfBootstrapOptions
+    } = {
+        flottant: {
+            classeDiv: 'mb-3',
+            label: 'labelFlottant'
+        },
+        colonne:  (largeur: number) => ({
+            classeDiv: 'mb-3',
+            label: { breakpoint: 'sm', width: largeur }
+        }),
+        ligne: {
+            classeDiv: 'mb-3',
+            label: { breakpoint: 'sm', width: 2 }
+        }
+    }
+    
     prépareLabelFlottant(composants: KfComposant | KfComposant[]) {
         const optionsBootstrap: IKfBootstrapOptions = {
             classeDiv: 'mb-3',
@@ -132,7 +151,7 @@ export class FabriqueFormulaire extends FabriqueMembre {
     }
 
     préparePourPage(composants: KfComposant | KfComposant[]) {
-       this.prépareLabelFlottant(composants);
+       this.prépareLabelColonne(composants, 2);
     }
 
     préparePourVueTable(composants: KfComposant | KfComposant[]) {

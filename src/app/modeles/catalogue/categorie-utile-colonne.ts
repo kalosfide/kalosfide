@@ -3,7 +3,8 @@ import { IKfVueTableColonneDef } from 'src/app/commun/kf-composants/kf-vue-table
 import { CategorieUtile } from './categorie-utile';
 import { Categorie } from './categorie';
 import { Compare } from '../../commun/outils/tri';
-import { KfBBtnGroup, KfBBtnGroupElement } from 'src/app/commun/kf-composants/kf-b-btn-group/kf-b-btn-group';
+import { KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
+import { LargeurColonne } from 'src/app/disposition/largeur-colonne';
 
 export class CategorieUtileColonne extends DataUtileColonne {
     constructor(utile: CategorieUtile) {
@@ -33,29 +34,39 @@ export class CategorieUtileColonne extends DataUtileColonne {
         };
     }
 
-    action(quandLigneSupprimée: (catégorie: Categorie) => void): IKfVueTableColonneDef<Categorie> {
+    édite(): IKfVueTableColonneDef<Categorie> {
         return {
-            nom: 'action',
+            nom: 'edite',
             créeContenu: (catégorie: Categorie) => {
-                const btnGroup = new KfBBtnGroup('action');
-                let bouton: KfBBtnGroupElement;
-                bouton = this.utile.lien.edite(catégorie);
-                btnGroup.ajoute(bouton);
-                bouton = this.utile.bouton.supprime(catégorie, quandLigneSupprimée);
-                bouton.inactivité = catégorie.nbProduits > 0;
-                btnGroup.ajoute(bouton);
-                return btnGroup;
+                const bouton = this.utile.lien.edite(catégorie);
+                return bouton;
             },
-            classesItem: ['colonne-btn-group-2'],
+            classesCol: [KfBootstrap.classeTexte({ alignement: 'center' })],
+            largeur: LargeurColonne.action,
             afficherSi: this.utile.conditionTable.edition,
         };
     }
 
-    colonnes(quandLigneSupprimée: (catégorie: Categorie) => void): IKfVueTableColonneDef<Categorie>[] {
+    supprime(quandSupprimé: (index: number) => void): IKfVueTableColonneDef<Categorie> {
+        return {
+            nom: 'supprime',
+            créeContenu: (catégorie: Categorie) => {
+                const bouton = this.utile.bouton.supprime(catégorie, quandSupprimé);
+                bouton.inactivité = catégorie.utilisé;
+                return bouton;
+            },
+            classesCol: [KfBootstrap.classeTexte({ alignement: 'center' })],
+            largeur: LargeurColonne.action,
+            afficherSi: this.utile.conditionTable.edition,
+        };
+    }
+
+    colonnes(quandSupprimé: (index: number) => void): IKfVueTableColonneDef<Categorie>[] {
         return [
             this.nom(),
             this.produits(),
-            this.action(quandLigneSupprimée),
+            this.édite(),
+            this.supprime(quandSupprimé)
         ];
     }
 

@@ -1,14 +1,31 @@
-    <dl #htmlElement [ngClass]="descriptions.classe" [ngStyle]="descriptions.style">
-        <ng-container *ngFor="let description of descriptions.descriptions">
-            <ng-container *ngIf="!description.nePasAfficher">
-                <dt [ngClass]="description.classeTitre" [ngStyle]="description.styleTitre">
-                    <app-kf-composant [composant]="description.titre">
-                    </app-kf-composant>
+<dl #htmlElement [ngClass]="descriptions.classe" [ngStyle]="descriptions.style">
+    <ng-container *ngFor="let description of descriptions.descriptions">
+        <ng-container *ngIf="description.dansDiv; else sansDivTemplate">
+            <div [ngClass]="description.classeDiv" [ngStyle]="description.styleDiv">
+                <ng-container *ngTemplateOutlet="sansDivTemplate"></ng-container>
+            </div>
+        </ng-container>
+        <ng-template #sansDivTemplate>
+            <ng-container *ngFor="let item of description.titres">
+                <dt [ngClass]="item.classe" [ngStyle]="item.style">
+                    <ng-container *ngIf="item.texte; else composantTemplate">
+                        {{ item.texte }}
+                    </ng-container>
+                    <ng-template #composantTemplate>
+                        <app-kf-composant [composant]="item.composant"> </app-kf-composant>
+                    </ng-template>
                 </dt>
-                <dd [ngClass]="description.classeContenu" [ngStyle]="description.styleContenu">
-                    <app-kf-composant [composant]="description.contenu">
-                    </app-kf-composant>
+            </ng-container>
+            <ng-container *ngFor="let item of description.details">
+                <dd [ngClass]="item.classe" [ngStyle]="item.style">
+                    <ng-container *ngIf="item.texte; else composantTemplate">
+                        {{ item.texte }}
+                    </ng-container>
+                    <ng-template #composantTemplate>
+                        <app-kf-composant [composant]="item.composant"> </app-kf-composant>
+                    </ng-template>
                 </dd>
             </ng-container>
-        </ng-container>
-    </dl>
+        </ng-template>
+    </ng-container>
+</dl>

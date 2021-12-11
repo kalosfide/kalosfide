@@ -1,12 +1,19 @@
 import { KfStringDef, ValeurStringDef } from 'src/app/commun/kf-composants/kf-partages/kf-string-def';
 import { PageDef } from 'src/app/commun/page-def';
-import { ISiteRoutes } from 'src/app/site/site-pages';
-import { AppSiteRoutes } from 'src/app/app-site/app-site-pages';
+import { AppRouteur } from 'src/app/app-routeur';
+import { Routeur } from 'src/app/commun/routeur';
 
 export interface IUrlDef {
+    /**
+     * PageDef de la cible 
+     */
     pageDef?: PageDef;
-    routes?: ISiteRoutes;
-    urlSite?: KfStringDef;
+
+    /**
+     * Si présent, fabrique d'url du parent de la cible si pageDef est présent, de la cible sinon.
+     * Si absent, la fabrique d'url de AppSite est utilisée.
+     */
+    routeur: Routeur;
 
     /**
      * Segments de l'url dépendant de la key d'un objet
@@ -26,21 +33,21 @@ export interface IUrlDef {
 }
 
 export class FabriqueUrl {
+    appRouteur: AppRouteur;
+
+    constructor() {
+        this.appRouteur = new AppRouteur();
+    }
+
     url(def: IUrlDef): KfStringDef {
         let segments: string[] = [];
         if (def.pageDef) {
-            segments = [def.pageDef.urlSegment];
+            segments = [def.pageDef.path];
         }
         if (def.keys) {
             segments = segments.concat(def.keys);
         }
-        if (!def.routes) {
-            console.log(def);
-        }
-        const url = def.urlSite
-            ? () => def.routes.url(ValeurStringDef(def.urlSite), segments)
-            : () => AppSiteRoutes.url(segments);
-        return url;
+        return def.routeur.url(...segments);
     }
 
     params(def: IUrlDef): any {

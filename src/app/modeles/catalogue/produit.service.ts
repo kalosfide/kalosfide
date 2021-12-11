@@ -3,13 +3,16 @@ import { Observable } from 'rxjs';
 import { ApiController, ApiAction } from '../../api/api-route';
 import { Produit } from './produit';
 import { KeyUidRnoNoService } from '../../commun/data-par-key/key-uid-rno-no/key-uid-rno-no.service';
-import { EtatsProduits } from './etat-produit';
+import { EtatProduit, EtatsProduits, IdEtatProduit } from './etat-produit';
 import { CatalogueService } from './catalogue.service';
 import { Catalogue } from './catalogue';
 import { ApiRequêteService } from 'src/app/api/api-requete.service';
-import { CatalogueUtile } from './catalogue-utile';
 import { ProduitUtile } from './produit-utile';
 import { ApiResult } from 'src/app/api/api-results/api-result';
+import { ApiRequêteAction } from 'src/app/api/api-requete-action';
+import { KfVueTableRéglages } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-reglages';
+import { StockageService } from 'src/app/services/stockage/stockage.service';
+import { SiteBilanCatalogue } from '../site/site-bilan';
 
 
 @Injectable({
@@ -21,9 +24,10 @@ export class ProduitService extends KeyUidRnoNoService<Produit> {
 
     constructor(
         private catalogueService: CatalogueService,
+        protected stockageService: StockageService,
         protected apiRequeteService: ApiRequêteService
     ) {
-        super(apiRequeteService);
+        super(stockageService, apiRequeteService);
         this.créeUtile();
     }
 
@@ -33,13 +37,6 @@ export class ProduitService extends KeyUidRnoNoService<Produit> {
 
     get utile(): ProduitUtile {
         return this.pUtile as ProduitUtile;
-    }
-
-    changeSiteNbProduits(deltaNbProduits: number) {
-        const site = this.navigation.litSiteEnCours();
-        site.nbProduits += deltaNbProduits;
-        this.navigation.fixeSiteEnCours(site);
-        this.identification.fixeSiteIdentifiant(site);
     }
 
     catalogue$(): Observable<Catalogue> {
@@ -65,13 +62,19 @@ export class ProduitService extends KeyUidRnoNoService<Produit> {
         return !!stock.produits.find(s => s.nom === nom && s.no !== no);
     }
 
+    private bilanCatalogue(stock: Catalogue): SiteBilanCatalogue {
+        const disponibles = Catalogue.filtre(stock, p => p.etat === IdEtatProduit.disponible);
+        return {
+            produits: disponibles.produits.length,
+            catégories: disponibles.catégories.length
+        }
+    }
+
     quandAjoute(ajouté: Produit) {
         const stock = this.catalogueService.litStock();
         stock.produits.push(ajouté);
         this.catalogueService.fixeStock(stock);
-        if (ajouté.etat === EtatsProduits.disponible.valeur) {
-            this.changeSiteNbProduits(1);
-        }
+        this.identification.fixeSiteBilanCatalogue(this.bilanCatalogue(stock));
     }
 
     quandEdite(édité: Produit) {
@@ -81,26 +84,26 @@ export class ProduitService extends KeyUidRnoNoService<Produit> {
             throw new Error('Produits: édité absent du stock');
         }
         const stocké = stock.produits[index];
-        const étatAvant = stocké.etat;
         Produit.copieData(édité, stocké);
         this.catalogueService.fixeStock(stock);
-        if (stocké.etat !== étatAvant) {
-            this.changeSiteNbProduits(stocké.etat === EtatsProduits.disponible.valeur ? 1 : -1);
-        }
+        this.identification.fixeSiteBilanCatalogue(this.bilanCatalogue(stock));
     }
 
-    quandSupprime(produit: Produit) {
-        const stock = this.catalogueService.litStock();
-        const index = stock.produits.findIndex(s => s.no === produit.no);
-        if (index === -1) {
-            throw new Error('Produits: supprimé absent du stock');
-        }
-        const stocké = stock.produits[index];
-        stock.produits.splice(index, 1);
-        this.catalogueService.fixeStock(stock);
-        if (stocké.etat === EtatsProduits.disponible.valeur) {
-            this.changeSiteNbProduits(-1);
-        }
+    apiRequêteSupprime(àSupprimer: Produit, quandSupprimé: (index: number, aprésSuppression: Catalogue) => void): ApiRequêteAction {
+        return {
+            demandeApi: () => this.supprime(àSupprimer),
+            actionSiOk: (créé: any) => {
+                const stock = this.catalogueService.litStock();
+                const index = stock.produits.findIndex(s => s.no === àSupprimer.no);
+                if (index === -1) {
+                    throw new Error('Produits: supprimé absent du stock');
+                }
+                stock.produits.splice(index, 1);
+                quandSupprimé(index, stock);
+                this.catalogueService.fixeStock(stock);
+                this.identification.fixeSiteBilanCatalogue(this.bilanCatalogue(stock));
+            }
+        };
     }
 
     prix(produit: Produit): Observable<ApiResult> {
@@ -144,4 +147,13 @@ export class ProduitService extends KeyUidRnoNoService<Produit> {
         stocké.etat = produit.etat;
         this.catalogueService.fixeStock(stock);
     }
+
+    get réglagesVueTable(): KfVueTableRéglages {
+        return this.catalogueService.litRéglagesVueTable('produit')
+    }
+
+    set réglagesVueTable(réglages: KfVueTableRéglages) {
+        this.catalogueService.fixeRéglagesVueTable('produit', réglages);
+    }
+
 }

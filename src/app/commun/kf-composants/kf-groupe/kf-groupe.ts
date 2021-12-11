@@ -4,8 +4,6 @@ import { FormGroup } from '@angular/forms';
 import { KfComposantGereValeur } from '../kf-composant/kf-composant-gere-valeur';
 import { KfEtiquette } from '../kf-elements/kf-etiquette/kf-etiquette';
 import { KfDivTable, KfDivTableLigne } from './kf-div-table';
-import { KfGéreCss } from '../kf-partages/kf-gere-css';
-import { KfNgClasse } from '../kf-partages/kf-gere-css-classe';
 
 export interface IKfComportementFormulaire {
     sauveQuandChange?: boolean;
@@ -113,5 +111,5 @@ export class KfGroupe extends KfComposant {
         }
         return !!this.contenus.find(c => c.prendLeFocus());
     }
-
+ 
 }

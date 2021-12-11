@@ -8,8 +8,6 @@ import { KfTexte } from '../kf-elements/kf-texte/kf-texte';
 import { KfVueTableLigneBase, IKfVueTableLigne } from './kf-vue-table-ligne-base';
 import { KfVueTableCelluleDef } from './i-kf-vue-table-cellule-def';
 import { KfComposantGereHtml } from '../kf-composant/kf-composant-gere-html';
-import { KfEvenement } from '../kf-partages/kf-evenements';
-import { EventEmitter } from '@angular/core';
 
 export interface IKfVueTableCellule {
     colonne: IKfVueTableColonne;

@@ -3,7 +3,7 @@ import { DataKeyUtile } from 'src/app/commun/data-par-key/data-key-utile';
 import { Produit } from './produit';
 import { DataKeyUtileUrl } from 'src/app/commun/data-par-key/data-key-utile-url';
 import { DataKeyUtileLien } from 'src/app/commun/data-par-key/data-key-utile-lien';
-import { ProduitRoutes, ProduitPages } from 'src/app/fournisseur/catalogue/produits/produit-pages';
+import { ProduitPages } from 'src/app/fournisseur/catalogue/produits/produit-pages';
 import { ProduitUtileUrl } from './produit-utile-url';
 import { ProduitUtileLien } from './produit-utile-lien';
 import { ProduitUtileColonne } from './produit-utile-colonne';
@@ -11,11 +11,12 @@ import { ProduitUtileBouton } from './produit-utile-bouton';
 import { ProduitUtileOutils } from './produit-utile-outils';
 import { DataKeyUtileColonne } from 'src/app/commun/data-par-key/data-key-utile-colonne';
 import { DataKeyUtileOutils } from 'src/app/commun/data-par-key/data-key-utile-outils';
+import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 
 export class ProduitUtile extends DataKeyUtile<Produit> {
     constructor(service: ProduitService) {
         super(service);
-        this.dataRoutes = ProduitRoutes;
+        this.dataRouteur = Fabrique.url.appRouteur.produit;
         this.dataPages = ProduitPages;
         this.pUrl = new ProduitUtileUrl(this);
         this.pLien = new ProduitUtileLien(this);

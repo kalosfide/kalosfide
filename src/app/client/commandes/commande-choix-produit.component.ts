@@ -21,6 +21,7 @@ export class CommandeChoixProduitComponent extends CLFChoixProduitComponent impl
         protected service: ClientCLFService,
     ) {
         super(route, service);
+        this.fixeTypeDefRéglagesVueTable('commande');
     }
 
 }

@@ -6,11 +6,14 @@ export class ApiRequêteLecture {
      * Requête GET envoyée à l'Api.
      */
     demandeApi: () => Observable<ApiResult>;
+
     /**
-     * Si présent et si retourne true, l'erreur n'entraine pas de redirection vers une page d'erreur.
+     * Si présent, est appelé avant le traitement par défaut des ApiResult,
+     * pour pouvoir appliquer un taitement particulier à une erreur
      */
-    traiteErreur?: (apiResult: ApiResult) => boolean;
-    /**
+     convertitResult?: (apiResult: ApiResult) => ApiResult;
+
+     /**
      * Si présent, spinner à afficher pendant l'attente du résultat de demandeApi.
      * Si absent, le spinner global est utilisé.
      */

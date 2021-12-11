@@ -11,19 +11,6 @@ export abstract class KeyUidRnoService<T extends KeyUidRno> extends DataKeyServi
         return '' + t.rno;
     }
 
-    get keyDeAjoute(): IKeyUidRno {
-        const enCours = this.keyIdentifiant;
-        const key = {
-            uid: enCours.uid,
-            rno: -1
-        };
-        return key;
-    }
-
-    fixeKeyDeAjoute(envoyé: T, reçu: T) {
-        envoyé.rno = reçu.rno;
-    }
-
     créeParams(objet: IDataKey): { [param: string]: string } {
         const key = objet as IKeyUidRno;
         return key.rno ? {

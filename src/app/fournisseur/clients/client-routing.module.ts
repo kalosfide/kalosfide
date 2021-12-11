@@ -4,17 +4,17 @@ import { FournisseurClientPages } from './client-pages';
 import { ClientIndexComponent } from './client-index.component';
 import { ClientAjouteComponent } from './client-ajoute.component';
 import { ClientEditeComponent } from './client-edite.component';
-import { ClientResolverService } from '../../modeles/client/client-resolver.service';
-import { ClientsResolverService } from '../../modeles/client/clients-resolver.service';
-import { ClientAccepteComponent } from './client-accepte.component';
-import { ClientExclutComponent } from './client-exclut.component';
+import { ClientResolverService } from './client-resolver.service';
+import { ClientsResolverService } from './clients-resolver.service';
 import { ClientComponent } from './client.component';
 import { ClientInviteComponent } from './client-invite.component';
 import { FClientAccueilComponent } from './client-accueil.component';
 import { ClientInvitationsComponent } from './client-invitations.component';
-import { InvitationsResolverService } from 'src/app/modeles/client/invitations-resolver.service';
-import { InvitationResolverService } from 'src/app/modeles/client/invitation-resolver.service';
-import { ClientChargeEtLaissePasserGardeService } from 'src/app/modeles/client/client-charge-et-laisse-passer-garde.service';
+import { InvitationsResolverService } from './invitations-resolver.service';
+import { InvitationResolverService } from './invitation-resolver.service';
+import { ClientChargeEtLaissePasserGardeService } from './client-charge-et-laisse-passer-garde.service';
+import { ClientDéfinitionsComponent } from './client-definitions.component';
+import { ClientMéthodesComponent } from './client-methodes.component';
 
 const routes: Routes = [
     {
@@ -26,11 +26,11 @@ const routes: Routes = [
         children: [
             {
                 path: '',
-                redirectTo: FournisseurClientPages.accueil.urlSegment,
+                redirectTo: FournisseurClientPages.accueil.path,
                 pathMatch: 'full',
             },
             {
-                path: FournisseurClientPages.accueil.urlSegment,
+                path: FournisseurClientPages.accueil.path,
                 data: {
                     pageDef: FournisseurClientPages.accueil,
                     estEnfantPathVide: true
@@ -39,10 +39,25 @@ const routes: Routes = [
                 resolve: {
                     liste: ClientsResolverService,
                     invitations: InvitationsResolverService,
-                }
+                },
+                children: [
+                    {
+                        path: '',
+                        redirectTo: FournisseurClientPages.définitions.path,
+                        pathMatch: 'full',
+                    },
+                    {
+                        path: FournisseurClientPages.définitions.path,
+                        component: ClientDéfinitionsComponent
+                    },
+                    {
+                        path: FournisseurClientPages.méthodes.path,
+                        component: ClientMéthodesComponent,
+                    }
+                ]
             },
             {
-                path: FournisseurClientPages.index.urlSegment,
+                path: FournisseurClientPages.index.path,
                 data: { pageDef: FournisseurClientPages.index },
                 children: [
                     {
@@ -54,12 +69,12 @@ const routes: Routes = [
                         },
                     },
                     {
-                        path: FournisseurClientPages.ajoute.urlSegment,
+                        path: FournisseurClientPages.ajoute.path,
                         data: { pageDef: FournisseurClientPages.ajoute },
                         component: ClientAjouteComponent,
                     },
                     {
-                        path: FournisseurClientPages.edite.urlSegment + '/:key',
+                        path: FournisseurClientPages.edite.path + '/:key',
                         data: { pageDef: FournisseurClientPages.edite },
                         component: ClientEditeComponent,
                         resolve: {
@@ -67,7 +82,7 @@ const routes: Routes = [
                         },
                     },
                     {
-                        path: FournisseurClientPages.invite.urlSegment + '/:key',
+                        path: FournisseurClientPages.invite.path + '/:key',
                         data: {
                             pageDef: FournisseurClientPages.inviteClient,
                             cheminDeKey: ['client', 'nom']
@@ -80,26 +95,10 @@ const routes: Routes = [
                             liste: InvitationsResolverService,
                         },
                     },
-                    {
-                        path: FournisseurClientPages.accepte.urlSegment + '/:key',
-                        data: { pageDef: FournisseurClientPages.accepte },
-                        component: ClientAccepteComponent,
-                        resolve: {
-                            valeur: ClientResolverService,
-                        },
-                    },
-                    {
-                        path: FournisseurClientPages.exclut.urlSegment + '/:key',
-                        data: { pageDef: FournisseurClientPages.exclut },
-                        component: ClientExclutComponent,
-                        resolve: {
-                            valeur: ClientResolverService,
-                        },
-                    },
                 ],
             },
             {
-                path: FournisseurClientPages.invitations.urlSegment,
+                path: FournisseurClientPages.invitations.path,
                 data: { pageDef: FournisseurClientPages.invitations },
                 children: [
                     {
@@ -110,7 +109,7 @@ const routes: Routes = [
                         },
                     },
                     {
-                        path: FournisseurClientPages.invite.urlSegment,
+                        path: FournisseurClientPages.invite.path,
                         data: { pageDef: FournisseurClientPages.invite },
                         component: ClientInviteComponent,
                         resolve: {
@@ -119,7 +118,7 @@ const routes: Routes = [
                         }
                     },
                     {
-                        path: FournisseurClientPages.réinvite.urlSegment + '/:key',
+                        path: FournisseurClientPages.réinvite.path + '/:key',
                         data: {
                             pageDef: FournisseurClientPages.réinvite,
                             cheminDeKey: ['invitation', 'email']

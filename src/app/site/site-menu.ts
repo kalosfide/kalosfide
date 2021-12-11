@@ -1,14 +1,12 @@
 import { Menu } from '../disposition/menu/menu';
 import { PageDef } from '../commun/page-def';
-import { ISiteRoutes } from './site-pages';
-import { Site } from '../modeles/site/site';
 import { NavItemLien } from '../disposition/navbars/nav-item-lien';
 import { NavItemDropdown } from '../disposition/navbars/nav-item-dropdown';
 import { FournisseurPages } from '../fournisseur/fournisseur-pages';
+import { Routeur } from '../commun/routeur';
 
 export abstract class SiteMenu extends Menu {
-    site: Site;
-    routes: ISiteRoutes;
+    routeur: Routeur;
 
     constructor() {
         super('site');
@@ -19,29 +17,29 @@ export abstract class SiteMenu extends Menu {
         i.lien.ajouteClasse('navbar-brand');
         i.rafraichit = () => {
             i.texte = this.site.titre;
-            i.url = this.routes.url(this.site.url);
+            i.url = this.routeur.url();
         };
         return i;
     }
 
     protected créeItem(pageDef: PageDef): NavItemLien {
-        const item = new NavItemLien(pageDef.urlSegment, this);
+        const item = new NavItemLien(pageDef.path, this);
         item.texte = pageDef.lien;
-        item.url = this.routes.url(this.site.url, [pageDef.urlSegment]);
+        item.url = this.routeur.url(pageDef.path);
         return item;
     }
 
     protected créeItemSite(...items: NavItemLien[]): NavItemDropdown {
         const itemSite = new NavItemDropdown('site', this);
-        itemSite.texte = 'Site';
+        itemSite.texte = 'Gestion';
         items.forEach(item => itemSite.ajoute(item));
         return itemSite;
     }
 
     protected créeItemDeSite(pageDef: PageDef): NavItemLien {
-        const item = new NavItemLien(pageDef.urlSegment, this);
+        const item = new NavItemLien(pageDef.path, this);
         item.texte = pageDef.lien;
-        item.url = this.routes.url(this.site.url, [FournisseurPages.site.urlSegment, pageDef.urlSegment]);
+        item.url = this.routeur.url(FournisseurPages.gestion.path, pageDef.path);
         return item;
     }
 }

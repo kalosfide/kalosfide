@@ -6,6 +6,7 @@ import { KfGéreCss } from '../kf-partages/kf-gere-css';
 import { IKfVueTableOutilVue, IKfVueTableOutil } from './kf-vue-table-outil';
 import { KfNgStyle } from '../kf-partages/kf-gere-css-style';
 import { KfTypeDEvenement } from '../kf-partages/kf-evenements';
+import { KfVueTableFiltreBase } from './kf-vue-table-filtre-base';
 
 export interface IKfVueTableOutils {
     nePasAfficher: boolean;
@@ -141,5 +142,49 @@ export class KfVueTableOutils<T> extends KfGéreCss implements IKfVueTableOutils
 
     get outils(): IKfVueTableOutil<T>[] {
         return this.pOutils;
+    }
+
+    get valeurFiltres(): ({ [key: string]: any }) {
+        const valeur: { [key: string]: any } = {};
+        this.pOutils
+            .filter(o => o.valide)
+            .map(o => o as KfVueTableFiltreBase<T>)
+            .forEach(o => {
+                const v = o.valeur
+                if (v !== undefined && v !== null) {
+                    valeur[o.nom] = o.valeur;
+                }
+            })
+        return valeur;
+    }
+    set valeurFiltres(valeur: { [key: string]: any }) {
+        this.pOutils
+            .filter(o => o.valide)
+            .map(o => o as KfVueTableFiltreBase<T>)
+            .forEach(o => {
+                const v = valeur[o.nom];
+                if (v !== undefined && v !== null) {
+                    o.valeur = v;
+                }
+            })
+    }
+
+    /**
+     * Enlève les filtres qui arrêterait une ligne.
+     * @param ligne ligne qui doit apparaître dans l'affichage
+     * @returns true si un filtre a été modifié
+     */
+    annuleFiltrePourLigne(ligne: KfVueTableLigne<T>): boolean {
+        let filtresChangés = false;
+        this.pOutils
+            .filter(o => o.valide)
+            .map(o => o as KfVueTableFiltreBase<T>)
+            .forEach(o => {
+                if (!o.valide(ligne)) {
+                    o.valeur = undefined;
+                    filtresChangés = true
+                }
+            });
+        return filtresChangés;
     }
 }

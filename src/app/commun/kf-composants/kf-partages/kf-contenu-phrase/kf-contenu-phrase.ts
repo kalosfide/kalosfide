@@ -28,8 +28,6 @@ export class KfContenuPhrase {
      */
     contenus: KfTypeContenuPhrasé[] = [];
 
-    enfantsDeVue: { [key: string]: HTMLElement };
-
     constructor(
         composant?: KfComposant,
         texte?: KfStringDef,

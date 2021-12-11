@@ -1,13 +1,11 @@
 import { KfGroupe } from '../kf-groupe/kf-groupe';
 import { KfBouton } from '../kf-elements/kf-bouton/kf-bouton';
 import { NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
-import { KfGéreCss } from '../kf-partages/kf-gere-css';
-import { KfStringDef } from '../kf-partages/kf-string-def';
-import { KfNgClasseDef, KfNgClasse } from '../kf-partages/kf-gere-css-classe';
 import { KfComposant } from '../kf-composant/kf-composant';
+import { KfEtiquette } from '../kf-elements/kf-etiquette/kf-etiquette';
 
 export interface IKfNgbModalDef {
-    titre: string;
+    titre?: string;
     corps?: KfGroupe;
     boutonOk?: KfBouton;
     /**
@@ -17,91 +15,76 @@ export interface IKfNgbModalDef {
     options?: NgbModalOptions;
     /**
      * Si absent, le comportement par défaut des NgbModal met le focus sur la croix de fermeture.
-     * Si présent et égal à 'sans', aucun élément n'aura le focus à l'ouverture.
+     * Si présent et égal à 'sans', aucun élément visible n'aura le focus à l'ouverture.
      * Si présent et égal à un Kfcomposant, ce composant aura le focus à l'ouverture
      */
     autoFocus?: 'sans' | KfComposant
+    /**
+     * Si présent et vrai, la fenêtre est déplaçable avec la souris.
+     */
+    déplaçable?: boolean;
+    /**
+     * Si présent et vrai et si déplaçable par le titre, le titre aura le style cursor: move.
+     */
+    curseurDéplacement?: boolean;
 }
 
 export class KfNgbModal {
-    private pDef: IKfNgbModalDef;
-    private pGéreCssEnTête: KfGéreCss;
-    private pGéreCssTitre: KfGéreCss;
-    private pGéreCssCorps: KfGéreCss;
-    private pGéreCssPied: KfGéreCss;
+    private pEnTête: KfGroupe;
+    private pTitre: KfEtiquette;
+    private pCorps: KfGroupe;
+    private pPied: KfGroupe;
+    private pBoutons: KfBouton[];
+    private pBoutonOk: KfBouton;
+    private pAutofocus: boolean;
+
+    private pDéplaçable: boolean;
+    private pCurseurDéplacement: boolean
 
     private pOptions: NgbModalOptions;
 
     constructor(def: IKfNgbModalDef) {
-        this.pDef = def;
+        this.pBoutons = def.boutonsDontOk ? def.boutonsDontOk : def.boutonOk ? [def.boutonOk] : undefined;
+        if (!def.titre && !def.corps && !this.pBoutons) {
+            throw new Error('Un KfNgbModalDef doit avoir au moins un titre ou un corps ou un bouton.');
+        }
+        if (def.titre) {
+            this.pEnTête = new KfGroupe('');
+            this.pTitre = new KfEtiquette('', def.titre);
+        }
+        this.pCorps = def.corps;
+        if (this.pBoutons) {
+            this.pPied = new KfGroupe('');
+        }
+        this.pAutofocus = def.autoFocus !== 'sans';
         if (def.autoFocus && def.autoFocus !== 'sans') {
             def.autoFocus.gereHtml.fixeAttribut('ngbAutofocus');
         }
+        this.pBoutonOk = def.boutonOk
         this.pOptions = {};
+        this.pDéplaçable = def.déplaçable;
+        this.pCurseurDéplacement = def.curseurDéplacement;
     }
 
-    get titre(): string { return this.pDef.titre; }
-    get corps(): KfGroupe { return this.pDef.corps; }
-    get boutonOk(): KfBouton { return this.pDef.boutonOk; }
-    get boutons(): KfBouton[] {
-        return this.pDef.boutonsDontOk ? this.pDef.boutonsDontOk : this.pDef.boutonOk ? [this.pDef.boutonOk] : undefined;
-    }
+    get enTete(): KfGroupe { return this.pEnTête; }
+    get titre(): KfEtiquette { return this.pTitre; }
+    get corps(): KfGroupe { return this.pCorps; }
+    get pied(): KfGroupe { return this.pPied; }
+    get boutonOk(): KfBouton { return this.pBoutonOk; }
+    get boutons(): KfBouton[] { return this.pBoutons; }
+
     get sansAutoFocus(): boolean {
-        return this.pDef.autoFocus === 'sans';
+        return !this.pAutofocus;
     }
+
+    get déplaçable(): boolean {
+        return this.pDéplaçable;
+    }
+    get curseurDéplacement(): boolean {
+        return this.pCurseurDéplacement;
+    }
+
     get options(): NgbModalOptions { return this.pOptions; }
-
-    ajouteClasseEnTête(...classeDefs: (KfStringDef | KfNgClasseDef)[]) {
-        if (!this.pGéreCssEnTête) {
-            this.pGéreCssEnTête = new KfGéreCss();
-        }
-        this.pGéreCssEnTête.ajouteClasse(...classeDefs);
-    }
-
-    get classeEnTete(): KfNgClasse {
-        if (this.pGéreCssEnTête) {
-            return this.pGéreCssEnTête.classe;
-        }
-    }
-
-    ajouteClasseTitre(...classeDefs: (KfStringDef | KfNgClasseDef)[]) {
-        if (!this.pGéreCssTitre) {
-            this.pGéreCssTitre = new KfGéreCss();
-        }
-        this.pGéreCssTitre.ajouteClasse(...classeDefs);
-    }
-
-    get classeTitre(): KfNgClasse {
-        if (this.pGéreCssTitre) {
-            return this.pGéreCssTitre.classe;
-        }
-    }
-
-    ajouteClasseCorps(...classeDefs: (KfStringDef | KfNgClasseDef)[]) {
-        if (!this.pGéreCssCorps) {
-            this.pGéreCssCorps = new KfGéreCss();
-        }
-        this.pGéreCssCorps.ajouteClasse(...classeDefs);
-    }
-
-    get classeCorps(): KfNgClasse {
-        if (this.pGéreCssCorps) {
-            return this.pGéreCssCorps.classe;
-        }
-    }
-
-    ajouteClassePied(...classeDefs: (KfStringDef | KfNgClasseDef)[]) {
-        if (!this.pGéreCssPied) {
-            this.pGéreCssPied = new KfGéreCss();
-        }
-        this.pGéreCssPied.ajouteClasse(...classeDefs);
-    }
-
-    get classePied(): KfNgClasse {
-        if (this.pGéreCssPied) {
-            return this.pGéreCssPied.classe;
-        }
-    }
 
     set avecFond(avecFond: boolean | 'static') {
         this.pOptions.backdrop = avecFond;

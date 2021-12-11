@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, ElementRef, ViewEncapsulation } from '@angular/core';
 import { KfComposantComponent } from '../kf-composant/kf-composant.component';
 import { TraiteKeydownService } from '../../traite-keydown/traite-keydown.service';
 import { KfBBtnGroup } from './kf-b-btn-group';
@@ -7,7 +7,8 @@ import { KfTypeDeComposant } from '../kf-composants-types';
 @Component({
     selector: 'app-kf-b-btn-group',
     templateUrl: './kf-b-btn-group.component.html',
-    styleUrls: ['../kf-composants.scss']
+    styleUrls: ['../kf-composants.scss'],
+    encapsulation: ViewEncapsulation.None
 })
 export class KfBBtnGroupComponent extends KfComposantComponent implements OnInit, AfterViewInit {
     @ViewChild('htmlElement', {static: false}) domElementRef: ElementRef;

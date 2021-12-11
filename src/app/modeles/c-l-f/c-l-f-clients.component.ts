@@ -2,7 +2,6 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { Site } from 'src/app/modeles/site/site';
-import { Identifiant } from 'src/app/securite/identifiant';
 import { IKfVueTableDef } from 'src/app/commun/kf-composants/kf-vue-table/i-kf-vue-table-def';
 import { ActivatedRoute, Data } from '@angular/router';
 import { CLFService } from './c-l-f.service';
@@ -20,26 +19,29 @@ import { CLFUtile } from './c-l-f-utile';
 import { CLFDocs } from './c-l-f-docs';
 import { ModeAction } from './condition-action';
 import { ILienDef } from 'src/app/disposition/fabrique/fabrique-lien';
-import { FournisseurRoutes, FournisseurPages } from 'src/app/fournisseur/fournisseur-pages';
 import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
+import { TypeCLF } from './c-l-f-type';
 
 @Component({ template: '' })
 export abstract class CLFClientsComponent extends PageTableComponent<CLFDocs> implements OnInit, OnDestroy {
 
     site: Site;
-    identifiant: Identifiant;
-    niveauTitre = 1;
 
     date: Date;
 
     clfDocs: CLFDocs;
-    documentsClients: CLFDocs[];
 
     constructor(
         protected route: ActivatedRoute,
         protected service: CLFService,
+
     ) {
         super(route, service);
+        this.niveauTitre = 1;
+    }
+
+    protected fixeTypeDefRéglagesVueTable(type: TypeCLF) {
+        this.fixeDefRéglagesVueTable(`${type}.clients`, (c: CLFDocs) => c.client.uid);
     }
 
     get routeur(): RouteurService { return this.service.routeur; }
@@ -85,7 +87,7 @@ export abstract class CLFClientsComponent extends PageTableComponent<CLFDocs> im
             id: (t: CLFDocs) => {
                 return this.utile.url.id(KeyUidRno.texteDeKey(t.client));
             },
-            quandClic: { colonneDuClic: this.utile.nom.choisit }, // (docsClient: CLFDocs) => (() => this.routeur.navigueUrlDef(this.utile.url.client(docsClient))).bind(this),
+            quandClic: (clfDocs: CLFDocs) => (() => this.service.routeur.navigueUrlDef(this.utile.url.client(clfDocs.client))).bind(this),
             triInitial: { colonne: 'nbDocuments', direction: 'desc' },
             pagination: Fabrique.vueTable.pagination<CLFDocs>('client'),
             navigationAuClavier: { type: 'lignes', controlePagination: true }
@@ -104,18 +106,17 @@ export abstract class CLFClientsComponent extends PageTableComponent<CLFDocs> im
     }
 
     rafraichit() {
-        this.barre.site = this.service.navigation.litSiteEnCours();
+        this.barre.site = this.service.litSiteEnCours();
         this.barre.rafraichit();
     }
 
     avantChargeData() {
-        this.site = this.service.navigation.litSiteEnCours();
-        this.identifiant = this.service.identification.litIdentifiant();
+        this.site = this.service.litSiteEnCours();
     }
 
     chargeData(data: Data) {
         this.clfDocs = data.clfDocs;
-        this.documentsClients = this.clfDocs.créeDocumentsClients();
+        this.liste = this.clfDocs.créeDocumentsClients();
         this.date = new Date(Date.now());
     }
 
@@ -132,9 +133,7 @@ export abstract class CLFClientsComponent extends PageTableComponent<CLFDocs> im
             const message = `Il n'y a pas de client enregistré.`;
             const lienDef: ILienDef = {
                 urlDef: {
-                    routes: FournisseurRoutes,
-                    pageDef: FournisseurPages.clients,
-                    urlSite: this.site.url
+                    routeur: Fabrique.url.appRouteur.clients
                 }
             };
             this.superGroupe.ajoute(this.utile.groupeCréationImpossible(this.clfDocs.type, message, lienDef));
@@ -149,8 +148,7 @@ export abstract class CLFClientsComponent extends PageTableComponent<CLFDocs> im
     }
 
     chargeGroupe() {
-        this._chargeVueTable(this.documentsClients);
-        this.rafraichit();
+        this._chargeVueTable(this.liste);
     }
 
     créePageTableDef(): IPageTableDef {

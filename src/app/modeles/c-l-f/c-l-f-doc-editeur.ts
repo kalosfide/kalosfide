@@ -19,12 +19,12 @@ export class CLFDocEditeur extends KeyUidRnoEditeur<CLFDoc> {
         this.kfChoisi = Fabrique.caseACocher(`choisi_${this.document.no}`, undefined,
             (() => {
                 this.document.synthèse.rafraichitCaseToutSélectionner();
-                // quand la valeur change, le service enregistre le changement dans le stock et emet un observable du bilan
+                // quand la valeur change, le service enregistre le changement dans le stock et émet un observable du bilan
                 (this.component.iservice as CLFService).changeChoisi(this.document.no, this.kfChoisi.valeur);
             }).bind(this)
         );
         this.kfChoisi.géreClasseEntree.ajouteClasse('text-center');
-        Fabrique.caseACocherAspect(this.kfChoisi);
+//        Fabrique.caseACocherAspect(this.kfChoisi);
         this.kfChoisi.valeur = this.document.apiDoc.choisi === true;
         if (!this.document.préparé) {
             this.kfChoisi.inactivité = true;

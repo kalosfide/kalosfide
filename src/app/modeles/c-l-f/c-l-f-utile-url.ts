@@ -1,27 +1,24 @@
 import { PageDef } from 'src/app/commun/page-def';
 import { IUrlDef } from 'src/app/disposition/fabrique/fabrique-url';
-import { ISiteRoutes, iSiteRoutePlusSegments } from 'src/app/site/site-pages';
 import { CLFUtile } from './c-l-f-utile';
 import { Client } from '../client/client';
 import { DataUtileUrl } from 'src/app/commun/data-par-key/data-utile-url';
 import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
 import { CLFDoc } from './c-l-f-doc';
-import { TypeCLF } from './c-l-f-type';
+import { apiType, TypeCLF } from './c-l-f-type';
 import { CLFLigne } from './c-l-f-ligne';
-import { LivraisonRoutes } from 'src/app/fournisseur/livraisons/livraison-pages';
-import { CommandeRoutes, CommandePages } from 'src/app/client/commandes/commande-pages';
+import { CommandePages } from 'src/app/client/commandes/commande-pages';
 import { CLFDocs } from './c-l-f-docs';
-import { FactureRoutes } from 'src/app/fournisseur/factures/facture-pages';
 import { CLFPages } from './c-l-f-pages';
 import { IKeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/i-key-uid-rno';
-import { ClientRoutes } from 'src/app/client/client-pages';
 import { ClientPages } from 'src/app/client/client-pages';
-import { FournisseurRoutes, FournisseurPages } from 'src/app/fournisseur/fournisseur-pages';
-import { KeyUidRnoNo } from 'src/app/commun/data-par-key/key-uid-rno-no/key-uid-rno-no';
-import { ValeurStringDef } from 'src/app/commun/kf-composants/kf-partages/kf-string-def';
+import { FournisseurPages } from 'src/app/fournisseur/fournisseur-pages';
+import { FDocumentPages } from 'src/app/fournisseur/documents/f-document-pages';
+import { Routeur } from 'src/app/commun/routeur';
+import { CLFRouteur, LFRouteur } from './c-l-f-routeur';
+import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 
 export class CLFUtileUrl extends DataUtileUrl {
-
     constructor(utile: CLFUtile) {
         super(utile);
     }
@@ -29,65 +26,64 @@ export class CLFUtileUrl extends DataUtileUrl {
     get utile(): CLFUtile {
         return this.parent as CLFUtile;
     }
-
     /**
      * Route racine des éditions
      */
-    private routeBase: ISiteRoutes;
-    private routeClient: (client?: Client) => ISiteRoutes;
-    /**
-     * Retourne l'ISiteRoutes de la route: commande/bon ou (livraison ou facture)/client/:[nomParamKeyClient]/bon/:[nomParamNoDoc]
-     */
-    private routeDocFnc: (clfDoc: CLFDoc) => ISiteRoutes;
-    /**
-     * ISiteRoutes de la route: commande/bon ou (livraison ou facture)/client/:[nomParamKeyClient]/bon/:[nomParamNoDoc]
-     */
-    private routeDoc: ISiteRoutes;
+    private routeurBase: CLFRouteur;
+    private get lfRouteurBase(): LFRouteur { return this.routeurBase as LFRouteur; }
 
     /**
-     * Nécessaire pour toutes les urls.
+     * ISiteRoutes de la route: commande/bon ou (livraison ou facture)/client/:key/bon/:[NomParam.noDoc]
+     */
+    private routeurBon: Routeur;
+
+    /**
+     * ISiteRoutes de la route: document.
+     */
+    private routeurDocument: Routeur;
+
+    /**
+     * ISiteRoutes de la route: document pour le client ou document/client/:keyClient pour le fournisseur
+     */
+    private routeurDocumentClient: (keyClient?: IKeyUidRno) => Routeur;
+
+    /**
+     * Nécessaire pour toutes les urls d'édition.
      * Suffisant pour choixClient, client.
      * @param type type CLF des documents
      */
     fixeRouteBase(type: TypeCLF) {
         switch (type) {
             case 'commande':
-                this.routeBase = CommandeRoutes;
-                this.routeClient = () => CommandeRoutes;
+                this.routeurBase = Fabrique.url.appRouteur.commande;
                 break;
             case 'facture':
-                this.routeBase = FactureRoutes;
-                this.routeClient =
-                    (client: Client) => iSiteRoutePlusSegments(FactureRoutes, [CLFPages.client.urlSegment, KeyUidRno.texteDeKey(client)]);
+                this.routeurBase = Fabrique.url.appRouteur.facture;
                 break;
             case 'livraison':
-                this.routeBase = LivraisonRoutes;
-                this.routeClient =
-                    (client: Client) => iSiteRoutePlusSegments(LivraisonRoutes, [CLFPages.client.urlSegment, KeyUidRno.texteDeKey(client)]);
+                this.routeurBase = Fabrique.url.appRouteur.livraison;
                 break;
         }
     }
 
     /**
      * Nécessaire pour toutes les urls autres que choixClient, client, bons.
-     * @param clfDoc le bon
+     * @param bon le bon
      */
-    fixeRouteDoc(clfDoc: CLFDoc) {
-        this.fixeRouteBase(clfDoc.clfDocs.type);
-        switch (clfDoc.clfDocs.type) {
+    fixeRouteBon(bon: CLFDoc) {
+        switch (bon.clfDocs.type) {
             case 'commande':
-                this.routeDoc = iSiteRoutePlusSegments(CommandeRoutes, [CLFPages.bon.urlSegment]);
+                this.routeurBase = Fabrique.url.appRouteur.commande;
                 break;
             case 'livraison':
+                this.routeurBase = Fabrique.url.appRouteur.livraison;
+                this.lfRouteurBase.fixeBon(bon);
+                break;
             case 'facture':
-                this.routeDoc = iSiteRoutePlusSegments(this.routeClient(clfDoc.client), [CLFPages.bon.urlSegment, '' + clfDoc.no]);
+                this.routeurBase = Fabrique.url.appRouteur.facture;
+                this.lfRouteurBase.fixeBon(bon);
                 break;
         }
-    }
-
-    fixeRouteCommande() {
-        this.routeBase = CommandeRoutes;
-        this.routeDoc = iSiteRoutePlusSegments(CommandeRoutes, [CLFPages.bon.urlSegment]);
     }
 
     private _texteKeyLigne(ligne: CLFLigne): string {
@@ -96,17 +92,17 @@ export class CLFUtileUrl extends DataUtileUrl {
 
     /**
      * Retourne une urlDef dont l'ISiteRoute est this.routeDoc:
-     * commande/bon ou (livraison ou facture)/client/:[nomParamKeyClient]/bon/:[nomParamNoDoc]
-     * @param pageDef si présent, l'urlSegment est ajouté
+     * commande/bon ou (livraison ou facture)/client/:key/bon/:[NomParam.noDoc]
+     * @param pageDef si présent, le path est ajouté
      * @param ligne si présent, le texteKey est ajouté
      */
     private _urlDefDoc(pageDef?: PageDef, ligne?: CLFLigne) {
-        const urlDef: IUrlDef = this.__urlDef(this.routeDoc, pageDef, this._texteKeyLigne(ligne));
+        const urlDef: IUrlDef = this.__urlDef(this.routeurBase.bon, pageDef, this._texteKeyLigne(ligne));
         return urlDef;
     }
 
     private _urlDefRetourLigne(pageDef: PageDef, ligne: CLFLigne) {
-        const urlDef: IUrlDef = this.__urlDef(this.routeDoc, pageDef, this._texteKeyLigne(ligne), true);
+        const urlDef: IUrlDef = this.__urlDef(this.routeurBase.bon, pageDef, this._texteKeyLigne(ligne), true);
         return urlDef;
     }
 
@@ -115,7 +111,7 @@ export class CLFUtileUrl extends DataUtileUrl {
      * Page de choix du client pour lequel on veut créer un document de synthèse.
      */
     choixClient(): IUrlDef {
-        return this.__urlDef(this.routeBase, CLFPages.choixClient);
+        return this.__urlDef(this.routeurBase, CLFPages.choixClient);
     }
 
     /**
@@ -130,43 +126,44 @@ export class CLFUtileUrl extends DataUtileUrl {
     }
 
     /**
-     * Route: (livraison ou facture)/client/:[nomParamKeyClient]
+     * Route: (livraison ou facture)/client/:key
      * Lien vers la page titre contenant toutes les pages d'édition d'un document de synthèse.
-     * @param clfDocs contient le client et ses documents à synthétiser et s'il n'y en a pas la dernière synthèse.
+     * @param client
      */
-    client(clfDocs: CLFDocs): IUrlDef {
-        return this.__urlDef(this.routeClient(clfDocs.client));
+    client(client: Client): IUrlDef {
+        this.lfRouteurBase.fixeClient(client);
+        return this.__urlDef(this.routeurBase.client);
     }
 
     /**
-     * Route: (livraison ou facture)/client/:[nomParamKeyClient]/bons
+     * Route: (livraison ou facture)/client/:key/bons
      * Url de la page de sélection des documents à synthétiser d'un client
      * @param client le client
      */
     bons(client: Client): IUrlDef {
-        return this.__urlDef(this.routeClient(client), CLFPages.bons);
+        this.lfRouteurBase.fixeClient(client);
+        return this.__urlDef(this.routeurBase.client, CLFPages.bons);
     }
 
     /**
-     * Route: commande/bon ou (livraison ou facture)/client/:[nomParamKeyClient]/bon/:[nomParamNoDoc]
+     * Route: commande/bon ou (livraison ou facture)/client/:key/bon/:[NomParam.noDoc]
      * Url de la page titre contenant toutes les pages d'édition d'un document.
      * @param clfDoc si présent, routeDoc n'a pas été initialisé (cas des gardes)
      */
     bon(clfDoc?: CLFDoc): IUrlDef {
         if (clfDoc) {
-            this.fixeRouteDoc(clfDoc);
+            this.fixeRouteBon(clfDoc);
         }
         return this._urlDefDoc();
     }
 
     /**
-     * Route: (livraison ou facture)/client/:[nomParamKeyClient]/bons
+     * Route: (livraison ou facture)/client/:key/bons
      * avec le no du bon en fragment
      * @param clfDoc bon qui est édité
      */
     retourDeBon(clfDoc: CLFDoc): IUrlDef {
         const urlDef = this.bons(clfDoc.client);
-        urlDef.fragment = this.id('' + clfDoc.no);
         return urlDef;
     }
 
@@ -175,7 +172,7 @@ export class CLFUtileUrl extends DataUtileUrl {
      * Url de la page du contexte.
      */
     sitePasOuvert(): IUrlDef {
-        return this.__urlDef(ClientRoutes, ClientPages.pasOuvert);
+        return this.__urlDef(Fabrique.url.appRouteur.client, ClientPages.pasOuvert);
     }
 
     /**
@@ -183,53 +180,53 @@ export class CLFUtileUrl extends DataUtileUrl {
      * Url de la page du bon.
      */
     retourDeSitePasOuvert(): IUrlDef {
-        return this.__urlDef(CommandeRoutes, CommandePages.bon);
+        return this.__urlDef(Fabrique.url.appRouteur.commande, CommandePages.bon);
     }
 
     /**
-     * Route: livraison/client/:[nomParamKeyClient]/bon/0
+     * Route: livraison/client/:key/bon/0
      * Lien vers la page de création d'un bon de commande virtuel
      */
     bonVirtuel(client: Client): IUrlDef {
-        const route = iSiteRoutePlusSegments(this.routeClient(client), [CLFPages.bon.urlSegment, '0']);
-        return this.__urlDef(route);
-    }
-    routeBonVirtuel(client: Client): string {
-        const def = this.bonVirtuel(client);
-        return def.routes.url(ValeurStringDef(def.urlSite), [CLFPages.nouveau.urlSegment]);
+        this.lfRouteurBase.fixeClient(client);
+        return this.__urlDef(this.routeurBase.client.enfant(CLFPages.bon.path, '0'));
     }
 
     /**
-     * Route: commande/bon/lignes ou livraison/client/:[nomParamKeyClient]/bon/:[nomParamNoDoc]/lignes.
+     * Route: commande/bon/lignes ou livraison/client/:key/bon/:[NomParam.noDoc]/lignes.
      * Url de la page titre contenant la page d'édition des lignes du bon.
-     * @param clfDoc si présent, routeLignes n'a pas été initialisé (cas des gardes)
+     * @param clfDoc si présent, routeDoc n'a pas été initialisé (cas des gardes)
      */
     lignes(clfDoc?: CLFDoc): IUrlDef {
         if (clfDoc) {
-            this.fixeRouteDoc(clfDoc);
+            this.fixeRouteBon(clfDoc);
         }
         return this._urlDefDoc(CLFPages.lignes);
     }
 
     /**
-     * Route: commande/bon/nouveau ou livraison/client/:[nomParamKeyClient]/bon/0/nouveau.
+     * Route: commande/bon/nouveau ou livraison/client/:key/bon/0/nouveau.
      * Url de la page titre contenant la page de création d'un bon de commande virtuel pour le fournisseur.
-     * @param clfDoc si présent, routeLignes n'a pas été initialisé (cas des gardes)
+     * @param clfDoc si présent, routeDoc n'a pas été initialisé (cas des gardes)
      */
-    nouveau(clfDoc?: CLFDoc): IUrlDef {
+    nouveau(clfDoc: CLFDoc): IUrlDef {
         if (clfDoc) {
-            this.fixeRouteDoc(clfDoc);
+            this.fixeRouteBon(clfDoc);
         }
         return this._urlDefDoc(CLFPages.nouveau);
     }
 
     /**
-     * Route: ./client/:[nomParamKeyClient]/envoi ou ./envoi pour les commandes
+     * Route: ./client/:key/envoi ou ./envoi pour les commandes
      * Url de la page de vérification et d'envoi d'un document.
      */
     envoi(clfDocs: CLFDocs): IUrlDef {
         this.fixeRouteBase(clfDocs.type);
-        return this.__urlDef(this.routeClient(clfDocs.client), CLFPages.envoi);
+        if (clfDocs.type === 'commande') {
+            return this.__urlDef(this.routeurBase, CLFPages.envoi);
+        }
+        this.lfRouteurBase.fixeClient(clfDocs.client)
+        return this.__urlDef(this.routeurBase.client, CLFPages.envoi);
     }
     retourDEnvoi(client?: Client): IUrlDef {
         if (client) {
@@ -259,41 +256,76 @@ export class CLFUtileUrl extends DataUtileUrl {
         return this._urlDefRetourLigne(CLFPages.lignes, ligne);
     }
 
-    private get routeDocuments(): ISiteRoutes {
-        let route: ISiteRoutes;
-        let pageDef: PageDef;
+    // dans le constructeur de FournisseurCLFService et ClientCLFService
+    fixeRoutesDocument() {
         if (this.utile.utilisateurEstLeClient) {
-            route = ClientRoutes;
-            pageDef = ClientPages.documents;
+            this.routeurDocument = Fabrique.url.appRouteur.client.enfant(ClientPages.documents.path);
+            this.routeurDocumentClient = () => this.routeurDocument;
         } else {
-            route = FournisseurRoutes;
-            pageDef = FournisseurPages.documents;
-        }
-        return iSiteRoutePlusSegments(route, [pageDef.urlSegment]);
-    }
-
-    private paramDocument(clfDoc: CLFDoc): string {
-        if (this.utile.utilisateurEstLeClient) {
-            return '' + clfDoc.no;
-        } else {
-            return KeyUidRnoNo.texteDeKey(clfDoc);
+            this.routeurDocument = Fabrique.url.appRouteur.fournisseur.enfant(FournisseurPages.documents.path);
+            this.routeurDocumentClient = (keyClient: IKeyUidRno) => this.routeurDocument.enfant(
+                FDocumentPages.clients.path, CLFPages.client.path, KeyUidRno.texteDeKey(keyClient));
         }
     }
 
+    /**
+     * Route: document/clients
+     */
+    clientsBilansDocs(): IUrlDef {
+        return this.__urlDef(this.routeurDocument, FDocumentPages.clients)
+    }
+
+    /**
+     * Route: document/clients avec le texteKey du client en fragment.
+     * @param keyClient key du client
+     */
+    retourDUnClientVersBilansDocs(keyClient: IKeyUidRno): IUrlDef {
+        const urlDef = this.clientsBilansDocs();
+        urlDef.fragment = this.id(KeyUidRno.texteDeKey(keyClient));
+        return urlDef;
+    }
+
+    /**
+     * Route: document/cherche
+     */
+    cherche(): IUrlDef {
+        return this.__urlDef(this.routeurDocument, FDocumentPages.cherche)
+    }
+
+    /**
+     * Route: document/client/:key/liste (fournisseur) document/liste (client)
+     * @param keyClient key du client
+     */
+    documentsClient(keyClient?: IKeyUidRno): IUrlDef {
+        return this.__urlDef(this.routeurDocumentClient(keyClient), CLFPages.liste);
+    }
+
+    private documentPageDef(type: TypeCLF): PageDef {
+        return type === 'commande' ? CLFPages.commande : type === 'livraison' ? CLFPages.livraison : CLFPages.facture;
+    }
+
+    /**
+     * Route: document/client/:key/type/:no (fournisseur) document/type/:no (client)
+     * @param clfDoc le document à afficher
+     */
     document(clfDoc: CLFDoc): IUrlDef {
-        const pageDef = clfDoc.type === 'commande'
-            ? CLFPages.commande
-            : clfDoc.type === 'livraison'
-                ? CLFPages.livraison
-                : CLFPages.facture;
-        const param = this.paramDocument(clfDoc);
-        return this.__urlDef(this.routeDocuments, pageDef, param);
+        return this.__urlDef(this.routeurDocumentClient(clfDoc), this.documentPageDef(clfDoc.type), '' + clfDoc.no);
     }
+
+    /**
+     * Id à utiliser dans la table des documents d'un client pour la ligne du document
+     * @param clfDoc document à identifier
+     */
     idDeDocument(clfDoc: CLFDoc): string {
-        return clfDoc.type + ' ' + this.paramDocument(clfDoc);
+        return apiType(clfDoc.type) + clfDoc.no;
     }
+
+    /**
+     * Route: document/client/:key/liste (fournisseur) document/liste (client) avec en fragment l'id du document
+     * @param clfDoc document qui était affiché
+     */
     retourDeDocument(clfDoc: CLFDoc): IUrlDef {
-        const urlDef = this.__urlDef(this.routeDocuments, CLFPages.liste);
+        const urlDef = this.documentsClient(clfDoc);
         urlDef.fragment = this.idDeDocument(clfDoc);
         return urlDef;
     }

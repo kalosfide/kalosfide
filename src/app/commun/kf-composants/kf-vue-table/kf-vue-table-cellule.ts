@@ -38,8 +38,18 @@ export class KfVueTableCellule<T> extends KfVueTableCelluleBase<T> implements IK
         return this.pLigne as KfVueTableLigne<T>;
     }
 
-    get classe(): KfNgClasse {
+    /**
+     * KfNgClasse de l'élément td de l'item.
+     */
+     get classe(): KfNgClasse {
         return this.pColonne.classeItem(this.item);
+    }
+
+    /**
+     * KfNgClasse de l'élément div ajouté autour du contenu de l'en-tête s'il existe.
+     */
+     get classeDiv(): KfNgClasse {
+        return this.pColonne.classeItemDiv;
     }
 
     get tabindex(): string {
@@ -71,13 +81,14 @@ export class KfVueTableCellule<T> extends KfVueTableCelluleBase<T> implements IK
     }
 
     /**
-     * Mise à jour du texte du contenu si la cellule a pour contenu un texte dépendant de la valeur de l'item.
+     * Mise à jour du contenu si la cellule dépend de la valeur de l'item.
      */
-    quandItemModifié() {
-        if (this.pColonne.créeContenu) {
-            const celluleDef = this.pColonne.créeContenu(this.item);
-            if (celluleDef && (typeof (celluleDef) === 'string' || typeof (celluleDef) === 'function')) {
-                this.contenu.fixeTexte(celluleDef);
+     quandItemModifié() {
+        if (this.pColonne.quandItemModifié) {
+            if (this.pColonne.quandItemModifié === 'rafraichit') {
+                this.créeContenu(this.pColonne.créeContenu(this.item));
+            } else {
+                this.pColonne.quandItemModifié(this);
             }
         }
     }

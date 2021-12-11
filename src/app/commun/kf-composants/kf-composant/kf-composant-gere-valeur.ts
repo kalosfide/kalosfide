@@ -247,17 +247,17 @@ export class KfComposantGereValeur {
                 return vueTable.superGroupes.map(g => g.gereValeur.valeurJson());
             default:
                 if (this.composant.estEntree) {
-                    const entrée = this.composant as KfEntrée;
+                    const valeur = this.abstractControl ? this.abstractControl.value : undefined;
+                    if (valeur === undefined || valeur === null) {
+                        return valeur;
+                    }
                     const estInputNombre = this.typeDeValeur === KfTypeDeValeur.avecEntreeInputNombre;
-                    const valeur = this.abstractControl.value;
-                    if (valeur !== undefined) {
-                        if (estInputNombre) {
-                            if (valeur !== '') {
-                                return +valeur;
-                            }
-                        } else {
-                            return valeur;
+                    if (estInputNombre) {
+                        if (valeur !== '') {
+                            return +valeur;
                         }
+                    } else {
+                        return valeur;
                     }
                 }
                 break;

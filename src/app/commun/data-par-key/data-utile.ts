@@ -1,7 +1,6 @@
 import { DataService } from '../../services/data.service';
 import { Site } from '../../modeles/site/site';
 import { RouteurService } from '../../services/routeur.service';
-import { ConditionEtatSite } from './condition-etat-site';
 import { ConditionTable, ModeTable } from './condition-table';
 import { ValeurEtObservable } from '../outils/valeur-et-observable';
 import { DataUtileUrl } from './data-utile-url';
@@ -37,10 +36,6 @@ export class DataUtile {
 
     get service(): DataService {
         return this.pService;
-    }
-
-    get site(): Site {
-        return this.pService.navigation.litSiteEnCours();
     }
 
     get routeur(): RouteurService {

@@ -1,10 +1,8 @@
-import { ComptePages, CompteRoutes } from '../compte-pages';
+import { ComptePages } from '../compte-pages';
 import { Component, OnInit } from '@angular/core';
 import { PageDef } from 'src/app/commun/page-def';
-import { IBarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { ActivatedRoute } from '@angular/router';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
-import { KfSuperGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-super-groupe';
 import { RéinitialiseMotDePasseModel } from './réinitialise-mot-de-passe.model';
 import { CompteService } from '../compte.service';
 import { Observable } from 'rxjs';
@@ -54,7 +52,8 @@ export class RéinitialiseMotDePasseComponent  extends FormulaireComponent imple
         const def: ILienDef = {
             nom: 'Connection',
             urlDef: {
-                keys: CompteRoutes.route([ComptePages.connection.urlSegment]),
+                pageDef: ComptePages.connection,
+                routeur: Fabrique.url.appRouteur.compte,
             },
             contenu: { texte: 'Connection' },
         };

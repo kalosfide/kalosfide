@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewChild, ViewChildren, QueryList, AfterViewInit, ElementRef } from '@angular/core';
+import { Component, OnInit, Input, ViewChild, ViewChildren, QueryList, AfterViewInit, ElementRef, ViewEncapsulation } from '@angular/core';
 import { KfRadios } from './kf-radios';
 import { KfComposantComponent } from '../../kf-composant/kf-composant.component';
 import { KfRadio } from './kf-radio';
@@ -7,7 +7,8 @@ import { TraiteKeydownService } from '../../../traite-keydown/traite-keydown.ser
 @Component({
     selector: 'app-kf-radio',
     templateUrl: './kf-radio.component.html',
-    styleUrls: ['../../kf-composants.scss']
+    styleUrls: ['../../kf-composants.scss'],
+    encapsulation: ViewEncapsulation.None
 })
 export class KfRadioComponent extends KfComposantComponent implements OnInit, AfterViewInit {
     @ViewChild('inputElement', {static: false}) inputElement: ElementRef;
