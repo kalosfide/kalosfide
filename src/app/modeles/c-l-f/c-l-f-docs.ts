@@ -27,8 +27,8 @@ export class CLFDocs {
     keyIdentifiant: IKeyId;
 
     /**
-     * Site réduit qui peut contenir uid, rno et etat.
-     * Ajouté avec uid, rno et etat quand le CLFDocs est stocké et vérifié à chaque lecture du stock pour recharger le stock si changé
+     * Site réduit qui peut contenir idet etat.
+     * Ajouté avec id et etat quand le CLFDocs est stocké et vérifié à chaque lecture du stock pour recharger le stock si changé
      * Chargé avec etat seulement pour vérifier s'il faut recharger le stock.
      */
     site: Site;
@@ -449,7 +449,7 @@ export class CLFDocs {
     /**
      * Si l'utilisateur a créé la commande, supprime la commande et toutes ses lignes.
      * Si l'utilisateur est le fournisseur et la commande a été créée par le client, fixe à 0 le aLivrer de toutes les lignes.
-     * @param ikeyCommande tout objet ayant l'uid, le rno et le no de la commande
+     * @param ikeyCommande tout objet ayant l'id et le no de la commande
      */
     quandSupprimeOuRefuse(ikeyCommande: IKeyIdNo) {
         if (this.type === 'commande') {

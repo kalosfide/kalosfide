@@ -4,13 +4,9 @@
  */
 export class CLFChercheDoc {
     /**
-     * uid du client du document.
+     * id du client du document.
      */
-    uid: string;
-    /**
-     * rno du client du document.
-     */
-    rno: number;
+    id: number;
     /**
      * nom du client du document.
      */

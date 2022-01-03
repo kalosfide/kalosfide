@@ -14,7 +14,7 @@ export abstract class KeyLigneEditeur<T extends KeyLigne> extends DataKeyEditeur
     protected kfDate: KfInputDateTemps;
 
     créeKfDeKey() {
-        this.kfId = Fabrique.input.nombreInvisible('rno');
+        this.kfId = Fabrique.input.nombreInvisible('id');
         this.kfNo = Fabrique.input.nombreInvisible('no');
         this.kfProduitId = Fabrique.input.nombreInvisible('produitId');
         this.kfDate = Fabrique.input.dateInvisible('date');

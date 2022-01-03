@@ -53,18 +53,7 @@ export abstract class DataKeyService<T extends IDataKey> extends DataService {
         return this.pModeTableIO;
     }
 
-    protected créeParams(key: any): { [param: string]: string } {
-        const params: { [param: string]: string } = {};
-        if (key.uid) { params.uid = key.uid; }
-        if (key.rno) { params.rno = key.rno; }
-        if (key.no) { params.no = key.no; }
-        if (key.date) { params.date = key.date; }
-        if (key.uid2) { params.uid2 = key.uid2; }
-        if (key.rno2) { params.rno2 = key.rno2; }
-        if (key.no2) { params.no2 = key.no2; }
-        return params;
-    }
-
+    protected abstract créeParams(key: any): { [param: string]: string };
     /**
      * demande à l'Api d'ajouter un objet à la base de données
      * @param objet contient la clé (incomplète si numAuto) et tous les autres champs

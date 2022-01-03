@@ -224,7 +224,7 @@ export abstract class CLFService extends CLFLectureService {
     /**
      * Crée un nouveau bon vide d'un client.
      * @param type 'commande' ou 'livraison'
-     * @param ikeyClient tout objet ayant l'uid et le rno du client
+     * @param ikeyClient tout objet ayant l'id du client
      */
     public apiRequêteCrée(type: TypeCLF, ikeyClient: IKeyId, formulaire?: KfSuperGroupe, afficheResultat?: AfficheResultat): ApiRequêteAction {
         let controller: string;
@@ -251,7 +251,7 @@ export abstract class CLFService extends CLFLectureService {
 
     /**
      * Crée une nouvelle commande d'un client copie de la précédente commande.
-     * @param ikeyClient tout objet ayant l'uid et le rno du client
+     * @param ikeyClient tout objet ayant l'id du client
      */
     public apiRequêteCréeCopie(type: TypeCLF, ikeyClient: IKeyId, formulaire?: KfSuperGroupe, afficheResultat?: AfficheResultat): ApiRequêteAction {
         let controller: string;
@@ -285,7 +285,7 @@ export abstract class CLFService extends CLFLectureService {
 
     /**
      * Si l'utilisateur a créé la commande, supprime la commande et toutes ses lignes.
-     * @param ikeyCommande tout objet ayant l'uid, le rno et le no de la commande
+     * @param ikeyCommande tout objet ayant l'id et le no de la commande
      */
     supprimeOuRefuse$(ikeyCommande: IKeyIdNo) {
         return this.post(ApiController.commande, ApiAction.bon.efface, null, this.paramsKeyBon(ikeyCommande));
@@ -524,7 +524,6 @@ export abstract class CLFService extends CLFLectureService {
                     // pour la création d'un bon virtuel
                     const apiDocModéleBonVirtuel = new ApiDoc();
                     apiDocModéleBonVirtuel.id = clfDoc.id;
-                    apiDocModéleBonVirtuel.rno = clfDoc.rno;
                     apiDocModéleBonVirtuel.no = 0;
                     apiDocModéleBonVirtuel.date = créé.date;
                     apiDocModéleBonVirtuel.noGroupe = créé.noGroupe;

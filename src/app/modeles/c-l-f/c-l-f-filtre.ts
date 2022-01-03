@@ -7,7 +7,7 @@ import { IKeyId } from 'src/app/commun/data-par-key/key-id/i-key-id';
  */
 export class CLFFiltre extends KeyId {
     /**
-     * uid du client ou du site
+     * id du client ou du site
      */
     id: number;
     /**

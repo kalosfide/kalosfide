@@ -6,10 +6,8 @@ import { Produit } from './produit';
  * Interface implémentée par Catalogue et CatalogueApi
  */
 export interface ICatalogue {
-    /** uid du site */
-    uid: string;
-    /** rno du site */
-    rno: number;
+    /** id du site */
+    id: number;
 
     catégories: Categorie[];
     produits: Produit[];
@@ -19,19 +17,15 @@ export interface ICatalogue {
  * Catalogue retourné par l'Api
  */
 export class CatalogueApi implements ICatalogue {
-    /** uid du site */
-    uid: string;
-    /** rno du site */
-    rno: number;
+    /** id du site */
+    id: number;
 
     catégories: Categorie[];
     produits: Produit[];
 }
 export class Catalogue implements ICatalogue {
-    /** uid du site */
-    uid: string;
-    /** rno du site */
-    rno: number;
+    /** id du site */
+    id: number;
 
     catégories: Categorie[];
     produits: Produit[];
@@ -77,8 +71,7 @@ export class Catalogue implements ICatalogue {
      */
     static filtre(catalogue: Catalogue, filtreProduit: (p: Produit) => boolean): Catalogue {
         const filtré = new Catalogue();
-        filtré.uid = catalogue.uid;
-        filtré.rno = catalogue.rno;
+        filtré.id = catalogue.id;
         filtré.produits = catalogue.produits.filter(p => filtreProduit(p));
         filtré.catégories = catalogue.catégories.filter(c => filtré.produits.find(p => p.categorieId === c.id));
         return filtré;

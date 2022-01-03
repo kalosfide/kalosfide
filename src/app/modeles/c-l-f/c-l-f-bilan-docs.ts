@@ -27,14 +27,9 @@ export class ApiBilanDocs {
  export class ApiClientBilanDocs {
      
     /**
-     * Uid du client.
+     * Id du client.
      */
-    uid: string;
-
-    /**
-     * Rno du client.
-     */
-    rno: number;
+    id: number;
 
     /**
      * Bilans par type
@@ -75,7 +70,7 @@ export class CLFBilanDocs {
  export class CLFClientBilanDocs {
      
     /**
-     * Uid du client.
+     * Client.
      */
     client: Client;
 
@@ -95,7 +90,7 @@ export class CLFBilanDocs {
     facture: CLFBilanDocs;
 
     constructor(clients: Client[], apiClientBilan: ApiClientBilanDocs) {
-        this.client = clients.find(c => c.id === apiClientBilan.uid && c.rno === apiClientBilan.rno);
+        this.client = clients.find(c => c.id === apiClientBilan.id);
         this.commande = new CLFBilanDocs(apiClientBilan.bilans.find(a => a.type === apiType('commande')));
         this.livraison = new CLFBilanDocs(apiClientBilan.bilans.find(a => a.type === apiType('livraison')));
         this.facture = new CLFBilanDocs(apiClientBilan.bilans.find(a => a.type === apiType('facture')));

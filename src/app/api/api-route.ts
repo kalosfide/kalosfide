@@ -69,7 +69,7 @@ export const ApiAction = {
     },
     catalogue: {
         /** GET le catalogue actuel d'un site
-         * params uid, rno du site
+         * params id du site
          */
         complet: 'complet',
         disponible: 'disponible',

@@ -18,7 +18,6 @@ export abstract class DataResolverService {
         if (site) {
             return {
                 id: site.id,
-                rno: site.rno
             };
         }
     }

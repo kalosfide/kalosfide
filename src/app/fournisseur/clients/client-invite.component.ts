@@ -181,12 +181,9 @@ export class ClientInviteComponent extends FormulaireComponent implements OnInit
 
     créeEdition = (): KfGroupe => {
         const groupe = Fabrique.formulaire.formulaire();
-        const uid = Fabrique.input.texteInvisible('uid');
-        uid.valeur = this.site.id;
-        groupe.ajoute(uid);
-        const rno = Fabrique.input.nombreInvisible('rno');
-        rno.valeur = this.site.rno;
-        groupe.ajoute(rno);
+        const id = Fabrique.input.nombreInvisible('id');
+        id.valeur = this.site.id;
+        groupe.ajoute(id);
         const emailTexte = 'Email du client';
         let client: Client;
         if (this._invitation) {
@@ -213,13 +210,10 @@ export class ClientInviteComponent extends FormulaireComponent implements OnInit
             this.email.gereHtml.ajouteTraiteur(KfTypeDEvenement.valeurChange, this.quandEmailChange.bind(this));
         }
         groupe.ajoute(this.email);
-        const uidClient = Fabrique.input.texteInvisible('uidClient');
-        groupe.ajoute(uidClient);
-        const rnoClient = Fabrique.input.nombreInvisible('rnoClient');
-        groupe.ajoute(rnoClient);
+        const idClient = Fabrique.input.nombreInvisible('uidClient');
+        groupe.ajoute(idClient);
         if (client) {
-            uidClient.valeur = client.id;
-            rnoClient.valeur = client.rno;
+            idClient.valeur = client.id;
             if (client.invitation) {
                 this.email.valeur = client.invitation.email;
                 groupe.comportementFormulaire.neSoumetPasSiPristine = false;

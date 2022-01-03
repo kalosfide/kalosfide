@@ -72,7 +72,7 @@ export class NavigationService implements OnDestroy {
                 this.siteSubject.next(nouvau);
                 const keyInchangé = !ancien
                     ? !nouvau
-                    : !!nouvau && ancien.id === nouvau.id && ancien.rno === nouvau.rno;
+                    : !!nouvau && ancien.id === nouvau.id;
                 if (!keyInchangé) {
                     // ce n'est plus le même site
                     this.keySiteSubject.next();

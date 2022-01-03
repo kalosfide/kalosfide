@@ -24,19 +24,6 @@ export enum EtatUtilisateur {
     fermé,
 }
 
-
-
-
-interface IRole extends IRoleData, IRolePréférences, IRoleEtat {
-    rno: number;
-    site: ISite;
-}
-interface ISite extends IKeyId, ISiteData, ISiteEtat {
-    fournisseur: IRoleData;
-    bilan: SiteBilan;
-    nouveauxDocs: ApiDoc[];
-}
-
 class ApiFournisseur implements IFournisseurData, IRoleEtat, IRolePréférences {
     nom: string;
     adresse: string;

@@ -45,10 +45,7 @@ export class FournisseurCLFService extends CLFService {
     clientsAvecRésumésBons(type: TypeCLF): Observable<CLFDocs> {
         const action = ApiAction.docCLF.clients;
         const site = this.litSiteEnCours();
-        const params: { [param: string]: string } = {
-            uid: site.id,
-            rno: '' + site.rno,
-        };
+        const params: { [param: string]: string } = KeyId.créeParams(site);
 
         return this.lectureObs<ApiDocs>({
             demandeApi: () => this.get<ApiDocs>(this.controller(type), action, params),
@@ -90,10 +87,7 @@ export class FournisseurCLFService extends CLFService {
         }
         const site = this.litSiteEnCours();
         let clfDocs$: Observable<CLFDocs>;
-        const params: { [param: string]: string } = {
-            uid: keyClient.id,
-            rno: '' + keyClient.rno,
-        };
+        const params: { [param: string]: string } = KeyId.créeParams(keyClient);
         clfDocs$ = this.lectureObs<ApiDocsAvecTarif>({
             demandeApi: () => this.get<ApiDocsAvecTarif>(this.controller(type), ApiAction.docCLF.client, params),
         }).pipe(

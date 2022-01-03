@@ -73,7 +73,7 @@ export class FDocumentChercheComponent extends FormulaireComponent implements On
         });
         const type = typeCLF(this.type);
         const textes = this.service.utile.texte.textes(type);
-        if (chercheDoc.uid) {
+        if (chercheDoc.id) {
             // le document existe
             KfBootstrap.ajouteClasseAlerte(this.groupeRésultat, 'success')
             this.étiquetteRésultat.fixeTextes(
@@ -85,8 +85,7 @@ export class FDocumentChercheComponent extends FormulaireComponent implements On
             this.lienRésultat.visible = true;
             const clfDocs = new CLFDocs();
             const apiDoc = new ApiDoc();
-            apiDoc.id = chercheDoc.uid;
-            apiDoc.rno = chercheDoc.rno;
+            apiDoc.id = chercheDoc.id;
             apiDoc.no = this.no;
             const clfDoc = CLFDoc.nouveau(clfDocs, type, apiDoc);
             this.lienRésultat.fixeContenus(this.service.utile.lien.document(clfDoc));

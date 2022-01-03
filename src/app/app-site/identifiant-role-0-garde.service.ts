@@ -3,7 +3,7 @@ import { ActivatedRouteSnapshot, RouterStateSnapshot, CanActivate } from '@angul
 import { IdentificationService } from '../securite/identification.service';
 
 /**
- * Fixe à 0 le rno du role en cours de l'identifiant s'il existe.
+ * Fixe à 0 l'id du site en cours de l'identifiant s'il existe.
  * Laisse passer.
  */
 @Injectable()
