@@ -5,8 +5,7 @@ import { ProduitUtile } from './produit-utile';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { EtatsProduits } from './etat-produit';
 import { Compare } from '../../commun/outils/tri';
-import { TypeMesure } from '../type-mesure';
-import { KfBBtnGroup, KfBBtnGroupElement } from 'src/app/commun/kf-composants/kf-b-btn-group/kf-b-btn-group';
+import { TypeMesureFabrique } from '../type-mesure';
 import { KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
 import { LargeurColonne } from 'src/app/disposition/largeur-colonne';
 import { Catalogue } from './catalogue';
@@ -46,7 +45,7 @@ export class ProduitUtileColonne extends DataUtileColonne {
     }
 
     typeCommande(): IKfVueTableColonneDef<Produit> {
-        const créeContenu = (produit: Produit) => TypeMesure.texteSeCommande(produit.typeMesure, produit.typeCommande);
+        const créeContenu = (produit: Produit) => TypeMesureFabrique.texteSeCommande(produit.typeMesure, produit.typeCommande);
         const def: IKfVueTableColonneDef<Produit> = {
             nom: 'typeCommande',
             enTeteDef: { titreDef: 'Se commande' },
@@ -73,7 +72,7 @@ export class ProduitUtileColonne extends DataUtileColonne {
             enTeteDef: { titreDef: 'Prix' },
             créeContenu: (produit: Produit) => Fabrique.texte.euros(produit.prix),
             compare: Compare.enchaine(
-                Compare.texte((produit: Produit) => produit.typeMesure),
+                Compare.nombre((produit: Produit) => produit.typeMesure),
                 Compare.nombre((produit: Produit) => produit.prix)
             ),
             classesTd: ['prix', 'apercu'],
@@ -94,7 +93,7 @@ export class ProduitUtileColonne extends DataUtileColonne {
     }
 
     etat(): IKfVueTableColonneDef<Produit> {
-        const créeContenu = (produit: Produit) => EtatsProduits.état(produit.etat).texte;
+        const créeContenu = (produit: Produit) => EtatsProduits.état(produit.disponible).texte;
         const def: IKfVueTableColonneDef<Produit> = {
             nom: 'état',
             enTeteDef: { titreDef: 'Etat' },
@@ -109,7 +108,7 @@ export class ProduitUtileColonne extends DataUtileColonne {
         const def: IKfVueTableColonneDef<Produit> = {
             nom: 'état',
             enTeteDef: { titreDef: 'Etat' },
-            créeContenu: (produit: Produit) => produit.editeur.kfEtat,
+            créeContenu: (produit: Produit) => produit.editeur.kfDisponible,
             nePasAfficherSi: this.utile.conditionTable.aperçu
         };
         return def;

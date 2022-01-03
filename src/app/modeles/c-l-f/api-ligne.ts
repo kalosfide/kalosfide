@@ -1,4 +1,5 @@
-import { KeyUidRnoNo2 } from 'src/app/commun/data-par-key/key-uid-rno-no-2/key-uid-rno-no-2';
+import { KeyLigne } from 'src/app/commun/data-par-key/key-ligne/key-ligne';
+import { TypeCommande } from '../type-commande';
 
 export interface IApiLigne {
 
@@ -10,7 +11,7 @@ export interface IApiLigne {
     /**
      * Présent quand la ligne est dans une commande ouverte ou en préparation
      */
-    typeCommande?: string;
+    typeCommande?: TypeCommande;
 
     /**
      * Présent quand la ligne est dans une commande ouverte ou en préparation
@@ -20,13 +21,13 @@ export interface IApiLigne {
 }
 
 /**
- * Objet reçu et stocké dans une liste. Contient seulement les parties no2 et date de la key de la ligne.
+ * Objet reçu et stocké dans une liste. Contient seulement les parties produitId et date de la key de la ligne.
  */
 export class ApiLigne implements IApiLigne {
     /**
-     * No du produit
+     * Id du produit
      */
-    no: number;
+    id: number;
 
     /**
      * Présent quand la ligne est dans une livraison ou une facture et provient d'une commande dont le tarif a changé
@@ -36,7 +37,7 @@ export class ApiLigne implements IApiLigne {
     /**
      * Présent quand la ligne est dans une commande ouverte ou en préparation
      */
-    typeCommande?: string;
+    typeCommande?: TypeCommande;
 
     /**
      * Présent quand la ligne est dans une commande ouverte ou en préparation
@@ -48,12 +49,12 @@ export class ApiLigne implements IApiLigne {
 /**
  * Objet à envoyer qui contient la key complète de la ligne
  */
-export class ApiLigneAEnvoyer extends KeyUidRnoNo2 implements IApiLigne {
+export class ApiLigneAEnvoyer extends KeyLigne implements IApiLigne {
 
     /**
      * Présent quand la ligne est dans une commande ouverte ou en préparation
      */
-    typeCommande?: string;
+    typeCommande?: TypeCommande;
 
     /**
      * Présent quand la ligne est dans une commande ouverte ou en préparation

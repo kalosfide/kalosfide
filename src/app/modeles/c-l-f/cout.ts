@@ -1,5 +1,5 @@
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
-import { TypeMesure } from '../type-mesure';
+import { TypeMesureFabrique } from '../type-mesure';
 import { CLFLigne } from './c-l-f-ligne';
 import { estNombre } from 'src/app/commun/outils/est-nombre';
 
@@ -80,7 +80,7 @@ export class LigneDocumentCoût {
     static quantité(): CoûtDef<CLFLigne> {
         return LigneDocumentCoût._coûtDef(
             (ligne: CLFLigne) => ligne.quantité,
-            (ligne: CLFLigne) => ligne.typeCommande === TypeMesure.typeCommandeParDéfaut(ligne.produit.typeMesure)
+            (ligne: CLFLigne) => ligne.typeCommande === TypeMesureFabrique.typeCommandeParDéfaut(ligne.produit.typeMesure)
         );
     }
 

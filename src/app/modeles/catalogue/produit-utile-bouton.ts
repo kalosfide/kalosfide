@@ -50,7 +50,7 @@ export class ProduitUtileBouton extends DataUtileBouton {
             ' va être supprimé.'
         );
         const apiRequêteAction: ApiRequêteAction = this.utile.service.apiRequêteSupprime(produit, quandSupprimé);
-        const bouton = Fabrique.bouton.attenteDeColonne('supprime' + produit.no,
+        const bouton = Fabrique.bouton.attenteDeColonne('supprime' + produit.id,
             Fabrique.contenu.supprime(), apiRequêteAction, this.utile.service,
             Fabrique.confirmeModal(titre, 'danger', [description])
         );

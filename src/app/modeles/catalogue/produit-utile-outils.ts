@@ -8,7 +8,7 @@ import { KfVueTableFiltreCherche } from 'src/app/commun/kf-composants/kf-vue-tab
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { KfVueTableFiltreNombre } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-filtre-nombre';
 import { KfVueTableFiltreTexte } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-filtre-texte';
-import { IdEtatProduit, EtatsProduits } from './etat-produit';
+import { KfEntreeInputBool } from 'src/app/commun/kf-composants/kf-composants-types';
 
 export class ProduitUtileOutils extends DataUtileOutils {
     constructor(utile: ProduitUtile) {
@@ -33,14 +33,13 @@ export class ProduitUtileOutils extends DataUtileOutils {
 
     catégorie(): KfVueTableFiltreNombre<Produit> {
         return Fabrique.vueTable.filtreNombre<Produit>(this.utile.nom.catégorie,
-            (p: Produit, noCategorie: number) => p.categorieNo === noCategorie, 'Filtrer par catégorie');
+            (p: Produit, idCategorie: number) => p.categorieId === idCategorie, 'Filtrer par catégorie');
     }
 
     état(): KfVueTableFiltreTexte<Produit> {
         return Fabrique.vueTable.filtreTexte<Produit>(this.utile.nom.état,
-        (p: Produit, idEtat: IdEtatProduit) => {
-            const etat = EtatsProduits.état(idEtat);
-            return etat ? etat.vérifie(p) : true;
+        (p: Produit, oui_non: KfEntreeInputBool) => {
+            return oui_non ? (oui_non === KfEntreeInputBool.oui && p.disponible) || !p.disponible : true;
         },
         'Filtrer par état');
     }

@@ -1,10 +1,12 @@
 import { ISiteData, ISiteEtat, Site } from '../modeles/site/site';
-import { IKeyUidRno } from '../commun/data-par-key/key-uid-rno/i-key-uid-rno';
+import { IKeyId } from '../commun/data-par-key/key-id/i-key-id';
 import { IRoleData, IRoleEtat, IRolePréférences, Role } from '../modeles/role/role';
-import { KeyUidRno } from '../commun/data-par-key/key-uid-rno/key-uid-rno';
+import { KeyId } from '../commun/data-par-key/key-id/key-id';
 import { SiteBilan } from '../modeles/site/site-bilan';
 import { ApiDoc } from '../modeles/c-l-f/api-doc';
-import { IdEtatRole } from '../modeles/role/etat-role';
+import { EtatRole } from '../modeles/role/etat-role';
+import { Fournisseur, IFournisseurData } from '../modeles/fournisseur/fournisseur';
+import { Client, IClientData } from '../modeles/client/client';
 
 export class JwtIdentifiant {
     /**
@@ -15,44 +17,62 @@ export class JwtIdentifiant {
     ExpireDans: number;
 }
 
+export enum EtatUtilisateur {
+    nouveau,
+    actif,
+    inactif,
+    fermé,
+}
+
+
+
+
 interface IRole extends IRoleData, IRolePréférences, IRoleEtat {
     rno: number;
     site: ISite;
 }
-interface ISite extends IKeyUidRno, ISiteData, ISiteEtat {
+interface ISite extends IKeyId, ISiteData, ISiteEtat {
     fournisseur: IRoleData;
     bilan: SiteBilan;
     nouveauxDocs: ApiDoc[];
 }
 
-class ApiFournisseur implements IRoleData {
+class ApiFournisseur implements IFournisseurData, IRoleEtat, IRolePréférences {
     nom: string;
     adresse: string;
     ville: string;
+    siret: string;
+
+    etat: EtatRole;
+    date0: Date;
+    dateEtat: Date;
+
+    formatNomFichierCommande: string;
+    formatNomFichierLivraison: string;
+    formatNomFichierFacture: string;
 }
 
-class ApiSite extends KeyUidRno implements ISiteData {
+class ApiClient extends KeyId implements IClientData, IRoleEtat, IRolePréférences {
+    nom: string;
+    adresse: string;
+    ville: string;
+    etat: EtatRole;
+    date0: Date;
+    dateEtat: Date;
+    formatNomFichierCommande: string;
+    formatNomFichierLivraison: string;
+    formatNomFichierFacture: string;
+}
+
+class ApiSite extends KeyId implements ISiteData, ISiteEtat {
     url: string;
     titre: string;
     ouvert: boolean;
     dateCatalogue: Date;
     bilan: SiteBilan;
     fournisseur: ApiFournisseur;
+    client: ApiClient;
     nouveauxDocs: ApiDoc[];
-}
-
-class ApiRole implements IRole {
-    rno: number;
-    nom: string;
-    adresse: string;
-    ville: string;
-    etat: string;
-    date0: Date;
-    dateEtat: Date;
-    formatNomFichierCommande: string;
-    formatNomFichierLivraison: string;
-    formatNomFichierFacture: string;
-    site: ApiSite;
 }
 
 class ApiNouveauSite implements IRoleData, ISiteData {
@@ -63,102 +83,79 @@ class ApiNouveauSite implements IRoleData, ISiteData {
     titre: string;
 }
 
-interface IIdentifiant {
+interface IIdentifiantData {
     userId: string;
     email: string;
-    uid: string;
     etat: string;
-    noDernierRole: number;
+    idDernierSite: number;
 }
-export class ApiIdentifiant implements IIdentifiant {
+export class ApiIdentifiant implements IIdentifiantData {
     userId: string;
     email: string;
-    uid: string;
     etat: string;
-    roles: ApiRole[];
-    noDernierRole: number;
+    idDernierSite: number;
+    sites: ApiSite[];
     nouveauSite: ApiNouveauSite;
 }
 
-export class Identifiant implements IIdentifiant {
+export class IdentifiantStocké extends ApiIdentifiant {
+    idSiteEnCours: number;
+}
+
+export class Identifiant implements IIdentifiantData {
     userId: string;
     email: string;
-    uid: string;
     etat: string;
-    roles: Role[];
-    noDernierRole: number;
-    rnoRoleEnCours: number;
+    idDernierSite: number;
+    sites: Site[];
+    idSiteEnCours: number;
 
-    private static _copie(de: IIdentifiant, vers: IIdentifiant) {
+    private static copieData(de: IIdentifiantData, vers: IIdentifiantData) {
         vers.userId = de.userId;
         vers.email = de.email;
-        vers.uid = de.uid;
         vers.etat = de.etat;
-        vers.noDernierRole = de.noDernierRole;
+        vers.idDernierSite = de.idDernierSite;
     }
 
-    private static créeRole(uid: string, apiRole: IRole): Role {
-        const role = new Role();
-        role.uid = uid;
-        role.rno = apiRole.rno;
-        Role.copieData(apiRole, role);
-        Role.copiePréférences(apiRole, role);
-        Role.copieEtat(apiRole, role);
-        role.site = new Site();
-        KeyUidRno.copieKey(apiRole.site, role.site);
-        Site.copieData(apiRole.site, role.site);
-        Site.copieEtat(apiRole.site, role.site);
-        role.site.bilan = apiRole.site.bilan;
-        role.site.fournisseur = apiRole.site.fournisseur
-        role.site.nouveauxDocs = apiRole.site.nouveauxDocs;
-        return role
+    private static créeFournisseur(apiFournisseur: ApiFournisseur): Fournisseur {
+        const fournisseur = new Fournisseur();
+        Fournisseur.copieData(apiFournisseur, fournisseur);
+        Role.copieEtat(apiFournisseur, fournisseur);
+        Role.copiePréférences(apiFournisseur, fournisseur);
+        return fournisseur;
     }
 
-    private static créeNouveauRole(uid: string, rno: number, nouveauSite: ApiNouveauSite): Role {
-        const role = new Role();
-        role.uid = uid;
-        role.rno = rno;
-        Role.copieData(nouveauSite, role);
-        role.etat = IdEtatRole.nouveau;
-        role.site = new Site();
-        role.site.uid = uid;
-        role.site.rno = rno;
-        Site.copieData(nouveauSite, role.site);
-        return role
+    private static créeSite(apiSite: ApiSite): Site {
+        const site = new Site();
+        site.id = apiSite.id;
+        Site.copieData(apiSite, site);
+        Site.copieEtat(apiSite, site);
+        site.bilan = apiSite.bilan;
+        const apiFournisseur: ApiFournisseur = apiSite.fournisseur;
+        const fournisseur = new Fournisseur();
+        Fournisseur.copieData(apiFournisseur, fournisseur);
+        Role.copieEtat(apiFournisseur, fournisseur);
+        site.fournisseur = fournisseur;
+        const apiClient = apiSite.client;
+        if (apiSite.client) {
+            const client = new Client();
+            client.id = apiClient.id;
+            Role.copieData(apiClient, client);
+            Role.copieEtat(apiClient, client);
+            Role.copiePréférences(apiClient, client);
+        } else {
+            Role.copiePréférences(apiFournisseur, fournisseur);           
+        }
+        site.fournisseur = fournisseur;
+        site.nouveauxDocs = apiSite.nouveauxDocs;
+        return site
     }
 
     public static àStocker(apiIdentifiant: ApiIdentifiant): Identifiant {
-        const créé = new Identifiant();
-        Identifiant._copie(apiIdentifiant, créé);
-        créé.roles = apiIdentifiant.roles.map(apiRole => {
-            const role = Identifiant.créeRole(apiIdentifiant.uid, apiRole);
-            if (apiRole.site.nouveauxDocs) {
-                if (role.estFournisseur) {
-                    role.site.nouveauxDocs.forEach(apiDoc => {
-                        apiDoc.type = 'C';
-                    });
-                } else {
-                    role.site.nouveauxDocs.forEach(apiDoc => {
-                        apiDoc.uid = role.uid;
-                        apiDoc.rno = role.rno;
-                    });
-                }
-            }
-            return role;
-        });
-        créé.rnoRoleEnCours = créé.noDernierRole;
-        if (apiIdentifiant.nouveauSite) {
-            créé.roles.push(Identifiant.créeNouveauRole(créé.uid, créé.roles.length + 1, apiIdentifiant.nouveauSite));
-        }
-        return créé;
-    }
-
-    public static deStock(identifiant: Identifiant): Identifiant {
-        const créé = new Identifiant();
-        Identifiant._copie(identifiant, créé);
-        créé.roles = identifiant.roles.map(role => Identifiant.créeRole(identifiant.uid, role));
-        créé.rnoRoleEnCours = identifiant.rnoRoleEnCours;
-        return créé;
+        const àStocker = new Identifiant();
+        Identifiant.copieData(apiIdentifiant, àStocker);
+        àStocker.sites = apiIdentifiant.sites.map(s => Identifiant.créeSite(s));
+        return àStocker;
     }
 
     /**
@@ -168,58 +165,44 @@ export class Identifiant implements IIdentifiant {
     public static MêmeUtilisateur(identifiant1: Identifiant, identifiant2: Identifiant): boolean {
         return !identifiant1
             ? !identifiant2
-            : !!identifiant2 && identifiant1.uid === identifiant2.uid;
+            : !!identifiant2 && identifiant1.userId === identifiant2.userId;
     }
 
     /**
-     * Compare les roles en cours de deux identifiants qui ont le même utilisateur.
-     * @returns true si les deux identifiants sont undefined ou null ou s'ils ont le même utilisateur avec le même role.
-     */
-    public static MêmeRole(identifiant1: Identifiant, identifiant2: Identifiant): boolean {
-        return !identifiant1 // identifiant2 est aussi undefined ou null
-            || identifiant1.rnoRoleEnCours === identifiant2.rnoRoleEnCours;
-    }
-
-    /**
-     * Compare les sites en cours de deux identifiants qui ont le même utilisateur dans le même role.
-     * @returns true si les deux identifiants sont undefined ou null ou s'ils ont le même utilisateur avec le même role
-     * avec le site dans le même état.
+     * Compare les idSiteEnCours de deux identifiants qui ont le même utilisateur.
+     * @returns true si les deux identifiants sont undefined ou null ou s'ils ont le même utilisateur avec le même idSiteEnCours.
      */
     public static MêmeSite(identifiant1: Identifiant, identifiant2: Identifiant): boolean {
+        return !identifiant1 // identifiant2 est aussi undefined ou null
+            || identifiant1.idSiteEnCours === identifiant2.idSiteEnCours;
+    }
+
+    /**
+     * Compare les sites[idSiteEnCours] de deux identifiants qui ont le même utilisateur avec le même idSiteEnCours.
+     * @returns true si les deux identifiants sont undefined ou null ou s'ils ont le même utilisateur avec le même idSiteEnCours
+     * avec leurs sites[idSiteEnCours] avec les même data et le même état.
+     */
+    public static SitesIdentiques(identifiant1: Identifiant, identifiant2: Identifiant): boolean {
         if (!identifiant1) {
             // identifiant2 est aussi undefined ou null
             return true;
         }
-        const role = Identifiant.roleEnCours(identifiant1);
-        if (!role) {
-            // identifiant2.dernierRole() est aussi undefined ou null
+        const site1 = identifiant1.sites.find(s => s.id === identifiant1.idSiteEnCours);
+        if (!site1) {
+            // les deux identifiants n'ont pas de site en cours
             return true;
         }
-        const site1 = role.site;
-        const site2 = Identifiant.roleEnCours(identifiant2).site;
+        const site2 = identifiant2.sites.find(s => s.id === identifiant2.idSiteEnCours);
         return Site.ontMêmeData(site1, site2) && Site.ontMêmeEtat(site1, site2);
-    }
-
-    public static roleEnCours(identifiant: Identifiant): Role {
-        if (identifiant) {
-            return identifiant.roles.find(r => r.rno === identifiant.rnoRoleEnCours);
-        }
     }
 
     public static siteEnCours(identifiant: Identifiant): Site {
         if (identifiant) {
-            const role = identifiant.roles.find(r => r.rno === identifiant.rnoRoleEnCours);
-            if (role) {
-                return role.site;
-            }
+            return identifiant.sites.find(r => r.id === identifiant.idSiteEnCours);
         }
     }
 
-    public get rolesAccessibles(): Role[] {
-        return this.roles.filter(r => r.peutEtrePris);
-    }
-
     get estAdministrateur(): boolean {
-        return this.roles.length === 0;
+        return this.sites.length === 0;
     }
 }

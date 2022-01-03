@@ -8,11 +8,11 @@ import { KfStringDef } from 'src/app/commun/kf-composants/kf-partages/kf-string-
 import { KfInputTexte } from 'src/app/commun/kf-composants/kf-elements/kf-input/kf-input-texte';
 import { KfInputNombre } from 'src/app/commun/kf-composants/kf-elements/kf-input/kf-input-nombre';
 import {
-    KfListeDeroulanteTexte, KfListeDeroulanteNombre
+    KfListeDeroulanteTexte, KfListeDeroulanteNombre, KfListeDeroulanteBool
 } from 'src/app/commun/kf-composants/kf-elements/kf-liste-deroulante/kf-liste-deroulante-texte';
 import { KfListeDeroulanteObjet } from 'src/app/commun/kf-composants/kf-elements/kf-liste-deroulante/kf-liste-deroulante-objet';
 import { KfValidateurs } from 'src/app/commun/kf-composants/kf-partages/kf-validateur';
-import { TypeCommande } from 'src/app/modeles/type-commande';
+import { TypeCommande, TypeCommandeFabrique } from 'src/app/modeles/type-commande';
 import { ReglesDeMotDePasse } from 'src/app/securite/mot-de-passe';
 import { IKfEntreeFocusClavier } from 'src/app/commun/kf-composants/kf-elements/kf-entree/i-kf-entree-focus-clavier';
 import { KfRadios } from 'src/app/commun/kf-composants/kf-elements/kf-radios/kf-radios';
@@ -106,19 +106,26 @@ export class FabriqueInput extends FabriqueEntrée {
         input.placeholder = placeholder;
         return input;
     }
+    nombreLectureSeule(nom: string, texte?: KfStringDef, valeur?: number): KfInputNombre {
+        const input = this.nombre(nom, texte);
+        input.valeur = valeur;
+        input.lectureSeule = true;
+        input.estRacineV = true;
+        return input;
+    }
     nombreInvisible(nom: string, valeur?: number): KfInputNombre {
         const input = new KfInputNombre(nom);
         input.valeur = valeur;
         input.visible = false;
         return input;
     }
-    nombreQuantité(nom: string, typeCommande: () => string, texte?: KfStringDef, placeholder?: string): KfInputNombre {
+    nombreQuantité(nom: string, typeCommande: () => TypeCommande, texte?: KfStringDef, placeholder?: string): KfInputNombre {
         const input = this.nombre(nom, texte, placeholder);
         input.min = 0;
-        input.pas = typeCommande() === TypeCommande.id.ALUnité ? 1 : .001;
+        input.pas = typeCommande() === TypeCommande.ALUnité ? 1 : .001;
         input.ajouteValidateur(KfValidateurs.nombreVirgule(8, () => {
             const type = typeCommande();
-            return type === TypeCommande.id.ALUnité ? 0 : 3;
+            return type === TypeCommande.ALUnité ? 0 : 3;
         }, '>='));
         return input;
     }
@@ -147,6 +154,10 @@ export class FabriqueListeDéroulante extends FabriqueEntrée {
     }
     nombre(nom: string, texte?: KfStringDef): KfListeDeroulanteNombre {
         const liste = new KfListeDeroulanteNombre(nom, texte);
+        return liste;
+    }
+    bool(nom: string, texte?: KfStringDef): KfListeDeroulanteBool {
+        const liste = new KfListeDeroulanteBool(nom, texte);
         return liste;
     }
     objet<T>(nom: string, texte?: KfStringDef): KfListeDeroulanteObjet<T> {

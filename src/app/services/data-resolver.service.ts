@@ -1,6 +1,6 @@
 import { ActivatedRouteSnapshot, Data, RouterStateSnapshot } from '@angular/router';
 import { Site } from '../modeles/site/site';
-import { IKeyUidRno } from '../commun/data-par-key/key-uid-rno/i-key-uid-rno';
+import { IKeyId } from '../commun/data-par-key/key-id/i-key-id';
 
 export abstract class DataResolverService {
 
@@ -13,11 +13,11 @@ export abstract class DataResolverService {
         }
     }
 
-    keySiteEnCours(route: ActivatedRouteSnapshot): IKeyUidRno {
+    keySiteEnCours(route: ActivatedRouteSnapshot): IKeyId {
         const site = this.siteEnCours(route);
         if (site) {
             return {
-                uid: site.uid,
+                id: site.id,
                 rno: site.rno
             };
         }

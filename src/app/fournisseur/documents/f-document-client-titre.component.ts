@@ -7,7 +7,7 @@ import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { IBarreTitre, IBarreDef, IBtnGroupeDef } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { KfBBtnGroup } from 'src/app/commun/kf-composants/kf-b-btn-group/kf-b-btn-group';
 import { Client } from 'src/app/modeles/client/client';
-import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
+import { KeyId } from 'src/app/commun/data-par-key/key-id/key-id';
 import { ActivatedRoute, Data } from '@angular/router';
 
 @Component({

@@ -1,4 +1,4 @@
-import { KeyUidRnoNoService } from 'src/app/commun/data-par-key/key-uid-rno-no/key-uid-rno-no.service';
+import { KeyIdNoService } from 'src/app/commun/data-par-key/key-id-no/key-id-no.service';
 import { Observable, of } from 'rxjs';
 import { ApiRequêteService } from 'src/app/api/api-requete.service';
 import { ValeurEtObservable } from 'src/app/commun/outils/valeur-et-observable';
@@ -18,11 +18,10 @@ import { ApiResult } from 'src/app/api/api-results/api-result';
 import { CLFDoc } from './c-l-f-doc';
 import { KfCaseACocher } from 'src/app/commun/kf-composants/kf-elements/kf-case-a-cocher/kf-case-a-cocher';
 import { Client } from '../client/client';
-import { IKeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/i-key-uid-rno';
-import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
-import { Site } from '../site/site';
+import { IKeyId } from 'src/app/commun/data-par-key/key-id/i-key-id';
+import { KeyId } from 'src/app/commun/data-par-key/key-id/key-id';
 
-export abstract class CLFLectureService extends KeyUidRnoNoService<ApiDoc> {
+export abstract class CLFLectureService extends KeyIdNoService<ApiDoc> {
 
     private pStockage: Stockage<CLFDocs>;
 
@@ -171,14 +170,13 @@ export abstract class CLFLectureService extends KeyUidRnoNoService<ApiDoc> {
      * @param keyClient présent si l'utilisateur est le fournisseur
      * @returns un Observale du CLFDocs stocké
      */
-    clientAvecRésumésDocs(keyClient?: IKeyUidRno): Observable<CLFDocs> {
+    clientAvecRésumésDocs(keyClient?: IKeyId): Observable<CLFDocs> {
         const stock = this.litStockSiExistant();
         if (!stock
             || stock.type // ce n'est pas un clfDocs de résumés d'un client
-            || (keyClient && !KeyUidRno.compareKey(stock.client, keyClient)) // il y a un client et ce n'est pas celui du stock
+            || (keyClient && !KeyId.compareKey(stock.client, keyClient)) // il y a un client et ce n'est pas celui du stock
         ) {
-            const role = this.identification.roleEnCours;
-            const site = role.site;
+            const site = this.identification.siteEnCours;
             const controller = ApiController.document;
             const action = ApiAction.document.client;
             let client$: Observable<Client>;
@@ -187,11 +185,10 @@ export abstract class CLFLectureService extends KeyUidRnoNoService<ApiDoc> {
                 client$ = this.clientService.client$(keyClient);
             } else {
                 // l'utilisateur est le client
-                const client = Client.deRole(role);
-                client$ = of(client);
-                keyClient = client;
+                client$ = of(site.client);
+                keyClient = site.client;
             }
-            if (!this.pFiltre || this.pFiltre.uid !== keyClient.uid || this.pFiltre.rno !== keyClient.rno) {
+            if (!this.pFiltre || this.pFiltre.id !== keyClient.id) {
                 this.pFiltre = new CLFFiltre(keyClient);
             }
 
@@ -226,7 +223,7 @@ export abstract class CLFLectureService extends KeyUidRnoNoService<ApiDoc> {
      * @param type type du document
      * Pas stocké.
      */
-    document(keyClient: IKeyUidRno, no: number, type: TypeCLF): Observable<CLFDocs> {
+    document(keyClient: IKeyId, no: number, type: TypeCLF): Observable<CLFDocs> {
         const site = this.litSiteEnCours();
         const action = type === 'commande'
             ? ApiAction.document.commande
@@ -234,8 +231,7 @@ export abstract class CLFLectureService extends KeyUidRnoNoService<ApiDoc> {
                 ? ApiAction.document.livraison
                 : ApiAction.document.facture;
         const params: { [param: string]: string } = {
-            uid: keyClient.uid,
-            rno: '' + keyClient.rno,
+            id: '' + keyClient.id,
             no: '' + no,
         };
         const lecture$: Observable<ApiDocsAvecTarifEtClient> = this.lectureObs<ApiDocsAvecTarifEtClient>({
@@ -272,8 +268,7 @@ export abstract class CLFLectureService extends KeyUidRnoNoService<ApiDoc> {
         const controller = ApiController.document;
         const action = ApiAction.document.cherche;
         const params: { [param: string]: string } = {
-            uid: site.uid,
-            rno: '' + site.rno,
+            id: '' + site.id,
             no: '' + param.no,
             type: param.type
         };

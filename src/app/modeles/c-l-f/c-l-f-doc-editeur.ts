@@ -1,11 +1,11 @@
-import { KeyUidRnoEditeur } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno-no-editeur';
+import { KeyIdEditeur } from 'src/app/commun/data-par-key/key-id/key-id-editeur';
 import { CLFDoc } from './c-l-f-doc';
 import { IDataComponent } from 'src/app/commun/data-par-key/i-data-component';
 import { KfCaseACocher } from 'src/app/commun/kf-composants/kf-elements/kf-case-a-cocher/kf-case-a-cocher';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { CLFService } from './c-l-f.service';
 
-export class CLFDocEditeur extends KeyUidRnoEditeur<CLFDoc> {
+export class CLFDocEditeur extends KeyIdEditeur<CLFDoc> {
     private document: CLFDoc;
 
     kfChoisi: KfCaseACocher;

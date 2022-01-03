@@ -3,7 +3,7 @@ import { KfOptionTexte } from './kf-option-texte';
 import { KfStringDef } from '../../kf-partages/kf-string-def';
 import { KfListeDeroulanteType } from './kf-liste-deroulante-type';
 import { IKfOption } from './kf-option-base';
-import { KfTypeDeValeur } from '../../kf-composants-types';
+import { KfEntreeInputBool, KfTypeDeValeur } from '../../kf-composants-types';
 
 export class KfListeDeroulanteTexteBase extends KfListeDeroulanteBase implements IKfListeDeroulante {
 
@@ -69,6 +69,32 @@ export class KfListeDeroulanteNombre extends KfListeDeroulanteTexteBase implemen
     }
     set valeur(valeur: number) {
         this.fixeValeur(valeur);
+    }
+
+}
+
+export class KfListeDeroulanteBool extends KfListeDeroulanteTexteBase implements IKfListeDeroulante {
+
+    constructor(nom: string, texte?: KfStringDef) {
+        super(nom, texte);
+        this.gereValeur.typeDeValeur = KfTypeDeValeur.avecEntreeInputBool;
+    }
+
+    créeEtAjouteOption(texte: string, valeur: KfEntreeInputBool): KfOptionTexte {
+        const option = new KfOptionTexte(valeur);
+        option.fixeTexte(texte);
+        this._ajouteOption(option);
+        return option;
+    }
+
+    get valeur(): boolean {
+        const valeur = this.gereValeur.valeur;
+        if (valeur !== null && valeur !== undefined) {
+            return valeur === KfEntreeInputBool.oui;
+        }
+    }
+    set valeur(valeur: boolean) {
+        this.fixeValeur(valeur ? KfEntreeInputBool.oui : KfEntreeInputBool.non);
     }
 
 }

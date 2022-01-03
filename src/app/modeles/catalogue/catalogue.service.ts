@@ -2,10 +2,9 @@ import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { Catalogue, CatalogueApi } from './catalogue';
 import { concatMap, map } from 'rxjs/operators';
-import { KeyUidRno } from '../../commun/data-par-key/key-uid-rno/key-uid-rno';
+import { KeyId } from '../../commun/data-par-key/key-id/key-id';
 import { DataService } from '../../services/data.service';
 import { ApiController, ApiAction } from 'src/app/api/api-route';
-import { EtatsProduits, IdEtatProduit } from './etat-produit';
 import { Site } from '../site/site';
 import { ApiRequêteService } from 'src/app/api/api-requete.service';
 import { SiteService } from '../site/site.service';
@@ -16,8 +15,6 @@ import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
 import { ApiRequêteAction } from 'src/app/api/api-requete-action';
 import { ContexteCatalogue } from 'src/app/client/contexte-catalogue';
-import { Role } from '../role/role';
-import { SiteBilanCatalogue } from '../site/site-bilan';
 
 @Injectable({
     providedIn: 'root'
@@ -47,7 +44,7 @@ export class CatalogueService extends DataService {
         if (!stock.avecIndisponibles) {
             return stock;
         }
-        stock = Catalogue.filtre(stock, p => p.etat === EtatsProduits.disponible.valeur);
+        stock = Catalogue.filtre(stock, p => p.disponible === true);
         stock.avecIndisponibles = false;
         return stock;
     }
@@ -77,10 +74,10 @@ export class CatalogueService extends DataService {
             || (avecIndisponibles && !stock.avecIndisponibles) // les indisponibles sont demandés mais pas en stock
         ) {
             const apiAction = avecIndisponibles ? ApiAction.catalogue.complet : ApiAction.catalogue.disponible;
-            const demandeApi = () => this.get<CatalogueApi>(ApiController.catalogue, apiAction, KeyUidRno.créeParams(site));
+            const demandeApi = () => this.get<CatalogueApi>(ApiController.catalogue, apiAction, KeyId.créeParams(site));
             return this.lectureObs<CatalogueApi>({ demandeApi }).pipe(
                 map(catalogueApi => {
-                    const catalogue: Catalogue = Catalogue.nouveau(site, catalogueApi);
+                    const catalogue: Catalogue = Catalogue.nouveau(catalogueApi);
                     catalogue.avecIndisponibles = avecIndisponibles;
                     this.stockage.fixeStock(catalogue);
                     return catalogue;
@@ -96,9 +93,9 @@ export class CatalogueService extends DataService {
      * Retourne le catalogue complet si l'utilisateur est le fournisseur
      */
     catalogue$(): Observable<Catalogue> {
-        const role = this.identification.roleEnCours;
-        const avecIndisponibles = role.estFournisseur
-        return this._catalogue$(role.site, avecIndisponibles);
+        const site = this.identification.siteEnCours;
+        const avecIndisponibles = !site.client;
+        return this._catalogue$(site, avecIndisponibles);
     }
 
     /**
@@ -106,14 +103,14 @@ export class CatalogueService extends DataService {
      * @param site ce paramètre est modifié si besoin pour refléter le site de l'Api.
      */
     public contexteChangé(site: Site): Observable<boolean> {
-        const demandeApi = () => this.get<ContexteCatalogue>(this.controllerUrl, ApiAction.catalogue.etat, KeyUidRno.créeParams(site));
+        const demandeApi = () => this.get<ContexteCatalogue>(this.controllerUrl, ApiAction.catalogue.etat, KeyId.créeParams(site));
         return this.lectureObs<ContexteCatalogue>({ demandeApi }).pipe(
             map(contexte => {
                 // la date de l'état du site n'existe pas avant le premier appel a contexteChangé
                 const initial = !site.dateCatalogue;
                 if (!Site.ontMêmeEtat(site, contexte)) {
                     Site.copieEtat(contexte, site);
-                    this.identification.fixeSite(site);
+                    this.identification.fixeEtatSite(site);
                     return true;
                 }
                 return false;
@@ -124,13 +121,13 @@ export class CatalogueService extends DataService {
     // ACTIONS
 
     apiRequêteAction(site: Site, apiAction: string, ouvert: boolean): ApiRequêteAction {
-        const params = KeyUidRno.créeParams(site);
+        const params = KeyId.créeParams(site);
         return {
             demandeApi: () => this.post(ApiController.catalogue, apiAction, null, params),
             actionSiOk: (créé: any) => {
                 site.ouvert = ouvert;
                 site.dateCatalogue = créé.date;
-                this.identification.fixeSite(site);
+                this.identification.fixeEtatSite(site);
             }
         };
     }

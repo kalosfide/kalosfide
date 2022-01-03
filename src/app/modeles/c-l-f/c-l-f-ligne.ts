@@ -1,16 +1,16 @@
-import { IKeyUidRnoNo2 } from 'src/app/commun/data-par-key/key-uid-rno-no-2/i-key-uid-rno-no-2';
+import { IKeyLigne } from 'src/app/commun/data-par-key/key-ligne/i-key-ligne';
 import { Produit } from '../catalogue/produit';
 import { CLFDoc } from './c-l-f-doc';
 import { ApiLigne, ApiLigneAEnvoyer } from './api-ligne';
 import { CLFLigneEditeur } from './c-l-f-ligne-editeur';
 import { IDataComponent } from 'src/app/commun/data-par-key/i-data-component';
-import { KeyUidRnoNo2 } from 'src/app/commun/data-par-key/key-uid-rno-no-2/key-uid-rno-no-2';
-import { TypeMesure } from '../type-mesure';
+import { KeyLigne } from 'src/app/commun/data-par-key/key-ligne/key-ligne';
+import { TypeMesure, TypeMesureFabrique } from '../type-mesure';
 import { Client } from '../client/client';
-import { IdEtatRole } from '../role/etat-role';
+import { EtatRole } from '../role/etat-role';
 import { TypeCommande } from '../type-commande';
 
-export class CLFLigne implements IKeyUidRnoNo2 {
+export class CLFLigne implements IKeyLigne {
     private pParent: CLFDoc;
     apiLigne: ApiLigne;
 
@@ -32,7 +32,7 @@ export class CLFLigne implements IKeyUidRnoNo2 {
             switch (type) {
                 case 'commande':
                     this.copiableFnc = () =>
-                        !(this.produit.typeCommande === TypeCommande.id.ALUnitéOuEnVrac && this.typeCommande === TypeCommande.id.ALUnité);
+                        !(this.produit.typeCommande === TypeCommande.ALUnitéOuEnVrac && this.typeCommande === TypeCommande.ALUnité);
                     break;
                 case 'livraison':
                     this.copiableFnc = () => true;
@@ -49,12 +49,9 @@ export class CLFLigne implements IKeyUidRnoNo2 {
         return this.pParent;
     }
 
-    get uid(): string { return this.pParent.uid; }
-    get rno(): number { return this.pParent.rno; }
+    get id(): number { return this.pParent.id; }
     get no(): number { return this.pParent.no; }
-    get uid2(): string { return this.pProduit.uid; }
-    get rno2(): number { return this.pProduit.rno; }
-    get no2(): number { return this.pProduit.no; }
+    get produitId(): number { return this.pProduit.id; }
 
     get produit(): Produit { return this.pProduit; }
     /** présent si dans bon */
@@ -73,22 +70,22 @@ export class CLFLigne implements IKeyUidRnoNo2 {
 
 
     get nomProduit(): string { return this.pProduit.nom; }
-    get noCategorie(): number { return this.pProduit.categorieNo; }
+    get noCategorie(): number { return this.pProduit.categorieId; }
     get nomCategorie(): string { return this.pProduit.nomCategorie; }
-    get typeMesure(): string { return this.pProduit.typeMesure; }
+    get typeMesure(): TypeMesure { return this.pProduit.typeMesure; }
     get prix(): number { return this.pProduit.prix; }
 
     get nomClient(): string { return this.client ? this.client.nom : undefined; }
-    get nouveauClient(): boolean { return this.client ? this.client.etat === IdEtatRole.nouveau : false; }
+    get nouveauClient(): boolean { return this.client ? this.client.etat === EtatRole.nouveau : false; }
     get texteClient(): string { return this.client ? this.nomClient + (this.nouveauClient ? ' (nouveau)' : '') : undefined; }
     get labelClient(): string { return 'Client' + (this.nouveauClient ? ' (nouveau)' : ''); }
 
-    get typeCommande(): string {
+    get typeCommande(): TypeCommande {
         return (this.pEditeur && this.pEditeur.kfTypeCommande && this.pEditeur.kfTypeCommande.aUneValeur)
             ? this.pEditeur.kfTypeCommande.valeur
             : this.apiLigne.typeCommande
                 ? this.apiLigne.typeCommande
-                : TypeMesure.typeCommandeParDéfaut(this.pProduit.typeMesure);
+                : TypeMesureFabrique.typeCommandeParDéfaut(this.pProduit.typeMesure);
     }
     get quantité(): number {
         return (this.pEditeur && this.pEditeur.kfQuantité && this.pEditeur.kfQuantité.aUneValeur)
@@ -117,13 +114,13 @@ export class CLFLigne implements IKeyUidRnoNo2 {
             this.apiLigne.aFixer = this.pEditeur.kfAFixer.valeur;
         } else {
             const typeCommande = this.pEditeur.kfTypeCommande ? this.pEditeur.kfTypeCommande.valeur : undefined;
-            if (typeCommande !== TypeMesure.typeCommandeParDéfaut(this.produit.typeMesure)) {
+            if (typeCommande !== TypeMesureFabrique.typeCommandeParDéfaut(this.produit.typeMesure)) {
                 this.apiLigne.typeCommande = typeCommande;
             }
             this.apiLigne.quantité = this.pEditeur.kfQuantité.valeur;
         }
         const apiL = new ApiLigneAEnvoyer();
-        KeyUidRnoNo2.copieKey(this, apiL);
+        KeyLigne.copieKey(this, apiL);
         ApiLigneAEnvoyer.copieData(this.apiLigne, apiL);
         return apiL;
     }

@@ -3,6 +3,7 @@ import { CanActivate, CanActivateChild, UrlTree } from '@angular/router';
 import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
 import { ApiResult404NotFound } from '../api/api-results/api-result-404-not-found';
+import { Site } from '../modeles/site/site';
 import { IdentificationService } from '../securite/identification.service';
 import { RouteurService } from '../services/routeur.service';
 
@@ -25,8 +26,8 @@ export class UsagerGardeService implements CanActivate, CanActivateChild {
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean | UrlTree> | boolean | UrlTree {
         const urlSite = route.paramMap.get('urlSite');
         if (urlSite) {
-            const role = this.identification.fixeRoleParUrl(urlSite);
-            if (role) {
+            const site: Site = this.identification.fixeSiteParUrl(urlSite);
+            if (site) {
                 return true;
             }
         }

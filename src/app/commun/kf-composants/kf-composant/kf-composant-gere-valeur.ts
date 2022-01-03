@@ -3,7 +3,7 @@ import { KfComposant } from './kf-composant';
 import { KfEntrée } from '../kf-elements/kf-entree/kf-entree';
 import { KfListe } from '../kf-liste/kf-liste';
 import { KfGroupe } from '../kf-groupe/kf-groupe';
-import { KfTypeDeComposant, KfTypeDeValeur } from '../kf-composants-types';
+import { KfEntreeInputBool, KfTypeDeComposant, KfTypeDeValeur } from '../kf-composants-types';
 import { KfValidateur, KfValidateurs } from '../kf-partages/kf-validateur';
 import { IKfVueTable, KfVueTable } from '../kf-vue-table/kf-vue-table';
 import { Noeud } from '../../outils/arbre/noeud';
@@ -257,6 +257,10 @@ export class KfComposantGereValeur {
                             return +valeur;
                         }
                     } else {
+                        const estInputBool = this.typeDeValeur === KfTypeDeValeur.avecEntreeInputBool
+                        if (estInputBool) {
+                            return valeur === KfEntreeInputBool.oui;
+                        }
                         return valeur;
                     }
                 }

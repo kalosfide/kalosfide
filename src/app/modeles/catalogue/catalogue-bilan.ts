@@ -1,5 +1,4 @@
 import { Catalogue } from './catalogue';
-import { IdEtatProduit } from './etat-produit';
 
 export class CatalogueBilan {
     catégories: number;
@@ -9,9 +8,9 @@ export class CatalogueBilan {
     constructor(catalogue: Catalogue) {
         this.catégories = catalogue.catégories.length;
         this.catégoriesVides = catalogue.catégories
-            .filter(c => catalogue.produits.find(p => p.categorieNo === c.no) !== undefined).length;
+            .filter(c => catalogue.produits.find(p => p.categorieId === c.id) !== undefined).length;
         this.produits = catalogue.produits.length;
         this.produitsDisponibles = catalogue.produits
-            .filter(p => p.etat === null || p.etat === undefined || p.etat === IdEtatProduit.disponible).length;
+            .filter(p => p.disponible === null || p.disponible === undefined || p.disponible === true).length;
     }
 }

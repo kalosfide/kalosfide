@@ -95,7 +95,7 @@ export class CLFBilanDocs {
     facture: CLFBilanDocs;
 
     constructor(clients: Client[], apiClientBilan: ApiClientBilanDocs) {
-        this.client = clients.find(c => c.uid === apiClientBilan.uid && c.rno === apiClientBilan.rno);
+        this.client = clients.find(c => c.id === apiClientBilan.uid && c.rno === apiClientBilan.rno);
         this.commande = new CLFBilanDocs(apiClientBilan.bilans.find(a => a.type === apiType('commande')));
         this.livraison = new CLFBilanDocs(apiClientBilan.bilans.find(a => a.type === apiType('livraison')));
         this.facture = new CLFBilanDocs(apiClientBilan.bilans.find(a => a.type === apiType('facture')));

@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { FournisseurCLFService } from '../fournisseur-c-l-f-.service';
 import { NomParam } from 'src/app/modeles/nom-param';
-import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
+import { KeyId } from 'src/app/commun/data-par-key/key-id/key-id';
 import { ApiResult404NotFound } from 'src/app/api/api-results/api-result-404-not-found';
 
 /**
@@ -22,7 +22,7 @@ export class FDocumentClientGardeService implements CanActivate {
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean | UrlTree> | boolean | UrlTree {
         const paramKey = route.paramMap.get(NomParam.keyClient);
         if (paramKey) {
-            const key = KeyUidRno.keyDeTexte(paramKey);
+            const key = KeyId.keyDeTexte(paramKey);
             return this.service.clientAvecRésumésDocs(key).pipe(
                 map(clfDocs => {
                     if (!clfDocs.apiDocs || clfDocs.apiDocs.length === 0) {

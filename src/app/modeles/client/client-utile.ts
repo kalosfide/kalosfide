@@ -10,12 +10,12 @@ import { ClientUtileColonne } from './client-utile-colonne';
 import { ClientUtileOutils } from './client-utile-outils';
 import { ClientUtileBouton } from './client-utile-bouton';
 import { DataKeyUtileOutils } from 'src/app/commun/data-par-key/data-key-utile-outils';
-import { KeyUidRnoUtile } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno-utile';
-import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
+import { KeyIdUtile } from 'src/app/commun/data-par-key/key-id/key-id-utile';
+import { KeyId } from 'src/app/commun/data-par-key/key-id/key-id';
 import { KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 
-export class ClientUtile extends KeyUidRnoUtile<Client> {
+export class ClientUtile extends KeyIdUtile<Client> {
     constructor(service: ClientService) {
         super(service);
         this.dataRouteur = Fabrique.url.appRouteur.clients;
@@ -32,7 +32,7 @@ export class ClientUtile extends KeyUidRnoUtile<Client> {
     }
 
     fragment(client: Client): string {
-        return 'kfvt' + KeyUidRno.texteDeKey(client);
+        return 'kfvt' + KeyId.texteDeKey(client);
     }
 
     get url(): ClientUtileUrl {

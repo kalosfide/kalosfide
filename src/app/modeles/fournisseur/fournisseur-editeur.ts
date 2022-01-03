@@ -1,6 +1,6 @@
 import { KfComposant } from '../../commun/kf-composants/kf-composant/kf-composant';
 import { Fabrique } from '../../disposition/fabrique/fabrique';
-import { KeyUidRnoEditeur } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno-no-editeur';
+import { KeyIdEditeur } from 'src/app/commun/data-par-key/key-id/key-id-editeur';
 import { KfEvenement, KfStatutDEvenement, KfTypeDEvenement, KfTypeDHTMLEvents } from 'src/app/commun/kf-composants/kf-partages/kf-evenements';
 import { AppSitePages } from 'src/app/app-site/app-site-pages';
 import { RoleEditeur } from '../role/role-editeur';
@@ -10,7 +10,7 @@ import { Fournisseur } from './fournisseur';
 import { SiteEditeur } from '../site/site-editeur';
 import { KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
 
-export class FournisseurEditeur extends KeyUidRnoEditeur<Fournisseur> {
+export class FournisseurEditeur extends KeyIdEditeur<Fournisseur> {
     roleEditeur: RoleEditeur;
     siteEditeur: SiteEditeur;
 

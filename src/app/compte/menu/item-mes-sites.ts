@@ -3,6 +3,7 @@ import { AppSite } from 'src/app/app-site/app-site';
 import { NavItemDropDownGroup } from 'src/app/disposition/navbars/nav-item-dropdown-group';
 import { NavItemLien } from 'src/app/disposition/navbars/nav-item-lien';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
+import { EtatRole } from 'src/app/modeles/role/etat-role';
 
 export class ItemMesSites extends NavItemDropDownGroup {
     constructor(parent: ItemCompte) {
@@ -25,13 +26,13 @@ export class ItemMesSites extends NavItemDropDownGroup {
                     return;
                 }
             }
-            const roles = this.identifiant
-                ? this.identifiant.rolesAccessibles.filter(role => role.rno !== this.identifiant.rnoRoleEnCours)
+            const sites = this.identifiant
+                ? this.identifiant.sites.filter(site => site.id !== this.identifiant.idSiteEnCours && site.fournisseur.etat !== EtatRole.fermé)
                 : [];
-            this.fixeContenus(roles.map(role => {
-                const item = new NavItemLien(role.site.url, this);
-                item.texte = role.site.url + '@' + AppSite.nom;
-                item.url = appRouteur.routeurDeRole(role).url();
+            this.fixeContenus(sites.map(site => {
+                const item = new NavItemLien(site.url, this);
+                item.texte = site.url + '@' + AppSite.nom;
+                item.url = appRouteur.routeurDeSite(site).url();
                 return item;
             }));
         };

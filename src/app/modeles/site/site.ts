@@ -1,5 +1,7 @@
-import { KeyUidRno } from '../../commun/data-par-key/key-uid-rno/key-uid-rno';
+import { KeyId } from '../../commun/data-par-key/key-id/key-id';
 import { ApiDoc } from '../c-l-f/api-doc';
+import { Client } from '../client/client';
+import { Fournisseur } from '../fournisseur/fournisseur';
 import { IRoleData, IRoleEtat } from '../role/role';
 import { SiteBilan } from './site-bilan';
 
@@ -25,7 +27,7 @@ export class SiteFournisseur implements IRoleData {
     ville: string;
 }
 
-export class Site extends KeyUidRno implements ISiteData, ISiteEtat {
+export class Site extends KeyId implements ISiteData, ISiteEtat {
     url: string;
     titre: string;
     ouvert: boolean;
@@ -34,16 +36,23 @@ export class Site extends KeyUidRno implements ISiteData, ISiteEtat {
     /**
      * Présent si l'utilisateur est le fournisseur du site ou l'administrateur.
      */
-     bilan: SiteBilan;
-     /**
-      * Présent si l'utilisateur est un client du site ou l'administrateur.
-      */
-     fournisseur: SiteFournisseur;
+    bilan: SiteBilan;
+
     /**
-     * Documents enregistrés depuis la dernière déconnection.
-     * Présent si l'utilisateur est un client du site ou le fournisseur et s'est déconnecté à la fin de sa session précédente.
+     * Fournisseur du Site.
      */
-     nouveauxDocs: ApiDoc[];
+    fournisseur: Fournisseur;
+
+    /**
+     * Client du Site. Présent si l'utilisateur est un client du site
+     */
+    client: Client;
+
+    /**
+    * Documents enregistrés depuis la dernière déconnection.
+    * Présent si l'utilisateur s'est déconnecté à la fin de sa session précédente.
+    */
+    nouveauxDocs: ApiDoc[];
 
     constructor(site?: Site) {
         super();
@@ -71,8 +80,7 @@ export class Site extends KeyUidRno implements ISiteData, ISiteEtat {
     }
 
     copie(site: Site) {
-        this.uid = site.uid;
-        this.rno = site.rno;
+        this.id = site.id;
         this.url = site.url;
         this.titre = site.titre;
         this.fournisseur = site.fournisseur;

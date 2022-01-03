@@ -21,8 +21,8 @@ export class FournisseurGardeService implements CanActivateChild {
     }
 
     canActivateChild(childRoute: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean | UrlTree> | boolean | UrlTree {
-        const role = this.identification.roleEnCours;
-        if (role.estFournisseur) {
+        const site = this.identification.siteEnCours;
+        if (!site.client) {
             return true;
         }
         return this.routeur.urlTreeErreur403(new ApiResult403Forbidden());

@@ -11,14 +11,7 @@ export class ApiDoc {
      * Ajouté quand le document est créé sinon.
      * Présent quand le document est envoyé.
      */
-    uid: string;
-
-    /**
-     * Présent quand le document fait partie d'une liste.
-     * Ajouté quand le document est créé sinon.
-     * Présent quand le document est envoyé.
-     */
-    rno: number;
+    id: number;
 
     /**
      * Présent quand le document fait partie d'une liste.

@@ -33,7 +33,7 @@ export abstract class DataKeyEditeur<T extends IDataKey> {
 
     protected abstract créeKfDeKey(): void;
     abstract fixeKfKey(key: IDataKey): void;
-    abstract fixeNoDeAjout(key: T): void;
+    abstract fixeIdDeAjout(key: T): void;
     protected abstract créeKfDeData(): void;
 
     get valide(): boolean {

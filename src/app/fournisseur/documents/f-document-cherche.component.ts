@@ -85,7 +85,7 @@ export class FDocumentChercheComponent extends FormulaireComponent implements On
             this.lienRésultat.visible = true;
             const clfDocs = new CLFDocs();
             const apiDoc = new ApiDoc();
-            apiDoc.uid = chercheDoc.uid;
+            apiDoc.id = chercheDoc.uid;
             apiDoc.rno = chercheDoc.rno;
             apiDoc.no = this.no;
             const clfDoc = CLFDoc.nouveau(clfDocs, type, apiDoc);

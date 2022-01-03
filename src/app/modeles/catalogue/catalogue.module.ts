@@ -5,7 +5,6 @@ import { DispositionModule } from '../../disposition/disposition.module';
 import { ProduitService } from './produit.service';
 import { CategorieService } from './categorie.service';
 import { CatalogueResolverService } from './catalogue-resolver.service';
-import { CatalogueService } from './catalogue.service';
 import { CategoriesResolverService } from './categories-resolver.service';
 import { ProduitResolverService } from './produit-resolver.service';
 import { CategorieResolverService } from './categorie-resolver.service';

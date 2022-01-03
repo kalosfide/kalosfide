@@ -2,17 +2,16 @@ import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { take, tap, map } from 'rxjs/operators';
 
-import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
+import { KeyId } from 'src/app/commun/data-par-key/key-id/key-id';
 import { Client } from 'src/app/modeles/client/client';
-import { KeyUidRnoService } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno.service';
+import { KeyIdService } from 'src/app/commun/data-par-key/key-id/key-id.service';
 import { ApiController, ApiAction } from '../../api/api-route';
-import { IdEtatRole } from '../role/etat-role';
+import { EtatRole } from '../role/etat-role';
 import { ApiResult } from '../../api/api-results/api-result';
 import { ApiRequêteService } from '../../api/api-requete.service';
 import { ClientUtile } from './client-utile';
 import { Stockage } from 'src/app/services/stockage/stockage';
 import { StockageService } from 'src/app/services/stockage/stockage.service';
-import { IKeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/i-key-uid-rno';
 import { ApiResult201Created } from 'src/app/api/api-results/api-result-201-created';
 import { Invitation, InvitationDeApi, InvitationVersApi } from './invitation';
 import { SiteBilanClients } from '../site/site-bilan';
@@ -29,9 +28,8 @@ class ApiClients {
 }
 
 class Stock {
-    siteUid: string;
-    siteRno: number;
-    identifiantUid: string;
+    siteId: number;
+    userId: string;
     clients: Client[];
     invitations: InvitationDeApi[];
 
@@ -44,7 +42,7 @@ class Stock {
 @Injectable({
     providedIn: 'root'
 })
-export class ClientService extends KeyUidRnoService<Client> {
+export class ClientService extends KeyIdService<Client> {
 
     controllerUrl = ApiController.client;
 
@@ -63,7 +61,7 @@ export class ClientService extends KeyUidRnoService<Client> {
     }
 
     urlSegmentDeKey = (client: Client): string => {
-        return KeyUidRno.texteDeKey(client);
+        return KeyId.texteDeKey(client);
     }
 
     protected _créeUtile() {
@@ -82,18 +80,18 @@ export class ClientService extends KeyUidRnoService<Client> {
         return !!stock.clients.find(s => s.nom === nom);
     }
 
-    nomPrisParAutre(uid: string, rno: number, nom: string): boolean {
+    nomPrisParAutre(id: number, nom: string): boolean {
         const stock = this.stockage.litStock();
         if (!stock) {
             throw new Error('Clients: Pas de stock');
         }
-        return !!stock.clients.find(s => s.nom === nom && (s.uid !== uid || s.rno !== rno));
+        return !!stock.clients.find(s => s.nom === nom && (s.id !== id));
     }
 
     private bilanClients(stock: Stock): SiteBilanClients {
        return {
-           actifs: stock.clients.filter(c => c.etat === IdEtatRole.actif).length,
-           nouveaux: stock.clients.filter(c => c.etat === IdEtatRole.nouveau).length
+           actifs: stock.clients.filter(c => c.etat === EtatRole.actif).length,
+           nouveaux: stock.clients.filter(c => c.etat === EtatRole.nouveau).length
        };
     }
 
@@ -102,11 +100,11 @@ export class ClientService extends KeyUidRnoService<Client> {
         if (!stock) {
             throw new Error('Clients: Pas de stock');
         }
-        const index = stock.clients.findIndex(c => KeyUidRno.compareKey(c, client));
+        const index = stock.clients.findIndex(c => KeyId.compareKey(c, client));
         if (index === -1) {
             throw new Error('Clients: édité absent du stock');
         }
-        stock.clients[index].etat = client.etat === IdEtatRole.fermé ? IdEtatRole.inactif : IdEtatRole.actif;
+        stock.clients[index].etat = client.etat === EtatRole.fermé ? EtatRole.inactif : EtatRole.actif;
         stock.clients[index].dateEtat = client.dateEtat;
         this.stockage.fixeStock(stock);
         this.identification.fixeSiteBilanClients(this.bilanClients(stock));
@@ -117,7 +115,7 @@ export class ClientService extends KeyUidRnoService<Client> {
         if (!stock) {
             throw new Error('Clients: Pas de stock');
         }
-        const index = stock.clients.findIndex(c => KeyUidRno.compareKey(c, client));
+        const index = stock.clients.findIndex(c => KeyId.compareKey(c, client));
         if (index === -1) {
             throw new Error('Clients: édité absent du stock');
         }
@@ -126,23 +124,23 @@ export class ClientService extends KeyUidRnoService<Client> {
     }
 
     active(client: Client) {
-        return this.put<Client>(ApiController.client, ApiAction.client.active, null, KeyUidRno.créeParams(client));
+        return this.put<Client>(ApiController.client, ApiAction.client.active, null, KeyId.créeParams(client));
     }
     quandActivé(client: Client) {
-        client.etat = IdEtatRole.actif;
+        client.etat = EtatRole.actif;
         this.quandEtatChange(client);
     }
 
     inactive(client: Client) {
-        return this.put<Client>(ApiController.client, ApiAction.client.inactive, null, KeyUidRno.créeParams(client));
+        return this.put<Client>(ApiController.client, ApiAction.client.inactive, null, KeyId.créeParams(client));
     }
     quandInactivé(client: Client): (créé: Client) => void {
         return (créé: Client) => {
             if (client.email) {
                 // le compte est géré par le client
-                if (client.etat === IdEtatRole.actif) {
+                if (client.etat === EtatRole.actif) {
                     // il était actif, il est devenu inactif
-                    client.etat = IdEtatRole.inactif;
+                    client.etat = EtatRole.inactif;
                     this.quandEtatChange(client);
                     return;
                 }
@@ -160,7 +158,7 @@ export class ClientService extends KeyUidRnoService<Client> {
             // le compte est géré par le fournisseur
             if (client.avecDocuments) {
                 // il est devenu inactif
-                client.etat = IdEtatRole.inactif;
+                client.etat = EtatRole.inactif;
                 this.quandEtatChange(client);
             } else {
                 // il a été supprimé
@@ -171,7 +169,7 @@ export class ClientService extends KeyUidRnoService<Client> {
 
     ajoute(client: Client): Observable<ApiResult> {
         const site = this.identification.siteEnCours;
-        const params: { [param: string]: string } = KeyUidRno.créeParams(site);
+        const params: { [param: string]: string } = KeyId.créeParams(site);
         params.nom = client.nom;
         params.adresse = client.adresse;
         return this.post(this.controllerUrl, ApiAction.data.ajoute, params).pipe(
@@ -179,8 +177,7 @@ export class ClientService extends KeyUidRnoService<Client> {
                 if (apiResult.statusCode === ApiResult201Created.code) {
                     // l'api retourne la clé du client créé
                     const keyClient = (apiResult as ApiResult201Created).entity;
-                    client.uid = keyClient.uid;
-                    client.rno = keyClient.rno;
+                    client.id = keyClient.id;
                 }
             })
         );
@@ -202,7 +199,7 @@ export class ClientService extends KeyUidRnoService<Client> {
         if (!stock) {
             throw new Error('Clients: Pas de stock');
         }
-        const index = stock.clients.findIndex(c => KeyUidRno.compareKey(c, édité));
+        const index = stock.clients.findIndex(c => KeyId.compareKey(c, édité));
         if (index === -1) {
             throw new Error('Clients: édité absent du stock');
         }
@@ -215,7 +212,7 @@ export class ClientService extends KeyUidRnoService<Client> {
         if (!stock) {
             throw new Error('Clients: Pas de stock');
         }
-        const index = stock.clients.findIndex(c => KeyUidRno.compareKey(c, supprimé));
+        const index = stock.clients.findIndex(c => KeyId.compareKey(c, supprimé));
         if (index === -1) {
             throw new Error('Clients: supprimé absent du stock');
         }
@@ -229,7 +226,7 @@ export class ClientService extends KeyUidRnoService<Client> {
         if (!stock) {
             throw new Error('Clients: Pas de stock');
         }
-        const client = stock.clients.find(c => c.uid === invitation.uidClient);
+        const client = stock.clients.find(c => c.id === invitation.idClient);
         if (!client) {
             throw new Error('Clients: invité absent du stock');
         }
@@ -266,14 +263,13 @@ export class ClientService extends KeyUidRnoService<Client> {
         }
         const identifiant = this.identification.litIdentifiant();
         const site = Identifiant.siteEnCours(identifiant);
-        const demandeApi = () => this.get<ApiClients>(ApiController.client, ApiAction.client.liste, KeyUidRno.créeParams(site));
+        const demandeApi = () => this.get<ApiClients>(ApiController.client, ApiAction.client.liste, KeyId.créeParams(site));
         return this.lectureObs<ApiClients>({ demandeApi }).pipe(
             take(1),
             map(apiClients => {
                 const nouveauStock = new Stock();
-                nouveauStock.siteUid = site.uid;
-                nouveauStock.siteRno = site.rno;
-                nouveauStock.identifiantUid = identifiant.uid;
+                nouveauStock.siteId = site.id;
+                nouveauStock.userId = identifiant.userId;
                 nouveauStock.clients = apiClients.clients;
                 nouveauStock.invitations = apiClients.invitations;
                 if (stock) {
@@ -283,7 +279,7 @@ export class ClientService extends KeyUidRnoService<Client> {
                     // on donne l'état nouveau aux clients créés par ces réponses
                     répondues.forEach(invitation => {
                         const client = nouveauStock.clients.find(c => c.email === invitation.email);
-                        client.etat = IdEtatRole.nouveau;
+                        client.etat = EtatRole.nouveau;
                     })
                 }
                 nouveauStock.date = apiClients.date;
@@ -304,30 +300,30 @@ export class ClientService extends KeyUidRnoService<Client> {
             throw new Error('Clients: Pas de stock');
         }
         stock.invitations.forEach(invitation => {
-            if (invitation.uidClient) {
-                const client = stock.clients.find(c => c.uid === invitation.uidClient);
+            if (invitation.idClient) {
+                const client = stock.clients.find(c => c.id === invitation.idClient);
                 client.invitation = invitation;
             }
         });
         return stock.clients;
     }
 
-    litClient(key: KeyUidRno): Client {
+    litClient(key: KeyId): Client {
         const stock = this.stockage.litStock();
         if (!stock) {
             throw new Error('Clients: Pas de stock');
         }
-        const client = stock.clients.find(c => c.uid === key.uid && c.rno === key.rno);
+        const client = stock.clients.find(c => c.id === key.id);
         if (client) {
-            client.invitation = stock.invitations.find(invitation => invitation.uidClient === client.uid && invitation.rnoClient === client.rno);
+            client.invitation = stock.invitations.find(invitation => invitation.idClient === client.id);
         }
         return client;
     }
 
     private créeInvitation(invitationData: InvitationDeApi, clients: Client[]): Invitation {
         const invitation = Invitation.nouveau(invitationData);
-        if (invitation.uidClient) {
-            const client = clients.find(c => c.uid === invitation.uidClient && c.rno === invitation.rnoClient);
+        if (invitation.idClient) {
+            const client = clients.find(c => c.id === invitation.idClient);
             invitation.client = client;
         }
         return invitation;
@@ -367,7 +363,7 @@ export class ClientService extends KeyUidRnoService<Client> {
      * retourne un Observable du Client
      * @param key key du client
      */
-    client$(key: KeyUidRno): Observable<Client> {
+    client$(key: KeyId): Observable<Client> {
         return this.chargeClientsEtInvitations().pipe(
             map(() => {
                 return this.litClient(key);
@@ -402,8 +398,8 @@ export class ClientService extends KeyUidRnoService<Client> {
         } else {
             stock.invitations.push(invitation);
         }
-        if (invitation.uidClient) {
-            const client = stock.clients.find(c => c.uid === invitation.uidClient);
+        if (invitation.idClient) {
+            const client = stock.clients.find(c => c.id === invitation.idClient);
             if (!client) {
                 throw new Error('Clients: invité absent du stock');
             }
@@ -425,7 +421,7 @@ export class ClientService extends KeyUidRnoService<Client> {
             throw new Error('Clients: invitation absent du stock');
         }
         stock.invitations.splice(index, 1);
-        if (invitation.uidClient) {
+        if (invitation.idClient) {
             this.quandInvitationSupprimée(invitation);
         }
     }

@@ -1,32 +1,26 @@
-import { KeyUidRnoNo, IKeyUidRnoNoData } from '../../commun/data-par-key/key-uid-rno-no/key-uid-rno-no';
+import { KeyId } from 'src/app/commun/data-par-key/key-id/key-id';
 import { Produit } from './produit';
 import { ProduitBilan } from './produit-bilan';
 
-export interface ICategorieData extends IKeyUidRnoNoData {
-    no: number;
-    nom: string;
-    date?: Date
-}
-
-export class Categorie extends KeyUidRnoNo implements ICategorieData {
+export class Categorie extends KeyId {
     nom: string;
     date?: Date
     nbProduits: number;
     bilans: ProduitBilan[];
 
-    copieData(d: CategorieData) {
+    copieData(d: Categorie) {
         this.nom = d.nom;
     }
 
     compteProduits(produits: Produit[]) {
-        this.nbProduits = produits.filter(p => p.categorieNo === this.no).length;
+        this.nbProduits = produits.filter(p => p.categorieId === this.id).length;
     }
 
     créeBilans(produits: Produit[]) {
         this.bilans = [{ type: 'C', nb: 0, quantité: 0 }, { type: 'L', nb: 0, quantité: 0 }, { type: 'F', nb: 0, quantité: 0 }];
         this.nbProduits = 0;
         produits.forEach(p => {
-            if (p.categorieNo === this.no && p.bilans) {
+            if (p.categorieId === this.id && p.bilans) {
                 for (let i = 0; i < 3; i++) {
                     const b = this.bilans[i];
                     const bp = p.bilans[i];
@@ -50,10 +44,4 @@ export class Categorie extends KeyUidRnoNo implements ICategorieData {
             return utilisé;
         }
     }
-}
-
-export class CategorieData implements ICategorieData {
-    no: number;
-    nom: string;
-    date?: Date
 }

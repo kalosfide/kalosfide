@@ -1,6 +1,6 @@
 import { Site } from '../site/site';
-import { Categorie, CategorieData, ICategorieData } from './categorie';
-import { Produit, ProduitData, IProduitData } from './produit';
+import { Categorie } from './categorie';
+import { Produit } from './produit';
 
 /**
  * Interface implémentée par Catalogue et CatalogueApi
@@ -11,8 +11,8 @@ export interface ICatalogue {
     /** rno du site */
     rno: number;
 
-    catégories: ICategorieData[];
-    produits: IProduitData[];
+    catégories: Categorie[];
+    produits: Produit[];
 }
 
 /**
@@ -24,8 +24,8 @@ export class CatalogueApi implements ICatalogue {
     /** rno du site */
     rno: number;
 
-    catégories: CategorieData[];
-    produits: ProduitData[];
+    catégories: Categorie[];
+    produits: Produit[];
 }
 export class Catalogue implements ICatalogue {
     /** uid du site */
@@ -49,61 +49,22 @@ export class Catalogue implements ICatalogue {
      * Crée un catalogue à partir d'un catalogue ou d'une lecture de l'Api
      * @param icatalogue Catalogue stocké ou CatalogueApi lu
      */
-    static nouveau(site: Site, icatalogue: ICatalogue): Catalogue {
+    static nouveau(icatalogue: ICatalogue): Catalogue {
         const catalogue = new Catalogue();
-        catalogue.uid = site.uid;
-        catalogue.rno = site.rno;
         catalogue.catégories = icatalogue.catégories.map(
-            (data: CategorieData) => {
+            (data: Categorie) => {
                 const categorie = new Categorie();
-                categorie.uid = site.uid;
-                categorie.rno = site.rno;
-                categorie.no = data.no;
+                categorie.id = data.id;
                 categorie.copieData(data);
                 return categorie;
             }
         );
         catalogue.produits = icatalogue.produits.map(
-            (data: ProduitData) => {
+            (data: Produit) => {
                 const produit = new Produit();
-                produit.uid = site.uid;
-                produit.rno = site.rno;
-                produit.no = data.no;
+                produit.id = data.id;
                 Produit.copieData(data, produit);
-                const categorie = icatalogue.catégories.find(c => c.no === produit.categorieNo);
-                produit.nomCategorie = categorie.nom;
-                return produit;
-            }
-        );
-        return catalogue;
-    }
-
-    /**
-     * Crée un catalogue à partir d'un catalogue ou d'une lecture de l'Api
-     * @param icatalogue Catalogue stocké ou CatalogueApi lu
-     */
-    static tarif(site: Site, icatalogue: ICatalogue): Catalogue {
-        const catalogue = new Catalogue();
-        catalogue.uid = site.uid;
-        catalogue.rno = site.rno;
-        catalogue.catégories = icatalogue.catégories.map(
-            (data: CategorieData) => {
-                const categorie = new Categorie();
-                categorie.uid = site.uid;
-                categorie.rno = site.rno;
-                categorie.no = data.no;
-                categorie.copieData(data);
-                return categorie;
-            }
-        );
-        catalogue.produits = icatalogue.produits.map(
-            (data: ProduitData) => {
-                const produit = new Produit();
-                produit.uid = site.uid;
-                produit.rno = site.rno;
-                produit.no = data.no;
-                Produit.copieData(data, produit);
-                const categorie = icatalogue.catégories.find(c => c.no === produit.categorieNo);
+                const categorie = icatalogue.catégories.find(c => c.id === produit.categorieId);
                 produit.nomCategorie = categorie.nom;
                 return produit;
             }
@@ -119,7 +80,7 @@ export class Catalogue implements ICatalogue {
         filtré.uid = catalogue.uid;
         filtré.rno = catalogue.rno;
         filtré.produits = catalogue.produits.filter(p => filtreProduit(p));
-        filtré.catégories = catalogue.catégories.filter(c => filtré.produits.find(p => p.categorieNo === c.no));
+        filtré.catégories = catalogue.catégories.filter(c => filtré.produits.find(p => p.categorieId === c.id));
         return filtré;
     }
 }

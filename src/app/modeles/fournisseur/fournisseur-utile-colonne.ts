@@ -1,13 +1,12 @@
 import { FournisseurUtile } from './fournisseur-utile';
 import { DataUtileColonne } from 'src/app/commun/data-par-key/data-utile-colonne';
 import { IKfVueTableColonneDef } from 'src/app/commun/kf-composants/kf-vue-table/i-kf-vue-table-colonne-def';
-import { TexteEtatRole, IdEtatRole } from '../role/etat-role';
 import { Compare } from '../../commun/outils/tri';
 import { TexteOutils } from 'src/app/commun/outils/texte-outils';
 import { LargeurColonne } from 'src/app/disposition/largeur-colonne';
 import { KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
 import { Fournisseur } from './fournisseur';
-import { KfVueTableCellule } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-cellule';
+import { EtatsRole } from '../role/etat-role';
 
 export class FournisseurUtileColonne extends DataUtileColonne {
     constructor(utile: FournisseurUtile) {
@@ -52,9 +51,9 @@ export class FournisseurUtileColonne extends DataUtileColonne {
         return {
             nom: 'état',
             enTeteDef: { titreDef: 'Etat' },
-            créeContenu: (fournisseur: Fournisseur) => () => TexteEtatRole(fournisseur.etat),
+            créeContenu: (fournisseur: Fournisseur) => () => EtatsRole.texte(fournisseur.etat),
             compare: Compare.enchaine(
-                Compare.texte((fournisseur: Fournisseur) => TexteEtatRole(fournisseur.etat)),
+                Compare.texte((fournisseur: Fournisseur) => EtatsRole.texte(fournisseur.etat)),
                 Compare.date((fournisseur: Fournisseur) => fournisseur.dateEtat)
             ),
             largeur: LargeurColonne.role_état,

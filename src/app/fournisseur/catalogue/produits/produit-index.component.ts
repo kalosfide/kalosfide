@@ -110,7 +110,7 @@ export class ProduitIndexComponent extends ProduitIndexBaseComponent implements 
                     }
                 }
             Fabrique.input.prépareSuitValeurEtFocus(editeur.kfPrix, apiRequêteAction(() => produit.apiProduitPrix), this.service);
-            Fabrique.listeDéroulante.prépareSuitValeurEtFocus(editeur.kfEtat, apiRequêteAction(() => produit.apiProduitEtat), this.service);
+            Fabrique.listeDéroulante.prépareSuitValeurEtFocus(editeur.kfDisponible, apiRequêteAction(() => produit.apiProduitEtat), this.service);
             superGroupe.avecInvalidFeedback = true;
             return superGroupe;
         };

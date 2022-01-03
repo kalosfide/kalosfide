@@ -9,7 +9,7 @@ import { KfTypeDeBaliseHTML } from '../commun/kf-composants/kf-composants-types'
 import { PageBaseComponent } from '../disposition/page-base/page-base.component';
 import { Site } from '../modeles/site/site';
 import { KfSuperGroupe } from '../commun/kf-composants/kf-groupe/kf-super-groupe';
-import { ActivatedRoute, Data } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { KfGroupe } from '../commun/kf-composants/kf-groupe/kf-groupe';
 import { ClientCLFService } from './client-c-l-f.service';
 import { BootstrapType, KfBootstrap } from '../commun/kf-composants/kf-partages/kf-bootstrap';
@@ -18,11 +18,8 @@ import { KfBouton } from '../commun/kf-composants/kf-elements/kf-bouton/kf-bouto
 import { ApiRequêteAction } from '../api/api-requete-action';
 import { map } from 'rxjs/operators';
 import { ApiResult204NoContent } from '../api/api-results/api-result-204-no-content';
-import { CLFDocs } from '../modeles/c-l-f/c-l-f-docs';
-import { Client } from '../modeles/client/client';
 import { CLFDoc } from '../modeles/c-l-f/c-l-f-doc';
 import { CLFTextes } from '../modeles/c-l-f/c-l-f-utile-texte';
-import { Role } from '../modeles/role/role';
 import { Identifiant } from '../securite/identifiant';
 import { ApiDoc } from '../modeles/c-l-f/api-doc';
 import { AppSite } from '../app-site/app-site';

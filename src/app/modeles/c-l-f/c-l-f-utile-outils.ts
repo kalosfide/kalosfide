@@ -36,7 +36,7 @@ export class CLFUtileOutils extends DataUtileOutils {
 
     catégorie(): KfVueTableFiltreNombre<CLFLigne> {
         return Fabrique.vueTable.filtreNombre<CLFLigne>(this.utile.nom.catégorie,
-            (ligne: CLFLigne, noCategorie: number) => ligne.produit.categorieNo === noCategorie, 'Filtrer par catégorie');
+            (ligne: CLFLigne, noCategorie: number) => ligne.produit.categorieId === noCategorie, 'Filtrer par catégorie');
     }
     chargeCatégories(vueTable: KfVueTable<CLFLigne>, catégories: Categorie[]) {
         const outil = vueTable.outils.outil(this.utile.nom.catégorie);

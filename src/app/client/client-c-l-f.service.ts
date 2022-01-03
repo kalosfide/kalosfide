@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, Subject } from 'rxjs';
 import { ApiAction, ApiController } from 'src/app/api/api-route';
-import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
+import { KeyId } from 'src/app/commun/data-par-key/key-id/key-id';
 import { concatMap, map, switchMap } from 'rxjs/operators';
 import { ApiRequêteService } from 'src/app/api/api-requete.service';
 import { Site } from 'src/app/modeles/site/site';
@@ -149,7 +149,7 @@ export class ClientCLFService extends CLFService {
                 // une modification du catalogue est en cours
                 site.ouvert = false;
             }
-            this.identification.fixeSite(site);
+            this.identification.fixeEtatSite(site);
             const clfDocs = new CLFDocs();
             clfDocs.type = 'commande';
             clfDocs.site = site;
@@ -167,18 +167,13 @@ export class ClientCLFService extends CLFService {
      * @returns un Observable qui émet true ou l'UrlTree de la page pasOuvert si le ClfDocs stocké est un contexte
      */
     chargeDocumentOuContexte(): Observable<boolean | UrlTree> {
-        const role = this.identification.roleEnCours;
-        const site: Site = role.site;
-        const client = Client.deRole(role);
-        const keyIdentifiant = {
-            uid: client.uid,
-            rno: client.rno
-        };
+        const site: Site = this.identification.siteEnCours;
+        const client = site.client;
         let stock = this.litStockSiExistant();
         if (stock && stock.type !== 'commande') {
             stock = undefined;
         }
-        const params = KeyUidRno.créeParams(keyIdentifiant);
+        const params = KeyId.créeParams(site.client);
         // si le stock existe et n'est pas un contexte résultant d'une erreur 409 précédente
         // il faut vérifier qu'il est à jour en passant la date à l'api
         if (stock && !stock.estContexte) {
@@ -212,7 +207,7 @@ export class ClientCLFService extends CLFService {
                     // l'état du site a changé depuis le chargement du site
                     site.ouvert = contexte.ouvert;
                     site.dateCatalogue = contexte.dateCatalogue;
-                    this.identification.fixeSite(site);
+                    this.identification.fixeEtatSite(site);
                 }
                 // crée et stocke un ClfDocs contexte
                 const clfDocs = new CLFDocs();

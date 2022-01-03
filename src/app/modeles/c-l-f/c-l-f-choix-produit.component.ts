@@ -36,7 +36,7 @@ export abstract class CLFChoixProduitComponent extends PageTableComponent<CLFLig
     }
 
     protected fixeTypeDefRéglagesVueTable(type: TypeCLF) {
-        this.fixeDefRéglagesVueTable(`${type}.produits`, (l: CLFLigne) => l.no2);
+        this.fixeDefRéglagesVueTable(`${type}.produits`, (l: CLFLigne) => l.produitId);
     }
 
     get routeur(): RouteurService { return this.service.routeur; }

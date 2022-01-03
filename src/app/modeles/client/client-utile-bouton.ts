@@ -9,9 +9,9 @@ import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquet
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { Invitation } from './invitation';
 import { Client } from './client';
-import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
-import { IdEtatRole } from '../role/etat-role';
-import { KfstringDef, KfstringDefs } from 'src/app/commun/kf-composants/kf-elements/kf-texte/kf-textes';
+import { KeyId } from 'src/app/commun/data-par-key/key-id/key-id';
+import { EtatRole } from '../role/etat-role';
+import { KfstringDef } from 'src/app/commun/kf-composants/kf-elements/kf-texte/kf-textes';
 
 export class ClientUtileBouton extends DataUtileBouton {
     constructor(utile: ClientUtile) {
@@ -37,7 +37,7 @@ export class ClientUtileBouton extends DataUtileBouton {
         const étiquettes: KfEtiquette[] = [];
         let étiquette = Fabrique.ajouteEtiquetteP(étiquettes);
         étiquette.ajouteTextes(`Le compte `, nom);
-        if (client.etat === IdEtatRole.nouveau) {
+        if (client.etat === EtatRole.nouveau) {
             // le compte est d'état Nouveau et géré par le client
             const email = { texte: client.email, balise: KfTypeDeBaliseHTML.b };
             if (client.date0 !== client.dateEtat) {
@@ -66,7 +66,7 @@ export class ClientUtileBouton extends DataUtileBouton {
                 this.utile.service.quandActivé(client);
             },
         };
-        const bouton = Fabrique.bouton.attenteDeColonne('active' + KeyUidRno.texteDeKey(client),
+        const bouton = Fabrique.bouton.attenteDeColonne('active' + KeyId.texteDeKey(client),
             contenu, apiRequêteAction, this.utile.service,
             Fabrique.confirmeModal(titre, 'primary', étiquettes)
         );
@@ -106,7 +106,7 @@ export class ClientUtileBouton extends DataUtileBouton {
                 this.utile.service.quandActivé(client);
             },
         };
-        const bouton = Fabrique.bouton.attenteDeColonne('active' + KeyUidRno.texteDeKey(client),
+        const bouton = Fabrique.bouton.attenteDeColonne('active' + KeyId.texteDeKey(client),
             contenu, apiRequêteAction, this.utile.service,
             Fabrique.confirmeModal(titre, 'warning', étiquettes)
         );
@@ -117,7 +117,7 @@ export class ClientUtileBouton extends DataUtileBouton {
         let titre = `Suppression d'un compte client`;
         let description: KfstringDef[];
         let action = ' va être supprimé.';
-        if (client.etat === IdEtatRole.nouveau) {
+        if (client.etat === EtatRole.nouveau) {
             // le compte est d'état Nouveau et géré par le client (faux)
             if (client.date0 !== client.dateEtat) {
                 // le compte existait avant d'être géré par le client (faux)
@@ -157,7 +157,7 @@ export class ClientUtileBouton extends DataUtileBouton {
                 rafraichitComponent(créé);
             },
         };
-        const bouton = Fabrique.bouton.attenteDeColonne('supprime' + KeyUidRno.texteDeKey(client),
+        const bouton = Fabrique.bouton.attenteDeColonne('supprime' + KeyId.texteDeKey(client),
             Fabrique.contenu.supprime(), apiRequêteAction, this.utile.service,
             Fabrique.confirmeModal(titre, 'danger', étiquettes)
         );

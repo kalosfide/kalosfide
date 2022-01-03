@@ -1,4 +1,3 @@
-import { KeyUidRnoNoEditeur } from 'src/app/commun/data-par-key/key-uid-rno-no/key-uid-rno-no-editeur';
 import { Categorie } from 'src/app/modeles/catalogue/categorie';
 import { CategorieService } from 'src/app/modeles/catalogue/categorie.service';
 import { KfInputTexte } from 'src/app/commun/kf-composants/kf-elements/kf-input/kf-input-texte';
@@ -6,8 +5,9 @@ import { KfValidateurs, KfValidateur } from 'src/app/commun/kf-composants/kf-par
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { CategoriePages } from '../../fournisseur/catalogue/categories/categorie-pages';
 import { IDataComponent } from 'src/app/commun/data-par-key/i-data-component';
+import { KeyIdEditeur } from 'src/app/commun/data-par-key/key-id/key-id-editeur';
 
-export class CategorieEditeur extends KeyUidRnoNoEditeur<Categorie> {
+export class CategorieEditeur extends KeyIdEditeur<Categorie> {
     kfNom: KfInputTexte;
     kfTexteEtat: KfInputTexte;
 
@@ -36,7 +36,7 @@ export class CategorieEditeur extends KeyUidRnoNoEditeur<Categorie> {
     private validateursNomEdite(): KfValidateur[] {
         const validateur = KfValidateurs.validateurDeFn('nomPris',
             (value: any) => {
-                return this.service.nomPrisParAutre(this.pKfNo.valeur, value);
+                return this.service.nomPrisParAutre(this._kfId.valeur, value);
             },
             'Ce nom est déjà pris');
         return [

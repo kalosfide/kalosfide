@@ -1,5 +1,5 @@
 import { FournisseursPages } from 'src/app/admin/fournisseurs/fournisseurs-pages';
-import { KeyUidRnoUtile } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno-utile';
+import { KeyIdUtile } from 'src/app/commun/data-par-key/key-id/key-id-utile';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { Fournisseur } from './fournisseur';
 import { FournisseurUtileBouton } from './fournisseur-utile-bouton';
@@ -9,7 +9,7 @@ import { FournisseurUtileOutils } from './fournisseur-utile-outils';
 import { FournisseurUtileUrl } from './fournisseur-utile-url';
 import { FournisseurService } from './fournisseur.service';
 
-export class FournisseurUtile extends KeyUidRnoUtile<Fournisseur> {
+export class FournisseurUtile extends KeyIdUtile<Fournisseur> {
     constructor(service: FournisseurService) {
         super(service);
         this.dataRouteur = Fabrique.url.appRouteur.admin.sites;

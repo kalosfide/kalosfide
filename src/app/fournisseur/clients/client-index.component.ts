@@ -5,21 +5,21 @@ import { Site } from 'src/app/modeles/site/site';
 import { ActivatedRoute, Data } from '@angular/router';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { Client } from 'src/app/modeles/client/client';
-import { KeyUidRnoIndexComponent } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno-index.component';
+import { KeyIdIndexComponent } from 'src/app/commun/data-par-key/key-id/key-id-index.component';
 import { ClientService } from 'src/app/modeles/client/client.service';
 import { IGroupeTableDef } from 'src/app/disposition/page-table/groupe-table';
 import { ModeTable } from 'src/app/commun/data-par-key/condition-table';
 import { EtatTable } from 'src/app/disposition/fabrique/etat-table';
 import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
 import { KfGéreCss } from 'src/app/commun/kf-composants/kf-partages/kf-gere-css';
-import { IdEtatRole } from 'src/app/modeles/role/etat-role';
+import { EtatRole } from 'src/app/modeles/role/etat-role';
 import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
 import { Invitation } from 'src/app/modeles/client/invitation';
 
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
 })
-export class ClientIndexComponent extends KeyUidRnoIndexComponent<Client> implements OnInit {
+export class ClientIndexComponent extends KeyIdIndexComponent<Client> implements OnInit {
 
     pageDef: PageDef = FournisseurClientPages.index;
 
@@ -38,7 +38,7 @@ export class ClientIndexComponent extends KeyUidRnoIndexComponent<Client> implem
         protected service: ClientService,
     ) {
         super(route, service);
-        this.fixeDefRéglagesVueTable('clients.clients', (c: Client) => c.uid);
+        this.fixeDefRéglagesVueTable('clients.clients', (c: Client) => c.id);
     }
 
     créeGroupeTableDef(): IGroupeTableDef<Client> {
@@ -70,7 +70,7 @@ export class ClientIndexComponent extends KeyUidRnoIndexComponent<Client> implem
                     const gereCss = new KfGéreCss();
                     gereCss.ajouteClasse({
                         nom: this.service.utile.classeNouveau,
-                        active: () => t.etat === IdEtatRole.nouveau
+                        active: () => t.etat === EtatRole.nouveau
                     });
                     return gereCss;
                 },

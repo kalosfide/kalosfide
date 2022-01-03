@@ -182,7 +182,7 @@ export class ClientInviteComponent extends FormulaireComponent implements OnInit
     créeEdition = (): KfGroupe => {
         const groupe = Fabrique.formulaire.formulaire();
         const uid = Fabrique.input.texteInvisible('uid');
-        uid.valeur = this.site.uid;
+        uid.valeur = this.site.id;
         groupe.ajoute(uid);
         const rno = Fabrique.input.nombreInvisible('rno');
         rno.valeur = this.site.rno;
@@ -218,7 +218,7 @@ export class ClientInviteComponent extends FormulaireComponent implements OnInit
         const rnoClient = Fabrique.input.nombreInvisible('rnoClient');
         groupe.ajoute(rnoClient);
         if (client) {
-            uidClient.valeur = client.uid;
+            uidClient.valeur = client.id;
             rnoClient.valeur = client.rno;
             if (client.invitation) {
                 this.email.valeur = client.invitation.email;

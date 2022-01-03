@@ -1,23 +1,31 @@
 import { InvitationDeApi } from './invitation';
-import { Role } from '../role/role';
-import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
+import { IRoleData, IRoleEtat, IRolePréférences, Role } from '../role/role';
+import { KeyId } from 'src/app/commun/data-par-key/key-id/key-id';
+import { EtatRole } from '../role/etat-role';
 
-/**
- * Si dans liste ne contient que
- */
-export class Client extends Role {
+export interface IClientData extends IRoleData {
+
+}
+
+export class Client extends KeyId implements IClientData, IRolePréférences, IRoleEtat  {
     email: string;
+    nom: string;
+    adresse: string;
+    ville: string;
+    formatNomFichierCommande: string;
+    formatNomFichierLivraison: string;
+    formatNomFichierFacture: string;
+    etat: EtatRole;
+    date0: Date;
+    dateEtat: Date;
     /**
      * Fixé lors des lectures mais pas stocké
      */
     invitation?: InvitationDeApi;
     avecDocuments: boolean;
 
-    static deRole(role: Role): Client {
-        const client = new Client();
-        KeyUidRno.copieKey(role, client);
-        Client.copieData(role, client);
-        return client;
+    static copieData(de: IClientData, vers: IClientData) {
+        Role.copieData(de, vers);
     }
 
 }

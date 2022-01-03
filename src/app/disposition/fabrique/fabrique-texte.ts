@@ -1,6 +1,6 @@
 import { Produit, IAvecProduit } from 'src/app/modeles/catalogue/produit';
-import { TypeMesure } from 'src/app/modeles/type-mesure';
-import { TypeCommande } from 'src/app/modeles/type-commande';
+import { TypeMesure, TypeMesureFabrique } from 'src/app/modeles/type-mesure';
+import { TypeCommande, TypeCommandeFabrique } from 'src/app/modeles/type-commande';
 import { ICoût } from 'src/app/modeles/c-l-f/cout';
 import { estNombre } from 'src/app/commun/outils/est-nombre';
 import { TexteOutils } from 'src/app/commun/outils/texte-outils';
@@ -49,24 +49,24 @@ export class FabriqueTexte {
     /**
      * Texte de l'option de la liste déroulante de choix du type de commande d'un produit
      */
-    typeCommande(typeCommande: string): string {
-        const exemple = TypeCommande.pourExemple(typeCommande);
-        return TypeCommande.pourListe(typeCommande) + (exemple ? ' (ex: ' + exemple + ')' : '');
+    typeCommande(typeCommande: TypeCommande): string {
+        const exemple = TypeCommandeFabrique.pourExemple(typeCommande);
+        return TypeCommandeFabrique.pourListe(typeCommande) + (exemple ? ' (ex: ' + exemple + ')' : '');
     }
 
     /**
      * Texte de l'option de la liste déroulante de choix du type de commande d'un produit
      */
-    typeMesure(typeMesure: string): string {
-        return TypeMesure.texte_au(typeMesure) + ' (ex: ' + this.eurosAvecTypeMesure(typeMesure, 12.5) + ')';
+    typeMesure(typeMesure: TypeMesure): string {
+        return TypeMesureFabrique.texte_au(typeMesure) + ' (ex: ' + this.eurosAvecTypeMesure(typeMesure, 12.5) + ')';
     }
 
     /**
      * Retourne le texte du prix, précédé de > si incomplet, suivi de € et de l'unité du type de mesure
      * @param valeur valeur du prix ou objet contenant la valeur et un champ incomplet
      */
-    eurosAvecTypeMesure(typeMesure: string, valeur: number | ICoût): string {
-        return valeur <= 0 ? 'indisponible' : this.euros(valeur) + ' ' + TypeMesure.texte_le(typeMesure);
+    eurosAvecTypeMesure(typeMesure: TypeMesure, valeur: number | ICoût): string {
+        return valeur <= 0 ? 'indisponible' : this.euros(valeur) + ' ' + TypeMesureFabrique.texte_le(typeMesure);
     }
 
     eurosEnToutesLettres(valeur: number): string {
@@ -81,7 +81,7 @@ export class FabriqueTexte {
     }
 
     seMesure(produit: Produit): string {
-        return TypeMesure.texte_au(produit.typeMesure);
+        return TypeMesureFabrique.texte_au(produit.typeMesure);
     }
 
     /**
@@ -91,14 +91,14 @@ export class FabriqueTexte {
         return this.eurosAvecTypeMesure(produit.typeMesure, produit.prix);
     }
 
-    quantitéAvecUnité(produit: Produit, quantité: number, idTypeCommande?: string): string {
+    quantitéAvecUnité(produit: Produit, quantité: number, typeCommande?: TypeCommande): string {
         if (quantité === null || quantité === undefined) {
             return '';
         }
         let texte = quantité.toLocaleString('fr-FR');
-        const typeMesure: string = idTypeCommande && idTypeCommande === TypeCommande.id.ALUnité && produit.typeCommande === TypeCommande.id.ALUnitéOuEnVrac
-            ? TypeMesure.id.ALaPièce : produit.typeMesure;
-        texte += ' ' + (quantité <= 1 ?  TypeMesure.unité(typeMesure) : TypeMesure.unités(typeMesure));
+        const typeMesure: TypeMesure = typeCommande === TypeCommande.ALUnité && produit.typeCommande === TypeCommande.ALUnitéOuEnVrac
+            ? TypeMesure.Aucune : produit.typeMesure;
+        texte += ' ' + (quantité <= 1 ?  TypeMesureFabrique.unité(typeMesure) : TypeMesureFabrique.unités(typeMesure));
         return texte;
     }
 

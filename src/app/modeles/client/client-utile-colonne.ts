@@ -2,7 +2,7 @@ import { ClientUtile } from './client-utile';
 import { DataUtileColonne } from 'src/app/commun/data-par-key/data-utile-colonne';
 import { IKfVueTableColonneDef } from 'src/app/commun/kf-composants/kf-vue-table/i-kf-vue-table-colonne-def';
 import { Client } from './client';
-import { TexteEtatRole, IdEtatRole } from '../role/etat-role';
+import { EtatRole, EtatsRole } from '../role/etat-role';
 import { Compare } from '../../commun/outils/tri';
 import { TexteOutils } from 'src/app/commun/outils/texte-outils';
 import { KfTexte } from 'src/app/commun/kf-composants/kf-elements/kf-texte/kf-texte';
@@ -52,9 +52,9 @@ export class ClientUtileColonne extends DataUtileColonne {
         return {
             nom: 'état',
             enTeteDef: { titreDef: 'Etat' },
-            créeContenu: (client: Client) => () => TexteEtatRole(client.etat),
+            créeContenu: (client: Client) => () => EtatsRole.texte(client.etat),
             compare: Compare.enchaine(
-                Compare.texte((client: Client) => TexteEtatRole(client.etat)),
+                Compare.texte((client: Client) => EtatsRole.texte(client.etat)),
                 Compare.date((client: Client) => client.dateEtat)
             ),
             largeur: LargeurColonne.role_état
@@ -81,7 +81,7 @@ export class ClientUtileColonne extends DataUtileColonne {
                     return texte;
                 }
                 const lien = client.invitation ? this.utile.lien.invité(client) : this.utile.lien.inviter(client);
-                lien.inactivité = client.etat !== IdEtatRole.actif;
+                lien.inactivité = client.etat !== EtatRole.actif;
                 return lien;
             },
             largeur: LargeurColonne.client_compte,
@@ -102,11 +102,11 @@ export class ClientUtileColonne extends DataUtileColonne {
         return {
             nom: 'action1',
             créeContenu: (client: Client) => {
-                if (client.etat === IdEtatRole.nouveau) {
+                if (client.etat === EtatRole.nouveau) {
                     return this.utile.bouton.active(client);
                 }
                 const lien = this.utile.lien.edite(client);
-                lien.inactivité = !!client.email || client.etat !== IdEtatRole.actif;
+                lien.inactivité = !!client.email || client.etat !== EtatRole.actif;
                 return lien;
             },
             classesCol: [KfBootstrap.classeTexte({ alignement: 'center' })],
@@ -127,15 +127,15 @@ export class ClientUtileColonne extends DataUtileColonne {
             nom: 'action2',
             créeContenu: (client: Client) => {
                 switch (client.etat) {
-                    case IdEtatRole.nouveau:
+                    case EtatRole.nouveau:
                         return this.utile.bouton.supprime(client, rafraichitComponent);
-                    case IdEtatRole.actif:
+                    case EtatRole.actif:
                         if (!client.email && !client.avecDocuments) {
                             return this.utile.bouton.supprime(client, rafraichitComponent);
                         }
                         return this.utile.bouton.inactive(client);
-                    case IdEtatRole.inactif:
-                    case IdEtatRole.fermé:
+                    case EtatRole.inactif:
+                    case EtatRole.fermé:
                         return this.utile.bouton.active(client);
                 }
             },

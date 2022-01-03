@@ -4,8 +4,8 @@ import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-t
 import { KfBouton } from 'src/app/commun/kf-composants/kf-elements/kf-bouton/kf-bouton';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
-import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
-import { IdEtatRole } from '../role/etat-role';
+import { KeyId } from 'src/app/commun/data-par-key/key-id/key-id';
+import { EtatRole } from '../role/etat-role';
 import { FournisseurUtile } from './fournisseur-utile';
 import { FournisseurUtileLien } from './fournisseur-utile-lien';
 import { FournisseurUtileUrl } from './fournisseur-utile-url';
@@ -42,13 +42,13 @@ export class FournisseurUtileBouton extends DataUtileBouton {
         let nom : string;
         let bootstrapType: BootstrapType;
         let active: boolean;
-        if (fournisseur.etat === IdEtatRole.inactif || fournisseur.etat === IdEtatRole.fermé) {
+        if (fournisseur.etat === EtatRole.inactif || fournisseur.etat === EtatRole.fermé) {
             contenu = Fabrique.contenu.activer();
             contenu.texte = 'Réactiver';
             titre = `Activation d'un fournisseur`;
             texte = {
                 action: `va être réactivé`,
-                état: fournisseur.etat === IdEtatRole.inactif ? 'désactivé' : 'fermé'
+                état: fournisseur.etat === EtatRole.inactif ? 'désactivé' : 'fermé'
             };
             nom = 'active';
             bootstrapType = 'primary';
@@ -82,11 +82,11 @@ export class FournisseurUtileBouton extends DataUtileBouton {
             demandeApi: () => this.utile.service.active(fournisseur, active),
             actionSiOk: (créé: { dateEtat: Date }) => {
                 fournisseur.dateEtat = créé.dateEtat;
-                fournisseur.etat = active ? IdEtatRole.actif : IdEtatRole.inactif;
+                fournisseur.etat = active ? EtatRole.actif : EtatRole.inactif;
                 fournisseur.vueTableLigne.quandItemModifié();
             }
         };
-        const bouton = Fabrique.bouton.attenteDeColonne(nom + KeyUidRno.texteDeKey(fournisseur),
+        const bouton = Fabrique.bouton.attenteDeColonne(nom + KeyId.texteDeKey(fournisseur),
             contenu, apiRequêteAction, this.utile.service,
             Fabrique.confirmeModal(titre, bootstrapType, étiquettes)
         );

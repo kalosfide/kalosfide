@@ -1,8 +1,8 @@
 import { Produit } from 'src/app/modeles/catalogue/produit';
 import { KfValidateurs, KfValidateur } from 'src/app/commun/kf-composants/kf-partages/kf-validateur';
 import { KfInputTexte } from 'src/app/commun/kf-composants/kf-elements/kf-input/kf-input-texte';
-import { TypeMesure } from 'src/app/modeles/type-mesure';
-import { TypeCommande } from 'src/app/modeles/type-commande';
+import { TypeMesure, TypeMesureFabrique } from 'src/app/modeles/type-mesure';
+import { TypeCommande, TypeCommandeFabrique } from 'src/app/modeles/type-commande';
 import { Categorie } from 'src/app/modeles/catalogue/categorie';
 import { KfInputNombre } from 'src/app/commun/kf-composants/kf-elements/kf-input/kf-input-nombre';
 import { ProduitPages } from '../../fournisseur/catalogue/produits/produit-pages';
@@ -11,26 +11,29 @@ import { KfTypeDEvenement } from 'src/app/commun/kf-composants/kf-partages/kf-ev
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { EtatsProduits } from 'src/app/modeles/catalogue/etat-produit';
 import {
+    KfListeDeroulanteBool,
     KfListeDeroulanteNombre, KfListeDeroulanteTexte
 } from 'src/app/commun/kf-composants/kf-elements/kf-liste-deroulante/kf-liste-deroulante-texte';
-import { KeyUidRnoNoEditeur } from 'src/app/commun/data-par-key/key-uid-rno-no/key-uid-rno-no-editeur';
+import { KeyUidRnoNoEditeur } from 'src/app/commun/data-par-key/key-id-no/key-id-no-editeur';
 import { ProduitService } from './produit.service';
 import { IDataComponent } from 'src/app/commun/data-par-key/i-data-component';
 import { KfOptionTexte } from 'src/app/commun/kf-composants/kf-elements/kf-liste-deroulante/kf-option-texte';
 import { Compare } from 'src/app/commun/outils/tri';
+import { KeyIdEditeur } from 'src/app/commun/data-par-key/key-id/key-id-editeur';
+import { KfCaseACocher } from 'src/app/commun/kf-composants/kf-elements/kf-case-a-cocher/kf-case-a-cocher';
 
-export class ProduitEditeur extends KeyUidRnoNoEditeur<Produit> {
+export class ProduitEditeur extends KeyIdEditeur<Produit> {
     categories: Categorie[];
 
     kfNom: KfInputTexte;
-    kfCategorieNo: KfListeDeroulanteNombre;
+    kfcategorieId: KfListeDeroulanteNombre;
     kfNomCategorie: KfInputTexte;
     kfTypeMesure: KfListeDeroulanteTexte;
     kfTypeMesureLS: KfInputTexte;
     kfTypeCommande: KfListeDeroulanteTexte;
     kfTypeCommandeLS: KfInputTexte;
-    kfEtat: KfListeDeroulanteTexte;
-    kfEtatLS: KfInputTexte;
+    kfDisponible: KfListeDeroulanteBool;
+    kfDisponibleLS: KfCaseACocher;
     kfPrix: KfInputNombre;
 
     constructor(component: IDataComponent) {
@@ -58,7 +61,7 @@ export class ProduitEditeur extends KeyUidRnoNoEditeur<Produit> {
     private validateursNomEdite(): KfValidateur[] {
         const validateur = KfValidateurs.validateurDeFn('nomPris',
             (value: any) => {
-                return this.service.nomPrisParAutre(this.pKfNo.valeur, value);
+                return this.service.nomPrisParAutre(this._kfId.valeur, value);
             },
             'Ce nom est déjà pris');
         return [
@@ -85,10 +88,10 @@ export class ProduitEditeur extends KeyUidRnoNoEditeur<Produit> {
             this.kfNomCategorie.lectureSeule = true;
             this.kfDeData.push(this.kfNomCategorie);
         } else {
-            const categorieNo = Fabrique.listeDéroulante.nombre('categorieNo', 'Catégorie');
-            this.kfCategorieNo = categorieNo;
-            categorieNo.ajouteValidateur(KfValidateurs.required);
-            this.kfDeData.push(categorieNo);
+            const categorieId = Fabrique.listeDéroulante.nombre('categorieId', 'Catégorie');
+            this.kfcategorieId = categorieId;
+            categorieId.ajouteValidateur(KfValidateurs.required);
+            this.kfDeData.push(categorieId);
         }
     }
     private créeTypesMesureEtCommande(lectureSeule?: boolean) {
@@ -103,27 +106,27 @@ export class ProduitEditeur extends KeyUidRnoNoEditeur<Produit> {
             this.kfTypeCommandeLS.estRacineV = true;
             this.kfDeData.push(this.kfTypeMesureLS, this.kfTypeCommandeLS);
         } else {
-            const typeMesure = Fabrique.listeDéroulante.texte('typeMesure', titreMesure);
-            TypeMesure.Mesures.forEach(mesure => {
+            const typeMesure = Fabrique.listeDéroulante.nombre('typeMesure', titreMesure);
+            TypeMesureFabrique.Mesures.forEach(mesure => {
                 typeMesure.créeEtAjouteOption(Fabrique.texte.typeMesure(mesure), mesure);
             });
             typeMesure.ajouteValidateur(KfValidateurs.required);
-            typeMesure.valeur = TypeMesure.id.ALaPièce;
+            typeMesure.valeur = TypeMesure.Aucune;
 
-            const typeCommande = Fabrique.listeDéroulante.texte('typeCommande', titreCommande);
-            TypeCommande.commandes.forEach(commande => {
+            const typeCommande = Fabrique.listeDéroulante.nombre('typeCommande', titreCommande);
+            TypeCommandeFabrique.commandes.forEach(commande => {
                 typeCommande.créeEtAjouteOption(Fabrique.texte.typeCommande(commande), commande);
             });
             typeCommande.ajouteValidateur(KfValidateurs.required);
-            typeCommande.valeur = TypeCommande.id.ALUnité;
+            typeCommande.valeur = TypeCommande.ALUnité;
 
             this.kfDeData.push(typeMesure, typeCommande);
 
             const rafraichit = () => {
-                if (typeMesure.valeur === TypeMesure.id.ALaPièce) {
-                    typeCommande.valeur = TypeCommande.id.ALUnité;
+                if (typeMesure.valeur === TypeMesure.Aucune) {
+                    typeCommande.valeur = TypeCommande.ALUnité;
                     typeCommande.options.forEach(option => {
-                        option.inactif = option.valeur !== TypeCommande.id.ALUnité ? true : undefined;
+                        option.inactif = option.valeur !== TypeCommande.ALUnité ? true : undefined;
                     });
                 } else {
                     typeCommande.options.forEach(option => option.inactif = undefined);
@@ -149,18 +152,17 @@ export class ProduitEditeur extends KeyUidRnoNoEditeur<Produit> {
     }
 
     private créeEtat(lectureSeule?: boolean) {
-        const titre = 'Etat';
+        const titre = 'Disponible';
         if (lectureSeule) {
-            this.kfEtatLS = Fabrique.input.texteLectureSeule('texteEtat', titre);
-            this.kfEtatLS.estRacineV = true;
-            this.kfDeData.push(this.kfEtatLS);
+            this.kfDisponibleLS = new KfCaseACocher('disponible', titre);
+            this.kfDisponibleLS.estRacineV = true;
+            this.kfDeData.push(this.kfDisponibleLS);
         } else {
-            const etat = Fabrique.listeDéroulante.texte('etat', titre);
-            EtatsProduits.états.forEach(e => etat.créeEtAjouteOption(e.texte, e.valeur));
-            etat.ajouteValidateur(KfValidateurs.required);
-            etat.valeur = EtatsProduits.disponible.valeur;
-            this.kfEtat = etat;
-            this.kfDeData.push(etat);
+            const disponible = Fabrique.listeDéroulante.bool('disponible', titre);
+            EtatsProduits.états.forEach(e => disponible.créeEtAjouteOption(e.texte, e.valeur));
+            disponible.ajouteValidateur(KfValidateurs.required);
+            this.kfDisponible = disponible;
+            this.kfDeData.push(disponible);
         }
     }
 
@@ -199,17 +201,17 @@ export class ProduitEditeur extends KeyUidRnoNoEditeur<Produit> {
         const categories = (data.categories as Categorie[])
             .map(c => c)
             .sort(Compare.texte((c: Categorie) => c.nom));
-        if (this.kfCategorieNo) {
-            categories.forEach(c => this.kfCategorieNo.créeEtAjouteOption(c.nom, c.no));
-            this.kfCategorieNo.valeur = categories[0].no;
+        if (this.kfcategorieId) {
+            categories.forEach(c => this.kfcategorieId.créeEtAjouteOption(c.nom, c.id));
+            this.kfcategorieId.valeur = categories[0].id;
         }
     }
 
     fixeValeur(produit: Produit) {
         this.edition.fixeValeur(produit);
         if (this.kfNomCategorie) {
-            this.kfTypeMesureLS.valeur = TypeMesure.texte_le(produit.typeMesure);
-            this.kfTypeCommandeLS.valeur = TypeCommande.pourListe(produit.typeCommande);
+            this.kfTypeMesureLS.valeur = TypeMesureFabrique.texte_le(produit.typeMesure);
+            this.kfTypeCommandeLS.valeur = TypeCommandeFabrique.pourListe(produit.typeCommande);
         }
     }
 }

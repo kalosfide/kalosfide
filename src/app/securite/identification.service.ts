@@ -2,14 +2,14 @@ import { Injectable } from '@angular/core';
 
 import { Subject, Observable, merge, Subscription } from 'rxjs';
 import { JwtIdentifiant, Identifiant, ApiIdentifiant } from './identifiant';
-import { Site } from '../modeles/site/site';
+import { ISiteEtat, Site } from '../modeles/site/site';
 import { Stockage } from '../services/stockage/stockage';
 import { StockageService } from '../services/stockage/stockage.service';
-import { Role } from '../modeles/role/role';
 import { ValeurEtObservable } from '../commun/outils/valeur-et-observable';
 import { ConditionEtatSite } from '../commun/data-par-key/condition-etat-site';
 import { SiteBilanCatalogue, SiteBilanClients } from '../modeles/site/site-bilan';
 import { Fabrique } from '../disposition/fabrique/fabrique';
+import { EtatRole } from '../modeles/role/etat-role';
 
 @Injectable({
     providedIn: 'root',
@@ -25,7 +25,7 @@ export class IdentificationService {
     private stockageIdentifiant: Stockage<Identifiant>;
 
     private utilisateurAChangé = new Subject<Identifiant>();
-    private roleAChangé = new Subject<Role>();
+    private roleAChangé = new Subject<Site>();
     private siteAChangé = new Subject<Site>();
 
     private pConditionSite: ConditionEtatSite;
@@ -39,18 +39,18 @@ export class IdentificationService {
             // appellé quand l'identifiant stocké change
             quandStockChange: (ancien: Identifiant, nouveau: Identifiant) => {
                 if (Identifiant.MêmeUtilisateur(ancien, nouveau)) {
-                    const nouveauRole = Identifiant.roleEnCours(nouveau);
-                    if (Identifiant.MêmeRole(ancien, nouveau)) {
-                        if (Identifiant.MêmeSite(ancien, nouveau)) {
+                    const nouveauSite = Identifiant.siteEnCours(nouveau);
+                    if (Identifiant.MêmeSite(ancien, nouveau)) {
+                        if (Identifiant.SitesIdentiques(ancien, nouveau)) {
                             return;
                         } else {
-                            this.siteAChangé.next(nouveauRole.site);
+                            this.siteAChangé.next(nouveauSite);
                         }
                     } else {
-                        if (nouveauRole) {
-                            Fabrique.url.appRouteur.site.fixeSite(nouveauRole.site.url);
+                        if (nouveauSite) {
+                            Fabrique.url.appRouteur.site.fixeSite(nouveauSite.url);
                         }
-                        this.roleAChangé.next(nouveauRole);
+                        this.roleAChangé.next(nouveauSite);
                     }
                 } else {
                     this.utilisateurAChangé.next(nouveau);
@@ -69,42 +69,42 @@ export class IdentificationService {
         return this.utilisateurAChangé.asObservable();
     }
 
-    public fixeRoleParUrl(urlSite: string): Role {
+    public fixeSiteParUrl(urlSite: string): Site {
         const identifiant = this.litIdentifiant();
-        let role: Role;
-        if (identifiant) {
-            role = identifiant.rolesAccessibles.find(r => r.site.url === urlSite);
-            if (role && identifiant.rnoRoleEnCours !== role.rno) {
-                identifiant.noDernierRole = identifiant.rnoRoleEnCours;
-                identifiant.rnoRoleEnCours = role.rno;
-                this.stockageIdentifiant.fixeStock(identifiant);
-            }
+        let site: Site;
+        if (!identifiant) {
+            return;
         }
-        return role;
+        site = identifiant.sites.find(s => s.url === urlSite);
+        if (site.fournisseur.etat === EtatRole.fermé) {
+            return;
+        }
+        if (site.client && site.client.etat === EtatRole.fermé) {
+            return; 
+        }
+        if (identifiant.idSiteEnCours !== site.id) {
+            identifiant.idSiteEnCours = site.id;
+            this.stockageIdentifiant.fixeStock(identifiant);
+        }
+        return site;
     }
 
     /**
-     * S'il y a un identifiant stocké, fixe à 0 son rnoRoleEnCours.
+     * S'il y a un identifiant stocké, fixe à 0 son idSiteeEnCours.
      */
-    public annuleRoleEnCours() {
+    public annuleSiteEnCours() {
         const identifiant = this.stockageIdentifiant.litStock();
-        if (identifiant && identifiant.rnoRoleEnCours !== 0) {
-            identifiant.noDernierRole = identifiant.rnoRoleEnCours;
-            identifiant.rnoRoleEnCours = 0;
+        if (identifiant && identifiant.idSiteEnCours !== 0) {
+            identifiant.idSiteEnCours = 0;
             this.stockageIdentifiant.fixeStock(identifiant);
         }
     }
 
-    public fixeSite(site: Site) {
+    public fixeEtatSite(étatSite: ISiteEtat) {
         const identifiant = this.stockageIdentifiant.litStock();
-        const role = Identifiant.roleEnCours(identifiant);
-        role.site = site;
+        const site = identifiant.sites.find(s => s.id === identifiant.idSiteEnCours);
+        Site.copieEtat(étatSite, site);
         this.stockageIdentifiant.fixeStock(identifiant);
-    }
-
-    public get roleEnCours(): Role {
-        const identifiant = this.litIdentifiant();
-        return Identifiant.roleEnCours(identifiant);
     }
 
     public get siteEnCours(): Site {
@@ -118,18 +118,18 @@ export class IdentificationService {
 
     public fixeSiteBilanCatalogue(bilan: SiteBilanCatalogue) {
         const identifiant = this.stockageIdentifiant.litStock();
-        const role = Identifiant.roleEnCours(identifiant);
-        if (!SiteBilanCatalogue.sontEgaux(role.site.bilan.catalogue, bilan)) {
-            role.site.bilan.catalogue = bilan;
+        const site = identifiant.sites.find(s => s.id === identifiant.idSiteEnCours);
+        if (!SiteBilanCatalogue.sontEgaux(site.bilan.catalogue, bilan)) {
+            site.bilan.catalogue = bilan;
             this.stockageIdentifiant.fixeStock(identifiant);
         }
     }
 
     public fixeSiteBilanClients(bilan: SiteBilanClients) {
         const identifiant = this.stockageIdentifiant.litStock();
-        const role = Identifiant.roleEnCours(identifiant);
-        if (!SiteBilanClients.sontEgaux(role.site.bilan.clients, bilan)) {
-            role.site.bilan.clients = bilan;
+        const site = identifiant.sites.find(s => s.id === identifiant.idSiteEnCours);
+        if (!SiteBilanClients.sontEgaux(site.bilan.clients, bilan)) {
+            site.bilan.clients = bilan;
             this.stockageIdentifiant.fixeStock(identifiant);
         }
     }
@@ -157,7 +157,7 @@ export class IdentificationService {
 
     public litIdentifiant(): Identifiant {
         const stock = this.stockageIdentifiant.litStock();
-        return stock ? Identifiant.deStock(stock) : null;
+        return stock;
     }
 
     public fixeIdentifiant(identifiant: Identifiant) {

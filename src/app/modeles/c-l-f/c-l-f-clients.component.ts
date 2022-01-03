@@ -14,7 +14,7 @@ import { IGroupeTableDef, GroupeTable } from 'src/app/disposition/page-table/gro
 import { IBarreTitre } from 'src/app/disposition/fabrique/fabrique-titre-page/fabrique-titre-page';
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
 import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
-import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
+import { KeyId } from 'src/app/commun/data-par-key/key-id/key-id';
 import { CLFUtile } from './c-l-f-utile';
 import { CLFDocs } from './c-l-f-docs';
 import { ModeAction } from './condition-action';
@@ -41,7 +41,7 @@ export abstract class CLFClientsComponent extends PageTableComponent<CLFDocs> im
     }
 
     protected fixeTypeDefRéglagesVueTable(type: TypeCLF) {
-        this.fixeDefRéglagesVueTable(`${type}.clients`, (c: CLFDocs) => c.client.uid);
+        this.fixeDefRéglagesVueTable(`${type}.clients`, (c: CLFDocs) => c.client.id);
     }
 
     get routeur(): RouteurService { return this.service.routeur; }
@@ -85,7 +85,7 @@ export abstract class CLFClientsComponent extends PageTableComponent<CLFDocs> im
             colonnesDef: this.utile.colonne.client.colonnesDocumentsClient(this.clfDocs),
             outils,
             id: (t: CLFDocs) => {
-                return this.utile.url.id(KeyUidRno.texteDeKey(t.client));
+                return this.utile.url.id(KeyId.texteDeKey(t.client));
             },
             quandClic: (clfDocs: CLFDocs) => (() => this.service.routeur.navigueUrlDef(this.utile.url.client(clfDocs.client))).bind(this),
             triInitial: { colonne: 'nbDocuments', direction: 'desc' },

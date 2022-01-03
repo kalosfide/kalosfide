@@ -15,7 +15,7 @@ export class IdentifiantRole0GardeService implements CanActivate {
     }
 
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
-        this.identification.annuleRoleEnCours();
+        this.identification.annuleSiteEnCours();
         return true;
     }
 

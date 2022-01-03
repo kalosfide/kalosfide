@@ -1,6 +1,6 @@
-import { IKeyUidRnoNo } from "src/app/commun/data-par-key/key-uid-rno-no/i-key-uid-rno-no";
-import { IKeyUidRno } from "src/app/commun/data-par-key/key-uid-rno/i-key-uid-rno";
-import { KeyUidRno } from "src/app/commun/data-par-key/key-uid-rno/key-uid-rno";
+import { IKeyIdNo } from "src/app/commun/data-par-key/key-id-no/i-key-id-no";
+import { IKeyId } from "src/app/commun/data-par-key/key-id/i-key-id";
+import { KeyId } from "src/app/commun/data-par-key/key-id/key-id";
 import { Routeur } from "src/app/commun/routeur";
 import { CLFPages } from "./c-l-f-pages";
 
@@ -35,12 +35,12 @@ export class LFRouteur extends CLFRouteur {
         super(parent, segment);
     }
 
-    fixeClient(iKeyClient: IKeyUidRno) {
-        this._client = new Routeur(this, CLFPages.client.path, KeyUidRno.texteDeKey(iKeyClient));
+    fixeClient(iKeyClient: IKeyId) {
+        this._client = new Routeur(this, CLFPages.client.path, KeyId.texteDeKey(iKeyClient));
     }
 
-    fixeBon(ikeyBon: IKeyUidRnoNo) {
-        this._bon = new Routeur(this, CLFPages.client.path, KeyUidRno.texteDeKey(ikeyBon), CLFPages.bon.path, '' + ikeyBon.no)
+    fixeBon(ikeyBon: IKeyIdNo) {
+        this._bon = new Routeur(this, CLFPages.client.path, KeyId.texteDeKey(ikeyBon), CLFPages.bon.path, '' + ikeyBon.no)
     }
 
     get client(): Routeur {

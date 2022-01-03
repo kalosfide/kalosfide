@@ -16,8 +16,8 @@ export class CDocumentResolverService extends CLFDocumentResolverService impleme
     }
 
     client(): Client {
-        const role = this.service.identification.roleEnCours;
-        return Client.deRole(role);
+        const site = this.service.identification.siteEnCours;
+        return site.client;
     }
 
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<CLFDoc> {

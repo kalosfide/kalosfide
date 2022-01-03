@@ -2,14 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { PageDef } from 'src/app/commun/page-def';
 import { ActivatedRoute, Data } from '@angular/router';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
-import { KeyUidRnoIndexComponent } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno-index.component';
+import { KeyIdIndexComponent } from 'src/app/commun/data-par-key/key-id/key-id-index.component';
 import { IGroupeTableDef } from 'src/app/disposition/page-table/groupe-table';
 import { EtatTable } from 'src/app/disposition/fabrique/etat-table';
 import { KfGéreCss } from 'src/app/commun/kf-composants/kf-partages/kf-gere-css';
-import { IdEtatRole } from 'src/app/modeles/role/etat-role';
+import { EtatRole } from 'src/app/modeles/role/etat-role';
 import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
 import { FournisseursPages } from './fournisseurs-pages';
-import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
+import { KeyId } from 'src/app/commun/data-par-key/key-id/key-id';
 import { KfBootstrap } from 'src/app/commun/kf-composants/kf-partages/kf-bootstrap';
 import { Fournisseur } from 'src/app/modeles/fournisseur/fournisseur';
 import { FournisseurService } from 'src/app/modeles/fournisseur/fournisseur.service';
@@ -19,7 +19,7 @@ import { KfVueTableLigne } from 'src/app/commun/kf-composants/kf-vue-table/kf-vu
 @Component({
     templateUrl: '../../disposition/page-base/page-base.html',
 })
-export class FournisseursIndexComponent extends KeyUidRnoIndexComponent<Fournisseur> implements OnInit {
+export class FournisseursIndexComponent extends KeyIdIndexComponent<Fournisseur> implements OnInit {
 
     pageDef: PageDef = AdminPages.fournisseurs;
 
@@ -34,7 +34,7 @@ export class FournisseursIndexComponent extends KeyUidRnoIndexComponent<Fourniss
         protected service: FournisseurService,
     ) {
         super(route, service);
-        this.fixeDefRéglagesVueTable('fournisseurs.fournisseurs', (fournisseur: Fournisseur) => KeyUidRno.texteDeKey(fournisseur));
+        this.fixeDefRéglagesVueTable('fournisseurs.fournisseurs', (fournisseur: Fournisseur) => KeyId.texteDeKey(fournisseur));
     }
 
     créeGroupeTableDef(): IGroupeTableDef<Fournisseur> {
@@ -65,7 +65,7 @@ export class FournisseursIndexComponent extends KeyUidRnoIndexComponent<Fourniss
                     const gereCss = new KfGéreCss();
                     gereCss.ajouteClasse({
                         nom: KfBootstrap.classe('text', 'danger'),
-                        active: () => fournisseur.etat === IdEtatRole.nouveau
+                        active: () => fournisseur.etat === EtatRole.nouveau
                     });
                     return gereCss;
                 },

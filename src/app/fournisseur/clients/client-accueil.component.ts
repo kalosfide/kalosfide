@@ -15,7 +15,7 @@ import { KfGroupe } from '../../commun/kf-composants/kf-groupe/kf-groupe';
 import { ActivatedRoute } from '@angular/router';
 import { Client } from 'src/app/modeles/client/client';
 import { ClientService } from 'src/app/modeles/client/client.service';
-import { IdEtatRole } from 'src/app/modeles/role/etat-role';
+import { EtatRole } from 'src/app/modeles/role/etat-role';
 import { KfOnglets } from 'src/app/commun/kf-composants/kf-ul-ol/kf-onglets';
 import { KfDescription } from 'src/app/commun/kf-composants/kf-description/kf-description';
 import { Invitation } from 'src/app/modeles/client/invitation';
@@ -81,8 +81,8 @@ export class FClientAccueilComponent extends PageBaseComponent implements OnInit
     private ajouteEtat() {
         let groupe = new KfGroupe('etat');
         let étiquette: KfEtiquette;
-        const nouveaux = this.clients.filter(c => c.etat === IdEtatRole.nouveau);
-        const actifs = this.clients.filter(c => c.etat === IdEtatRole.actif);
+        const nouveaux = this.clients.filter(c => c.etat === EtatRole.nouveau);
+        const actifs = this.clients.filter(c => c.etat === EtatRole.actif);
         if (actifs.length === 0 && nouveaux.length === 0) {
             groupe.ajouteClasse('alert', KfBootstrap.classe('alert', 'danger'));
             étiquette = Fabrique.ajouteEtiquetteP();
@@ -134,12 +134,12 @@ export class FClientAccueilComponent extends PageBaseComponent implements OnInit
             colonne = groupe.divLigne.ajoute(composants);
             colonne.ajouteClasse('col');
             composants = []
-            const fermé = this.clients.filter(c => c.etat === IdEtatRole.fermé);
+            const fermé = this.clients.filter(c => c.etat === EtatRole.fermé);
             ajouteLigne('ferme',
                 `Comptes fermés`,
                 fermé.length,
             );
-            const inactifs = this.clients.filter(c => c.etat === IdEtatRole.inactif);
+            const inactifs = this.clients.filter(c => c.etat === EtatRole.inactif);
             ajouteLigne('inactif',
                 `Comptes inactifs`,
                 inactifs.length,

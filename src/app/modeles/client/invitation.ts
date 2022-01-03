@@ -1,15 +1,13 @@
-import { IKeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/i-key-uid-rno';
+import { IKeyId } from 'src/app/commun/data-par-key/key-id/i-key-id';
 import { Client } from './client';
 
 export class InvitationData {
     email: string;
-    uidClient: string;
-    rnoClient: number;
+    idClient: number;
 
     static copie(de: InvitationData, vers: InvitationData) {
         vers.email = de.email;
-        vers.uidClient = de.uidClient;
-        vers.rnoClient = de.rnoClient;
+        vers.idClient = de.idClient;
     }
 }
 
@@ -19,13 +17,11 @@ export class InvitationDeApi extends InvitationData {
 
 export class InvitationVersApi extends InvitationData {
     // key du site
-    uid: string;
-    rno: number;
+    id: number;
 
-    static nouveau(invitation: Invitation, keySite: IKeyUidRno): InvitationVersApi {
+    static nouveau(invitation: Invitation, keySite: IKeyId): InvitationVersApi {
         const nouveau = new InvitationVersApi();
-        nouveau.uid = keySite.uid;
-        nouveau.rno = keySite.rno;
+        nouveau.id = keySite.id;
         InvitationData.copie(invitation, nouveau);
         return nouveau;
     }
@@ -34,40 +30,35 @@ export class InvitationVersApi extends InvitationData {
 export class Invitation extends InvitationDeApi {
     client: Client;
 
-    // key du site
-    uid: string;
-    rno: number;
+    // Id du site
+    id: number;
 
     static nouveau(invitationData: InvitationDeApi): Invitation {
         const nouveau = new Invitation();
         nouveau.date = new Date(invitationData.date);
         nouveau.email = invitationData.email;
-        nouveau.uidClient = invitationData.uidClient;
-        nouveau.rnoClient = invitationData.rnoClient;
+        nouveau.idClient = invitationData.idClient;
         return nouveau;
     }
 
     static créeParamsKey(invitation: Invitation): { [key: string]: string } {
         const params: { [key: string]: string } = {};
         params.email = invitation.email;
-        params.uid = invitation.uid;
-        params.rno = '' + invitation.rno;
+        params.id = '' + invitation.id;
         return params;
     }
 
     static créeParamsEnvoi(invitation: Invitation): { [key: string]: string } {
         const params = Invitation.créeParamsKey(invitation);
-        if (invitation.uidClient) {
-            params.uidClient = invitation.uidClient;
-            params.rnoClient = '' + invitation.rnoClient;
+        if (invitation.idClient) {
+            params.idClient = '' + invitation.idClient;
         }
         params.date = (new Date(invitation.date)).toDateString();
         return params;
     }
 
     static mêmeClient(invitation1: InvitationData, invitation2: InvitationData): boolean {
-        return !!invitation1 && !!invitation2
-            && invitation1.uidClient === invitation2.uidClient && invitation1.rnoClient === invitation2.rnoClient;
+        return !!invitation1 && !!invitation2 && invitation1.idClient === invitation2.idClient;
     }
 
     get nomClient(): string {

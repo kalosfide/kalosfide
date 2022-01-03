@@ -6,7 +6,7 @@ import { CLFUtile } from './c-l-f-utile';
 import { DataUtileLien } from 'src/app/commun/data-par-key/data-utile-lien';
 import { CLFDoc } from './c-l-f-doc';
 import { CLFLigne } from './c-l-f-ligne';
-import { IKeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/i-key-uid-rno';
+import { IKeyId } from 'src/app/commun/data-par-key/key-id/i-key-id';
 import { Client } from '../client/client';
 import { CLFDocs } from './c-l-f-docs';
 
@@ -29,7 +29,7 @@ export class CLFUtileLien extends DataUtileLien {
      * avec le texteKey du client en fragment.
      * @param keyClient key du client
      */
-    retourDUnClient(keyClient: IKeyUidRno): KfLien {
+    retourDUnClient(keyClient: IKeyId): KfLien {
         return Fabrique.lien.retour(this.url.retourDUnClient(keyClient), 'Clients');
     }
 
@@ -108,7 +108,7 @@ export class CLFUtileLien extends DataUtileLien {
      * avec le texteKey du client en fragment.
      * @param keyClient key du client
      */
-     retourDUnClientVersBilansDocs(keyClient: IKeyUidRno): KfLien {
+     retourDUnClientVersBilansDocs(keyClient: IKeyId): KfLien {
         return Fabrique.lien.retour(this.url.retourDUnClientVersBilansDocs(keyClient), 'Autre client');
     }
 

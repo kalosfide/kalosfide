@@ -7,7 +7,7 @@ import { ApiLigne } from './api-ligne';
 import { CLFDocEditeur } from './c-l-f-doc-editeur';
 import { IDataComponent } from 'src/app/commun/data-par-key/i-data-component';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
-import { KeyUidRnoNo } from 'src/app/commun/data-par-key/key-uid-rno-no/key-uid-rno-no';
+import { KeyIdNo } from 'src/app/commun/data-par-key/key-id-no/key-id-no';
 import { KfCaseACocher } from 'src/app/commun/kf-composants/kf-elements/kf-case-a-cocher/kf-case-a-cocher';
 import { apiType, typeCLF, TypeCLF } from './c-l-f-type';
 import { CLFService } from './c-l-f.service';
@@ -110,7 +110,7 @@ export class CLFDoc {
                 const produit = produit_lignes.produit;
                 const ligne = new CLFLigne(synthèse, produit);
                 ligne.apiLigne = new ApiLigne();
-                ligne.apiLigne.no = produit.no;
+                ligne.apiLigne.id = produit.id;
                 let quantité = 0;
                 produit_lignes.lignes.forEach(l => quantité += l.apiLigne.aFixer);
                 ligne.apiLigne.quantité = quantité;
@@ -118,8 +118,7 @@ export class CLFDoc {
                 return ligne;
             });
         synthèse.apiDoc = new ApiDoc();
-        synthèse.apiDoc.uid = synthèse.client.uid;
-        synthèse.apiDoc.rno = synthèse.client.rno;
+        synthèse.apiDoc.id = synthèse.client.id;
         synthèse.apiDoc.lignes = synthèse.pLignes.map(l => l.apiLigne);
 
         return synthèse;
@@ -134,7 +133,7 @@ export class CLFDoc {
     }
 
     lignePasDansBon(no2: number): boolean {
-        return this.lignes.find(l => l.no2 === no2) === undefined;
+        return this.lignes.find(l => l.produitId === no2) === undefined;
     }
 
     get estVide(): boolean {
@@ -153,8 +152,7 @@ export class CLFDoc {
         return this.apiDoc.lignes;
     }
 
-    get uid(): string { return this.apiDoc.uid; }
-    get rno(): number { return this.apiDoc.rno; }
+    get id(): number { return this.apiDoc.id; }
     get no(): number { return this.apiDoc.no; }
     get date(): Date {
         if (this.apiDoc.date) {
@@ -215,10 +213,10 @@ export class CLFDoc {
             let produit: Produit;
             if (!this.estVirtuel && this.clfDocs.tarif) {
                 produit = this.clfDocs.tarif.produits.find(
-                    p => p.no === apiLigne.no && p.date === apiLigne.date);
+                    p => p.id === apiLigne.id && p.date === apiLigne.date);
             }
             if (!produit) {
-                produit = this.catalogue.produits.find(p => p.no === apiLigne.no);
+                produit = this.catalogue.produits.find(p => p.id === apiLigne.id);
             }
             const ligne = new CLFLigne(this, produit);
             ligne.apiLigne = apiLigne;
@@ -226,14 +224,14 @@ export class CLFDoc {
         });
     }
 
-    créeLigne(no: number): CLFLigne {
-        const produit = this.catalogue.produits.find(p => p.no === no);
+    créeLigne(produitId: number): CLFLigne {
+        const produit = this.catalogue.produits.find(p => p.id === produitId);
         if (!produit) {
             return;
         }
         const ligne = new CLFLigne(this, produit);
         ligne.apiLigne = new ApiLigne();
-        ligne.apiLigne.no = no;
+        ligne.apiLigne.id = produitId;
         ligne.apiLigne.date = this.clfDocs.site.dateCatalogue;
         return ligne;
     }
@@ -249,13 +247,13 @@ export class CLFDoc {
 
     produitsACommander(): CLFDoc {
         const document = new CLFDoc(this.clfDocs, null);
-        const produits = this.catalogue.produits.filter(p => this.apiDoc.lignes.find(l => l.no === p.no) === undefined);
+        const produits = this.catalogue.produits.filter(p => this.apiDoc.lignes.find(l => l.id === p.id) === undefined);
         document.pLignes = produits.map(p => new CLFLigne(this, p));
         return document;
     }
 
     get code(): string {
-        return apiType(this.type) + '-' + KeyUidRnoNo.texteDeKey(this);
+        return apiType(this.type) + '-' + KeyIdNo.texteDeKey(this);
     }
 
     get titreCode(): string {
@@ -385,8 +383,7 @@ export class CLFDoc {
      */
     apiSynthèseAEnvoyer(filtre: (clfDoc: CLFDoc) => boolean): ApiDocumentsSynthèse {
         const apiDocs = new ApiDocumentsSynthèse();
-        apiDocs.uid = this.uid;
-        apiDocs.rno = this.rno;
+        apiDocs.id = this.id;
         apiDocs.noDocs = this.àSynthétiser
             .filter(d => filtre(d))
             .map(d => d.no);

@@ -71,7 +71,7 @@ export class CLFUtileBouton extends DataUtileBouton {
             ' va être supprimée.'
         );
         const apiRequêteAction: ApiRequêteAction = this.service.apiRequêteSupprimeLigne(ligne, quandLigneSupprimée);
-        const bouton = Fabrique.bouton.attenteDeColonne('supprime' + ligne.no2,
+        const bouton = Fabrique.bouton.attenteDeColonne('supprime' + ligne.produitId,
             Fabrique.contenu.supprime(), apiRequêteAction, this.service,
             Fabrique.confirmeModal(titre, 'danger', [description])
         );
@@ -79,7 +79,7 @@ export class CLFUtileBouton extends DataUtileBouton {
     }
 
     copieLigne(ligne: CLFLigne): KfBouton {
-        const bouton = Fabrique.bouton.attenteDeColonne('copie1_' + ligne.no2,
+        const bouton = Fabrique.bouton.attenteDeColonne('copie1_' + ligne.produitId,
             Fabrique.contenu.copier(), this.service.apiRequêteCopieQuantitéDansAFixerLigne(ligne), this.service);
         return bouton;
     }

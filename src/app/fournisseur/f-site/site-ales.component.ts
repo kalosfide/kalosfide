@@ -2,12 +2,12 @@ import { ActivatedRoute } from '@angular/router';
 import { Site } from 'src/app/modeles/site/site';
 import { SiteService } from 'src/app/modeles/site/site.service';
 import { FSitePages } from './f-site-pages';
-import { KeyUidRnoALESComponent } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno-ales.component';
+import { KeyIdALESComponent } from 'src/app/commun/data-par-key/key-id/key-id-ales.component';
 import { SiteEditeur } from 'src/app/modeles/site/site-editeur';
 import { Component } from "@angular/core";
 
 @Component({ template: '' })
-export abstract class SiteALESComponent extends KeyUidRnoALESComponent<Site> {
+export abstract class SiteALESComponent extends KeyIdALESComponent<Site> {
 
     site: null;
 

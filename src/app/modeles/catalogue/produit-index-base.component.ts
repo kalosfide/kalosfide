@@ -3,9 +3,8 @@ import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Data } from '@angular/router';
 import { ProduitService } from 'src/app/modeles/catalogue/produit.service';
 import { Produit } from 'src/app/modeles/catalogue/produit';
-import { KeyUidRnoNoIndexComponent } from '../../commun/data-par-key/key-uid-rno-no/key-uid-rno-no-index.component';
 import { Categorie } from './categorie';
-import { IdEtatProduit, EtatsProduits, EtatProduit } from './etat-produit';
+import { EtatsProduits, EtatProduit } from './etat-produit';
 import { IKfVueTableDef } from '../../commun/kf-composants/kf-vue-table/i-kf-vue-table-def';
 import { Fabrique } from '../../disposition/fabrique/fabrique';
 import { Catalogue } from './catalogue';
@@ -22,10 +21,11 @@ import { EtatTable } from 'src/app/disposition/fabrique/etat-table';
 import { Site } from '../site/site';
 import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
 import { Compare } from 'src/app/commun/outils/tri';
+import { KeyIdIndexComponent } from 'src/app/commun/data-par-key/key-id/key-id-index.component';
 
 
 @Component({ template: '' })
-export abstract class ProduitIndexBaseComponent extends KeyUidRnoNoIndexComponent<Produit> implements OnDestroy {
+export abstract class ProduitIndexBaseComponent extends KeyIdIndexComponent<Produit> implements OnDestroy {
 
     site: Site;
 
@@ -38,7 +38,7 @@ export abstract class ProduitIndexBaseComponent extends KeyUidRnoNoIndexComponen
         protected service: ProduitService,
     ) {
         super(route, service);
-        this.fixeDefRéglagesVueTable('catalogue.produits', (p: Produit) => p.no);
+        this.fixeDefRéglagesVueTable('catalogue.produits', (p: Produit) => p.id);
     }
 
     protected _créeVueTableDef(): IKfVueTableDef<Produit> {
@@ -89,16 +89,16 @@ export abstract class ProduitIndexBaseComponent extends KeyUidRnoNoIndexComponen
      * @param data Data résolu avec un champ 'catalogue'
      */
     protected chargeData(data: Data) {
-        const catalogue: Catalogue = Catalogue.nouveau(this.site, data.catalogue);
+        const catalogue: Catalogue = Catalogue.nouveau(data.catalogue);
         this.liste = catalogue.produits;
         this.categories = catalogue.catégories;
-        this.liste.forEach(p => p.nomCategorie = this.categories.find(c => c.no === p.categorieNo).nom);
+        this.liste.forEach(p => p.nomCategorie = this.categories.find(c => c.id === p.categorieId).nom);
     }
 
     private chargeEtatTable(etat: EtatTable) {
         const nbProduits = this.liste.length;
         // si l'utilisateur n'est pas le fournisseur, les produits n'ont pas de champ etat mais sont disponibles
-        const nbDisponibles = this.liste.filter(p => p.etat === undefined || p.etat === null || p.etat === IdEtatProduit.disponible).length;
+        const nbDisponibles = this.liste.filter(p => p.disponible === undefined || p.disponible === null || p.disponible === true).length;
         const nbCatégories = this.categories.length;
         let message: string;
         let urlDef: IUrlDef;
@@ -160,7 +160,7 @@ export abstract class ProduitIndexBaseComponent extends KeyUidRnoNoIndexComponen
         let filtre = this.vueTable.outils.outil(this.service.utile.nom.catégorie);
         const listeCatégories: KfListeDeroulanteNombre = filtre.composant as KfListeDeroulanteNombre;
         this.categories
-            .map(c => ({ nom: c.nom, no: c.no }))
+            .map(c => ({ nom: c.nom, no: c.id }))
             .sort(Compare.texte(nom_no => nom_no.nom))
             .forEach(nom_no => listeCatégories.créeEtAjouteOption(nom_no.nom, nom_no.no));
 

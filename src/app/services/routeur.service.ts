@@ -41,11 +41,11 @@ export class RouteurService {
      * @param segments de l'url relative
      */
     private urlErreur(): string {
-        const role = this.identification.roleEnCours;
-        if (!role) {
+        const site = this.identification.siteEnCours;
+        if (!site) {
             return Fabrique.url.appRouteur.appSite.url();
         }
-        return Fabrique.url.appRouteur.routeurDeRole(role).url(AppPages.apiErreur.path);
+        return Fabrique.url.appRouteur.routeurDeSite(site).url(AppPages.apiErreur.path);
     }
 
     navigueVersPageErreur(apiResult: ApiResultErreur) {

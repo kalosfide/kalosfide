@@ -16,7 +16,6 @@ import { PageTableComponent } from 'src/app/disposition/page-table/page-table.co
 import { CLFClientBilanDocs } from 'src/app/modeles/c-l-f/c-l-f-bilan-docs';
 import { CLFUtile } from 'src/app/modeles/c-l-f/c-l-f-utile';
 import { RouteurService } from 'src/app/services/routeur.service';
-import { Role } from 'src/app/modeles/role/role';
 
 /**
  * Affiche la liste par client des bilans (nombre et total des montants) des documents par type
@@ -56,8 +55,8 @@ export class FDocumentClientsComponent extends PageTableComponent<CLFClientBilan
 
     créeGroupeTableDef(): IGroupeTableDef<CLFClientBilanDocs> {
         const outils = Fabrique.vueTable.outils<CLFClientBilanDocs>();
-        const role = this.service.identification.roleEnCours;
-        const estFournisseur = role.estFournisseur
+        const site = this.service.identification.siteEnCours;
+        const estFournisseur = !site.client;
         if (estFournisseur) {
             outils.ajoute(this.utile.outils.clientDeClientBilanDocs());
         }

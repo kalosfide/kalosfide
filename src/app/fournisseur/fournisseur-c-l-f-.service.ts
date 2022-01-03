@@ -9,8 +9,8 @@ import { Observable, of } from 'rxjs';
 import { CLFDocs } from '../modeles/c-l-f/c-l-f-docs';
 import { TypeCLF } from '../modeles/c-l-f/c-l-f-type';
 import { concatMap, map, mergeMap, tap } from 'rxjs/operators';
-import { IKeyUidRno } from '../commun/data-par-key/key-uid-rno/i-key-uid-rno';
-import { KeyUidRno } from '../commun/data-par-key/key-uid-rno/key-uid-rno';
+import { IKeyId } from '../commun/data-par-key/key-id/i-key-id';
+import { KeyId } from '../commun/data-par-key/key-id/key-id';
 import { Catalogue } from '../modeles/catalogue/catalogue';
 import { ApiClientBilanDocs, CLFClientBilanDocs } from '../modeles/c-l-f/c-l-f-bilan-docs';
 import { ValeurEtObservable } from '../commun/outils/valeur-et-observable';
@@ -46,7 +46,7 @@ export class FournisseurCLFService extends CLFService {
         const action = ApiAction.docCLF.clients;
         const site = this.litSiteEnCours();
         const params: { [param: string]: string } = {
-            uid: site.uid,
+            uid: site.id,
             rno: '' + site.rno,
         };
 
@@ -80,18 +80,18 @@ export class FournisseurCLFService extends CLFService {
      * @param keyClient key du client
      * @param type type du document de synthèse
      */
-    clientAvecBons(keyClient: IKeyUidRno, type: TypeCLF): Observable<CLFDocs> {
+    clientAvecBons(keyClient: IKeyId, type: TypeCLF): Observable<CLFDocs> {
         const stock = this.litStockSiExistant();
         if (stock // le stock existe
             && stock.type === type // type inchangé
-            && KeyUidRno.compareKey(stock.keyClient, keyClient) // client inchangé
+            && KeyId.compareKey(stock.keyClient, keyClient) // client inchangé
         ) {
             return of(stock);
         }
         const site = this.litSiteEnCours();
         let clfDocs$: Observable<CLFDocs>;
         const params: { [param: string]: string } = {
-            uid: keyClient.uid,
+            uid: keyClient.id,
             rno: '' + keyClient.rno,
         };
         clfDocs$ = this.lectureObs<ApiDocsAvecTarif>({
@@ -145,7 +145,7 @@ export class FournisseurCLFService extends CLFService {
         const controller = ApiController.document;
         const action = ApiAction.document.bilans;
         return this.lectureObs<ApiClientBilanDocs[]>({
-            demandeApi: () => this.get<ApiClientBilanDocs>(controller, action, KeyUidRno.créeParams(site)),
+            demandeApi: () => this.get<ApiClientBilanDocs>(controller, action, KeyId.créeParams(site)),
         }).pipe(
             concatMap(apiClientsBilans => this.clientService.clients$().pipe(
                 map(clients => apiClientsBilans.map(apiClientBilan => new CLFClientBilanDocs(clients, apiClientBilan)))

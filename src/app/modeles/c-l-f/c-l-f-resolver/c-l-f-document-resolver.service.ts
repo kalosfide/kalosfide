@@ -7,8 +7,8 @@ import { map } from 'rxjs/operators';
 import { CLFService } from '../c-l-f.service';
 import { NomParam } from '../../nom-param';
 import { ApiResult404NotFound } from 'src/app/api/api-results/api-result-404-not-found';
-import { KeyUidRnoNo } from 'src/app/commun/data-par-key/key-uid-rno-no/key-uid-rno-no';
-import { IKeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/i-key-uid-rno';
+import { KeyIdNo } from 'src/app/commun/data-par-key/key-id-no/key-id-no';
+import { IKeyId } from 'src/app/commun/data-par-key/key-id/i-key-id';
 import { Client } from '../../client/client';
 
 export abstract class CLFDocumentResolverService extends DataResolverService {
@@ -70,7 +70,7 @@ export abstract class CLFDocumentResolverService extends DataResolverService {
             this.service.routeur.navigueVersPageErreur(new ApiResult404NotFound());
             return null;
         }
-        const keyDoc = KeyUidRnoNo.keyDeTexte(paramKeyDoc);
+        const keyDoc = KeyIdNo.keyDeTexte(paramKeyDoc);
         return this.service.document(keyDoc, keyDoc.no, type).pipe(
             map(clfDocs => {
                 clfDocs.site = this.service.litSiteEnCours();

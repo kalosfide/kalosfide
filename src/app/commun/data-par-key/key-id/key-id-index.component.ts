@@ -1,16 +1,16 @@
 import { Router, ActivatedRoute } from '@angular/router';
 
-import { KeyUidRnoService } from './key-uid-rno.service';
+import { KeyIdService } from './key-id.service';
 import { DataKeyIndexComponent } from '../data-key-index.component';
-import { KeyUidRno } from './key-uid-rno';
+import { KeyId } from './key-id';
 import { Component,} from '@angular/core';
 
 @Component({ template: '' })
-export abstract class KeyUidRnoIndexComponent<T extends KeyUidRno> extends DataKeyIndexComponent<T>  {
+export abstract class KeyIdIndexComponent<T extends KeyId> extends DataKeyIndexComponent<T>  {
 
     constructor(
         protected route: ActivatedRoute,
-        protected service: KeyUidRnoService<T>,
+        protected service: KeyIdService<T>,
     ) {
         super(route, service);
     }

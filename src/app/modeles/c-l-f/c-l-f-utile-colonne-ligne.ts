@@ -6,7 +6,7 @@ import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
 import { Compare } from '../../commun/outils/tri';
-import { TypeMesure } from '../type-mesure';
+import { TypeMesureFabrique } from '../type-mesure';
 import { CLFLigne } from './c-l-f-ligne';
 import { CoûtDef, LigneDocumentCoût } from './cout';
 import { CLFDoc } from './c-l-f-doc';
@@ -87,7 +87,7 @@ export class CLFUtileColonneLigne {
     }
 
     seCommande(): IKfVueTableColonneDef<CLFLigne> {
-        const créeContenu = (ligne: CLFLigne) => TypeMesure.texteSeCommande(ligne.produit.typeMesure, ligne.produit.typeCommande);
+        const créeContenu = (ligne: CLFLigne) => TypeMesureFabrique.texteSeCommande(ligne.produit.typeMesure, ligne.produit.typeCommande);
         const def: IKfVueTableColonneDef<CLFLigne> = {
             nom: 'seCommande',
             enTeteDef: { titreDef: 'Se commande' },
@@ -183,7 +183,7 @@ export class CLFUtileColonneLigne {
     }
 
     typeMesure(titre: string): IKfVueTableColonneDef<CLFLigne> {
-        const créeContenu = (ligne: CLFLigne) => TypeMesure.texteUnités(ligne.produit.typeMesure, ligne.produit.typeCommande);
+        const créeContenu = (ligne: CLFLigne) => TypeMesureFabrique.texteUnités(ligne.produit.typeMesure, ligne.produit.typeCommande);
         return {
             nom: 'typeMesure',
             créeContenu,

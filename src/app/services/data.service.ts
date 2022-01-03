@@ -4,7 +4,7 @@ import { ApiResult } from '../api/api-results/api-result';
 import { RouteurService } from './routeur.service';
 import { NavigationService } from './navigation.service';
 import { AttenteService } from './attente.service';
-import { IKeyUidRno } from '../commun/data-par-key/key-uid-rno/i-key-uid-rno';
+import { IKeyId } from '../commun/data-par-key/key-id/i-key-id';
 import { KfNgbModalService } from '../commun/kf-composants/kf-ngb-modal/kf-ngb-modal.service';
 import { ApiRequêteAction } from '../api/api-requete-action';
 import { ApiRequêteLecture } from '../api/api-requete-lecture';

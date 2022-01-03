@@ -6,7 +6,7 @@ import { CataloguePages } from "./fournisseur/catalogue/catalogue-pages";
 import { FournisseurPages } from "./fournisseur/fournisseur-pages";
 import { CLFPages } from "./modeles/c-l-f/c-l-f-pages";
 import { CommandeRouteur, LFRouteur } from "./modeles/c-l-f/c-l-f-routeur";
-import { Role } from "./modeles/role/role";
+import { Site } from "./modeles/site/site";
 import { SitePages } from "./site/site-pages";
 import { SiteRouteur } from "./site/site-routeur";
 
@@ -58,12 +58,12 @@ export class AppRouteur extends Routeur {
         return new Routeur(this, 'assets');
     }
 
-    routeurDeRole(role: Role): Routeur {
-        const site = new SiteRouteur(this);
-        site.fixeSite(role.site.url);
-        return role.estFournisseur
-            ? new Routeur(site, SitePages.fournisseur.path)
-            : new Routeur(site, SitePages.client.path);
+    routeurDeSite(site: Site): Routeur {
+        const routeur = new SiteRouteur(this);
+        routeur.fixeSite(site.url);
+        return site.client
+            ? new Routeur(routeur, SitePages.client.path)
+            : new Routeur(routeur, SitePages.fournisseur.path);
     }
 
 }

@@ -1,4 +1,4 @@
-import { IKeyUidRno } from '../commun/data-par-key/key-uid-rno/i-key-uid-rno';
+import { IKeyId } from '../commun/data-par-key/key-id/i-key-id';
 
 export class FournisseurModel {
     nom: string;

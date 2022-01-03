@@ -1,13 +1,12 @@
 import { ApiDoc } from './api-doc';
-import { IKeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/i-key-uid-rno';
+import { IKeyId } from 'src/app/commun/data-par-key/key-id/i-key-id';
 import { Catalogue } from '../catalogue/catalogue';
 import { Client } from '../client/client';
-import { ApiDocs } from './api-docs';
 import { CLFLigne } from './c-l-f-ligne';
 import { CLFDoc } from './c-l-f-doc';
 import { Produit } from '../catalogue/produit';
 import { Site } from '../site/site';
-import { IKeyUidRnoNo } from 'src/app/commun/data-par-key/key-uid-rno-no/i-key-uid-rno-no';
+import { IKeyIdNo } from 'src/app/commun/data-par-key/key-id-no/i-key-id-no';
 import { CLFNbBons } from './c-l-f-nb-bons';
 import { typeCLF, TypeCLF } from './c-l-f-type';
 
@@ -25,7 +24,7 @@ export class CLFDocs {
      * Key de l'identifiant de l'utilisateur.
      * Ajouté quand le CLFDocs est stocké et vérifié à chaque lecture du stock pour recharger le stock si changé
      */
-    keyIdentifiant: IKeyUidRno;
+    keyIdentifiant: IKeyId;
 
     /**
      * Site réduit qui peut contenir uid, rno et etat.
@@ -94,7 +93,7 @@ export class CLFDocs {
         return this.type === 'livraison' ? 'commande' : this.type === 'facture' ? 'livraison' : undefined;
     }
 
-    get keyClient(): IKeyUidRno { return this.client ? this.client : this.keyIdentifiant; }
+    get keyClient(): IKeyId { return this.client ? this.client : this.keyIdentifiant; }
 
     get sansBonVirtuelOuvert(): boolean {
         const apiDoc = this.apiDocs.find(d => d.no === 0 && !d.date);
@@ -112,9 +111,9 @@ export class CLFDocs {
         if (this.tarif) {
             this.tarif.produits.forEach(p => p.nom = p.nom + ' (vieux)');
             this.tarif.produits.forEach(produit => {
-                let catégorie = this.tarif.catégories.find(c => c.no === produit.categorieNo);
+                let catégorie = this.tarif.catégories.find(c => c.id === produit.categorieId);
                 if (!catégorie) {
-                    catégorie = catalogue.catégories.find(c => c.no === produit.categorieNo);
+                    catégorie = catalogue.catégories.find(c => c.id === produit.categorieId);
                 }
                 produit.nomCategorie = catégorie.nom;
             });
@@ -183,8 +182,7 @@ export class CLFDocs {
             return clfDoc;
         } else {
             const apiDoc = new ApiDoc();
-            apiDoc.uid = this.client.uid;
-            apiDoc.rno = this.client.rno;
+            apiDoc.id = this.client.id;
             clfDoc = CLFDoc.nouveau(this, this.type, apiDoc);
 
             // Si la dernière synthèse a été créée à partir du seul bon virtuel et s'il n'y a pas de bons envoyés sans synthèse ni de bon virtuel,
@@ -224,8 +222,7 @@ export class CLFDocs {
                 // le client n'a jamais commandé
                 // on crée un ApiDoc sans lignes
                 apiDoc = new ApiDoc();
-                apiDoc.uid = this.client.uid;
-                apiDoc.rno = this.client.rno;
+                apiDoc.id = this.client.id;
             } else {
                 apiDoc = this.apiDocs[0];
             }
@@ -236,8 +233,7 @@ export class CLFDocs {
             if (!apiDoc) {
                 // le fournisseur veut créer un bon virtuel et il n'a pas de synthèse modèle
                 apiDoc = new ApiDoc();
-                apiDoc.uid = this.client.uid;
-                apiDoc.rno = this.client.rno;
+                apiDoc.id = this.client.id;
                 apiDoc.no = 0;
             }
             //            apiDoc.lignes.forEach(l => l.quantité = l.aFixer);
@@ -275,7 +271,7 @@ export class CLFDocs {
             const clfDocs = new CLFDocs();
             clfDocs.type = this.typeASynthétiser;
             clfDocs.client = client;
-            clfDocs.apiDocs = this.apiDocs.filter(d => d.uid === client.uid && d.rno === client.rno);
+            clfDocs.apiDocs = this.apiDocs.filter(d => d.id === client.id);
             return clfDocs;
         });
         return clfDocsClient;
@@ -283,13 +279,13 @@ export class CLFDocs {
 
     /**
      * Retourne le produit lu dans le catalogue
-     * @param no no du produiit
+     * @param id Id du produiit
      */
-    produit(no: string | number): Produit {
-        if (no) {
-            const produit: Produit = this.catalogue.produits.find(p => p.no === +no);
+    produit(id: string): Produit {
+        if (id) {
+            const produit: Produit = this.catalogue.produits.find(p => p.id === +id);
             if (produit) {
-                produit.nomCategorie = this.catalogue.catégories.find(c => produit.categorieNo === c.no).nom;
+                produit.nomCategorie = this.catalogue.catégories.find(c => produit.categorieId === c.id).nom;
                 return produit;
             }
         }
@@ -304,7 +300,7 @@ export class CLFDocs {
         const apiDocument = this.type === 'commande'
             ? this.apiDocs[0]
             : this.apiDocs.find(d => d.no === 0);
-        const index = apiDocument.lignes.findIndex(l => l.no === ligne.no2);
+        const index = apiDocument.lignes.findIndex(l => l.id === ligne.produitId);
         if (index === -1) {
             apiDocument.lignes.push(ligne.apiLigne);
         } else {
@@ -332,7 +328,7 @@ export class CLFDocs {
         const àFixer = ligne.éditeur.kfAFixer.valeur;
         ligne.apiLigne.aFixer = àFixer;
         const apiDocument = this.apiDocs.find(d => d.no === ligne.no);
-        const apiLigne = apiDocument.lignes.find(l => l.no === ligne.no2 && l.date === ligne.date);
+        const apiLigne = apiDocument.lignes.find(l => l.id === ligne.produitId && l.date === ligne.date);
         apiLigne.aFixer = àFixer;
     }
 
@@ -342,7 +338,7 @@ export class CLFDocs {
      */
     quandQuantitéCopiéeDansAFixerLigne(ligne: CLFLigne) {
         const apiDocument = this.apiDocs.find(d => d.no === ligne.no);
-        const apiLigne = apiDocument.lignes.find(l => l.no === ligne.no2 && l.date === ligne.date);
+        const apiLigne = apiDocument.lignes.find(l => l.id === ligne.produitId && l.date === ligne.date);
         const àFixer = apiLigne.quantité;
         ligne.aFixer = àFixer;
         apiLigne.aFixer = àFixer;
@@ -354,7 +350,7 @@ export class CLFDocs {
      */
     quandAnnuleLigne(ligne: CLFLigne) {
         const apiDocument = this.apiDocs.find(d => d.no === ligne.no);
-        const apiLigne = apiDocument.lignes.find(l => l.no === ligne.no2 && l.date === ligne.date);
+        const apiLigne = apiDocument.lignes.find(l => l.id === ligne.produitId && l.date === ligne.date);
         ligne.aFixer = 0;
         apiLigne.aFixer = 0;
     }
@@ -409,8 +405,7 @@ export class CLFDocs {
      */
     quandBonCréé(créé: ApiDoc, copie?: boolean) {
         const apiDoc = new ApiDoc();
-        apiDoc.uid = this.client.uid;
-        apiDoc.rno = this.client.rno;
+        apiDoc.id = this.client.id;
         apiDoc.no = créé.no;
         apiDoc.lignes = [];
         if (this.type === 'commande') {
@@ -456,7 +451,7 @@ export class CLFDocs {
      * Si l'utilisateur est le fournisseur et la commande a été créée par le client, fixe à 0 le aLivrer de toutes les lignes.
      * @param ikeyCommande tout objet ayant l'uid, le rno et le no de la commande
      */
-    quandSupprimeOuRefuse(ikeyCommande: IKeyUidRnoNo) {
+    quandSupprimeOuRefuse(ikeyCommande: IKeyIdNo) {
         if (this.type === 'commande') {
             // L'utilisateur est le client.
             // Les apiDocuments sont réduits à la dernière commande du client.

@@ -1,23 +1,22 @@
 import { Injectable } from '@angular/core';
 import { ApiController } from '../../api/api-route';
 import { Categorie } from './categorie';
-import { KeyUidRnoNoService } from '../../commun/data-par-key/key-uid-rno-no/key-uid-rno-no.service';
 import { CatalogueService } from './catalogue.service';
 import { ApiRequêteService } from 'src/app/api/api-requete.service';
-import { CatalogueUtile } from './catalogue-utile';
 import { CategorieUtile } from './categorie-utile';
 import { Observable } from 'rxjs';
 import { Catalogue } from './catalogue';
-import { map, switchMap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { ApiRequêteAction } from 'src/app/api/api-requete-action';
 import { KfVueTableRéglages } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-reglages';
 import { StockageService } from 'src/app/services/stockage/stockage.service';
+import { KeyIdService } from 'src/app/commun/data-par-key/key-id/key-id.service';
 
 
 @Injectable({
     providedIn: 'root'
 })
-export class CategorieService extends KeyUidRnoNoService<Categorie> {
+export class CategorieService extends KeyIdService<Categorie> {
 
     controllerUrl = ApiController.categorie;
 
@@ -41,15 +40,15 @@ export class CategorieService extends KeyUidRnoNoService<Categorie> {
     catégories$(): Observable<Categorie[]> {
         return this.catalogueService.catalogue$().pipe(
             map((catalogue: Catalogue) => {
-                catalogue.catégories.forEach(c => c.nbProduits = catalogue.produits.filter(p => p.categorieNo === c.no).length);
+                catalogue.catégories.forEach(c => c.nbProduits = catalogue.produits.filter(p => p.categorieId === c.id).length);
                 return catalogue.catégories;
             })
         );
     }
 
-    catégorie$(no: number): Observable<Categorie> {
+    catégorie$(id: number): Observable<Categorie> {
         return this.catalogueService.catalogue$().pipe(
-            map((catalogue: Catalogue) => catalogue.catégories.find(c => c.no === no))
+            map((catalogue: Catalogue) => catalogue.catégories.find(c => c.id === id))
         );
     }
 
@@ -57,9 +56,9 @@ export class CategorieService extends KeyUidRnoNoService<Categorie> {
         const stock = this.catalogueService.litStock();
         return stock.catégories;
     }
-    litCatégorie(no: number): Categorie {
+    litCatégorie(id: number): Categorie {
         const stock = this.catalogueService.litStock();
-        return stock.catégories.find(c => c.no === no);
+        return stock.catégories.find(c => c.id === id);
     }
 
     nomPris(nom: string): boolean {
@@ -67,9 +66,9 @@ export class CategorieService extends KeyUidRnoNoService<Categorie> {
         return !!stock.catégories.find(s => s.nom === nom);
     }
 
-    nomPrisParAutre(no: number, nom: string): boolean {
+    nomPrisParAutre(id: number, nom: string): boolean {
         const stock = this.catalogueService.litStock();
-        return !!stock.catégories.find(s => s.nom === nom && s.no !== no);
+        return !!stock.catégories.find(s => s.nom === nom && s.id !== id);
     }
 
     quandAjoute(ajouté: Categorie) {
@@ -80,7 +79,7 @@ export class CategorieService extends KeyUidRnoNoService<Categorie> {
 
     quandEdite(édité: Categorie) {
         const stock = this.catalogueService.litStock();
-        const index = stock.catégories.findIndex(s => s.no === édité.no);
+        const index = stock.catégories.findIndex(s => s.id === édité.id);
         if (index === -1) {
             throw new Error('Catégories: édité absent du stock');
         }
@@ -93,7 +92,7 @@ export class CategorieService extends KeyUidRnoNoService<Categorie> {
             demandeApi: () => this.supprime(àSupprimer),
             actionSiOk: (créé: any) => {
                 const stock = this.catalogueService.litStock();
-                const index = stock.catégories.findIndex(s => s.no === àSupprimer.no);
+                const index = stock.catégories.findIndex(s => s.id === àSupprimer.id);
                 if (index === -1) {
                     throw new Error('Catégories: supprimé absent du stock');
                 }

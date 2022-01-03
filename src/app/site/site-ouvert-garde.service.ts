@@ -6,7 +6,6 @@ import { ClientPages } from "../client/client-pages";
 import { Fabrique } from "../disposition/fabrique/fabrique";
 import { ApiResultErreurSpéciale } from "../api/api-results/api-result-erreur";
 import { map } from "rxjs/operators";
-import { Role } from "../modeles/role/role";
 
 /**
  * Lit dans le stock l'état du site et, si le site est fermé, redirige vers la page pasOuvert pour un client
@@ -23,11 +22,11 @@ export class SiteOuvertGardeService implements CanActivate {
     }
 
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean | UrlTree> | boolean | UrlTree {
-        const role = this.service.identification.roleEnCours;
-        if (role.site.ouvert) {
+        const site = this.service.identification.siteEnCours;
+        if (site.ouvert) {
             return true;
         }
-        if (role.estClient) {
+        if (site.client) {
             return this.service.routeur.urlTreePageDef(ClientPages.pasOuvert, Fabrique.url.appRouteur.client);
         }
         const modal = Fabrique.erreurModal(new ApiResultErreurSpéciale(409,

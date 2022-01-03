@@ -1,33 +1,23 @@
-import { KeyUidRnoNo, IKeyUidRnoNoData } from '../../commun/data-par-key/key-uid-rno-no/key-uid-rno-no';
 import { ProduitEditeur } from './produit-editeur';
 import { ProduitBilan } from './produit-bilan';
 import { TypeCLF, apiType } from '../c-l-f/c-l-f-type';
 import { KfVueTableLigne } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-ligne';
+import { KeyId } from 'src/app/commun/data-par-key/key-id/key-id';
+import { TypeMesure } from '../type-mesure';
+import { TypeCommande } from '../type-commande';
 
 export interface IAvecProduit {
     produit: Produit;
 }
 
-export interface IProduitData extends IKeyUidRnoNoData {
-    no: number;
+export class Produit extends KeyId implements IAvecProduit {
     nom: string;
-    categorieNo: number;
-    typeCommande: string;
-    typeMesure: string;
-    prix: number;
-    etat: string;
-    date?: Date;
-    bilans: ProduitBilan[];
-}
-
-export class Produit extends KeyUidRnoNo implements IAvecProduit, IProduitData {
-    nom: string;
-    categorieNo: number;
-    typeCommande: string;
-    typeMesure: string;
+    categorieId: number;
+    typeCommande: TypeCommande;
+    typeMesure: TypeMesure;
     prix: number;
     // présents pour le fournisseur
-    etat: string;
+    disponible: boolean;
     date?: Date;
     bilans: ProduitBilan[];
 
@@ -53,20 +43,20 @@ export class Produit extends KeyUidRnoNo implements IAvecProduit, IProduitData {
      * @param de data source
      * @param vers data destination
      */
-    static copieData(de: IProduitData, vers: IProduitData) {
+    static copieData(de: Produit, vers: Produit) {
         if (de.nom) { vers.nom = de.nom; }
-        if (de.categorieNo) { vers.categorieNo = de.categorieNo; }
+        if (de.categorieId) { vers.categorieId = de.categorieId; }
         if (de.typeCommande) { vers.typeCommande = de.typeCommande; }
         if (de.typeMesure) { vers.typeMesure = de.typeMesure; }
         if (de.prix) { vers.prix = de.prix; }
-        if (de.etat) { vers.etat = de.etat; }
+        if (de.disponible) { vers.disponible = de.disponible; }
         if (de.date) { vers.date = de.date; }
         if (de.bilans) { vers.bilans = de.bilans; }
     }
 
     get apiProduitPrix(): Produit {
         const produit = new Produit();
-        KeyUidRnoNo.copieKey(this, produit);
+        KeyId.copieKey(this, produit);
         this.prix = this.editeur.kfPrix.valeur;
         produit.prix = this.prix;
         return produit;
@@ -74,9 +64,9 @@ export class Produit extends KeyUidRnoNo implements IAvecProduit, IProduitData {
 
     get apiProduitEtat(): Produit {
         const produit = new Produit();
-        KeyUidRnoNo.copieKey(this, produit);
-        this.etat = this.editeur.kfEtat.valeur;
-        produit.etat = this.etat;
+        KeyId.copieKey(this, produit);
+        this.disponible = this.editeur.kfDisponible.valeur === true;
+        produit.disponible = this.disponible;
         return produit;
     }
 
@@ -99,17 +89,5 @@ export class Produit extends KeyUidRnoNo implements IAvecProduit, IProduitData {
         }
     }
 
-}
-
-export class ProduitData implements IProduitData {
-    no: number;
-    nom: string;
-    categorieNo: number;
-    typeCommande: string;
-    typeMesure: string;
-    prix: number;
-    etat: string;
-    date?: Date;
-    bilans: ProduitBilan[];
 }
 

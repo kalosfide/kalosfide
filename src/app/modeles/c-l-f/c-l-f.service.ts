@@ -7,19 +7,19 @@ import { ModeAction } from './condition-action';
 import { ApiDoc } from './api-doc';
 import { CatalogueService } from '../catalogue/catalogue.service';
 import { StockageService } from 'src/app/services/stockage/stockage.service';
-import { IKeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/i-key-uid-rno';
+import { IKeyId } from 'src/app/commun/data-par-key/key-id/i-key-id';
 import { ApiController, ApiAction } from 'src/app/api/api-route';
-import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
+import { KeyId } from 'src/app/commun/data-par-key/key-id/key-id';
 import { ClientService } from '../client/client.service';
 import { CLFDoc } from './c-l-f-doc';
-import { IKeyUidRnoNo } from 'src/app/commun/data-par-key/key-uid-rno-no/i-key-uid-rno-no';
-import { KeyUidRnoNo } from 'src/app/commun/data-par-key/key-uid-rno-no/key-uid-rno-no';
+import { IKeyIdNo } from 'src/app/commun/data-par-key/key-id-no/i-key-id-no';
+import { KeyIdNo } from 'src/app/commun/data-par-key/key-id-no/key-id-no';
 import { CLFLectureService } from './c-l-f-lecture.service';
 import { CLFUtile } from './c-l-f-utile';
 import { ApiResult } from 'src/app/api/api-results/api-result';
 import { CLFLigne } from './c-l-f-ligne';
 import { ApiLigneAEnvoyer } from './api-ligne';
-import { KeyUidRnoNo2 } from 'src/app/commun/data-par-key/key-uid-rno-no-2/key-uid-rno-no-2';
+import { KeyLigne } from 'src/app/commun/data-par-key/key-ligne/key-ligne';
 import { ApiRequêteAction } from 'src/app/api/api-requete-action';
 import { IUrlDef } from 'src/app/disposition/fabrique/fabrique-url';
 import { KfSuperGroupe } from 'src/app/commun/kf-composants/kf-groupe/kf-super-groupe';
@@ -151,8 +151,8 @@ export abstract class CLFService extends CLFLectureService {
      * Si l'utilisateur est le client la date de l'état du site est ajouté.
      */
     private paramsKeyLigne(ligne: CLFLigne): { [param: string]: string } {
-        const params = KeyUidRnoNo.créeParams(ligne);
-        params['no2'] = '' + ligne.no2;
+        const params = KeyIdNo.créeParams(ligne);
+        params['no2'] = '' + ligne.produitId;
         return this.paramsAvecContexte(params);
     }
 
@@ -160,8 +160,8 @@ export abstract class CLFService extends CLFLectureService {
      * Paramètre de requête contenant la key du client.
      * Si l'utilisateur est le client la date de l'état du site est ajouté.
      */
-    protected paramsKeyClient(ikeyClient: IKeyUidRno): { [param: string]: string } {
-        const params = KeyUidRno.créeParams(ikeyClient);
+    protected paramsKeyClient(ikeyClient: IKeyId): { [param: string]: string } {
+        const params = KeyId.créeParams(ikeyClient);
         return this.paramsAvecContexte(params);
     }
 
@@ -169,8 +169,8 @@ export abstract class CLFService extends CLFLectureService {
      * Paramètre de requête contenant la key du bon.
      * Si l'utilisateur est le client la date de l'état du site est ajouté.
      */
-    private paramsKeyBon(ikeyBon: IKeyUidRnoNo): { [param: string]: string } {
-        const params = KeyUidRnoNo.créeParams(ikeyBon);
+    private paramsKeyBon(ikeyBon: IKeyIdNo): { [param: string]: string } {
+        const params = KeyIdNo.créeParams(ikeyBon);
         return this.paramsAvecContexte(params);
     }
 
@@ -226,7 +226,7 @@ export abstract class CLFService extends CLFLectureService {
      * @param type 'commande' ou 'livraison'
      * @param ikeyClient tout objet ayant l'uid et le rno du client
      */
-    public apiRequêteCrée(type: TypeCLF, ikeyClient: IKeyUidRno, formulaire?: KfSuperGroupe, afficheResultat?: AfficheResultat): ApiRequêteAction {
+    public apiRequêteCrée(type: TypeCLF, ikeyClient: IKeyId, formulaire?: KfSuperGroupe, afficheResultat?: AfficheResultat): ApiRequêteAction {
         let controller: string;
         switch (type) {
             case 'commande':
@@ -253,7 +253,7 @@ export abstract class CLFService extends CLFLectureService {
      * Crée une nouvelle commande d'un client copie de la précédente commande.
      * @param ikeyClient tout objet ayant l'uid et le rno du client
      */
-    public apiRequêteCréeCopie(type: TypeCLF, ikeyClient: IKeyUidRno, formulaire?: KfSuperGroupe, afficheResultat?: AfficheResultat): ApiRequêteAction {
+    public apiRequêteCréeCopie(type: TypeCLF, ikeyClient: IKeyId, formulaire?: KfSuperGroupe, afficheResultat?: AfficheResultat): ApiRequêteAction {
         let controller: string;
         switch (type) {
             case 'commande':
@@ -287,11 +287,11 @@ export abstract class CLFService extends CLFLectureService {
      * Si l'utilisateur a créé la commande, supprime la commande et toutes ses lignes.
      * @param ikeyCommande tout objet ayant l'uid, le rno et le no de la commande
      */
-    supprimeOuRefuse$(ikeyCommande: IKeyUidRnoNo) {
+    supprimeOuRefuse$(ikeyCommande: IKeyIdNo) {
         return this.post(ApiController.commande, ApiAction.bon.efface, null, this.paramsKeyBon(ikeyCommande));
     }
     /** actionSiOk de supprimeOuRefuse si l'utilisateur est le fournisseur */
-    siSupprimeOuRefuseOk(ikeyCommande: IKeyUidRnoNo) {
+    siSupprimeOuRefuseOk(ikeyCommande: IKeyIdNo) {
         const géreDocs = this.litStock();
         géreDocs.quandSupprimeOuRefuse(ikeyCommande);
         this.fixeStock(géreDocs);
@@ -347,12 +347,12 @@ export abstract class CLFService extends CLFLectureService {
         return this.apiRequêteAction(
             () => {
                 const params = this.paramsKeyBon(ligne);
-                params.no2 = '' + ligne.no2;
+                params.no2 = '' + ligne.produitId;
                 return this.delete(controller, ApiAction.bon.supprime, this.paramsKeyLigne(ligne));
             },
             (stock: CLFDocs) => {
                 // Les lignes d'un bon ont toutes la même date Date_Nulle, leur no2 (no de produit) suffit à les distinguer.
-                const index = ligne.parent.lignes.findIndex(l => l.no2 === ligne.no2)
+                const index = ligne.parent.lignes.findIndex(l => l.produitId === ligne.produitId)
                 stock.quandLigneSupprimée(index);
                 rafraichitComponent(stock, index);
             }
@@ -368,7 +368,7 @@ export abstract class CLFService extends CLFLectureService {
         const controller = this.controller(ligne.parent.type);
         return this.apiRequêteAction(
             () => {
-                const params = KeyUidRnoNo2.créeParams(ligne);
+                const params = KeyLigne.créeParams(ligne);
                 params.aFixer = '' + ligne.éditeur.kfAFixer.valeur;
                 return this.post(controller, ApiAction.docCLF.fixe, null, params);
             },
@@ -384,7 +384,7 @@ export abstract class CLFService extends CLFLectureService {
     public apiRequêteCopieQuantitéDansAFixerLigne(ligne: CLFLigne): ApiRequêteAction {
         const controller = this.controller(ligne.parent.type);
         return this.apiRequêteAction(
-            () => this.post(controller, ApiAction.docCLF.copie1, null, KeyUidRnoNo2.créeParams(ligne)),
+            () => this.post(controller, ApiAction.docCLF.copie1, null, KeyLigne.créeParams(ligne)),
             (stock: CLFDocs) => stock.quandQuantitéCopiéeDansAFixerLigne(ligne),
         );
     }
@@ -397,7 +397,7 @@ export abstract class CLFService extends CLFLectureService {
     public apiRequêteAnnuleLigne(ligne: CLFLigne): ApiRequêteAction {
         const controller = this.controller(ligne.parent.type);
         return this.apiRequêteAction(
-            () => this.post(controller, ApiAction.docCLF.annule1, null, KeyUidRnoNo2.créeParams(ligne)),
+            () => this.post(controller, ApiAction.docCLF.annule1, null, KeyLigne.créeParams(ligne)),
             (stock: CLFDocs) => stock.quandAnnuleLigne(ligne),
         );
     }
@@ -411,7 +411,7 @@ export abstract class CLFService extends CLFLectureService {
     public apiRequêteCopieQuantitéDansAFixerDoc(bon: CLFDoc, quandBonModifié?: (bon: CLFDoc) => void): ApiRequêteAction {
         const controller = this.controller(bon.type);
         return this.apiRequêteAction(
-            () => this.post(controller, ApiAction.docCLF.copieD, null, KeyUidRnoNo.créeParams(bon)),
+            () => this.post(controller, ApiAction.docCLF.copieD, null, KeyIdNo.créeParams(bon)),
             (stock: CLFDocs) => {
                 stock.quandQuantitéCopiéeDansAFixerDoc(bon);
                 if (quandBonModifié) {
@@ -428,7 +428,7 @@ export abstract class CLFService extends CLFLectureService {
     public apiRequêteAnnuleDoc(bon: CLFDoc, quandBonModifié?: (bon: CLFDoc) => void): ApiRequêteAction {
         const controller = this.controller(bon.type);
         return this.apiRequêteAction(
-            () => this.post(controller, ApiAction.docCLF.annuleD, null, KeyUidRnoNo.créeParams(bon)),
+            () => this.post(controller, ApiAction.docCLF.annuleD, null, KeyIdNo.créeParams(bon)),
             (stock: CLFDocs) => {
                 stock.quandAnnuleDoc(bon);
                 if (quandBonModifié) {
@@ -463,7 +463,7 @@ export abstract class CLFService extends CLFLectureService {
     public apiRequêteSupprimeBonVirtuel(doc: CLFDoc, rafraichitTable?: () => void): ApiRequêteAction {
         const controller = this.controller(doc.type);
         return this.apiRequêteAction(
-            () => this.post(controller, ApiAction.bon.efface, null, KeyUidRnoNo.créeParams(doc)),
+            () => this.post(controller, ApiAction.bon.efface, null, KeyIdNo.créeParams(doc)),
             (stock: CLFDocs) => {
                 stock.quandSupprimeBonVirtuel();
                 if (rafraichitTable) {
@@ -523,7 +523,7 @@ export abstract class CLFService extends CLFLectureService {
                     // la synthèse a été créée à partir du bon virtuel seul, elle peut servir de modèle
                     // pour la création d'un bon virtuel
                     const apiDocModéleBonVirtuel = new ApiDoc();
-                    apiDocModéleBonVirtuel.uid = clfDoc.uid;
+                    apiDocModéleBonVirtuel.id = clfDoc.id;
                     apiDocModéleBonVirtuel.rno = clfDoc.rno;
                     apiDocModéleBonVirtuel.no = 0;
                     apiDocModéleBonVirtuel.date = créé.date;

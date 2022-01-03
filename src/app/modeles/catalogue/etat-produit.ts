@@ -1,3 +1,4 @@
+import { KfEntreeInputBool } from 'src/app/commun/kf-composants/kf-composants-types';
 import { Produit } from './produit';
 
 export enum IdEtatProduit {
@@ -7,29 +8,24 @@ export enum IdEtatProduit {
 }
 
 export class EtatProduit {
-    valeur: IdEtatProduit;
+    valeur: KfEntreeInputBool;
     texte: string;
     vérifie: (p: Produit) => boolean;
 }
 
 export class EtatsProduits {
-    static disponible: EtatProduit = {
-        valeur: IdEtatProduit.disponible,
-        texte: 'disponible',
-        vérifie: (p: Produit) => p.etat === IdEtatProduit.disponible
+    static oui: EtatProduit = {
+        valeur: KfEntreeInputBool.oui,
+        texte: 'Disponible',
+        vérifie: (p: Produit) => p.disponible
     };
-    static indisponible: EtatProduit = {
-        valeur: IdEtatProduit.indisponible,
-        texte: 'indisponible',
-        vérifie: (p: Produit) => p.etat === IdEtatProduit.indisponible
+    static non: EtatProduit = {
+        valeur: KfEntreeInputBool.non,
+        texte: 'Indisponible',
+        vérifie: (p: Produit) => !p.disponible
     };
-    static supprimé: EtatProduit = {
-        valeur: IdEtatProduit.supprimé,
-        texte: 'supprimé',
-        vérifie: (p: Produit) => p.etat === IdEtatProduit.supprimé
-    };
-    static états: EtatProduit[] = [EtatsProduits.disponible, EtatsProduits.indisponible, EtatsProduits.supprimé];
-    static état(id: string): EtatProduit {
-        return EtatsProduits.états.find(e => e.valeur === id);
+    static états: EtatProduit[] = [EtatsProduits.oui, EtatsProduits.non];
+    static état(disponible: boolean): EtatProduit {
+        return disponible ? this.oui : this.non;
     }
 }

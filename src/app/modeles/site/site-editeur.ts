@@ -1,17 +1,12 @@
-import { KfComposant } from '../../commun/kf-composants/kf-composant/kf-composant';
-import { KfValidateurs, KfValidateur } from '../../commun/kf-composants/kf-partages/kf-validateur';
+import { KfValidateurs } from '../../commun/kf-composants/kf-partages/kf-validateur';
 import { Fabrique } from '../../disposition/fabrique/fabrique';
 import { KfInputTexte } from 'src/app/commun/kf-composants/kf-elements/kf-input/kf-input-texte';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
-import { KeyUidRnoEditeur } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno-no-editeur';
+import { KeyIdEditeur } from 'src/app/commun/data-par-key/key-id/key-id-editeur';
 import { Site } from './site';
-import { KfTypeDEvenement } from 'src/app/commun/kf-composants/kf-partages/kf-evenements';
-import { AppSitePages } from 'src/app/app-site/app-site-pages';
-import { RoleEditeur } from '../role/role-editeur';
 import { IDataComponent } from 'src/app/commun/data-par-key/i-data-component';
-import { FSitePages } from 'src/app/fournisseur/f-site/f-site-pages';
 
-export class SiteEditeur extends KeyUidRnoEditeur<Site> {
+export class SiteEditeur extends KeyIdEditeur<Site> {
     kfNom: KfInputTexte;
     kfUrl: KfInputTexte;
     kfTitre: KfInputTexte;

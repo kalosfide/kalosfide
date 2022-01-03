@@ -3,14 +3,14 @@ import { IUrlDef } from 'src/app/disposition/fabrique/fabrique-url';
 import { CLFUtile } from './c-l-f-utile';
 import { Client } from '../client/client';
 import { DataUtileUrl } from 'src/app/commun/data-par-key/data-utile-url';
-import { KeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno';
+import { KeyId } from 'src/app/commun/data-par-key/key-id/key-id';
 import { CLFDoc } from './c-l-f-doc';
 import { apiType, TypeCLF } from './c-l-f-type';
 import { CLFLigne } from './c-l-f-ligne';
 import { CommandePages } from 'src/app/client/commandes/commande-pages';
 import { CLFDocs } from './c-l-f-docs';
 import { CLFPages } from './c-l-f-pages';
-import { IKeyUidRno } from 'src/app/commun/data-par-key/key-uid-rno/i-key-uid-rno';
+import { IKeyId } from 'src/app/commun/data-par-key/key-id/i-key-id';
 import { ClientPages } from 'src/app/client/client-pages';
 import { FournisseurPages } from 'src/app/fournisseur/fournisseur-pages';
 import { FDocumentPages } from 'src/app/fournisseur/documents/f-document-pages';
@@ -45,7 +45,7 @@ export class CLFUtileUrl extends DataUtileUrl {
     /**
      * ISiteRoutes de la route: document pour le client ou document/client/:keyClient pour le fournisseur
      */
-    private routeurDocumentClient: (keyClient?: IKeyUidRno) => Routeur;
+    private routeurDocumentClient: (keyClient?: IKeyId) => Routeur;
 
     /**
      * Nécessaire pour toutes les urls d'édition.
@@ -87,7 +87,7 @@ export class CLFUtileUrl extends DataUtileUrl {
     }
 
     private _texteKeyLigne(ligne: CLFLigne): string {
-        return ligne ? '' + ligne.no2 : undefined;
+        return ligne ? '' + ligne.produitId : undefined;
     }
 
     /**
@@ -119,9 +119,9 @@ export class CLFUtileUrl extends DataUtileUrl {
      * avec le texteKey du client en fragment.
      * @param keyClient key du client
      */
-    retourDUnClient(keyClient: IKeyUidRno): IUrlDef {
+    retourDUnClient(keyClient: IKeyId): IUrlDef {
         const urlDef = this.choixClient();
-        urlDef.fragment = this.id(KeyUidRno.texteDeKey(keyClient));
+        urlDef.fragment = this.id(KeyId.texteDeKey(keyClient));
         return urlDef;
     }
 
@@ -263,8 +263,8 @@ export class CLFUtileUrl extends DataUtileUrl {
             this.routeurDocumentClient = () => this.routeurDocument;
         } else {
             this.routeurDocument = Fabrique.url.appRouteur.fournisseur.enfant(FournisseurPages.documents.path);
-            this.routeurDocumentClient = (keyClient: IKeyUidRno) => this.routeurDocument.enfant(
-                FDocumentPages.clients.path, CLFPages.client.path, KeyUidRno.texteDeKey(keyClient));
+            this.routeurDocumentClient = (keyClient: IKeyId) => this.routeurDocument.enfant(
+                FDocumentPages.clients.path, CLFPages.client.path, KeyId.texteDeKey(keyClient));
         }
     }
 
@@ -279,9 +279,9 @@ export class CLFUtileUrl extends DataUtileUrl {
      * Route: document/clients avec le texteKey du client en fragment.
      * @param keyClient key du client
      */
-    retourDUnClientVersBilansDocs(keyClient: IKeyUidRno): IUrlDef {
+    retourDUnClientVersBilansDocs(keyClient: IKeyId): IUrlDef {
         const urlDef = this.clientsBilansDocs();
-        urlDef.fragment = this.id(KeyUidRno.texteDeKey(keyClient));
+        urlDef.fragment = this.id(KeyId.texteDeKey(keyClient));
         return urlDef;
     }
 
@@ -296,7 +296,7 @@ export class CLFUtileUrl extends DataUtileUrl {
      * Route: document/client/:key/liste (fournisseur) document/liste (client)
      * @param keyClient key du client
      */
-    documentsClient(keyClient?: IKeyUidRno): IUrlDef {
+    documentsClient(keyClient?: IKeyId): IUrlDef {
         return this.__urlDef(this.routeurDocumentClient(keyClient), CLFPages.liste);
     }
 

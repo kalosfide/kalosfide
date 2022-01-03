@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { KeyUidRnoNoIndexComponent } from 'src/app/commun/data-par-key/key-uid-rno-no/key-uid-rno-no-index.component';
+import { KeyUidRnoNoIndexComponent } from 'src/app/commun/data-par-key/key-id-no/key-id-no-index.component';
 import { Categorie } from 'src/app/modeles/catalogue/categorie';
 import { PageDef } from 'src/app/commun/page-def';
 import { CategoriePages } from './categorie-pages';
@@ -20,11 +20,12 @@ import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquet
 import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
 import { KfLien } from 'src/app/commun/kf-composants/kf-elements/kf-lien/kf-lien';
 import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
+import { KeyIdIndexComponent } from 'src/app/commun/data-par-key/key-id/key-id-index.component';
 
 @Component({
     templateUrl: '../../../disposition/page-base/page-base.html',
 })
-export class CategorieIndexComponent extends KeyUidRnoNoIndexComponent<Categorie> implements OnInit {
+export class CategorieIndexComponent extends KeyIdIndexComponent<Categorie> implements OnInit {
     pageDef: PageDef = CategoriePages.index;
 
     get titre(): string {
@@ -42,7 +43,7 @@ export class CategorieIndexComponent extends KeyUidRnoNoIndexComponent<Categorie
         protected service: CategorieService,
     ) {
         super(route, service);
-        this.fixeDefRéglagesVueTable('catalogue.categorie', (c: Categorie) => c.no);
+        this.fixeDefRéglagesVueTable('catalogue.categorie', (c: Categorie) => c.id);
     }
 
     protected get barreTitreDef(): IBarreDef {
@@ -131,7 +132,7 @@ export class CategorieIndexComponent extends KeyUidRnoNoIndexComponent<Categorie
      * @param data Data résolu avec un champ 'catalogue'
      */
     protected chargeData(data: Data) {
-        const catalogue: Catalogue = Catalogue.nouveau(this.site, data.catalogue);
+        const catalogue: Catalogue = Catalogue.nouveau(data.catalogue);
         this.liste = catalogue.catégories;
         this.liste.forEach(c => c.compteProduits(catalogue.produits));
     }

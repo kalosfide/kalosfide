@@ -271,7 +271,7 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
             };
         }
         vueTableDef.id = (ligne: CLFLigne) => {
-            return this.utile.url.id('' + ligne.produit.no);
+            return this.utile.url.id('' + ligne.produit.id);
         };
         vueTableDef.triInitial = { colonne: this.utile.nom.catégorie, direction: 'asc' };
         vueTableDef.pagination = Fabrique.vueTable.pagination<CLFLigne>();
@@ -435,9 +435,14 @@ export abstract class CLFDocComponent extends PageTableComponent<CLFLigne> imple
         KfBootstrap.ajouteClasseAlerte(groupe, 'primary');
         const kfNom = Fabrique.input.texte('filename', 'Nom du fichier');
         Fabrique.formulaire.préparePourPage(kfNom);
-        const role = this.service.identification.roleEnCours;
-        const nom2 = role.estFournisseur ? this.clfDoc.client.nom : role.site.fournisseur.nom;
-        kfNom.valeur = Role.nomFichier(role, this.clfDoc.type, this.clfDoc.no, nom2);
+        const site = this.service.identification.siteEnCours;
+        if (site.client) {
+            // l'utilisateur est un client
+            kfNom.valeur = Role.nomFichier(site.client, this.clfDoc.type, this.clfDoc.no, site.fournisseur.nom);
+        } else {
+            // l'utilisateur est le fournisseur
+            kfNom.valeur = Role.nomFichier(site.fournisseur, this.clfDoc.type, this.clfDoc.no, this.clfDoc.client.nom);
+        }
         groupe.ajoute(kfNom);
         const def: IBoutonDef = {
             nom: 'btDownload',

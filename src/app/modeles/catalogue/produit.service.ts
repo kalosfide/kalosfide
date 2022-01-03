@@ -2,8 +2,6 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiController, ApiAction } from '../../api/api-route';
 import { Produit } from './produit';
-import { KeyUidRnoNoService } from '../../commun/data-par-key/key-uid-rno-no/key-uid-rno-no.service';
-import { EtatProduit, EtatsProduits, IdEtatProduit } from './etat-produit';
 import { CatalogueService } from './catalogue.service';
 import { Catalogue } from './catalogue';
 import { ApiRequêteService } from 'src/app/api/api-requete.service';
@@ -13,12 +11,13 @@ import { ApiRequêteAction } from 'src/app/api/api-requete-action';
 import { KfVueTableRéglages } from 'src/app/commun/kf-composants/kf-vue-table/kf-vue-table-reglages';
 import { StockageService } from 'src/app/services/stockage/stockage.service';
 import { SiteBilanCatalogue } from '../site/site-bilan';
+import { KeyIdService } from 'src/app/commun/data-par-key/key-id/key-id.service';
 
 
 @Injectable({
     providedIn: 'root'
 })
-export class ProduitService extends KeyUidRnoNoService<Produit> {
+export class ProduitService extends KeyIdService<Produit> {
 
     controllerUrl = ApiController.produit;
 
@@ -47,9 +46,9 @@ export class ProduitService extends KeyUidRnoNoService<Produit> {
         const stock = this.catalogueService.litStock();
         return stock.produits;
     }
-    litProduit(no: number): Produit {
+    litProduit(id: number): Produit {
         const stock = this.catalogueService.litStock();
-        return stock.produits.find(p => p.no === no);
+        return stock.produits.find(p => p.id === id);
     }
 
     nomPris(nom: string): boolean {
@@ -57,13 +56,13 @@ export class ProduitService extends KeyUidRnoNoService<Produit> {
         return !!stock.produits.find(s => s.nom === nom);
     }
 
-    nomPrisParAutre(no: number, nom: string): boolean {
+    nomPrisParAutre(id: number, nom: string): boolean {
         const stock = this.catalogueService.litStock();
-        return !!stock.produits.find(s => s.nom === nom && s.no !== no);
+        return !!stock.produits.find(s => s.nom === nom && s.id !== id);
     }
 
     private bilanCatalogue(stock: Catalogue): SiteBilanCatalogue {
-        const disponibles = Catalogue.filtre(stock, p => p.etat === IdEtatProduit.disponible);
+        const disponibles = Catalogue.filtre(stock, p => p.disponible === true);
         return {
             produits: disponibles.produits.length,
             catégories: disponibles.catégories.length
@@ -79,7 +78,7 @@ export class ProduitService extends KeyUidRnoNoService<Produit> {
 
     quandEdite(édité: Produit) {
         const stock = this.catalogueService.litStock();
-        const index = stock.produits.findIndex(s => s.no === édité.no);
+        const index = stock.produits.findIndex(s => s.id === édité.id);
         if (index === -1) {
             throw new Error('Produits: édité absent du stock');
         }
@@ -94,7 +93,7 @@ export class ProduitService extends KeyUidRnoNoService<Produit> {
             demandeApi: () => this.supprime(àSupprimer),
             actionSiOk: (créé: any) => {
                 const stock = this.catalogueService.litStock();
-                const index = stock.produits.findIndex(s => s.no === àSupprimer.no);
+                const index = stock.produits.findIndex(s => s.id === àSupprimer.id);
                 if (index === -1) {
                     throw new Error('Produits: supprimé absent du stock');
                 }
@@ -108,9 +107,7 @@ export class ProduitService extends KeyUidRnoNoService<Produit> {
 
     prix(produit: Produit): Observable<ApiResult> {
         const produitPrix = {
-            uid: produit.uid,
-            rno: produit.rno,
-            no: produit.no,
+            id: produit.id,
             prix: produit.prix
         };
         return this.put(ApiController.produit, ApiAction.produit.edite, produitPrix);
@@ -118,7 +115,7 @@ export class ProduitService extends KeyUidRnoNoService<Produit> {
 
     prixOk(produit: Produit) {
         const stock = this.catalogueService.litStock();
-        const index = stock.produits.findIndex(s => s.no === produit.no);
+        const index = stock.produits.findIndex(s => s.id === produit.id);
         if (index === -1) {
             throw new Error('Produits: prix absent du stock');
         }
@@ -129,22 +126,20 @@ export class ProduitService extends KeyUidRnoNoService<Produit> {
 
     etat(produit: Produit): Observable<ApiResult> {
         const produitEtat = {
-            uid: produit.uid,
-            rno: produit.rno,
-            no: produit.no,
-            etat: produit.etat
+            id: produit.id,
+            disponible: produit.disponible
         };
         return this.put(ApiController.produit, ApiAction.produit.edite, produitEtat);
     }
 
     etatOk(produit: Produit) {
         const stock = this.catalogueService.litStock();
-        const index = stock.produits.findIndex(s => s.no === produit.no);
+        const index = stock.produits.findIndex(s => s.id === produit.id);
         if (index === -1) {
             throw new Error('Produits: etat absent du stock');
         }
         const stocké = stock.produits[index];
-        stocké.etat = produit.etat;
+        stocké.disponible = produit.disponible;
         this.catalogueService.fixeStock(stock);
     }
 

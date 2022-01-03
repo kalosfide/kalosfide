@@ -74,6 +74,10 @@ export enum KfTypeDeValeur {
      */
     avecEntreeInputNombre,
     /**
+     * input boolean (type de la valeur: boolean)
+     */
+    avecEntreeInputBool,
+    /**
      * liste (type de la valeur: any[])
      *  le type est fixé dans le constructeur
      */
@@ -83,6 +87,11 @@ export enum KfTypeDeValeur {
      *  le type fixé dans le constructeur devient aucun si tous les contenus sont de type aucun
      */
     avecGroupe,
+}
+
+export enum KfEntreeInputBool {
+    oui = 'oui',
+    non = 'nom'
 }
 
 export type KfTypeDeBouton = 'button' | 'reset' | 'submit'

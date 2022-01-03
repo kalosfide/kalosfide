@@ -16,7 +16,6 @@ import { CLFDocs } from './c-l-f-docs';
 import { ModeAction } from './condition-action';
 import { EtatTable } from 'src/app/disposition/fabrique/etat-table';
 import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
-import { Role } from '../role/role';
 
 /**
  * Route: fournisseur: document/client/:keyClient/liste, client: document/liste
@@ -35,7 +34,7 @@ export abstract class CLFDocsComponent extends PageTableComponent<CLFDoc> implem
         protected service: CLFService,
     ) {
         super(route, service);
-        this.fixeDefRéglagesVueTable('documents', (d: CLFDoc) => [d.type, d.uid, d.rno, d.no].join('_'));
+        this.fixeDefRéglagesVueTable('documents', (d: CLFDoc) => [d.type, d.id, d.no].join('_'));
     }
 
     get routeur(): RouteurService { return this.service.routeur; }
@@ -63,8 +62,8 @@ export abstract class CLFDocsComponent extends PageTableComponent<CLFDoc> implem
             colonnesDef: this.utile.colonne.docCLF.defsDocuments(),
             quandClic: (clfDoc: CLFDoc) => (() => this.service.routeur.navigueUrlDef(this.utile.url.document(clfDoc))).bind(this),
         };
-        const role = this.service.identification.roleEnCours;
-        const estFournisseur = role.estFournisseur
+        const site = this.service.identification.siteEnCours;
+        const estFournisseur = !site.client;
         if (estFournisseur) {
             vueTableDef.triInitial = { colonne: 'date', direction: 'desc' };
             vueTableDef.pagination = Fabrique.vueTable.pagination<CLFDoc>('document');

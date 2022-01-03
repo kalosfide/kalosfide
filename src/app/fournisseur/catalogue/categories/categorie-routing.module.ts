@@ -37,7 +37,7 @@ const routes: Routes = [
                 ],
             },
             {
-                path: CategoriePages.edite.path + '/:no',
+                path: CategoriePages.edite.path + '/:id',
                 data: { pageDef: CategoriePages.edite },
                 component: CategorieEditeComponent,
                 canActivate: [

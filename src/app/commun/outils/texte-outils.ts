@@ -85,6 +85,17 @@ class TexteDate {
         return `${jours[surementUneDate.getDay()]} ${this.en_lettres(surementUneDate)}`;
     }
 
+    formate(date: Date, format: {
+        hierAujourDHuiDemain: { hier?: boolean, aujourDHui?: boolean, demain?: boolean },
+        autreJour: (date: Date) => string,
+    }) {
+        const surementUneDate = new Date(date);
+        return format.hierAujourDHuiDemain.hier && Dateur.estAujourdhui(surementUneDate) ? `aujourd'hui`
+            : format.hierAujourDHuiDemain.hier &&Dateur.estDemain(surementUneDate) ? 'demain'
+                : format.hierAujourDHuiDemain.hier &&Dateur.estHier(surementUneDate) ? 'hier'
+                    : format.autreJour(date);
+    }
+
 }
 
 export class TexteOutils {

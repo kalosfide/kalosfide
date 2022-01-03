@@ -1,13 +1,13 @@
 import { Client } from 'src/app/modeles/client/client';
 import { KfValidateurs, KfValidateur } from 'src/app/commun/kf-composants/kf-partages/kf-validateur';
 import { FournisseurClientPages } from '../../fournisseur/clients/client-pages';
-import { KeyUidRnoEditeur } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno-no-editeur';
+import { KeyIdEditeur } from 'src/app/commun/data-par-key/key-id/key-id-editeur';
 import { ClientService } from './client.service';
 import { IDataComponent } from 'src/app/commun/data-par-key/i-data-component';
 import { AppSitePages } from 'src/app/app-site/app-site-pages';
 import { RoleEditeur } from '../role/role-editeur';
 
-export class ClientEditeur extends KeyUidRnoEditeur<Client> {
+export class ClientEditeur extends KeyIdEditeur<Client> {
     roleEditeur: RoleEditeur;
 
     constructor(component: IDataComponent) {
@@ -35,7 +35,7 @@ export class ClientEditeur extends KeyUidRnoEditeur<Client> {
     private validateurNomEdite(): KfValidateur {
         const validateur = KfValidateurs.validateurDeFn('nomPris',
             (value: any) => {
-                return this.service.nomPrisParAutre(this._kfUid.valeur, this._kfRno.valeur, value);
+                return this.service.nomPrisParAutre(this._kfId.valeur, value);
             },
             'Ce nom est déjà pris');
         return validateur;

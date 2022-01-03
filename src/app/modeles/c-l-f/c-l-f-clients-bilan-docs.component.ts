@@ -16,7 +16,6 @@ import { CLFUtile } from './c-l-f-utile';
 import { EtatTable } from 'src/app/disposition/fabrique/etat-table';
 import { IPageTableDef } from 'src/app/disposition/page-table/i-page-table-def';
 import { CLFClientBilanDocs } from './c-l-f-bilan-docs';
-import { Role } from '../role/role';
 
 /**
  * Route: documents/liste
@@ -55,8 +54,8 @@ export abstract class CLFClientsBilanDocsComponent extends PageTableComponent<CL
 
     créeGroupeTableDef(): IGroupeTableDef<CLFClientBilanDocs> {
         const outils = Fabrique.vueTable.outils<CLFClientBilanDocs>();
-        const role = this.service.identification.roleEnCours;
-        const estFournisseur = role.estFournisseur
+        const site = this.service.identification.siteEnCours;
+        const estFournisseur = !site.client;
         if (estFournisseur) {
             outils.ajoute(this.utile.outils.clientDeClientBilanDocs());
         }

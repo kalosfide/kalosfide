@@ -6,15 +6,14 @@ import { Component, OnInit } from '@angular/core';
 import { Site } from 'src/app/modeles/site/site';
 import { ProduitService } from 'src/app/modeles/catalogue/produit.service';
 import { ProduitEditeur } from 'src/app/modeles/catalogue/produit-editeur';
-import { IdEtatProduit } from 'src/app/modeles/catalogue/etat-produit';
-import { KeyUidRnoNoALESComponent } from 'src/app/commun/data-par-key/key-uid-rno-no/key-uid-rno-no-ales.component';
 import { KfComposant } from 'src/app/commun/kf-composants/kf-composant/kf-composant';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { KfTypeDeBaliseHTML } from 'src/app/commun/kf-composants/kf-composants-types';
+import { KeyIdALESComponent } from 'src/app/commun/data-par-key/key-id/key-id-ales.component';
 
 @Component({ template: '' })
-export abstract class ProduitALESComponent extends KeyUidRnoNoALESComponent<Produit> implements OnInit {
+export abstract class ProduitALESComponent extends KeyIdALESComponent<Produit> implements OnInit {
 
     site: Site;
 
@@ -62,7 +61,7 @@ export abstract class ProduitALESComponent extends KeyUidRnoNoALESComponent<Prod
 
     fixeValeur(valeur: Produit) {
         this.dataEditeur.fixeValeur(valeur);
-        this.produitChargéDisponible = valeur && valeur.etat === IdEtatProduit.disponible;
+        this.produitChargéDisponible = valeur && valeur.disponible === true;
     }
 
 }

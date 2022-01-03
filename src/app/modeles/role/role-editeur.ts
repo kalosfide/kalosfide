@@ -1,12 +1,12 @@
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { KfInputTexte } from 'src/app/commun/kf-composants/kf-elements/kf-input/kf-input-texte';
 import { KfValidateurs, KfValidateur } from 'src/app/commun/kf-composants/kf-partages/kf-validateur';
-import { KeyUidRnoEditeur } from 'src/app/commun/data-par-key/key-uid-rno/key-uid-rno-no-editeur';
+import { KeyIdEditeur } from 'src/app/commun/data-par-key/key-id/key-id-editeur';
 import { IDataComponent } from 'src/app/commun/data-par-key/i-data-component';
 import { IRoleData, Role } from './role';
 import { KfEtiquette } from 'src/app/commun/kf-composants/kf-elements/kf-etiquette/kf-etiquette';
 
-export class RoleEditeur extends KeyUidRnoEditeur<Role> {
+export class RoleEditeur extends KeyIdEditeur<Role> {
     texteEtat: KfInputTexte;
 
     kfNom: KfInputTexte;

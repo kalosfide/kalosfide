@@ -16,9 +16,9 @@ import { AppSitePages } from 'src/app/app-site/app-site-pages';
 import { Fabrique } from 'src/app/disposition/fabrique/fabrique';
 import { ILienDef } from 'src/app/disposition/fabrique/fabrique-lien';
 import { ActivatedRoute } from '@angular/router';
-import { Role } from 'src/app/modeles/role/role';
 import { Routeur } from 'src/app/commun/routeur';
 import { AdminPages } from 'src/app/admin/admin-pages';
+import { Site } from 'src/app/modeles/site/site';
 
 
 @Component({
@@ -53,15 +53,15 @@ export class ConnectionComponent extends FormulaireComponent implements OnInit {
             this.routeur.naviguePageDef(AdminPages.accueil, appRouteur.admin);
             return;
         }
-        let role: Role;
-        if (identifiant.noDernierRole !== undefined) {
-            role = identifiant.rolesAccessibles.find(r => r.rno === identifiant.noDernierRole);
+        let site: Site;
+        if (identifiant.idDernierSite !== undefined) {
+            site = identifiant.sites.find(s => s.id === identifiant.idDernierSite);
         }
-        if (role) {
-            appRouteur.site.fixeSite(role.site.url);
-            const routeur: Routeur = role.estFournisseur
-                ? appRouteur.fournisseur
-                : appRouteur.client;
+        if (site) {
+            appRouteur.site.fixeSite(site.url);
+            const routeur: Routeur = site.client
+                ? appRouteur.client
+                : appRouteur.fournisseur;
             this.routeur.naviguePageDef(SitePages.accueil, routeur);
         } else {
             this.routeur.naviguePageDef(AppSitePages.accueil);

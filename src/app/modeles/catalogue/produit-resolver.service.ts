@@ -19,8 +19,8 @@ export class ProduitResolverService extends DataResolverService implements Resol
         if (!catalogue) {
             throw new Error('ProduitResolverService: CatalogueResolverService doit avoir déjà résolu le catalogue');
         }
-        const no: number = +route.paramMap.get('no');
-        const produit: Produit = catalogue.produits.find(p => p.no === no);
+        const id: number = +route.paramMap.get('id');
+        const produit: Produit = catalogue.produits.find(p => p.id === id);
         if (!produit) {
             this.service.routeur.navigueVersPageErreur(new ApiResult404NotFound());
             return EMPTY;

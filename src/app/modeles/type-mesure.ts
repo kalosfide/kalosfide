@@ -1,116 +1,117 @@
-import { TypeCommande } from './type-commande';
+import { TypeCommande, TypeCommandeFabrique } from './type-commande';
 
-export class TypeMesure {
+export enum TypeMesure
+{
+    Aucune,
+    Kilo,
+    Litre
+}
 
-    static id = {
-        ALaPièce: 'U',
-        AuKilo: 'K',
-        AuLitre: 'L',
-    };
+export class TypeMesureFabrique {
 
-    static Mesures: string[] = [TypeMesure.id.ALaPièce, TypeMesure.id.AuKilo, TypeMesure.id.AuLitre];
+    static Mesures: TypeMesure[] = [TypeMesure.Aucune, TypeMesure.Kilo, TypeMesure.Litre];
 
-    static unité(id: string): string {
-        switch (id) {
-            case TypeMesure.id.ALaPièce:
+    static unité(typeMesure: TypeMesure): string {
+        switch (typeMesure) {
+            case TypeMesure.Aucune:
                 return 'pièce';
-            case TypeMesure.id.AuKilo:
+            case TypeMesure.Kilo:
                 return 'kg';
-            case TypeMesure.id.AuLitre:
+            case TypeMesure.Litre:
                 return 'L';
             default:
-                throw new Error(`TypeMesure: la valeur ${id} n'appartient pas au type`);
+                throw new Error(`TypeMesure: la valeur ${typeMesure} n'appartient pas au type`);
         }
     }
 
-    static unités(id: string): string {
-        switch (id) {
-            case TypeMesure.id.ALaPièce:
+    static unités(typeMesure: TypeMesure): string {
+        switch (typeMesure) {
+            case TypeMesure.Aucune:
                 return 'pièces';
-            case TypeMesure.id.AuKilo:
+            case TypeMesure.Kilo:
                 return 'kg';
-            case TypeMesure.id.AuLitre:
+            case TypeMesure.Litre:
                 return 'L';
             default:
-                throw new Error(`TypeMesure: la valeur ${id} n'appartient pas au type`);
+                throw new Error(`TypeMesure: la valeur ${typeMesure} n'appartient pas au type`);
         }
     }
 
-    static texte_le(id: string): string {
-        switch (id) {
-            case TypeMesure.id.ALaPièce:
+    static texte_le(typeMesure: TypeMesure): string {
+        switch (typeMesure) {
+            case TypeMesure.Aucune:
                 return 'la pièce';
-            case TypeMesure.id.AuKilo:
+            case TypeMesure.Kilo:
                 return 'le kg';
-            case TypeMesure.id.AuLitre:
+            case TypeMesure.Litre:
                 return 'le L';
             default:
-                throw new Error(`TypeMesure: la valeur ${id} n'appartient pas au type`);
+                throw new Error(`TypeMesure: la valeur ${typeMesure} n'appartient pas au type`);
         }
     }
 
-    static texte_au(id: string): string {
-        switch (id) {
-            case TypeMesure.id.ALaPièce:
+    static texte_au(typeMesure: TypeMesure): string {
+        switch (typeMesure) {
+            case TypeMesure.Aucune:
                 return `à l'unité`;
-            case TypeMesure.id.AuKilo:
+            case TypeMesure.Kilo:
                 return 'au poids';
-            case TypeMesure.id.AuLitre:
+            case TypeMesure.Litre:
                 return 'au volume';
             default:
-                throw new Error(`TypeMesure: la valeur ${id} n'appartient pas au type`);
+                throw new Error(`TypeMesure: la valeur ${typeMesure} n'appartient pas au type`);
         }
     }
 
-    static texteSeCommande(idTypeMesure: string, idTypeCommande: string): string {
-        if (idTypeMesure === TypeMesure.id.ALaPièce && idTypeCommande !== TypeCommande.id.ALUnité) {
+    static texteSeCommande(typeMesure: TypeMesure, typeCommande: TypeCommande): string {
+        if (typeMesure === TypeMesure.Aucune && typeCommande !== TypeCommande.ALUnité) {
             throw Error('texteSeCommande: Types de commande et de mesure incompatibles');
         }
-        if (idTypeCommande === TypeCommande.id.ALUnitéOuEnVrac) {
-            return TypeCommande.pourListe(TypeCommande.id.ALUnité) + ' ou ' + TypeMesure.texte_au(idTypeMesure);
+        if (typeCommande === TypeCommande.ALUnitéOuEnVrac) {
+            return TypeCommandeFabrique.pourListe(TypeCommande.ALUnité) + ' ou ' + TypeMesureFabrique.texte_au(typeMesure);
         } else {
-            return TypeMesure.texte_au(idTypeMesure);
+            return TypeMesureFabrique.texte_au(typeMesure);
         }
     }
-    static texteUnités(idTypeMesure: string, idTypeCommande: string): string {
-        switch (idTypeCommande) {
-            case TypeCommande.id.ALUnité:
+    static texteUnités(typeMesure: TypeMesure, typeCommande: TypeCommande): string {
+        switch (typeCommande) {
+            case TypeCommande.ALUnité:
                 return 'pièce(s)';
-            case TypeCommande.id.EnVrac:
-            case TypeCommande.id.ALUnitéOuEnVrac:
-                return TypeMesure.unité(idTypeMesure);
+            case TypeCommande.EnVrac:
+            case TypeCommande.ALUnitéOuEnVrac:
+                return TypeMesureFabrique.unité(typeMesure);
         }
     }
-    static optionsUnités(idTypeMesure: string, idTypeCommande: string): {
+    static optionsUnités(typeMesure: TypeMesure, typeCommande: TypeCommande): {
         texte: string,
-        valeur: string
+        valeur: TypeCommande
     }[] {
-        if (idTypeMesure === TypeMesure.id.ALaPièce && idTypeCommande !== TypeCommande.id.ALUnité) {
+        if (typeMesure === TypeMesure.Aucune && typeCommande !== TypeCommande.ALUnité) {
             throw Error('texteUnités: Types de commande et de mesure incompatibles');
         }
-        switch (idTypeCommande) {
-            case TypeCommande.id.ALUnité:
+        switch (typeCommande) {
+            case TypeCommande.ALUnité:
                 return [
-                    { texte: 'pièce(s)', valeur: TypeCommande.id.ALUnité },
+                    { texte: 'pièce(s)', valeur: TypeCommande.ALUnité },
                 ];
-            case TypeCommande.id.EnVrac:
+            case TypeCommande.EnVrac:
                 return [
-                    { texte: TypeMesure.unité(idTypeMesure), valeur: TypeCommande.id.EnVrac },
+                    { texte: TypeMesureFabrique.unité(typeMesure), valeur: TypeCommande.EnVrac },
                 ];
-            case TypeCommande.id.ALUnitéOuEnVrac:
+            case TypeCommande.ALUnitéOuEnVrac:
                 return [
-                    { texte: TypeMesure.unité(idTypeMesure), valeur: TypeCommande.id.EnVrac },
-                    { texte: 'pièce(s)', valeur: TypeCommande.id.ALUnité },
+                    { texte: TypeMesureFabrique.unité(typeMesure), valeur: TypeCommande.EnVrac },
+                    { texte: 'pièce(s)', valeur: TypeCommande.ALUnité },
                 ];
         }
     }
 
-    static typeCommandeParDéfaut(idTypeMesure: string): string {
-        switch (idTypeMesure) {
-            case TypeMesure.id.ALaPièce:
-                return TypeCommande.id.ALUnité;
+    static typeCommandeParDéfaut(typeMesure: TypeMesure): TypeCommande {
+        switch (typeMesure) {
+            case TypeMesure.Aucune:
+                return TypeCommande.ALUnité;
             default:
-                return TypeCommande.id.EnVrac;
+                return TypeCommande.EnVrac;
         }
     }
 }

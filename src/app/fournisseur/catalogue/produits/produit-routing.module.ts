@@ -44,7 +44,7 @@ const routes: Routes = [
                 }
             },
             {
-                path: ProduitPages.edite.path + '/:no',
+                path: ProduitPages.edite.path + '/:id',
                 data: {
                     pageDef: ProduitPages.edite,
                     estEnfantPathVide: undefined

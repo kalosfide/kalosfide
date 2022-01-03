@@ -21,8 +21,8 @@ export class CategorieResolverService extends DataResolverService implements Res
     }
 
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<never> | Categorie | Observable<Categorie> {
-        const no: number = +route.paramMap.get('no');
-        return this.service.catégorie$(no).pipe(
+        const id: number = +route.paramMap.get('id');
+        return this.service.catégorie$(id).pipe(
             mergeMap(catégorie => {
                 if (catégorie) {
                     return of(catégorie);
